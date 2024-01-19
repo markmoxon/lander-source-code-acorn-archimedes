@@ -3,7 +3,8 @@ PYTHON?=python
 
 .PHONY:all
 all:
-	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/output.txt -o 3-assembled-output/GameCode.bin 1-source-files/main-sources/Lander.arm
+	@$(PYTHON) 2-build-files/convert_to_vasm.py
+	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
 	cp 1-source-files/other-sources/GameCode.inf 5-compiled-game-discs/arthur/GameCode.inf
 	cp 1-source-files/other-sources/Lander,ffb 5-compiled-game-discs/arthur/Lander,ffb
 	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/GameCode
