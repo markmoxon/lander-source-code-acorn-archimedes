@@ -2,7 +2,7 @@
 #
 # ******************************************************************************
 #
-# AVIATOR VERIFICATION SCRIPT
+# LANDER VERIFICATION SCRIPT
 #
 # Written by Kieran Connell, extended by Mark Moxon
 #
