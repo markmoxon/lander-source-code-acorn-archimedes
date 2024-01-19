@@ -1,4 +1,7 @@
+
 .org 0x8000
+
+.set OS_WriteS, 1
 
 .long 0xFA800000
 .long 0x00000000
@@ -475,7 +478,7 @@
  SWI     0x0
  MOV     R0, #0x10
  SWI     0x0
- SWI     0x1
+ SWI     OS_WriteS
 
 .byte "GAME OVER - press a key to start again"
 .byte 0
@@ -490,7 +493,7 @@
  SWI     0x0
  MOV     R0, #0x10
  SWI     0x0
- SWI     0x1
+ SWI     OS_WriteS
 
 .byte "GAME OVER - press a key to start again"
 .byte 0
@@ -2421,7 +2424,7 @@
  SWI     0x7
  MOV     PC, R14
  STRB    R1, [R0]
- SWI     0x1
+ SWI     OS_WriteS
 
 .byte "There is not enough memory to run this game."
 .word 0x0D0A
@@ -2463,7 +2466,7 @@ Entry:
  SWI     0x0
  MOV     R0, #0xD
  SWI     0x0
- SWI     0x1
+ SWI     OS_WriteS
 
 .byte "Lander Demo/Practice (C) D.J.Braben 1987"
 .byte 0
@@ -2483,7 +2486,7 @@ Entry:
  SWI     0x0
  SUBS    R8, R8, #1
  BNE     0x0000A6E4
- SWI     0x1
+ SWI     OS_WriteS
 
 .byte "Lander Demo/Practice (C) D.J.Braben 1987"
 .byte 0

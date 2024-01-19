@@ -26,6 +26,9 @@ for line in risc_os_file:
     # .label -> label:
     line = re.sub(r"^\.([^ \n]+)", r"\1:", line)
 
+    # x = y -> .set x, y
+    line = re.sub(r"^ ?(.+) = (.+)$", r".set \1, \2", line)
+
     # ORG -> .org
     line = re.sub(r"^ ?ORG ", ".org ", line)
 
