@@ -477,16 +477,9 @@
  SWI     0x0
  SWI     0x1
 
-.long 0x454D4147
-.long 0x45564F20
-.long 0x202D2052
-.long 0x73657270
-.long 0x20612073
-.long 0x2079656B
-.long 0x73206F74
-.long 0x74726174
-.long 0x61676120
-.long 0x00006E69
+.byte "GAME OVER - press a key to start again"
+.byte 0
+.balign 4
 
  MOV     R0, #0x70
  MOV     R1, #2
@@ -499,16 +492,9 @@
  SWI     0x0
  SWI     0x1
 
-.long 0x454D4147
-.long 0x45564F20
-.long 0x202D2052
-.long 0x73657270
-.long 0x20612073
-.long 0x2079656B
-.long 0x73206F74
-.long 0x74726174
-.long 0x61676120
-.long 0x00006E69
+.byte "GAME OVER - press a key to start again"
+.byte 0
+.balign 4
 
  SWI     0x4
  B       0x0000A734
@@ -2437,31 +2423,11 @@
  STRB    R1, [R0]
  SWI     0x1
 
-.long 0x72656854
-.long 0x73692065
-.long 0x746F6E20
-.long 0x6F6E6520
-.long 0x20686775
-.long 0x6F6D656D
-.long 0x74207972
-.long 0x7572206F
-.long 0x6874206E
-.long 0x67207369
-.long 0x2E656D61
-.long 0x6C500D0A
-.long 0x65736165
-.long 0x4F432A20
-.long 0x4749464E
-.long 0x20455255
-.long 0x72756F79
-.long 0x63616D20
-.long 0x656E6968
-.long 0x206F7420
-.long 0x65657266
-.long 0x726F6D20
-.long 0x656D2065
-.long 0x79726F6D
-.long 0x0000002E
+.byte "There is not enough memory to run this game."
+.word 0x0D0A
+.byte "Please *CONFIGURE your machine to free more memory."
+.byte 0
+.balign 4
 
  B       0x0000A8D4
 
@@ -2499,17 +2465,9 @@ Entry:
  SWI     0x0
  SWI     0x1
 
-.long 0x646E614C
-.long 0x44207265
-.long 0x2F6F6D65
-.long 0x63617250
-.long 0x65636974
-.long 0x29432820
-.long 0x4A2E4420
-.long 0x6172422E
-.long 0x206E6562
-.long 0x37383931
-.long 0x00000000
+.byte "Lander Demo/Practice (C) D.J.Braben 1987"
+.byte 0
+.balign 4
 
  BL      0x00009D3C
  MOV     R0, #0x16
@@ -2527,17 +2485,9 @@ Entry:
  BNE     0x0000A6E4
  SWI     0x1
 
-.long 0x646E614C
-.long 0x44207265
-.long 0x2F6F6D65
-.long 0x63617250
-.long 0x65636974
-.long 0x29432820
-.long 0x4A2E4420
-.long 0x6172422E
-.long 0x206E6562
-.long 0x37383931
-.long 0x00000000
+.byte "Lander Demo/Practice (C) D.J.Braben 1987"
+.byte 0
+.balign 4
 
  LDR     R0, 0x0000A578
  STR     R0, [R11, #0x124]

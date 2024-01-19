@@ -32,8 +32,20 @@ for line in risc_os_file:
     # Hexadecimal & -> 0x
     line = re.sub(r"&", "0x", line)
 
-    # EQUW -> .long
+    # EQUD -> .long
     line = re.sub(r"^ ?EQUD ", ".long ", line)
+
+    # EQUW -> .word
+    line = re.sub(r"^ ?EQUW ", ".word ", line)
+
+    # EQUS -> .byte
+    line = re.sub(r"^ ?EQUS ", ".byte ", line)
+
+    # EQUB -> .byte
+    line = re.sub(r"^ ?EQUB ", ".byte ", line)
+
+    # ALIGN -> .balign
+    line = re.sub(r"^ ?ALIGN ", ".balign ", line)
 
     # Write updated line
     vasm_file.write(line)

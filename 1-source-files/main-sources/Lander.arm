@@ -477,16 +477,9 @@
  SWI     0x0                        ; 00008764 : EF000000 : ....
  SWI     0x1                        ; 00008768 : EF000001 : ....
 
- EQUD &454D4147                     ; 0000876C : 454D4147 : GAME
- EQUD &45564F20                     ; 00008770 : 45564F20 :  OVE
- EQUD &202D2052                     ; 00008774 : 202D2052 : R - 
- EQUD &73657270                     ; 00008778 : 73657270 : pres
- EQUD &20612073                     ; 0000877C : 20612073 : s a 
- EQUD &2079656B                     ; 00008780 : 2079656B : key 
- EQUD &73206F74                     ; 00008784 : 73206F74 : to s
- EQUD &74726174                     ; 00008788 : 74726174 : tart
- EQUD &61676120                     ; 0000878C : 61676120 :  aga
- EQUD &00006E69                     ; 00008790 : 00006E69 : in..
+ EQUS "GAME OVER - press a key to start again"
+ EQUB 0
+ ALIGN 4
 
  MOV     R0, #0x70                  ; 00008794 : E3A00070 : p...
  MOV     R1, #2                     ; 00008798 : E3A01002 : ....
@@ -499,16 +492,9 @@
  SWI     0x0                        ; 000087B4 : EF000000 : ....
  SWI     0x1                        ; 000087B8 : EF000001 : ....
 
- EQUD &454D4147                     ; 000087BC : 454D4147 : GAME
- EQUD &45564F20                     ; 000087C0 : 45564F20 :  OVE
- EQUD &202D2052                     ; 000087C4 : 202D2052 : R - 
- EQUD &73657270                     ; 000087C8 : 73657270 : pres
- EQUD &20612073                     ; 000087CC : 20612073 : s a 
- EQUD &2079656B                     ; 000087D0 : 2079656B : key 
- EQUD &73206F74                     ; 000087D4 : 73206F74 : to s
- EQUD &74726174                     ; 000087D8 : 74726174 : tart
- EQUD &61676120                     ; 000087DC : 61676120 :  aga
- EQUD &00006E69                     ; 000087E0 : 00006E69 : in..
+ EQUS "GAME OVER - press a key to start again"
+ EQUB 0
+ ALIGN 4
 
  SWI     0x4                        ; 000087E4 : EF000004 : ....
  B       0x0000A734                 ; 000087E8 : EA0007D1 : ....
@@ -2437,31 +2423,11 @@
  STRB    R1, [R0]                   ; 0000A5A4 : E5C01000 : ....
  SWI     0x1                        ; 0000A5A8 : EF000001 : ....
 
- EQUD &72656854                     ; 0000A5AC : 72656854 : Ther
- EQUD &73692065                     ; 0000A5B0 : 73692065 : e is
- EQUD &746F6E20                     ; 0000A5B4 : 746F6E20 :  not
- EQUD &6F6E6520                     ; 0000A5B8 : 6F6E6520 :  eno
- EQUD &20686775                     ; 0000A5BC : 20686775 : ugh 
- EQUD &6F6D656D                     ; 0000A5C0 : 6F6D656D : memo
- EQUD &74207972                     ; 0000A5C4 : 74207972 : ry t
- EQUD &7572206F                     ; 0000A5C8 : 7572206F : o ru
- EQUD &6874206E                     ; 0000A5CC : 6874206E : n th
- EQUD &67207369                     ; 0000A5D0 : 67207369 : is g
- EQUD &2E656D61                     ; 0000A5D4 : 2E656D61 : ame.
- EQUD &6C500D0A                     ; 0000A5D8 : 6C500D0A : ..Pl
- EQUD &65736165                     ; 0000A5DC : 65736165 : ease
- EQUD &4F432A20                     ; 0000A5E0 : 4F432A20 :  *CO
- EQUD &4749464E                     ; 0000A5E4 : 4749464E : NFIG
- EQUD &20455255                     ; 0000A5E8 : 20455255 : URE 
- EQUD &72756F79                     ; 0000A5EC : 72756F79 : your
- EQUD &63616D20                     ; 0000A5F0 : 63616D20 :  mac
- EQUD &656E6968                     ; 0000A5F4 : 656E6968 : hine
- EQUD &206F7420                     ; 0000A5F8 : 206F7420 :  to 
- EQUD &65657266                     ; 0000A5FC : 65657266 : free
- EQUD &726F6D20                     ; 0000A600 : 726F6D20 :  mor
- EQUD &656D2065                     ; 0000A604 : 656D2065 : e me
- EQUD &79726F6D                     ; 0000A608 : 79726F6D : mory
- EQUD &0000002E                     ; 0000A60C : 0000002E : ....
+ EQUS "There is not enough memory to run this game."
+ EQUW &0D0A
+ EQUS "Please *CONFIGURE your machine to free more memory."
+ EQUB 0
+ ALIGN 4
 
  B       0x0000A8D4                 ; 0000A610 : EA0000AF : ....
 
@@ -2499,17 +2465,9 @@
  SWI     0x0                        ; 0000A688 : EF000000 : ....
  SWI     0x1                        ; 0000A68C : EF000001 : ....
 
- EQUD &646E614C                     ; 0000A690 : 646E614C : Land
- EQUD &44207265                     ; 0000A694 : 44207265 : er D
- EQUD &2F6F6D65                     ; 0000A698 : 2F6F6D65 : emo/
- EQUD &63617250                     ; 0000A69C : 63617250 : Prac
- EQUD &65636974                     ; 0000A6A0 : 65636974 : tice
- EQUD &29432820                     ; 0000A6A4 : 29432820 :  (C)
- EQUD &4A2E4420                     ; 0000A6A8 : 4A2E4420 :  D.J
- EQUD &6172422E                     ; 0000A6AC : 6172422E : .Bra
- EQUD &206E6562                     ; 0000A6B0 : 206E6562 : ben 
- EQUD &37383931                     ; 0000A6B4 : 37383931 : 1987
- EQUD &00000000                     ; 0000A6B8 : 00000000 : ....
+ EQUS "Lander Demo/Practice (C) D.J.Braben 1987"
+ EQUB 0
+ ALIGN 4
 
  BL      0x00009D3C                 ; 0000A6BC : EBFFFD9E : ....
  MOV     R0, #0x16                  ; 0000A6C0 : E3A00016 : ....
@@ -2527,17 +2485,9 @@
  BNE     0x0000A6E4                 ; 0000A6F0 : 1AFFFFFB : ....
  SWI     0x1                        ; 0000A6F4 : EF000001 : ....
 
- EQUD &646E614C                     ; 0000A6F8 : 646E614C : Land
- EQUD &44207265                     ; 0000A6FC : 44207265 : er D
- EQUD &2F6F6D65                     ; 0000A700 : 2F6F6D65 : emo/
- EQUD &63617250                     ; 0000A704 : 63617250 : Prac
- EQUD &65636974                     ; 0000A708 : 65636974 : tice
- EQUD &29432820                     ; 0000A70C : 29432820 :  (C)
- EQUD &4A2E4420                     ; 0000A710 : 4A2E4420 :  D.J
- EQUD &6172422E                     ; 0000A714 : 6172422E : .Bra
- EQUD &206E6562                     ; 0000A718 : 206E6562 : ben 
- EQUD &37383931                     ; 0000A71C : 37383931 : 1987
- EQUD &00000000                     ; 0000A720 : 00000000 : ....
+ EQUS "Lander Demo/Practice (C) D.J.Braben 1987"
+ EQUB 0
+ ALIGN 4
 
  LDR     R0, 0x0000A578             ; 0000A724 : E51F01B4 : ....
  STR     R0, [R11, #0x124]          ; 0000A728 : E58B0124 : $...
