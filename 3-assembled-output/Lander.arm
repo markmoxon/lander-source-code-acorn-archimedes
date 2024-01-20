@@ -11,6 +11,9 @@
 .long    0xFA800000
 .long    0x00000000
 .long    0x14000000
+
+var_800C:
+
 .long    0x00008000
 .long    0x0DE30D3A
 .long    0x0DE30DE4
@@ -18,7 +21,13 @@
 .long    0x0DE30DE4
 .long    0x0DE30DE4
 .long    0x0DE30DE4
+
+var_8028:
+
 .long    0x00008010
+
+var_802C:
+
 .long    0x00026600
 .long    0x000276D4
 .long    0x000287A8
@@ -31,6 +40,9 @@
 .long    0x0002FD74
 .long    0x00030E48
 .long    0x00031F1C
+
+var_805C:
+
 .long    0x00026600
 .long    0x000276D4
 .long    0x000287A8
@@ -56,7 +68,7 @@ sub_808C:
  SUB     R4, R4, R8
  STR     R8, [R11, #0x148]
  ADD     R5, R11, #0x160
- LDR     R0, 0x0000800C
+ LDR     R0, var_800C
  LDMIA   R0, {R0-R2}
  SUB     R0, R0, R4
  SUB     R2, R2, R3
@@ -70,7 +82,7 @@ sub_808C:
 lab_80DC:
 
  LDRB    R1, [R11, #0xE4]
- LDR     R0, 0x00008028
+ LDR     R0, var_8028
  ADD     R0, R0, R1, LSL #1
  LDRB    R10, [R0, #1]
  LDRB    R0, [R0]
@@ -157,38 +169,38 @@ sub_81F4:
  LDR     R0, [R11, #0x100]
  STR     R0, [R11, #0x104]
  SUB     R0, R8, R9, LSL #1
- LDR     R2, 0x000091F0
+ LDR     R2, var_91F0
  BIC     R0, R0, #0x300000
  LDR     R0, [R2, R0, LSR #20]
  MOV     R0, R0, ASR #7
  ADD     R1, R9, R8, LSL #1
  ADD     R1, R9, R1, LSL #1
  ADD     R3, R1, R8
- LDR     R2, 0x000091F0
+ LDR     R2, var_91F0
  BIC     R1, R1, #0x300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #7
  SUB     R1, R9, R8, LSL #1
  RSB     R1, R8, R1, LSL #1
  ADD     R1, R1, R9
- LDR     R2, 0x000091F0
+ LDR     R2, var_91F0
  BIC     R1, R1, #0x300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #7
  ADD     R1, R9, R8, LSL #1
  ADD     R1, R9, R1, LSL #2
  SUB     R1, R1, R8
- LDR     R2, 0x000091F0
+ LDR     R2, var_91F0
  BIC     R1, R1, #0x300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #7
  ADD     R1, R3, R9, LSL #3
- LDR     R2, 0x000091F0
+ LDR     R2, var_91F0
  BIC     R1, R1, #0x300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #8
  ADD     R1, R9, R3, LSL #1
- LDR     R2, 0x000091F0
+ LDR     R2, var_91F0
  BIC     R1, R1, #0x300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #8
@@ -384,7 +396,7 @@ lab_850C:
  CMP     R1, #0
  MOVMI   R1, #0
  ADD     R3, R11, #0x30
- LDR     R14, 0x00008EBC
+ LDR     R14, var_8EBC
  STR     R14, [R11, #0x110]
  MOV     R0, #0
  MOV     R2, #0xF000000
@@ -572,14 +584,17 @@ lab_86EC:
  SWI     OS_ReadC
  B       lab_A734
 
-.long    0x0000805C
-.long    0x0000802C
+var_87EC:
+
+.long    var_805C
+
+.long    var_802C
 
 sub_87F4:
 
  STMFD   R13!, {R10, R12, R14}
  ADD     R10, R11, #0x700
- LDR     R12, 0x000087EC
+ LDR     R12, var_87EC
 
 lab_8800:
 
@@ -649,7 +664,7 @@ lab_88E8:
 
  LDMFD   R13!, {R0-R2}
  BLO     lab_86C4
- LDR     R14, 0x00008EC0
+ LDR     R14, var_8EC0
  STR     R14, [R11, #0x110]
  ADD     R3, R11, #0x30
  BL      sub_8EC4
@@ -1115,13 +1130,18 @@ lab_8E8C:
  LDMFD   R13!, {R0-R7, R9}
  B       lab_8E80
 
-.long    0x0000AB8C
-.long    0x0000A960
+var_8EBC:
+
+.long    var_AB8C
+
+var_8EC0:
+
+.long    var_A960
 
 sub_8EC4:
 
  STMFD   R13!, {R6-R12, R14}
- LDR     R12, 0x0000924C
+ LDR     R12, var_924C
  ADD     R4, R11, #0
  STMIA   R4, {R0-R2}
  MOVS    R4, R0
@@ -1353,10 +1373,21 @@ lab_91D8:
  BNE     lab_91D8
  MOV     PC, R14
 
+var_91EC:
+
 .long    0x37373737
-.long    0x0000B810
-.long    0x0000C810
-.long    0x0000CA10
+
+var_91F0:
+
+.long    var_B810
+
+var_91F4:
+
+.long    var_C810
+
+var_91F8:
+
+.long    var_CA10
 
 sub_91FC:
 
@@ -1366,23 +1397,28 @@ sub_91FC:
  SUBS    R1, R1, R2
  MOVMI   R1, #0
  STR     R1, [R11, #0x128]
- LDR     R7, 0x00009A6C
+ LDR     R7, var_9A6C
  ADD     R11, R7, #0x140
- LDR     R8, 0x000091EC
+ LDR     R8, var_91EC
  MOV     R10, R1, LSR #4
  BL      sub_A4C8
  ADD     R11, R7, #0x280
- LDR     R8, 0x000091EC
+ LDR     R8, var_91EC
  MOV     R10, R1, LSR #4
  BL      sub_A4C8
  ADD     R11, R7, #0x3C0
- LDR     R8, 0x000091EC
+ LDR     R8, var_91EC
  MOV     R10, R1, LSR #4
  BL      sub_A4C8
  LDMFD   R13!, {R10-R12, PC}
 
-.long    0x0000805C
-.long    0x0000802C
+var_924C:
+
+.long    var_805C
+
+var_9250:
+
+.long    var_802C
 
 sub_9254:
 
@@ -1503,18 +1539,18 @@ sub_93E4:
 
  STMFD   R13!, {R0-R1, R14}
  ADD     R0, R0, #0x40000000
- LDR     R14, 0x000091F0
+ LDR     R14, var_91F0
  BIC     R0, R0, #0x300000
  LDR     R2, [R14, R0, LSR #20]
  ADD     R1, R1, #0x40000000
- LDR     R14, 0x000091F0
+ LDR     R14, var_91F0
  BIC     R1, R1, #0x300000
  LDR     R3, [R14, R1, LSR #20]
  LDMFD   R13!, {R4-R5}
- LDR     R14, 0x000091F0
+ LDR     R14, var_91F0
  BIC     R4, R4, #0x300000
  LDR     R0, [R14, R4, LSR #20]
- LDR     R14, 0x000091F0
+ LDR     R14, var_91F0
  BIC     R5, R5, #0x300000
  LDR     R1, [R14, R5, LSR #20]
  STMFD   R13!, {R0-R3}
@@ -1659,7 +1695,7 @@ lab_95D4:
 
 lab_95F0:
 
- LDR     R14, 0x000091F4
+ LDR     R14, var_91F4
  BIC     R2, R2, #0x1800000
  LDR     R1, [R14, R2, LSR #23]
  TST     R3, #1
@@ -1692,7 +1728,7 @@ lab_9648:
  MOVS    R3, R3, LSL #1
  BNE     lab_9648
  ADD     R2, R14, R4
- LDR     R14, 0x000091F8
+ LDR     R14, var_91F8
  BIC     R2, R2, #0x300000
  LDR     R0, [R14, R2, LSR #20]
  LDMIA   R13!, {PC}
@@ -1891,18 +1927,24 @@ lab_9890:
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
  ADD     R4, R11, #0x64
+
+var_98E8:
+
  ADD     R4, R11, #0x74
+
+var_98EC:
+
  MOV     R4, R12
  ADD     R4, R11, #0x170
  ADD     R4, R11, #0x160
  STMDB   R13!, {R14}
- LDR     R1, 0x000098EC
- STR     R1, 0x00009938
+ LDR     R1, var_98EC
+ STR     R1, var_9938
  LDMIA   R0, {R0-R2}
  MOV     R3, R12
  BL      sub_9924
- LDR     R1, 0x000098E8
- STR     R1, 0x00009938
+ LDR     R1, var_98E8
+ STR     R1, var_9938
  LDMIA   R13!, {PC}
 
 sub_991C:
@@ -1917,6 +1959,9 @@ sub_9924:
  ADD     R0, R0, R3
  ADD     R1, R1, R4
  ADD     R2, R2, R5
+
+var_9938:
+
  ADD     R3, R11, #0x74
  STMIA   R3, {R0-R2}
  LDMFD   R13!, {R5-R6}
@@ -1990,22 +2035,30 @@ lab_9A0C:
  ADD     R8, R11, #0x64
  STMIA   R8, {R5-R7, R14}
  LDMFD   R13!, {R5-R8, PC}
+
+var_9A38:
+
  SWIMI   0x9C3490
+
+var_9A3C:
+
  BLE     0x000EA980
 
 sub_9A40:
 
  STMDB   R13!, {R14}
- LDR     R0, 0x00009A38
- LDR     R1, 0x00009A3C
+ LDR     R0, var_9A38
+ LDR     R1, var_9A3C
  TST     R1, R1, LSR #1
  MOVS    R14, R0, RRX
  ADC     R1, R1, R1
  EOR     R14, R14, R0, LSL #12
  EOR     R0, R14, R14, LSR #20
- STR     R1, 0x00009A38
- STR     R0, 0x00009A3C
+ STR     R1, var_9A38
+ STR     R0, var_9A3C
  LDMIA   R13!, {PC}
+
+var_9A6C:
 
 .long    0x01FD9400
 .long    0x00000000
@@ -2030,6 +2083,8 @@ sub_9A40:
 .long    0xFFFFFFFF
 .long    0x00009A70
 
+lab_9AC4:
+
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -2039,6 +2094,9 @@ sub_9A40:
  ADD     R3, R3, R1, LSL #6
  STRB    R7, [R3]
  B       lab_9CEC
+
+lab_9AE8:
+
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -2049,6 +2107,9 @@ sub_9A40:
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
  B       lab_9CEC
+
+lab_9B10:
+
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -2061,6 +2122,9 @@ sub_9A40:
  STRB    R7, [R3, #0x140]
  STRB    R7, [R3, #0x141]
  B       lab_9CEC
+
+lab_9B40:
+
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -2075,6 +2139,9 @@ sub_9A40:
  STRB    R7, [R3, #0x140]
  STRB    R7, [R3, #0x141]
  B       lab_9CEC
+
+lab_9B78:
+
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -2086,6 +2153,9 @@ sub_9A40:
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
  B       lab_9CEC
+
+lab_9BA4:
+
  LDMIA   R9!, {R0-R5, R8}
  STMFD   R13!, {R9, R12}
  BL      sub_9DDC
@@ -2157,46 +2227,49 @@ sub_9C58:
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
 
-.long    0x00009B40
-.long    0x00009B40
-.long    0x00009B40
-.long    0x00009B40
-.long    0x00009B40
-.long    0x00009B40
-.long    0x00009B10
-.long    0x00009AE8
-.long    0x00009AC4
-.long    0x00009B78
-.long    0x00009B78
-.long    0x00009B78
-.long    0x00009B78
-.long    0x00009B78
-.long    0x00009B78
-.long    0x00009AE8
-.long    0x00009AE8
-.long    0x00009AC4
-.long    0x00009BA4
-.long    0x00009CF8
+.long    lab_9B40
+.long    lab_9B40
+.long    lab_9B40
+.long    lab_9B40
+.long    lab_9B40
+.long    lab_9B40
+.long    lab_9B10
+.long    lab_9AE8
+.long    lab_9AC4
+.long    lab_9B78
+.long    lab_9B78
+.long    lab_9B78
+.long    lab_9B78
+.long    lab_9B78
+.long    lab_9B78
+.long    lab_9AE8
+.long    lab_9AE8
+.long    lab_9AC4
+.long    lab_9BA4
+.long    sub_9CF8
 
 sub_9CDC:
 
  STMFD   R13!, {R6-R12, R14}
- LDR     R1, 0x0000924C
+ LDR     R1, var_924C
  LDR     R9, [R1, R0, LSL #2]
- LDR     R12, 0x00009A6C
+ LDR     R12, var_9A6C
 
 lab_9CEC:
 
  LDR     R0, [R9], #4
  ADD     R0, PC, R0, LSL #2
  LDR     PC, [R0, #-0x6C]
+
+sub_9CF8:
+
  LDMFD   R13!, {R6-R12, PC}
 
 sub_9CFC:
 
  STMFD   R13!, {R12, R14}
- LDR     R12, 0x0000924C
- LDR     R14, 0x00009250
+ LDR     R12, var_924C
+ LDR     R14, var_9250
  MOV     R0, #0xB
  MOV     R1, #0x13
 
@@ -2210,19 +2283,30 @@ lab_9D10:
  BPL     lab_9D10
  LDMFD   R13!, {R12, PC}
 
+var_9D2C:
+
 .long    0x01FD9400
+
+var_9D30:
+
 .long    0x01FED400
+
+var_9D34:
+
 .long    0x00000000
-.long    0x0000DA10
+
+var_9D38:
+
+.long    var_DA10
 
 sub_9D3C:
 
- LDRB    R0, 0x00009D34
+ LDRB    R0, var_9D34
  EORS    R0, R0, #1
- STRB    R0, 0x00009D34
- LDRNE   R1, 0x00009D2C
- LDREQ   R1, 0x00009D30
- STR     R1, 0x00009A6C
+ STRB    R0, var_9D34
+ LDRNE   R1, var_9D2C
+ LDREQ   R1, var_9D30
+ STR     R1, var_9A6C
  TEQ     R0, #0
  MOVEQ   R1, #1
  MOVNE   R1, #2
@@ -2243,7 +2327,7 @@ sub_9D3C:
  MOV     R7, #0
  MOV     R8, #0
  MOV     R9, #0
- LDR     R11, 0x00009A6C
+ LDR     R11, var_9A6C
  ADD     R12, R11, #0x12C00
 
 lab_9DAC:
@@ -2274,7 +2358,7 @@ sub_9DDC:
  CMPLO   R5, #0xEF
  BHS     lab_A110
  STMDB   R13!, {R14}
- LDR     R12, 0x00009A6C
+ LDR     R12, var_9A6C
  CMP     R1, R3
  BHS     lab_9E20
  MOV     R6, R0
@@ -2318,7 +2402,7 @@ lab_9E60:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_9E98
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R6, [R10, R9, LSL #2]
  B       lab_9EBC
@@ -2348,7 +2432,7 @@ lab_9EBC:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_9EEC
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R7, [R10, R9, LSL #2]
  B       lab_9F10
@@ -2400,7 +2484,7 @@ lab_9F38:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_9F8C
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R11, [R10, R9, LSL #2]
  B       lab_9FB0
@@ -2470,7 +2554,7 @@ lab_A030:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A05C
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R6, [R10, R9, LSL #2]
  B       lab_A080
@@ -2500,7 +2584,7 @@ lab_A080:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A0B0
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R7, [R10, R9, LSL #2]
  B       lab_A0D4
@@ -2549,7 +2633,7 @@ lab_A110:
  CMPHS   R4, #0x140
  MOVHS   PC, R14
  STMDB   R13!, {R14}
- LDR     R12, 0x00009A6C
+ LDR     R12, var_9A6C
  CMP     R1, R3
  BGT     lab_A158
  MOV     R6, R0
@@ -2592,7 +2676,7 @@ lab_A198:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A1CC
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R6, [R10, R9, LSL #2]
  B       lab_A1F0
@@ -2622,7 +2706,7 @@ lab_A1F0:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A220
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R7, [R10, R9, LSL #2]
  B       lab_A244
@@ -2663,7 +2747,7 @@ lab_A244:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A2A0
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R12, [R10, R9, LSL #2]
  B       lab_A2C4
@@ -2703,7 +2787,7 @@ lab_A2C4:
 
 lab_A300:
 
- LDR     R12, 0x00009A6C
+ LDR     R12, var_9A6C
  BL      sub_A408
  LDMIA   R13!, {PC}
 
@@ -2726,7 +2810,7 @@ lab_A328:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A354
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R6, [R10, R9, LSL #2]
  B       lab_A378
@@ -2756,7 +2840,7 @@ lab_A378:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A3A8
- LDR     R10, 0x00009D38
+ LDR     R10, var_9D38
  ADD     R10, R10, R14, LSL #8
  LDR     R7, [R10, R9, LSL #2]
  B       lab_A3CC
@@ -2902,20 +2986,43 @@ lab_A4F4:
  STRB    R8, [R11]
  MOV     PC, R14
 
+var_A56C:
+
 .long    0x00012200
+
+var_A570:
+
 .long    0x000121FC
+
+var_A574:
+
 .long    0x00000000
+
+var_A578:
+
 .long    0x000001F4
+
+var_A57C:
+
 .long    0x000001F4
+
+var_A580:
+
 .long    0x00000D55
+
+var_A584:
+
 .long    0x00000000
 .long    0xFF01FF03
 .long    0x00000001
+
+var_A590:
+
 .long    0x0000A588
 
 sub_A594:
 
- LDR     R1, 0x0000A590
+ LDR     R1, var_A590
  MOV     R0, #0x15
  SWI     OS_Word
  MOV     PC, R14
@@ -2939,11 +3046,11 @@ Entry:
  SWI     OS_WriteC
  MOV     R0, #0xF
  SWI     OS_WriteC
- STR     R13, 0x0000A584
- LDR     R13, 0x0000A570
- LDR     R11, 0x0000A56C
+ STR     R13, var_A584
+ LDR     R13, var_A570
+ LDR     R11, var_A56C
  STMDB   R13!, {R14}
- LDR     R0, 0x0000A574
+ LDR     R0, var_A574
  LDRB    R1, [R0]
  MOV     R2, #0xAA
  STRB    R2, [R0]
@@ -2994,9 +3101,9 @@ lab_A6E4:
 .byte    0
 .balign   4
 
- LDR     R0, 0x0000A578
+ LDR     R0, var_A578
  STR     R0, [R11, #0x124]
- LDR     R0, 0x0000A57C
+ LDR     R0, var_A57C
  STR     R0, [R11, #0x138]
 
 lab_A734:
@@ -3009,9 +3116,9 @@ lab_A734:
  MOV     R1, #0x23
  MOV     R2, #1
  BL      sub_9160
- LDR     R0, 0x0000A578
+ LDR     R0, var_A578
  STR     R0, [R11, #0x124]
- LDR     R0, 0x0000A580
+ LDR     R0, var_A580
  STR     R0, [R11, #0x128]
  MOV     R0, #0x30000
  STR     R0, [R11, #0x12C]
@@ -3127,7 +3234,7 @@ lab_A8AC:
 lab_A8D4:
 
  LDMIA   R13!, {R14}
- LDR     R13, 0x0000A584
+ LDR     R13, var_A584
  MOV     PC, R14
  MOV     R0, #0x1E
  SWI     OS_WriteC
@@ -3164,6 +3271,8 @@ sub_A948:
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
  MOV     PC, R14
+
+var_A960:
 
 .long    0x00000006
 .long    0x00000008
@@ -3304,6 +3413,9 @@ sub_A948:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000008
+
+var_AB8C:
+
 .long    0x00000009
 .long    0x00000009
 .long    0x0000007C
@@ -4105,6 +4217,9 @@ sub_A948:
 .long    0x00000004
 .long    0x00000008
 .long    0x00000CC0
+
+var_B810:
+
 .long    0x00000000
 .long    0x00C90F87
 .long    0x01921D1F
@@ -5129,6 +5244,9 @@ sub_A948:
 .long    0xFDA4D928
 .long    0xFE6DE2E1
 .long    0xFF36F077
+
+var_C810:
+
 .long    0x00000000
 .long    0x00517C55
 .long    0x00A2F61E
@@ -5257,6 +5375,9 @@ sub_A948:
 .long    0x1F84534E
 .long    0x1FADDF6B
 .long    0x1FD718C5
+
+var_CA10:
+
 .long    0x00000000
 .long    0x03FFFFFF
 .long    0x05A82799
@@ -6281,6 +6402,9 @@ sub_A948:
 .long    0x7FCFF6FB
 .long    0x7FDFFBFE
 .long    0x7FEFFEFF
+
+var_DA10:
+
 .long    0xFFFFFFFF
 .long    0x00000000
 .long    0x00000000
