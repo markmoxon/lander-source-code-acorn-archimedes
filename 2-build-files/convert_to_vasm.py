@@ -2,11 +2,12 @@
 #
 # ******************************************************************************
 #
-# CONVERT RISC OS TO VASM
+# CONVERT BBC BASIC ASSEMBLER TO VASM
 #
 # Written by Mark Moxon
 #
-# This script converts source code in RISC OS style into vasm style.
+# This script converts source code from BBC BASIC ARM Assembler style into
+# vasm-compatible ARM assembler.
 #
 # ******************************************************************************
 
@@ -15,13 +16,13 @@ import re
 
 print("Converting 1-source-files/Lander.arm")
 
-risc_os_file = open("1-source-files/main-sources/Lander.arm", "r")
+bbc_basic_file = open("1-source-files/main-sources/Lander.arm", "r")
 vasm_file = open("3-assembled-output/Lander.arm", "w")
 
-for line in risc_os_file:
+for line in bbc_basic_file:
 
     # Strip comments
-    line = re.sub(r" *;.*$", "", line)
+    line = re.sub(r" *[;\\].*$", "", line)
 
     # .label -> label:
     line = re.sub(r"^\.([^ \n]+)", r"\1:", line)
@@ -53,6 +54,6 @@ for line in risc_os_file:
     # Write updated line
     vasm_file.write(line)
 
-risc_os_file.close()
+bbc_basic_file.close()
 
 print("3-assembled-output/Lander.arm file saved")
