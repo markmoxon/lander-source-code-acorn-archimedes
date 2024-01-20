@@ -1,4 +1,3 @@
-
 .set OS_WriteC, 0x00
 .set OS_WriteS, 0x01
 .set OS_ReadC, 0x04
@@ -45,6 +44,8 @@
 .long    0x00030E48
 .long    0x00031F1C
 
+sub_808C:
+
  STMFD   R13!, {R5-R9, R14}
  LDR     R3, [R11, #0x144]
  AND     R9, R3, #0xFF000000
@@ -79,12 +80,12 @@
  SUB     R8, R8, #0x5800000
  MOV     R0, #0x80000000
  STR     R0, [R11, #0xC4]
- BL      0x000081F4
+ BL      sub_81F4
  LDR     R14, [R11, #0x140]
  SUB     R0, R0, R14
  STR     R0, [R11, #0x174]
  ADD     R0, R11, #0x170
- BL      0x00009748
+ BL      sub_9748
  BHS     0x00008170
  STMIA   R7!, {R0-R1}
  CMP     R6, #0
@@ -99,8 +100,8 @@
  STMIA   R14, {R0-R3}
  CMP     R4, #0x80000000
  BEQ     0x0000816C
- BL      0x000082DC
- BL      0x00009DC8
+ BL      sub_82DC
+ BL      sub_9DC8
  LDMFD   R13!, {R6-R8}
  SUBS    R10, R10, #1
  LDRNE   R0, [R11, #0x170]
@@ -110,7 +111,7 @@
  BNE     0x00008114
  LDRB    R0, [R11, #0xE4]
  SUBS    R0, R0, #2
- BLPL    0x00009CDC
+ BLPL    sub_9CDC
  LDRB    R0, [R11, #0xE4]
  ADDS    R0, R0, #1
  CMP     R0, #0xB
@@ -131,10 +132,13 @@
  ADDNE   R7, R11, #0x500
  B       0x000080DC
  MOV     R0, #9
- BL      0x00009CDC
+ BL      sub_9CDC
  MOV     R0, #0xA
- BL      0x00009CDC
+ BL      sub_9CDC
  LDMFD   R13!, {R5-R9, PC}
+
+sub_81F4:
+
  LDR     R0, [R11, #0x100]
  STR     R0, [R11, #0x104]
  SUB     R0, R8, R9, LSL #1
@@ -181,6 +185,9 @@
  MOVLO   R0, #0x3500000
  STR     R0, [R11, #0x100]
  MOV     PC, R14
+
+sub_82AC:
+
  STMFD   R13!, {R8-R9, R14}
  LDR     R8, [R0]
  LDR     R1, [R11, #0x13C]
@@ -189,10 +196,13 @@
  LDR     R1, [R11, #0x144]
  ADD     R9, R9, R1
  SUB     R9, R9, #0x14000000
- BL      0x000081F4
+ BL      sub_81F4
  LDR     R14, [R11, #0x140]
  SUB     R0, R0, R14
  LDMFD   R13!, {R8-R9, PC}
+
+sub_82DC:
+
  STMFD   R13!, {R0-R4, R14}
  LDR     R3, [R11, #0x104]
  LDR     R4, [R11, #0x100]
@@ -240,6 +250,9 @@
  ORR     R8, R8, R8, LSL #16
  ORR     R8, R8, R8, LSL #24
  LDMFD   R13!, {R0-R4, PC}
+
+sub_8398:
+
  STMDB   R13!, {R14}
  SWI     OS_Mouse
  STRB    R2, [R11, #0x15C]
@@ -254,7 +267,7 @@
  SUB     R1, R1, #0x200
  MOV     R0, R0, LSL #22
  MOV     R1, R1, LSL #22
- BL      0x00009574
+ BL      sub_9574
  CMP     R0, #0x40000000
  MOVHS   R0, #0x40000000
  SUBHS   R0, R0, #1
@@ -279,7 +292,7 @@
  SUB     R1, R3, R4, ASR #1
  STR     R0, [R11, #0x158]
  STR     R1, [R11, #0x154]
- BL      0x000093E4
+ BL      sub_93E4
  ADD     R14, R11, #0x94
  LDMIA   R14, {R0-R5}
  CMN     R1, #0x34000000
@@ -315,7 +328,7 @@
  MOV     R8, R0
  MOV     R9, R2
  SUB     R9, R9, #0x5000000
- BL      0x000081F4
+ BL      sub_81F4
  SUB     R0, R0, #0x640000
  LDR     R1, [R11, #0x98]
  SUB     R14, R0, R1
@@ -331,10 +344,10 @@
  BEQ     0x00008508
  CMP     R0, #0xC
  ADDLO   R13, R13, #4
- BLO     0x000086C8
+ BLO     sub_86C8
  LDMIA   R13!, {R0}
  CMP     R1, R0
- BLGT    0x00008654
+ BLGT    sub_8654
  CMP     R1, #0
  MOVMI   R1, #0
  ADD     R3, R11, #0x30
@@ -342,10 +355,10 @@
  STR     R14, [R11, #0x110]
  MOV     R0, #0
  MOV     R2, #0xF000000
- BL      0x00008EC4
+ BL      sub_8EC4
  LDRB    R10, [R11, #0x120]
  CMP     R10, #0
- BLNE    0x000086C8
+ BLNE    sub_86C8
  LDRB    R10, [R11, #0x15C]
  TST     R10, #6
  BEQ     0x000085F4
@@ -370,27 +383,27 @@
  MOV     R8, #0xA
  MOV     R9, #0x1D
  STMFD   R13!, {R0-R9}
- BL      0x00008A8C
+ BL      sub_8A8C
  TST     R10, #4
  LDMNEIA R13, {R0-R9}
- BLNE    0x00008A8C
+ BLNE    sub_8A8C
  TST     R10, #4
  LDMNEIA R13, {R0-R9}
- BLNE    0x00008A8C
+ BLNE    sub_8A8C
  TST     R10, #4
  LDMNEIA R13, {R0-R9}
- BLNE    0x00008A8C
+ BLNE    sub_8A8C
  TST     R10, #4
  LDMNEIA R13, {R0-R9}
- BLNE    0x00008A8C
+ BLNE    sub_8A8C
  TST     R10, #4
  LDMNEIA R13, {R0-R9}
- BLNE    0x00008A8C
+ BLNE    sub_8A8C
  TST     R10, #4
  LDMNEIA R13, {R0-R9}
- BLNE    0x00008A8C
+ BLNE    sub_8A8C
  LDMFD   R13!, {R0-R9}
- BL      0x00008A8C
+ BL      sub_8A8C
  TST     R10, #1
  BEQ     0x00008650
  LDR     R8, [R11, #0x124]
@@ -413,13 +426,16 @@
  MOV     R6, #0x14
  MOV     R7, #0x1BC0000
  ORR     R7, R7, #0xFF
- BL      0x00008A84
+ BL      sub_8A84
  LDMIA   R13!, {PC}
+
+sub_8654:
+
  ADD     R3, R11, #0x94
  LDMIA   R3, {R0-R5}
  CMP     R0, #0x8000000
  CMPLO   R2, #0x8000000
- BHS     0x000086C8
+ BHS     sub_86C8
  CMP     R3, #0
  RSBMI   R3, R3, #0
  CMP     R4, #0
@@ -444,6 +460,9 @@
  STR     R1, [R11, #0x98]
  MOV     PC, R14
  LDMFD   R13!, {R10, R12}
+
+sub_86C8:
+
  MOV     R0, #0
  STR     R0, [R11, #0x130]
  MOV     R0, #0x1E
@@ -452,17 +471,17 @@
  ADD     R0, R11, #0x94
  LDMIA   R0, {R0-R2}
  SUB     R1, R1, #0x500000
- BL      0x00008CBC
+ BL      sub_8CBC
  LDR     R0, [R11, #0x118]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
- BL      0x000093E4
- BL      0x000087F4
- BL      0x00008DDC
- BL      0x00009CFC
- BL      0x0000808C
- BL      0x00009108
- BL      0x00009D3C
+ BL      sub_93E4
+ BL      sub_87F4
+ BL      sub_8DDC
+ BL      sub_9CFC
+ BL      sub_808C
+ BL      sub_9108
+ BL      sub_9D3C
  LDR     R0, [R11, #0x118]
  ADD     R0, R0, #1
  STR     R0, [R11, #0x118]
@@ -511,6 +530,8 @@
 .long    0x0000805C
 .long    0x0000802C
 
+sub_87F4:
+
  STMFD   R13!, {R10, R12, R14}
  ADD     R10, R11, #0x700
  LDR     R12, 0x000087EC
@@ -526,17 +547,17 @@
  LDRNE   R14, [R11, #0x12C]
  ADDNE   R4, R4, R14
  TST     R7, #0x10000
- BLNE    0x0000893C
+ BLNE    sub_893C
  MOV     R8, R0
  MOV     R9, R2
  STMFD   R13!, {R0-R3}
- BL      0x000081F4
+ BL      sub_81F4
  MOV     R9, R0
  LDMFD   R13!, {R0-R3}
  TST     R7, #0x200000
- BLNE    0x000089C8
+ BLNE    sub_89C8
  CMP     R1, R9
- BLGT    0x00008998
+ BLGT    sub_8998
  STMIA   R10!, {R0-R7}
  LDR     R8, [R11, #0x13C]
  SUB     R0, R0, R8
@@ -577,22 +598,25 @@
  LDR     R14, 0x00008EC0
  STR     R14, [R11, #0x110]
  ADD     R3, R11, #0x30
- BL      0x00008EC4
+ BL      sub_8EC4
  B       0x00008800
  STMFD   R13!, {R0-R2, R7}
  LDR     R14, [R11, #0x140]
  SUB     R1, R9, R14
  MOV     R8, R2
- BL      0x00009670
- BLLO    0x00009BF4
+ BL      sub_9670
+ BLLO    sub_9BF4
  LDMFD   R13!, {R0-R2, R7}
  MOV     R8, R2
- BL      0x00009670
- BLLO    0x00009BB8
+ BL      sub_9670
+ BLLO    sub_9BB8
  LDMIA   R10, {R0-R7}
  CMP     R7, #0
  BNE     0x0000880C
  LDMFD   R13!, {R10, R12, PC}
+
+sub_893C:
+
  STMFD   R13!, {R0-R2, R6}
  MOV     R0, #0xF
  CMP     R6, #8
@@ -616,6 +640,9 @@
  ORR     R7, R7, #0x1D0000
  LDMFD   R13!, {R0-R2, R6}
  MOV     PC, R14
+
+sub_8998:
+
  MOV     R1, R9
  CMP     R9, #0x5500000
  BEQ     0x00008A34
@@ -628,6 +655,9 @@
  MOV     R5, R5, ASR #1
  RSB     R4, R4, #0
  MOV     PC, R14
+
+sub_89C8:
+
  SUB     R8, R9, R1
  CMP     R8, #0x1800000
  MOVHS   PC, R14
@@ -650,10 +680,10 @@
  ADDEQ   R8, R8, #0x14
  STREQ   R8, [R11, #0x124]
  MOV     R8, #0x14
- BL      0x00008CBC
+ BL      sub_8CBC
  B       0x00008A58
  MOV     R8, #3
- BL      0x00008CBC
+ BL      sub_8CBC
  B       0x00008A58
  TST     R7, #0x40000
  BEQ     0x00008A58
@@ -661,7 +691,7 @@
  MOVNE   R8, #0x41
  MOVEQ   R8, #4
  SUB     R1, R1, #0x100000
- BL      0x00008C58
+ BL      sub_8C58
  SUBS    R8, R8, #1
  BNE     0x00008A4C
  LDR     R8, [R11, #0x108]
@@ -675,21 +705,27 @@
  SUB     R8, R8, #1
  STR     R8, [R11, #0x10C]
  B       0x00008800
+
+sub_8A84:
+
  STMFD   R13!, {R8, R14}
  B       0x00008AC8
+
+sub_8A8C:
+
  STMFD   R13!, {R8, R14}
  B       0x00008AA0
  MOV     R4, #0
  MOV     R3, #0
  MOV     R5, #0
  STMFD   R13!, {R0-R1}
- BL      0x00009A40
+ BL      sub_9A40
  ADD     R3, R3, R0, ASR R8
- BL      0x00009A40
+ BL      sub_9A40
  ADD     R4, R4, R0, ASR R8
- BL      0x00009A40
+ BL      sub_9A40
  ADD     R5, R5, R0, ASR R8
- BL      0x00009A40
+ BL      sub_9A40
  ADD     R6, R6, R0, LSR R9
  LDMFD   R13!, {R0-R1}
  LDR     R8, [R11, #0x10C]
@@ -703,14 +739,20 @@
  MOV     R9, #0
  STR     R9, [R8, #0x1C]
  LDMFD   R13!, {R8, PC}
+
+sub_8AF4:
+
  ADD     R0, R11, #0x700
  STR     R0, [R11, #0x108]
  MOV     R1, #0
  STR     R1, [R0, #0x1C]
  STR     R1, [R11, #0x10C]
  MOV     PC, R14
+
+sub_8B0C:
+
  STMFD   R13!, {R0-R2, R8, R14}
- BL      0x00009A40
+ BL      sub_9A40
  AND     R0, R0, #7
  ADD     R0, R0, #3
  MOV     R1, R0
@@ -734,8 +776,11 @@
  MOV     R8, #0xD
  MOV     R6, #0xF
  B       0x00008A98
+
+sub_8B70:
+
  STMFD   R13!, {R0-R2, R8, R14}
- BL      0x00009A40
+ BL      sub_9A40
  MOV     R1, R1, LSR #29
  MOV     R2, R0, LSR #30
  AND     R0, R0, #7
@@ -760,8 +805,11 @@
  MOV     R8, #0xA
  MOV     R6, #0xF
  B       0x00008A94
+
+sub_8BD8:
+
  STMFD   R13!, {R0-R2, R8, R14}
- BL      0x00009A40
+ BL      sub_9A40
  MOV     R1, R1, LSR #29
  MOV     R2, R0, LSR #30
  AND     R0, R0, #7
@@ -786,14 +834,20 @@
  MOV     R8, #0xA
  MOV     R6, #0xAA
  B       0x00008A94
+
+sub_8C40:
+
  STMFD   R13!, {R8, R14}
  MOV     R7, #0x1D0000
  MOV     R9, #0x1D
  MOV     R8, #8
  MOV     R6, #8
  B       0x00008A94
+
+sub_8C58:
+
  STMFD   R13!, {R0-R2, R8, R14}
- BL      0x00009A40
+ BL      sub_9A40
  AND     R2, R0, #3
  ADD     R2, R2, #0xC
  AND     R0, R0, #4
@@ -817,11 +871,14 @@
  MOV     R8, #0xA
  MOV     R6, #0x14
  B       0x00008A94
+
+sub_8CBC:
+
  STMFD   R13!, {R3-R9, R14}
- BL      0x00008C40
- BL      0x00008B70
- BL      0x00008B0C
- BL      0x00008C40
+ BL      sub_8C40
+ BL      sub_8B70
+ BL      sub_8B0C
+ BL      sub_8C40
  SUBS    R8, R8, #1
  BPL     0x00008CC0
  LDMFD   R13!, {R3-R9, PC}
@@ -831,7 +888,7 @@
  MOV     R1, #0
  LDR     R2, [R11, #0x144]
  SUB     R2, R2, #0x6000000
- BL      0x00008CBC
+ BL      sub_8CBC
  LDMIA   R13!, {PC}
  STMFD   R13!, {R6-R9, R14}
  MOV     R8, #0x96
@@ -839,7 +896,7 @@
  MOV     R1, #0
  LDR     R2, [R11, #0x144]
  SUB     R2, R2, #0x6000000
- BL      0x00008C40
+ BL      sub_8C40
  SUBS    R8, R8, #1
  BPL     0x00008D14
  LDMFD   R13!, {R6-R9, PC}
@@ -848,13 +905,16 @@
  MVN     R1, #0x10000000
  LDR     R2, [R11, #0x144]
  SUB     R2, R2, #0x6000000
- BL      0x00008BD8
+ BL      sub_8BD8
  LDMFD   R13!, {R6-R9, PC}
+
+sub_8D40:
+
  LDR     R4, [R11, #0x124]
  SUBS    R4, R4, #0x320
  MOVMI   PC, R14
  STMDB   R13!, {R14}
- BL      0x00009A40
+ BL      sub_9A40
  MOV     R0, R0, LSR #18
  CMP     R0, R4
  LDMHSIA R13!, {PC}
@@ -862,7 +922,7 @@
  MVN     R1, #0x20000000
  LDR     R2, [R11, #0x144]
  SUB     R2, R2, #0x6000000
- BL      0x00008BD8
+ BL      sub_8BD8
  LDMIA   R13!, {PC}
 
 .long    0x0000AA98
@@ -891,6 +951,8 @@
 .long    0x0000AF84
 .long    0x0000AF84
 
+sub_8DDC:
+
  STMFD   R13!, {R5-R12, R14}
  LDR     R0, [R11, #0x13C]
  AND     R8, R0, #0xFF000000
@@ -918,7 +980,7 @@
  ADD     R0, PC, R0, LSL #2
  LDR     R14, [R0, #-0xCC]
  STR     R14, [R11, #0x110]
- BL      0x000081F4
+ BL      sub_81F4
  MOV     R1, R0
  CMP     R0, #0x5500000
  BEQ     0x00008E1C
@@ -933,7 +995,7 @@
  CMP     R14, #0xC
  BHS     0x00008E8C
  ADD     R3, R11, #0x30
- BL      0x00008EC4
+ BL      sub_8EC4
  B       0x00008E1C
  LDR     R14, [R11, #0x118]
  TST     R14, #3
@@ -944,12 +1006,14 @@
  MOV     R0, R8
  MOV     R2, R9
  SUB     R1, R1, #0xC00000
- BL      0x00008B0C
+ BL      sub_8B0C
  LDMFD   R13!, {R0-R7, R9}
  B       0x00008E80
 
 .long    0x0000AB8C
 .long    0x0000A960
+
+sub_8EC4:
 
  STMFD   R13!, {R6-R12, R14}
  LDR     R12, 0x0000924C
@@ -991,17 +1055,17 @@
  ADD     R0, R11, #0x54
  ADD     R1, R11, #0x64
  STMIA   R0, {R2-R4}
- BL      0x00009254
+ BL      sub_9254
  ADD     R0, R11, #0
- BL      0x0000991C
+ BL      sub_991C
  ADD     R0, R11, #0x74
- BL      0x00009748
+ BL      sub_9748
  STMIA   R10!, {R0-R1}
  ADD     R0, R11, #0x74
- BL      0x000082AC
+ BL      sub_82AC
  STR     R0, [R11, #0x78]
  ADD     R0, R11, #0x74
- BL      0x00009748
+ BL      sub_9748
  STMIA   R10!, {R0-R1}
  LDR     R14, [R10, #-0xC]
  CMP     R14, R1
@@ -1016,7 +1080,7 @@
  MOV     R0, R9
  ADD     R9, R9, #0xC
  ADD     R1, R11, #0x54
- BL      0x00009254
+ BL      sub_9254
  LDR     R1, [R11, #0x58]
  LDRB    R14, [R11, #0x114]
  TST     R14, #1
@@ -1024,7 +1088,7 @@
  MVNEQ   R1, #0
  ADDNE   R2, R11, #0x84
  ADDNE   R0, R11, #0x54
- BLNE    0x0000928C
+ BLNE    sub_928C
  STMFD   R13!, {R8-R9, R11-R12}
  CMP     R1, #0
  BPL     0x00009038
@@ -1042,7 +1106,7 @@
  LDMIA   R6, {R2-R3}
  ADD     R7, R10, R7, LSL #4
  LDMIA   R7, {R4-R5}
- BL      0x00009C28
+ BL      sub_9C28
  LDMFD   R13!, {R3, R9, R11}
  CMP     R3, #0
  BPL     0x000090F4
@@ -1090,12 +1154,15 @@
  LDMIA   R5, {R2-R3}
  ADD     R6, R10, R6, LSL #4
  LDMIA   R6, {R4-R5}
- BL      0x00009C58
+ BL      sub_9C58
  LDMFD   R13!, {R8-R9, R11-R12}
  ADD     R9, R9, #0x10
  SUBS    R8, R8, #1
  BNE     0x00008FBC
  LDMFD   R13!, {R6-R12, PC}
+
+sub_9108:
+
  LDR     R0, [R11, #0x124]
  ADD     R1, R11, #0x200
  MOV     R2, #0x13
@@ -1118,6 +1185,9 @@
  SWI     OS_WriteC
  SWI     OS_WriteC
  MOV     PC, R14
+
+sub_9160:
+
  STMFD   R13!, {R1-R2}
  ADD     R1, R11, #0x200
  MOV     R2, #0x13
@@ -1159,6 +1229,8 @@
 .long    0x0000C810
 .long    0x0000CA10
 
+sub_91FC:
+
  STMFD   R13!, {R10-R12, R14}
  LDR     R1, [R11, #0x128]
  LDRB    R2, [R11, #0x15C]
@@ -1169,19 +1241,21 @@
  ADD     R11, R7, #0x140
  LDR     R8, 0x000091EC
  MOV     R10, R1, LSR #4
- BL      0x0000A4C8
+ BL      sub_A4C8
  ADD     R11, R7, #0x280
  LDR     R8, 0x000091EC
  MOV     R10, R1, LSR #4
- BL      0x0000A4C8
+ BL      sub_A4C8
  ADD     R11, R7, #0x3C0
  LDR     R8, 0x000091EC
  MOV     R10, R1, LSR #4
- BL      0x0000A4C8
+ BL      sub_A4C8
  LDMFD   R13!, {R10-R12, PC}
 
 .long    0x0000805C
 .long    0x0000802C
+
+sub_9254:
 
  LDRB    R2, [R11, #0x114]
  TST     R2, #1
@@ -1190,13 +1264,16 @@
  MOVEQ   PC, R14
  STMFD   R13!, {R6-R7, R14}
  ADD     R2, R11, #0x30
- BL      0x0000928C
+ BL      sub_928C
  STR     R3, [R1]
- BL      0x0000928C
+ BL      sub_928C
  STR     R3, [R1, #4]
- BL      0x0000928C
+ BL      sub_928C
  STR     R3, [R1, #8]
  LDMFD   R13!, {R6-R7, PC}
+
+sub_928C:
+
  LDR     R4, [R2], #4
  LDR     R5, [R0]
  EOR     R7, R4, R5
@@ -1283,6 +1360,9 @@
  STMIA   R0, {R2-R4}
  STMIA   R1, {R5-R6, R14}
  LDMFD   R13!, {R5-R6, PC}
+
+sub_93E4:
+
  STMFD   R13!, {R0-R1, R14}
  ADD     R0, R0, #0x40000000
  LDR     R14, 0x000091F0
@@ -1383,6 +1463,9 @@
  MOV     R0, #0
  STR     R0, [R11, #0x44]
  MOV     PC, R14
+
+sub_9574:
+
  STMDB   R13!, {R14}
  MOV     R3, #0
  CMP     R0, #0
@@ -1446,6 +1529,9 @@
  LDR     R0, [R14, R2, LSR #20]
  LDMIA   R13!, {PC}
  LDMIA   R0, {R0-R2}
+
+sub_9670:
+
  CMN     R2, #0x80000000
  MOVHS   PC, R14
  MOVS    R3, R0
@@ -1500,6 +1586,9 @@
  CMP     R0, #0x140
  CMPLO   R1, #0xEF
  LDMFD   R13!, {R7, PC}
+
+sub_9748:
+
  LDMIA   R0, {R0-R2}
  CMN     R2, #0x80000000
  MOVHS   PC, R14
@@ -1613,12 +1702,18 @@
  STR     R1, 0x00009938
  LDMIA   R0, {R0-R2}
  MOV     R3, R12
- BL      0x00009924
+ BL      sub_9924
  LDR     R1, 0x000098E8
  STR     R1, 0x00009938
  LDMIA   R13!, {PC}
+
+sub_991C:
+
  LDMIA   R0, {R0-R2}
  ADD     R3, R11, #0x64
+
+sub_9924:
+
  STMFD   R13!, {R5-R6}
  LDMIA   R3, {R3-R5}
  ADD     R0, R0, R3
@@ -1690,6 +1785,9 @@
  LDMFD   R13!, {R5-R8, PC}
  SWIMI   0x9C3490
  BLE     0x000EA980
+
+sub_9A40:
+
  STMDB   R13!, {R14}
  LDR     R0, 0x00009A38
  LDR     R1, 0x00009A3C
@@ -1783,9 +1881,12 @@
  B       0x00009CEC
  LDMIA   R9!, {R0-R5, R8}
  STMFD   R13!, {R9, R12}
- BL      0x00009DDC
+ BL      sub_9DDC
  LDMFD   R13!, {R9, R12}
  B       0x00009CEC
+
+sub_9BB8:
+
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
  ADD     R14, R14, #0x1000000
@@ -1801,6 +1902,9 @@
  STR     R1, [R9], #4
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
+
+sub_9BF4:
+
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
  BIC     R14, R14, #0xC00000
@@ -1814,6 +1918,9 @@
  STR     R1, [R9], #4
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
+
+sub_9C28:
+
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #8]
  RSB     R14, R14, #0x14000000
@@ -1826,6 +1933,9 @@
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
+
+sub_9C58:
+
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #8]
  RSB     R14, R14, #0x14000000
@@ -1861,6 +1971,8 @@
 .long    0x00009BA4
 .long    0x00009CF8
 
+sub_9CDC:
+
  STMFD   R13!, {R6-R12, R14}
  LDR     R1, 0x0000924C
  LDR     R9, [R1, R0, LSL #2]
@@ -1869,6 +1981,9 @@
  ADD     R0, PC, R0, LSL #2
  LDR     PC, [R0, #-0x6C]
  LDMFD   R13!, {R6-R12, PC}
+
+sub_9CFC:
+
  STMFD   R13!, {R12, R14}
  LDR     R12, 0x0000924C
  LDR     R14, 0x00009250
@@ -1886,6 +2001,8 @@
 .long    0x01FED400
 .long    0x00000000
 .long    0x0000DA10
+
+sub_9D3C:
 
  LDRB    R0, 0x00009D34
  EORS    R0, R0, #1
@@ -1922,11 +2039,17 @@
  CMP     R12, R11
  BNE     0x00009DAC
  LDMFD   R13!, {R9, R11-R12, PC}
+
+sub_9DC8:
+
  STMFD   R13!, {R2-R7, R9-R12, R14}
- BL      0x00009DDC
+ BL      sub_9DDC
  LDMFD   R13!, {R0-R5}
- BL      0x00009DDC
+ BL      sub_9DDC
  LDMFD   R13!, {R9-R12, PC}
+
+sub_9DDC:
+
  CMP     R0, #0x140
  CMPLO   R1, #0xEF
  CMPLO   R2, #0x140
@@ -2019,7 +2142,7 @@
  ADD     R11, R12, R4, LSR #16
  MOV     R10, R5, LSR #16
  SUBS    R10, R10, R4, LSR #16
- BLPL    0x0000A4C8
+ BLPL    sub_A4C8
  SUB     R12, R12, #0x140
  SUBS    R9, R9, #1
  BNE     0x00009F38
@@ -2064,7 +2187,7 @@
  ADD     R11, R12, R4, LSR #16
  MOV     R10, R5, LSR #16
  SUBS    R10, R10, R4, LSR #16
- BLPL    0x0000A4C8
+ BLPL    sub_A4C8
  SUB     R12, R12, #0x140
  SUBS    R9, R9, #1
  BNE     0x00009FEC
@@ -2219,7 +2342,7 @@
  MOVGT   R14, R6
  MOVGT   R6, R7
  MOVGT   R7, R14
- BL      0x0000A408
+ BL      sub_A408
  LDMFD   R13!, {R0-R1}
  SUBS    R9, R3, R1
  LDMEQIA R13!, {PC}
@@ -2257,7 +2380,7 @@
  BICNE   R5, R5, #0xFF
  ORRNE   R5, R5, #0x8000
  LDR     R12, 0x00009A6C
- BL      0x0000A408
+ BL      sub_A408
  LDMIA   R13!, {PC}
  RSBMI   R10, R10, #0
  CMP     R14, #0
@@ -2322,6 +2445,9 @@
  MOVGT   R4, R5
  MOVGT   R5, R14
  B       0x0000A300
+
+sub_A408:
+
  CMP     R9, #0x100
  MOVHS   PC, R14
  STMDB   R13!, {R14}
@@ -2346,7 +2472,7 @@
  RSBLO   R10, R0, R5, LSR #16
  RSBHS   R10, R0, #0x140
  CMP     R10, #0
- BLPL    0x0000A4C8
+ BLPL    sub_A4C8
  LDMIA   R13!, {R11}
  SUB     R11, R11, #1
  SUBS    R9, R9, #1
@@ -2371,6 +2497,8 @@
 .long    0x0000A52C
 .long    0x0000A528
 .long    0x0000A524
+
+sub_A4C8:
 
  CMP     R10, #0x12
  ADDLO   R0, PC, R10, LSL #2
@@ -2425,6 +2553,8 @@
 .long    0x00000001
 .long    0x0000A588
 
+sub_A594:
+
  LDR     R1, 0x0000A590
  MOV     R0, #0x15
  SWI     OS_Word
@@ -2467,7 +2597,7 @@ Entry:
  MOV     R1, #1
  MOV     R2, #0
  SWI     OS_Byte
- BL      0x00008AF4
+ BL      sub_8AF4
  MOV     R0, #0x16
  SWI     OS_WriteC
  MOV     R0, #0xD
@@ -2478,7 +2608,7 @@ Entry:
 .byte    0
 .balign   4
 
- BL      0x00009D3C
+ BL      sub_9D3C
  MOV     R0, #0x16
  SWI     OS_WriteC
  MOV     R0, #0x8D
@@ -2509,7 +2639,7 @@ Entry:
  STRHS   R0, [R11, #0x138]
  MOV     R1, #0x23
  MOV     R2, #1
- BL      0x00009160
+ BL      sub_9160
  LDR     R0, 0x0000A578
  STR     R0, [R11, #0x124]
  LDR     R0, 0x0000A580
@@ -2529,11 +2659,11 @@ Entry:
  BNE     0x0000A78C
  ADD     R6, R11, #0x4400
  MOV     R5, #0x800
- BL      0x00009A40
+ BL      sub_9A40
  MOV     R8, R0
  MOV     R9, R0, LSL #8
  STMDB   R13!, {R0}
- BL      0x000081F4
+ BL      sub_81F4
  MOV     R14, R0
  LDMIA   R13!, {R0}
  CMP     R14, #0x5500000
@@ -2554,7 +2684,7 @@ Entry:
  LDR     R0, [R11, #0x134]
  MOV     R1, #0x1E
  MOV     R2, #1
- BL      0x00009160
+ BL      sub_9160
  MVN     R0, #0
  STR     R0, [R11, #0x130]
  MOV     R0, #0
@@ -2572,26 +2702,26 @@ Entry:
  MOV     R1, #0
  MOV     R2, #0
  STMIA   R3!, {R0-R2}
- BL      0x0000A594
+ BL      sub_A594
  MOV     R0, #0x81
  MOV     R1, #0
  MOV     R2, #0
  SWI     OS_Byte
  TEQ     R2, #0x1B
  BEQ     0x0000A8AC
- BL      0x00008398
+ BL      sub_8398
  LDR     R0, [R11, #0x118]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
- BL      0x000093E4
- BL      0x00008D40
- BL      0x000087F4
- BL      0x00008DDC
- BL      0x00009CFC
- BL      0x0000808C
- BL      0x00009108
- BL      0x000091FC
- BL      0x00009D3C
+ BL      sub_93E4
+ BL      sub_8D40
+ BL      sub_87F4
+ BL      sub_8DDC
+ BL      sub_9CFC
+ BL      sub_808C
+ BL      sub_9108
+ BL      sub_91FC
+ BL      sub_9D3C
  LDR     R14, [R11, #0x118]
  ADD     R14, R14, #1
  STR     R14, [R11, #0x118]
@@ -2615,26 +2745,29 @@ Entry:
  SWI     OS_WriteC
  STMFD   R13!, {R0-R12, R14}
  MOV     R0, R1, LSR #28
- BL      0x0000A948
+ BL      sub_A948
  MOV     R0, R1, LSR #24
- BL      0x0000A948
+ BL      sub_A948
  MOV     R0, R1, LSR #20
- BL      0x0000A948
+ BL      sub_A948
  MOV     R0, R1, LSR #16
- BL      0x0000A948
+ BL      sub_A948
  MOV     R0, R1, LSR #12
- BL      0x0000A948
+ BL      sub_A948
  MOV     R0, R1, LSR #8
- BL      0x0000A948
+ BL      sub_A948
  MOV     R0, R1, LSR #4
- BL      0x0000A948
+ BL      sub_A948
  MOV     R0, R1
- BL      0x0000A948
+ BL      sub_A948
  MOV     R0, #0xA
  SWI     OS_WriteC
  MOV     R0, #0xD
  SWI     OS_WriteC
  LDMFD   R13!, {R0-R12, PC}
+
+sub_A948:
+
  AND     R0, R0, #0xF
  CMP     R0, #0xA
  ADDHS   R0, R0, #0x37
@@ -7666,7 +7799,7 @@ Entry:
 .long    0x00009782
 .long    0x0000947A
 .long    0x00009191
-.long    0x00008EC4
+.long    sub_8EC4
 .long    0x00008C13
 .long    0x0000897B
 .long    0x000086FB
