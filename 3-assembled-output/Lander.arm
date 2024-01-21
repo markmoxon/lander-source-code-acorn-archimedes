@@ -8,15 +8,42 @@
 
 .org     0x00008000
 
+
+
+
+
+
+
+
+
+
 var_8000:
 
 .long    0xFA800000
 .long    0x00000000
 .long    0x14000000
 
+
+
+
+
+
+
+
+
+
 var_800C:
 
 .long    var_8000
+
+
+
+
+
+
+
+
+
 
 var_8010:
 
@@ -27,9 +54,27 @@ var_8010:
 .long    0x0DE30DE4
 .long    0x0DE30DE4
 
+
+
+
+
+
+
+
+
+
 var_8028:
 
 .long    var_8010
+
+
+
+
+
+
+
+
+
 
 var_802C:
 
@@ -46,6 +91,15 @@ var_802C:
 .long    0x00030E48
 .long    0x00031F1C
 
+
+
+
+
+
+
+
+
+
 var_805C:
 
 .long    0x00026600
@@ -60,6 +114,15 @@ var_805C:
 .long    0x0002FD74
 .long    0x00030E48
 .long    0x00031F1C
+
+
+
+
+
+
+
+
+
 
 sub_808C:
 
@@ -169,6 +232,15 @@ lab_81E0:
  BL      sub_9CDC
  LDMFD   R13!, {R5-R9, PC}
 
+
+
+
+
+
+
+
+
+
 sub_81F4:
 
  LDR     R0, [R11, #0x100]
@@ -218,6 +290,15 @@ sub_81F4:
  STR     R0, [R11, #0x100]
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 sub_82AC:
 
  STMFD   R13!, {R8-R9, R14}
@@ -232,6 +313,15 @@ sub_82AC:
  LDR     R14, [R11, #0x140]
  SUB     R0, R0, R14
  LDMFD   R13!, {R8-R9, PC}
+
+
+
+
+
+
+
+
+
 
 sub_82DC:
 
@@ -282,6 +372,15 @@ sub_82DC:
  ORR     R8, R8, R8, LSL #16
  ORR     R8, R8, R8, LSL #24
  LDMFD   R13!, {R0-R4, PC}
+
+
+
+
+
+
+
+
+
 
 sub_8398:
 
@@ -485,6 +584,15 @@ lab_8650:
 
  LDMIA   R13!, {PC}
 
+
+
+
+
+
+
+
+
+
 sub_8654:
 
  ADD     R3, R11, #0x94
@@ -519,6 +627,15 @@ sub_8654:
 lab_86C4:
 
  LDMFD   R13!, {R10, R12}
+
+
+
+
+
+
+
+
+
 
 sub_86C8:
 
@@ -589,11 +706,29 @@ lab_86EC:
  SWI     OS_ReadC
  B       lab_A734
 
+
+
+
+
+
+
+
+
+
 var_87EC:
 
 .long    var_805C
 
 .long    var_802C
+
+
+
+
+
+
+
+
+
 
 sub_87F4:
 
@@ -692,6 +827,15 @@ lab_8904:
  BNE     lab_880C
  LDMFD   R13!, {R10, R12, PC}
 
+
+
+
+
+
+
+
+
+
 sub_893C:
 
  STMFD   R13!, {R0-R2, R6}
@@ -718,6 +862,15 @@ sub_893C:
  LDMFD   R13!, {R0-R2, R6}
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 sub_8998:
 
  MOV     R1, R9
@@ -732,6 +885,15 @@ sub_8998:
  MOV     R5, R5, ASR #1
  RSB     R4, R4, #0
  MOV     PC, R14
+
+
+
+
+
+
+
+
+
 
 sub_89C8:
 
@@ -795,10 +957,28 @@ lab_8A58:
  STR     R8, [R11, #0x10C]
  B       lab_8800
 
+
+
+
+
+
+
+
+
+
 sub_8A84:
 
  STMFD   R13!, {R8, R14}
  B       lab_8AC8
+
+
+
+
+
+
+
+
+
 
 sub_8A8C:
 
@@ -841,6 +1021,15 @@ lab_8AC8:
  STR     R9, [R8, #0x1C]
  LDMFD   R13!, {R8, PC}
 
+
+
+
+
+
+
+
+
+
 sub_8AF4:
 
  ADD     R0, R11, #0x700
@@ -849,6 +1038,15 @@ sub_8AF4:
  STR     R1, [R0, #0x1C]
  STR     R1, [R11, #0x10C]
  MOV     PC, R14
+
+
+
+
+
+
+
+
+
 
 sub_8B0C:
 
@@ -877,6 +1075,15 @@ sub_8B0C:
  MOV     R8, #0xD
  MOV     R6, #0xF
  B       lab_8A98
+
+
+
+
+
+
+
+
+
 
 sub_8B70:
 
@@ -907,6 +1114,15 @@ sub_8B70:
  MOV     R6, #0xF
  B       lab_8A94
 
+
+
+
+
+
+
+
+
+
 sub_8BD8:
 
  STMFD   R13!, {R0-R2, R8, R14}
@@ -936,6 +1152,15 @@ sub_8BD8:
  MOV     R6, #0xAA
  B       lab_8A94
 
+
+
+
+
+
+
+
+
+
 sub_8C40:
 
  STMFD   R13!, {R8, R14}
@@ -944,6 +1169,15 @@ sub_8C40:
  MOV     R8, #8
  MOV     R6, #8
  B       lab_8A94
+
+
+
+
+
+
+
+
+
 
 sub_8C58:
 
@@ -973,6 +1207,15 @@ sub_8C58:
  MOV     R6, #0x14
  B       lab_8A94
 
+
+
+
+
+
+
+
+
+
 sub_8CBC:
 
  STMFD   R13!, {R3-R9, R14}
@@ -987,6 +1230,15 @@ lab_8CC0:
  BPL     lab_8CC0
  LDMFD   R13!, {R3-R9, PC}
 
+
+
+
+
+
+
+
+
+
 sub_8CDC:
 
 
@@ -999,6 +1251,15 @@ sub_8CDC:
  SUB     R2, R2, #0x6000000
  BL      sub_8CBC
  LDMIA   R13!, {PC}
+
+
+
+
+
+
+
+
+
 
 sub_8CFC:
 
@@ -1018,6 +1279,15 @@ lab_8D14:
  BPL     lab_8D14
  LDMFD   R13!, {R6-R9, PC}
 
+
+
+
+
+
+
+
+
+
 sub_8D24:
 
 
@@ -1029,6 +1299,15 @@ sub_8D24:
  SUB     R2, R2, #0x6000000
  BL      sub_8BD8
  LDMFD   R13!, {R6-R9, PC}
+
+
+
+
+
+
+
+
+
 
 sub_8D40:
 
@@ -1072,6 +1351,15 @@ sub_8D40:
 .long    var_AF84
 .long    var_AF84
 .long    var_AF84
+
+
+
+
+
+
+
+
+
 
 sub_8DDC:
 
@@ -1150,13 +1438,40 @@ lab_8E8C:
  LDMFD   R13!, {R0-R7, R9}
  B       lab_8E80
 
+
+
+
+
+
+
+
+
+
 var_8EBC:
 
 .long    var_AB8C
 
+
+
+
+
+
+
+
+
+
 var_8EC0:
 
 .long    var_A960
+
+
+
+
+
+
+
+
+
 
 sub_8EC4:
 
@@ -1321,6 +1636,15 @@ lab_90F4:
  BNE     lab_8FBC
  LDMFD   R13!, {R6-R12, PC}
 
+
+
+
+
+
+
+
+
+
 sub_9108:
 
  LDR     R0, [R11, #0x124]
@@ -1348,6 +1672,15 @@ lab_9140:
  SWI     OS_WriteC
  SWI     OS_WriteC
  MOV     PC, R14
+
+
+
+
+
+
+
+
+
 
 sub_9160:
 
@@ -1393,21 +1726,66 @@ lab_91D8:
  BNE     lab_91D8
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 var_91EC:
 
 .long    0x37373737
+
+
+
+
+
+
+
+
+
 
 var_91F0:
 
 .long    var_B810
 
+
+
+
+
+
+
+
+
+
 var_91F4:
 
 .long    var_C810
 
+
+
+
+
+
+
+
+
+
 var_91F8:
 
 .long    var_CA10
+
+
+
+
+
+
+
+
+
 
 sub_91FC:
 
@@ -1432,13 +1810,40 @@ sub_91FC:
  BL      sub_A4C8
  LDMFD   R13!, {R10-R12, PC}
 
+
+
+
+
+
+
+
+
+
 var_924C:
 
 .long    var_805C
 
+
+
+
+
+
+
+
+
+
 var_9250:
 
 .long    var_802C
+
+
+
+
+
+
+
+
+
 
 sub_9254:
 
@@ -1456,6 +1861,15 @@ sub_9254:
  BL      sub_928C
  STR     R3, [R1, #8]
  LDMFD   R13!, {R6-R7, PC}
+
+
+
+
+
+
+
+
+
 
 sub_928C:
 
@@ -1529,6 +1943,15 @@ lab_9358:
  ADDS    R3, R3, R6
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 sub_937C:
 
 
@@ -1548,6 +1971,15 @@ sub_937C:
  STR     R1, [R2, #0x14]
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 sub_93B4:
 
 
@@ -1564,6 +1996,15 @@ sub_93B4:
  STMIA   R0, {R2-R4}
  STMIA   R1, {R5-R6, R14}
  LDMFD   R13!, {R5-R6, PC}
+
+
+
+
+
+
+
+
+
 
 sub_93E4:
 
@@ -1680,6 +2121,15 @@ lab_9530:
  STR     R0, [R11, #0x44]
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 sub_9574:
 
  STMDB   R13!, {R14}
@@ -1764,6 +2214,15 @@ lab_9648:
  LDMIA   R13!, {PC}
  LDMIA   R0, {R0-R2}
 
+
+
+
+
+
+
+
+
+
 sub_9670:
 
  CMN     R2, #0x80000000
@@ -1829,6 +2288,15 @@ lab_9700:
  CMP     R0, #0x140
  CMPLO   R1, #0xEF
  LDMFD   R13!, {R7, PC}
+
+
+
+
+
+
+
+
+
 
 sub_9748:
 
@@ -1957,13 +2425,40 @@ lab_9890:
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
 
+
+
+
+
+
+
+
+
+
 var_98E4:
 
  ADD     R4, R11, #0x64
 
+
+
+
+
+
+
+
+
+
 var_98E8:
 
  ADD     R4, R11, #0x74
+
+
+
+
+
+
+
+
+
 
 var_98EC:
 
@@ -1980,10 +2475,28 @@ var_98EC:
  STR     R1, var_9938
  LDMIA   R13!, {PC}
 
+
+
+
+
+
+
+
+
+
 sub_991C:
 
  LDMIA   R0, {R0-R2}
  ADD     R3, R11, #0x64
+
+
+
+
+
+
+
+
+
 
 sub_9924:
 
@@ -1993,12 +2506,30 @@ sub_9924:
  ADD     R1, R1, R4
  ADD     R2, R2, R5
 
+
+
+
+
+
+
+
+
+
 var_9938:
 
  ADD     R3, R11, #0x74
  STMIA   R3, {R0-R2}
  LDMFD   R13!, {R5-R6}
  MOV     PC, R14
+
+
+
+
+
+
+
+
+
 
 sub_9948:
 
@@ -2074,13 +2605,40 @@ lab_9A0C:
  STMIA   R8, {R5-R7, R14}
  LDMFD   R13!, {R5-R8, PC}
 
+
+
+
+
+
+
+
+
+
 var_9A38:
 
 .long    0x4F9C3490
 
+
+
+
+
+
+
+
+
+
 var_9A3C:
 
 .long    0xDA0383CF
+
+
+
+
+
+
+
+
+
 
 sub_9A40:
 
@@ -2096,9 +2654,27 @@ sub_9A40:
  STR     R0, var_9A3C
  LDMIA   R13!, {PC}
 
+
+
+
+
+
+
+
+
+
 var_9A6C:
 
 .long    0x01FD9400
+
+
+
+
+
+
+
+
+
 
 var_9A70:
 
@@ -2122,6 +2698,15 @@ var_9A70:
 .long    0xFFFFFFFF
 .long    0xFFFFFFFF
 .long    0xFFFFFFFF
+
+
+
+
+
+
+
+
+
 
 var_9AC0:
 
@@ -2206,6 +2791,15 @@ lab_9BA4:
  LDMFD   R13!, {R9, R12}
  B       lab_9CEC
 
+
+
+
+
+
+
+
+
+
 sub_9BB8:
 
  STMFD   R13!, {R9, R14}
@@ -2224,6 +2818,15 @@ sub_9BB8:
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
 
+
+
+
+
+
+
+
+
+
 sub_9BF4:
 
  STMFD   R13!, {R9, R14}
@@ -2240,6 +2843,15 @@ sub_9BF4:
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
 
+
+
+
+
+
+
+
+
+
 sub_9C28:
 
  STMFD   R13!, {R9, R14}
@@ -2254,6 +2866,15 @@ sub_9C28:
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
+
+
+
+
+
+
+
+
+
 
 sub_9C58:
 
@@ -2292,6 +2913,15 @@ sub_9C58:
 .long    lab_9BA4
 .long    sub_9CF8
 
+
+
+
+
+
+
+
+
+
 sub_9CDC:
 
  STMFD   R13!, {R6-R12, R14}
@@ -2305,9 +2935,27 @@ lab_9CEC:
  ADD     R0, PC, R0, LSL #2
  LDR     PC, [R0, #-0x6C]
 
+
+
+
+
+
+
+
+
+
 sub_9CF8:
 
  LDMFD   R13!, {R6-R12, PC}
+
+
+
+
+
+
+
+
+
 
 sub_9CFC:
 
@@ -2327,21 +2975,66 @@ lab_9D10:
  BPL     lab_9D10
  LDMFD   R13!, {R12, PC}
 
+
+
+
+
+
+
+
+
+
 var_9D2C:
 
 .long    0x01FD9400
+
+
+
+
+
+
+
+
+
 
 var_9D30:
 
 .long    0x01FED400
 
+
+
+
+
+
+
+
+
+
 var_9D34:
 
 .long    0x00000000
 
+
+
+
+
+
+
+
+
+
 var_9D38:
 
 .long    var_DA10
+
+
+
+
+
+
+
+
+
 
 sub_9D3C:
 
@@ -2384,6 +3077,15 @@ lab_9DAC:
  BNE     lab_9DAC
  LDMFD   R13!, {R9, R11-R12, PC}
 
+
+
+
+
+
+
+
+
+
 sub_9DC8:
 
  STMFD   R13!, {R2-R7, R9-R12, R14}
@@ -2391,6 +3093,15 @@ sub_9DC8:
  LDMFD   R13!, {R0-R5}
  BL      sub_9DDC
  LDMFD   R13!, {R9-R12, PC}
+
+
+
+
+
+
+
+
+
 
 sub_9DDC:
 
@@ -2922,6 +3633,15 @@ lab_A3CC:
  MOVGT   R5, R14
  B       lab_A300
 
+
+
+
+
+
+
+
+
+
 sub_A408:
 
  CMP     R9, #0x100
@@ -2983,6 +3703,15 @@ lab_A470:
 .long    var_A524 + 1 * 4
 .long    var_A524
 
+
+
+
+
+
+
+
+
+
 sub_A4C8:
 
  CMP     R10, #0x12
@@ -3012,6 +3741,15 @@ lab_A4F4:
  STRLOB  R8, [R11], #1
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 var_A524:
 
  STRB    R8, [R11, #0x10]
@@ -3033,42 +3771,132 @@ var_A524:
  STRB    R8, [R11]
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 var_A56C:
 
 .long    0x00012200
+
+
+
+
+
+
+
+
+
 
 var_A570:
 
 .long    0x000121FC
 
+
+
+
+
+
+
+
+
+
 var_A574:
 
 .long    0x00000000
+
+
+
+
+
+
+
+
+
 
 var_A578:
 
 .long    0x000001F4
 
+
+
+
+
+
+
+
+
+
 var_A57C:
 
 .long    0x000001F4
+
+
+
+
+
+
+
+
+
 
 var_A580:
 
 .long    0x00000D55
 
+
+
+
+
+
+
+
+
+
 var_A584:
 
 .long    0x00000000
+
+
+
+
+
+
+
+
+
 
 var_A588:
 
 .long    0xFF01FF03
 .long    0x00000001
 
+
+
+
+
+
+
+
+
+
 var_A590:
 
 .long    var_A588
+
+
+
+
+
+
+
+
+
 
 sub_A594:
 
@@ -3287,6 +4115,15 @@ lab_A8D4:
  LDR     R13, var_A584
  MOV     PC, R14
 
+
+
+
+
+
+
+
+
+
 sub_A8E0:
 
 
@@ -3295,6 +4132,15 @@ sub_A8E0:
  SWI     OS_WriteC
  MOV     R0, #0xA
  SWI     OS_WriteC
+
+
+
+
+
+
+
+
+
 
 sub_A8F0:
 
@@ -3323,6 +4169,15 @@ sub_A8F0:
  SWI     OS_WriteC
  LDMFD   R13!, {R0-R12, PC}
 
+
+
+
+
+
+
+
+
+
 sub_A948:
 
  AND     R0, R0, #0xF
@@ -3331,6 +4186,15 @@ sub_A948:
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
  MOV     PC, R14
+
+
+
+
+
+
+
+
+
 
 var_A960:
 
@@ -3413,6 +4277,15 @@ var_A960:
 .long    0x00000004
 .long    0x00000444
 
+
+
+
+
+
+
+
+
+
 var_AA98:
 
 .long    0x00000005
@@ -3476,6 +4349,15 @@ var_AA98:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000008
+
+
+
+
+
+
+
+
+
 
 var_AB8C:
 
@@ -3574,6 +4456,15 @@ var_AB8C:
 .long    0x00000008
 .long    0x00000C80
 
+
+
+
+
+
+
+
+
+
 var_AD04:
 
 .long    0x0000000B
@@ -3648,6 +4539,15 @@ var_AD04:
 .long    0x00000007
 .long    0x00000008
 .long    0x00000080
+
+
+
+
+
+
+
+
+
 
 var_AE24:
 
@@ -3740,6 +4640,15 @@ var_AE24:
 .long    0x00000008
 .long    0x00000040
 
+
+
+
+
+
+
+
+
+
 var_AF84:
 
 .long    0x00000005
@@ -3775,6 +4684,15 @@ var_AF84:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000000
+
+
+
+
+
+
+
+
+
 
 var_B008:
 
@@ -3812,6 +4730,15 @@ var_B008:
 .long    0x00000004
 .long    0x00000000
 
+
+
+
+
+
+
+
+
+
 var_B08C:
 
 .long    0x00000005
@@ -3847,6 +4774,15 @@ var_B08C:
 .long    0x00000001
 .long    0x00000002
 .long    0x00000040
+
+
+
+
+
+
+
+
+
 
 var_B110:
 
@@ -3949,6 +4885,15 @@ var_B110:
 .long    0x00000002
 .long    0x00000003
 .long    0x00000400
+
+
+
+
+
+
+
+
+
 
 var_B29C:
 
@@ -4089,6 +5034,15 @@ var_B29C:
 .long    0x00000007
 .long    0x00000800
 
+
+
+
+
+
+
+
+
+
 var_B4BC:
 
 .long    0x00000006
@@ -4156,6 +5110,15 @@ var_B4BC:
 .long    0x00000005
 .long    0x00000777
 
+
+
+
+
+
+
+
+
+
 var_B5BC:
 
 .long    0x00000006
@@ -4208,6 +5171,15 @@ var_B5BC:
 .long    0x00000001
 .long    0x00000005
 .long    0x00000000
+
+
+
+
+
+
+
+
+
 
 var_B684:
 
@@ -4310,6 +5282,15 @@ var_B684:
 .long    0x00000004
 .long    0x00000008
 .long    0x00000CC0
+
+
+
+
+
+
+
+
+
 
 var_B810:
 
@@ -5338,6 +6319,15 @@ var_B810:
 .long    0xFE6DE2E1
 .long    0xFF36F077
 
+
+
+
+
+
+
+
+
+
 var_C810:
 
 .long    0x00000000
@@ -5468,6 +6458,15 @@ var_C810:
 .long    0x1F84534E
 .long    0x1FADDF6B
 .long    0x1FD718C5
+
+
+
+
+
+
+
+
+
 
 var_CA10:
 
@@ -6495,6 +7494,15 @@ var_CA10:
 .long    0x7FCFF6FB
 .long    0x7FDFFBFE
 .long    0x7FEFFEFF
+
+
+
+
+
+
+
+
+
 
 var_DA10:
 
