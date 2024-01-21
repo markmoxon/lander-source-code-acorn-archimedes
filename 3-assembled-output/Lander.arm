@@ -6,7 +6,9 @@
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
 
-.org     0x8000
+.org     0x00008000
+
+var_8000:
 
 .long    0xFA800000
 .long    0x00000000
@@ -14,7 +16,10 @@
 
 var_800C:
 
-.long    0x00008000
+.long    var_8000
+
+var_8010:
+
 .long    0x0DE30D3A
 .long    0x0DE30DE4
 .long    0x0DE30DE4
@@ -24,7 +29,7 @@ var_800C:
 
 var_8028:
 
-.long    0x00008010
+.long    var_8010
 
 var_802C:
 
@@ -1027,31 +1032,31 @@ sub_8D40:
  BL      sub_8BD8
  LDMIA   R13!, {PC}
 
-.long    0x0000AA98
-.long    0x0000AD04
-.long    0x0000AE24
-.long    0x0000AD04
-.long    0x0000AD04
-.long    0x0000B110
-.long    0x0000AE24
-.long    0x0000B08C
-.long    0x0000B29C
-.long    0x0000B684
-.long    0x0000B684
-.long    0x0000B684
-.long    0x0000B684
-.long    0x0000B008
-.long    0x0000AF84
-.long    0x0000AF84
-.long    0x0000AF84
-.long    0x0000B5BC
-.long    0x0000B008
-.long    0x0000B008
-.long    0x0000B4BC
-.long    0x0000B008
-.long    0x0000AF84
-.long    0x0000AF84
-.long    0x0000AF84
+.long    var_AA98
+.long    var_AD04
+.long    var_AE24
+.long    var_AD04
+.long    var_AD04
+.long    var_B110
+.long    var_AE24
+.long    var_B08C
+.long    var_B29C
+.long    var_B684
+.long    var_B684
+.long    var_B684
+.long    var_B684
+.long    var_B008
+.long    var_AF84
+.long    var_AF84
+.long    var_AF84
+.long    var_B5BC
+.long    var_B008
+.long    var_B008
+.long    var_B4BC
+.long    var_B008
+.long    var_AF84
+.long    var_AF84
+.long    var_AF84
 
 sub_8DDC:
 
@@ -2038,11 +2043,11 @@ lab_9A0C:
 
 var_9A38:
 
- SWIMI   0x9C3490
+.long    0x4F9C3490
 
 var_9A3C:
 
- BLE     0x000EA980
+.long    0xDA0383CF
 
 sub_9A40:
 
@@ -2061,6 +2066,9 @@ sub_9A40:
 var_9A6C:
 
 .long    0x01FD9400
+
+var_9A70:
+
 .long    0x00000000
 .long    0x01010101
 .long    0x02020202
@@ -2081,7 +2089,10 @@ var_9A6C:
 .long    0xFFFFFFFF
 .long    0xFFFFFFFF
 .long    0xFFFFFFFF
-.long    0x00009A70
+
+var_9AC0:
+
+.long    var_9A70
 
 lab_9AC4:
 
@@ -2920,24 +2931,24 @@ lab_A470:
  BNE     lab_A414
  LDMIA   R13!, {PC}
 
-.long    0x0000A568
-.long    0x0000A564
-.long    0x0000A560
-.long    0x0000A55C
-.long    0x0000A558
-.long    0x0000A554
-.long    0x0000A550
-.long    0x0000A54C
-.long    0x0000A548
-.long    0x0000A544
-.long    0x0000A540
-.long    0x0000A53C
-.long    0x0000A538
-.long    0x0000A534
-.long    0x0000A530
-.long    0x0000A52C
-.long    0x0000A528
-.long    0x0000A524
+.long    var_A524 + 17 * 4
+.long    var_A524 + 16 * 4
+.long    var_A524 + 15 * 4
+.long    var_A524 + 14 * 4
+.long    var_A524 + 13 * 4
+.long    var_A524 + 12 * 4
+.long    var_A524 + 11 * 4
+.long    var_A524 + 10 * 4
+.long    var_A524 + 9 * 4
+.long    var_A524 + 8 * 4
+.long    var_A524 + 7 * 4
+.long    var_A524 + 6 * 4
+.long    var_A524 + 5 * 4
+.long    var_A524 + 4 * 4
+.long    var_A524 + 3 * 4
+.long    var_A524 + 2 * 4
+.long    var_A524 + 1 * 4
+.long    var_A524
 
 sub_A4C8:
 
@@ -2967,6 +2978,9 @@ lab_A4F4:
  CMPLO   R11, R10
  STRLOB  R8, [R11], #1
  MOV     PC, R14
+
+var_A524:
+
  STRB    R8, [R11, #0x10]
  STRB    R8, [R11, #0xF]
  STRB    R8, [R11, #0xE]
@@ -3013,12 +3027,15 @@ var_A580:
 var_A584:
 
 .long    0x00000000
+
+var_A588:
+
 .long    0xFF01FF03
 .long    0x00000001
 
 var_A590:
 
-.long    0x0000A588
+.long    var_A588
 
 sub_A594:
 
@@ -3352,6 +3369,9 @@ var_A960:
 .long    0x00000002
 .long    0x00000004
 .long    0x00000444
+
+var_AA98:
+
 .long    0x00000005
 .long    0x00000006
 .long    0x0000004C
@@ -3510,6 +3530,9 @@ var_AB8C:
 .long    0x00000007
 .long    0x00000008
 .long    0x00000C80
+
+var_AD04:
+
 .long    0x0000000B
 .long    0x00000005
 .long    0x00000094
@@ -3582,6 +3605,9 @@ var_AB8C:
 .long    0x00000007
 .long    0x00000008
 .long    0x00000080
+
+var_AE24:
+
 .long    0x0000000E
 .long    0x00000006
 .long    0x000000B8
@@ -3670,6 +3696,9 @@ var_AB8C:
 .long    0x00000007
 .long    0x00000008
 .long    0x00000040
+
+var_AF84:
+
 .long    0x00000005
 .long    0x00000002
 .long    0x0000004C
@@ -3703,6 +3732,9 @@ var_AB8C:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000000
+
+var_B008:
+
 .long    0x00000005
 .long    0x00000002
 .long    0x0000004C
@@ -3736,6 +3768,9 @@ var_AB8C:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000000
+
+var_B08C:
+
 .long    0x00000005
 .long    0x00000002
 .long    0x0000004C
@@ -3769,6 +3804,9 @@ var_AB8C:
 .long    0x00000001
 .long    0x00000002
 .long    0x00000040
+
+var_B110:
+
 .long    0x0000000D
 .long    0x00000008
 .long    0x000000AC
@@ -3868,6 +3906,9 @@ var_AB8C:
 .long    0x00000002
 .long    0x00000003
 .long    0x00000400
+
+var_B29C:
+
 .long    0x00000010
 .long    0x0000000C
 .long    0x000000D0
@@ -4004,6 +4045,9 @@ var_AB8C:
 .long    0x00000003
 .long    0x00000007
 .long    0x00000800
+
+var_B4BC:
+
 .long    0x00000006
 .long    0x00000006
 .long    0x00000058
@@ -4068,6 +4112,9 @@ var_AB8C:
 .long    0x00000003
 .long    0x00000005
 .long    0x00000777
+
+var_B5BC:
+
 .long    0x00000006
 .long    0x00000004
 .long    0x00000058
@@ -4118,6 +4165,9 @@ var_AB8C:
 .long    0x00000001
 .long    0x00000005
 .long    0x00000000
+
+var_B684:
+
 .long    0x0000000D
 .long    0x00000008
 .long    0x000000AC
