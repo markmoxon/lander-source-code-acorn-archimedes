@@ -986,6 +986,11 @@
  SUBS    R8, R8, #1                 ; 00008CD0 : E2588001 : ..X.
  BPL     lab_8CC0                   ; 00008CD4 : 5AFFFFF9 : ...Z
  LDMFD   R13!, {R3-R9, PC}          ; 00008CD8 : E8BD83F8 : ....
+
+.sub_8CDC
+
+; Not called directly
+
  STMDB   R13!, {R14}                ; 00008CDC : E92D4000 : .@-.
  MOV     R8, #&32                   ; 00008CE0 : E3A08032 : 2...
  LDR     R0, [R11, #&13C]           ; 00008CE4 : E59B013C : <...
@@ -994,6 +999,11 @@
  SUB     R2, R2, #&6000000          ; 00008CF0 : E2422406 : .$B.
  BL      sub_8CBC                   ; 00008CF4 : EBFFFFF0 : ....
  LDMIA   R13!, {PC}                 ; 00008CF8 : E8BD8000 : ....
+
+.sub_8CFC
+
+; Not called directly
+
  STMFD   R13!, {R6-R9, R14}         ; 00008CFC : E92D43C0 : .C-.
  MOV     R8, #&96                   ; 00008D00 : E3A08096 : ....
  LDR     R0, [R11, #&13C]           ; 00008D04 : E59B013C : <...
@@ -1007,6 +1017,11 @@
  SUBS    R8, R8, #1                 ; 00008D18 : E2588001 : ..X.
  BPL     lab_8D14                   ; 00008D1C : 5AFFFFFC : ...Z
  LDMFD   R13!, {R6-R9, PC}          ; 00008D20 : E8BD83C0 : ....
+
+.sub_8D24
+
+; Not called directly
+
  STMFD   R13!, {R6-R9, R14}         ; 00008D24 : E92D43C0 : .C-.
  LDR     R0, [R11, #&13C]           ; 00008D28 : E59B013C : <...
  MVN     R1, #&10000000             ; 00008D2C : E3E01201 : ....
@@ -1513,6 +1528,11 @@
  RSBMI   R6, R6, #0                 ; 00009370 : 42666000 : .`fB
  ADDS    R3, R3, R6                 ; 00009374 : E0933006 : .0..
  MOV     PC, R14                    ; 00009378 : E1A0F00E : ....
+
+.sub_937C
+
+; Not called directly
+
  ADD     R2, R11, #&30              ; 0000937C : E28B2030 : 0 ..
  LDR     R0, [R2, #4]               ; 00009380 : E5920004 : ....
  LDR     R1, [R2, #&C]              ; 00009384 : E592100C : ....
@@ -1527,6 +1547,11 @@
  STR     R0, [R2, #&1C]             ; 000093A8 : E582001C : ....
  STR     R1, [R2, #&14]             ; 000093AC : E5821014 : ....
  MOV     PC, R14                    ; 000093B0 : E1A0F00E : ....
+
+.sub_93B4
+
+; Not called directly
+
  STMFD   R13!, {R5-R6, R14}         ; 000093B4 : E92D4060 : `@-.
  LDMIA   R0, {R2-R4}                ; 000093B8 : E890001C : ....
  LDMIA   R1, {R5-R6, R14}           ; 000093BC : E8914060 : `@..
@@ -1931,6 +1956,9 @@
  RSBMI   R1, R6, #&40               ; 000098D8 : 42661040 : @.fB
  CMN     R0, #0                     ; 000098DC : E3700000 : ..p.
  LDMFD   R13!, {R5-R7, PC}          ; 000098E0 : E8BD80E0 : ....
+
+.var_98E4
+
  ADD     R4, R11, #&64              ; 000098E4 : E28B4064 : d@..
 
 .var_98E8
@@ -1971,6 +1999,11 @@
  STMIA   R3, {R0-R2}                ; 0000993C : E8830007 : ....
  LDMFD   R13!, {R5-R6}              ; 00009940 : E8BD0060 : `...
  MOV     PC, R14                    ; 00009944 : E1A0F00E : ....
+
+.sub_9948
+
+; Not called directly
+
  STMFD   R13!, {R5-R8, R14}         ; 00009948 : E92D41E0 : .A-.
  LDMIA   R1, {R1-R3, R14}           ; 0000994C : E891400E : .@..
  MOV     R8, R0                     ; 00009950 : E1A08000 : ....
@@ -3253,10 +3286,20 @@
  LDMIA   R13!, {R14}                ; 0000A8D4 : E8BD4000 : .@..
  LDR     R13, var_A584              ; 0000A8D8 : E51FD35C : \...
  MOV     PC, R14                    ; 0000A8DC : E1A0F00E : ....
+
+.sub_A8E0
+
+; Not called directly
+
  MOV     R0, #&1E                   ; 0000A8E0 : E3A0001E : ....
  SWI     OS_WriteC                  ; 0000A8E4 : EF000000 : ....
  MOV     R0, #&A                    ; 0000A8E8 : E3A0000A : ....
  SWI     OS_WriteC                  ; 0000A8EC : EF000000 : ....
+
+.sub_A8F0
+
+; Not called directly
+
  STMFD   R13!, {R0-R12, R14}        ; 0000A8F0 : E92D5FFF : ._-.
  MOV     R0, R1, LSR #28            ; 0000A8F4 : E1A00E21 : !...
  BL      sub_A948                   ; 0000A8F8 : EB000012 : ....

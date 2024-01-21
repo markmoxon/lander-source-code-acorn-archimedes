@@ -986,6 +986,11 @@ lab_8CC0:
  SUBS    R8, R8, #1
  BPL     lab_8CC0
  LDMFD   R13!, {R3-R9, PC}
+
+sub_8CDC:
+
+
+
  STMDB   R13!, {R14}
  MOV     R8, #0x32
  LDR     R0, [R11, #0x13C]
@@ -994,6 +999,11 @@ lab_8CC0:
  SUB     R2, R2, #0x6000000
  BL      sub_8CBC
  LDMIA   R13!, {PC}
+
+sub_8CFC:
+
+
+
  STMFD   R13!, {R6-R9, R14}
  MOV     R8, #0x96
  LDR     R0, [R11, #0x13C]
@@ -1007,6 +1017,11 @@ lab_8D14:
  SUBS    R8, R8, #1
  BPL     lab_8D14
  LDMFD   R13!, {R6-R9, PC}
+
+sub_8D24:
+
+
+
  STMFD   R13!, {R6-R9, R14}
  LDR     R0, [R11, #0x13C]
  MVN     R1, #0x10000000
@@ -1513,6 +1528,11 @@ lab_9358:
  RSBMI   R6, R6, #0
  ADDS    R3, R3, R6
  MOV     PC, R14
+
+sub_937C:
+
+
+
  ADD     R2, R11, #0x30
  LDR     R0, [R2, #4]
  LDR     R1, [R2, #0xC]
@@ -1527,6 +1547,11 @@ lab_9358:
  STR     R0, [R2, #0x1C]
  STR     R1, [R2, #0x14]
  MOV     PC, R14
+
+sub_93B4:
+
+
+
  STMFD   R13!, {R5-R6, R14}
  LDMIA   R0, {R2-R4}
  LDMIA   R1, {R5-R6, R14}
@@ -1931,6 +1956,9 @@ lab_9890:
  RSBMI   R1, R6, #0x40
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
+
+var_98E4:
+
  ADD     R4, R11, #0x64
 
 var_98E8:
@@ -1971,6 +1999,11 @@ var_9938:
  STMIA   R3, {R0-R2}
  LDMFD   R13!, {R5-R6}
  MOV     PC, R14
+
+sub_9948:
+
+
+
  STMFD   R13!, {R5-R8, R14}
  LDMIA   R1, {R1-R3, R14}
  MOV     R8, R0
@@ -3253,10 +3286,20 @@ lab_A8D4:
  LDMIA   R13!, {R14}
  LDR     R13, var_A584
  MOV     PC, R14
+
+sub_A8E0:
+
+
+
  MOV     R0, #0x1E
  SWI     OS_WriteC
  MOV     R0, #0xA
  SWI     OS_WriteC
+
+sub_A8F0:
+
+
+
  STMFD   R13!, {R0-R12, R14}
  MOV     R0, R1, LSR #28
  BL      sub_A948
