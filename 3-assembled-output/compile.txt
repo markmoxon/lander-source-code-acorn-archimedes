@@ -2639,7 +2639,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A598 1500A0E3        	  2626:  MOV     R0, #0x15
 00:0000A59C 070000EF        	  2627:  SWI     OS_Word
 00:0000A5A0 0EF0A0E1        	  2628:  MOV     PC, R14
-                            	  2629: lab_A5A4:
+                            	  2629: AbortWithMemoryError:
 00:0000A5A4 0010C0E5        	  2630:  STRB    R1, [R0]
 00:0000A5A8 010000EF        	  2631:  SWI     OS_WriteS
 00:0000A5AC 5468657265206973	  2632: .byte    "There is not enough "
@@ -2658,7 +2658,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A606 6D656D6F72792E  	  2637: .byte    "memory."
 00:0000A60D 00              	  2638: .byte    0
                             	  2639: .balign 4
-00:0000A610 AF0000EA        	  2640:  B       lab_A8D4
+00:0000A610 AF0000EA        	  2640:  B       ReturnToDesktop
                             	  2641: Entry:
 00:0000A614 1600A0E3        	  2642:  MOV     R0, #0x16
 00:0000A618 000000EF        	  2643:  SWI     OS_WriteC
@@ -2674,12 +2674,12 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A640 0020C0E5        	  2653:  STRB    R2, [R0]
 00:0000A644 0030D0E5        	  2654:  LDRB    R3, [R0]
 00:0000A648 030052E1        	  2655:  CMP     R2, R3
-00:0000A64C D4FFFF1A        	  2656:  BNE     lab_A5A4
+00:0000A64C D4FFFF1A        	  2656:  BNE     AbortWithMemoryError
 00:0000A650 5520A0E3        	  2657:  MOV     R2, #0x55
 00:0000A654 0020C0E5        	  2658:  STRB    R2, [R0]
 00:0000A658 0030D0E5        	  2659:  LDRB    R3, [R0]
 00:0000A65C 030052E1        	  2660:  CMP     R2, R3
-00:0000A660 CFFFFF1A        	  2661:  BNE     lab_A5A4
+00:0000A660 CFFFFF1A        	  2661:  BNE     AbortWithMemoryError
 00:0000A664 0010C0E5        	  2662:  STRB    R1, [R0]
 00:0000A668 0400A0E3        	  2663:  MOV     R0, #4
 00:0000A66C 0110A0E3        	  2664:  MOV     R1, #1
@@ -2803,13 +2803,13 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A844 0020A0E3        	  2774:  MOV     R2, #0
 00:0000A848 0700A3E8        	  2775:  STMIA   R3!, {R0-R2}
 00:0000A84C 50FFFFEB        	  2776:  BL      sub_A594
-                            	  2777: lab_A850:
+                            	  2777: MainLoop:
 00:0000A850 8100A0E3        	  2778:  MOV     R0, #0x81
 00:0000A854 0010A0E3        	  2779:  MOV     R1, #0
 00:0000A858 0020A0E3        	  2780:  MOV     R2, #0
 00:0000A85C 060000EF        	  2781:  SWI     OS_Byte
 00:0000A860 1B0032E3        	  2782:  TEQ     R2, #0x1B
-00:0000A864 1000000A        	  2783:  BEQ     lab_A8AC
+00:0000A864 1000000A        	  2783:  BEQ     EndGame
 00:0000A868 CAF6FFEB        	  2784:  BL      sub_8398
 00:0000A86C 18019BE5        	  2785:  LDR     R0, [R11, #0x118]
 00:0000A870 000CA0E1        	  2786:  MOV     R0, R0, LSL #24
@@ -2826,8 +2826,8 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A89C 18E19BE5        	  2797:  LDR     R14, [R11, #0x118]
 00:0000A8A0 01E08EE2        	  2798:  ADD     R14, R14, #1
 00:0000A8A4 18E18BE5        	  2799:  STR     R14, [R11, #0x118]
-00:0000A8A8 E8FFFFEA        	  2800:  B       lab_A850
-                            	  2801: lab_A8AC:
+00:0000A8A8 E8FFFFEA        	  2800:  B       MainLoop
+                            	  2801: EndGame:
 00:0000A8AC 7E00A0E3        	  2802:  MOV     R0, #0x7E
 00:0000A8B0 060000EF        	  2803:  SWI     OS_Byte
 00:0000A8B4 1600A0E3        	  2804:  MOV     R0, #0x16
@@ -2838,7 +2838,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A8C8 0010A0E3        	  2809:  MOV     R1, #0
 00:0000A8CC 0020A0E3        	  2810:  MOV     R2, #0
 00:0000A8D0 060000EF        	  2811:  SWI     OS_Byte
-                            	  2812: lab_A8D4:
+                            	  2812: ReturnToDesktop:
 00:0000A8D4 0040BDE8        	  2813:  LDMIA   R13!, {R14}
 00:0000A8D8 5CD31FE5        	  2814:  LDR     R13, returnAddr
 00:0000A8DC 0EF0A0E1        	  2815:  MOV     PC, R14
@@ -10111,7 +10111,10 @@ Source: "3-assembled-output/Lander.arm"
 
 
 Symbols by name:
+AbortWithMemoryError             A:0000A5A4
+EndGame                          A:0000A8AC
 Entry                            A:0000A614
+MainLoop                         A:0000A850
 OS_BinaryToDecimal               S:00000028
 OS_Byte                          S:00000006
 OS_Mouse                         S:0000001C
@@ -10119,6 +10122,7 @@ OS_ReadC                         S:00000004
 OS_Word                          S:00000007
 OS_WriteC                        S:00000000
 OS_WriteS                        S:00000001
+ReturnToDesktop                  A:0000A8D4
 SwitchScreenBank                 A:00009D3C
 arctanTable                      A:0000C810
 arctanTableAddr                  A:000091F4
@@ -10264,16 +10268,12 @@ lab_A414                         A:0000A414
 lab_A46C                         A:0000A46C
 lab_A470                         A:0000A470
 lab_A4F4                         A:0000A4F4
-lab_A5A4                         A:0000A5A4
 lab_A6E4                         A:0000A6E4
 lab_A734                         A:0000A734
 lab_A78C                         A:0000A78C
 lab_A7A0                         A:0000A7A0
 lab_A7E0                         A:0000A7E0
 lab_A7F8                         A:0000A7F8
-lab_A850                         A:0000A850
-lab_A8AC                         A:0000A8AC
-lab_A8D4                         A:0000A8D4
 returnAddr                       A:0000A584
 screenAddr                       A:00009A6C
 screenBank0Addr                  A:00009D2C
@@ -10603,7 +10603,7 @@ Symbols by value:
 0000A588 var_A588
 0000A590 var_A590
 0000A594 sub_A594
-0000A5A4 lab_A5A4
+0000A5A4 AbortWithMemoryError
 0000A614 Entry
 0000A6E4 lab_A6E4
 0000A734 lab_A734
@@ -10611,9 +10611,9 @@ Symbols by value:
 0000A7A0 lab_A7A0
 0000A7E0 lab_A7E0
 0000A7F8 lab_A7F8
-0000A850 lab_A850
-0000A8AC lab_A8AC
-0000A8D4 lab_A8D4
+0000A850 MainLoop
+0000A8AC EndGame
+0000A8D4 ReturnToDesktop
 0000A8E0 sub_A8E0
 0000A8F0 sub_A8F0
 0000A948 sub_A948

@@ -2626,7 +2626,7 @@ sub_A594:
  MOV     R0, #0x15
  SWI     OS_Word
  MOV     PC, R14
-lab_A5A4:
+AbortWithMemoryError:
  STRB    R1, [R0]
  SWI     OS_WriteS
 .byte    "There is not enough "
@@ -2637,7 +2637,7 @@ lab_A5A4:
 .byte    "memory."
 .byte    0
 .balign 4
- B       lab_A8D4
+ B       ReturnToDesktop
 Entry:
  MOV     R0, #0x16
  SWI     OS_WriteC
@@ -2653,12 +2653,12 @@ Entry:
  STRB    R2, [R0]
  LDRB    R3, [R0]
  CMP     R2, R3
- BNE     lab_A5A4
+ BNE     AbortWithMemoryError
  MOV     R2, #0x55
  STRB    R2, [R0]
  LDRB    R3, [R0]
  CMP     R2, R3
- BNE     lab_A5A4
+ BNE     AbortWithMemoryError
  STRB    R1, [R0]
  MOV     R0, #4
  MOV     R1, #1
@@ -2774,13 +2774,13 @@ lab_A7F8:
  MOV     R2, #0
  STMIA   R3!, {R0-R2}
  BL      sub_A594
-lab_A850:
+MainLoop:
  MOV     R0, #0x81
  MOV     R1, #0
  MOV     R2, #0
  SWI     OS_Byte
  TEQ     R2, #0x1B
- BEQ     lab_A8AC
+ BEQ     EndGame
  BL      sub_8398
  LDR     R0, [R11, #0x118]
  MOV     R0, R0, LSL #24
@@ -2797,8 +2797,8 @@ lab_A850:
  LDR     R14, [R11, #0x118]
  ADD     R14, R14, #1
  STR     R14, [R11, #0x118]
- B       lab_A850
-lab_A8AC:
+ B       MainLoop
+EndGame:
  MOV     R0, #0x7E
  SWI     OS_Byte
  MOV     R0, #0x16
@@ -2809,7 +2809,7 @@ lab_A8AC:
  MOV     R1, #0
  MOV     R2, #0
  SWI     OS_Byte
-lab_A8D4:
+ReturnToDesktop:
  LDMIA   R13!, {R14}
  LDR     R13, returnAddr
  MOV     PC, R14

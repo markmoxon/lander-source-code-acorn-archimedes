@@ -4025,10 +4025,22 @@
  SWI     OS_Word                    ; 
  MOV     PC, R14                    ; 
 
-.lab_A5A4
+; ******************************************************************************
+;
+;       Name: AbortWithMemoryError
+;       Type: Subroutine
+;   Category: Start and end
+;    Summary: Show a memory error and abort the game
+;
+; ******************************************************************************
 
- STRB    R1, [R0]                   ; 
- SWI     OS_WriteS                  ; 
+.AbortWithMemoryError
+
+ STRB    R1, [R0]                   ; Restore the byte that we have been poking
+                                    ; in the Entry routine to determine whether
+                                    ; there is enough memory
+
+ SWI     OS_WriteS                  ; Print the following string
 
  EQUS    "There is not enough "
  EQUS    "memory to run this game."
@@ -4039,7 +4051,8 @@
  EQUB    0
  ALIGN
 
- B       lab_A8D4                   ; 
+ B       ReturnToDesktop            ; Jump to ReturnToDesktop to return to quit
+                                    ; the game and return to the desktop
 
 ; ******************************************************************************
 ;
@@ -4066,12 +4079,12 @@
  STRB    R2, [R0]                   ; 
  LDRB    R3, [R0]                   ; 
  CMP     R2, R3                     ; 
- BNE     lab_A5A4                   ; 
+ BNE     AbortWithMemoryError       ; 
  MOV     R2, #&55                   ; 
  STRB    R2, [R0]                   ; 
  LDRB    R3, [R0]                   ; 
  CMP     R2, R3                     ; 
- BNE     lab_A5A4                   ; 
+ BNE     AbortWithMemoryError       ; 
  STRB    R1, [R0]                   ; 
  MOV     R0, #4                     ; 
  MOV     R1, #1                     ; 
@@ -4204,18 +4217,30 @@
  STMIA   R3!, {R0-R2}               ; 
  BL      sub_A594                   ; 
 
-.lab_A850
+; ******************************************************************************
+;
+;       Name: MainLoop
+;       Type: Subroutine
+;   Category: Main loop
+;    Summary: The main game loop ???
+;
+; ******************************************************************************
+
+.MainLoop
 
  MOV     R0, #&81                   ; 
  MOV     R1, #0                     ; 
  MOV     R2, #0                     ; 
  SWI     OS_Byte                    ; 
  TEQ     R2, #&1B                   ; 
- BEQ     lab_A8AC                   ; 
+ BEQ     EndGame                    ; 
+
  BL      sub_8398                   ; 
+
  LDR     R0, [R11, #&118]           ; 
  MOV     R0, R0, LSL #24            ; 
  MOV     R1, R0, LSL #1             ; 
+
  BL      sub_93E4                   ; 
  BL      sub_8D40                   ; 
  BL      sub_87F4                   ; 
@@ -4225,12 +4250,23 @@
  BL      sub_9108                   ; 
  BL      sub_91FC                   ; 
  BL      SwitchScreenBank           ; 
+
  LDR     R14, [R11, #&118]          ; 
  ADD     R14, R14, #1               ; 
  STR     R14, [R11, #&118]          ; 
- B       lab_A850                   ; 
 
-.lab_A8AC
+ B       MainLoop                   ; 
+
+; ******************************************************************************
+;
+;       Name: EndGame
+;       Type: Subroutine
+;   Category: Start and end
+;    Summary: Finish the game
+;
+; ******************************************************************************
+
+.EndGame
 
  MOV     R0, #&7E                   ; 
  SWI     OS_Byte                    ; 
@@ -4243,10 +4279,21 @@
  MOV     R2, #0                     ; 
  SWI     OS_Byte                    ; 
 
-.lab_A8D4
+; ******************************************************************************
+;
+;       Name: ReturnToDesktop
+;       Type: Subroutine
+;   Category: Start and end
+;    Summary: Return to the desktop
+;
+; ******************************************************************************
+
+.ReturnToDesktop
 
  LDMIA   R13!, {R14}                ; 
+
  LDR     R13, returnAddr            ; 
+
  MOV     PC, R14                    ; 
 
 ; ******************************************************************************
