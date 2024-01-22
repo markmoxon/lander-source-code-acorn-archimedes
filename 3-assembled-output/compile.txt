@@ -363,7 +363,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008514 000051E3        	   358:  CMP     R1, #0
 00:00008518 0010A043        	   359:  MOVMI   R1, #0
 00:0000851C 30308BE2        	   360:  ADD     R3, R11, #0x30
-00:00008520 94E99FE5        	   361:  LDR     R14, var_8EBC
+00:00008520 94E99FE5        	   361:  LDR     R14, dataTable3Addr
 00:00008524 10E18BE5        	   362:  STR     R14, [R11, #0x110]
 00:00008528 0000A0E3        	   363:  MOV     R0, #0
 00:0000852C 0F24A0E3        	   364:  MOV     R2, #0xF000000
@@ -614,7 +614,7 @@ Source: "3-assembled-output/Lander.arm"
                             	   601: lab_88E8:
 00:000088E8 0700BDE8        	   602:  LDMFD   R13!, {R0-R2}
 00:000088EC 74FFFF3A        	   603:  BLO     sub_86C4
-00:000088F0 C8E59FE5        	   604:  LDR     R14, var_8EC0
+00:000088F0 C8E59FE5        	   604:  LDR     R14, dataTable1Addr
 00:000088F4 10E18BE5        	   605:  STR     R14, [R11, #0x110]
 00:000088F8 30308BE2        	   606:  ADD     R3, R11, #0x30
 00:000088FC 700100EB        	   607:  BL      sub_8EC4
@@ -932,31 +932,31 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D70 98FFFFEB        	   919:  BL      sub_8BD8
 00:00008D74 0080BDE8        	   920:  LDMIA   R13!, {PC}
                             	   921: var_8D78:
-00:00008D78 98AA0000        	   922: .long    var_AA98
-00:00008D7C 04AD0000        	   923: .long    var_AD04
-00:00008D80 24AE0000        	   924: .long    var_AE24
-00:00008D84 04AD0000        	   925: .long    var_AD04
-00:00008D88 04AD0000        	   926: .long    var_AD04
-00:00008D8C 10B10000        	   927: .long    var_B110
-00:00008D90 24AE0000        	   928: .long    var_AE24
-00:00008D94 8CB00000        	   929: .long    var_B08C
-00:00008D98 9CB20000        	   930: .long    var_B29C
-00:00008D9C 84B60000        	   931: .long    var_B684
-00:00008DA0 84B60000        	   932: .long    var_B684
-00:00008DA4 84B60000        	   933: .long    var_B684
-00:00008DA8 84B60000        	   934: .long    var_B684
-00:00008DAC 08B00000        	   935: .long    var_B008
-00:00008DB0 84AF0000        	   936: .long    var_AF84
-00:00008DB4 84AF0000        	   937: .long    var_AF84
-00:00008DB8 84AF0000        	   938: .long    var_AF84
-00:00008DBC BCB50000        	   939: .long    var_B5BC
-00:00008DC0 08B00000        	   940: .long    var_B008
-00:00008DC4 08B00000        	   941: .long    var_B008
-00:00008DC8 BCB40000        	   942: .long    var_B4BC
-00:00008DCC 08B00000        	   943: .long    var_B008
-00:00008DD0 84AF0000        	   944: .long    var_AF84
-00:00008DD4 84AF0000        	   945: .long    var_AF84
-00:00008DD8 84AF0000        	   946: .long    var_AF84
+00:00008D78 98AA0000        	   922: .long    dataTable2
+00:00008D7C 04AD0000        	   923: .long    dataTable4
+00:00008D80 24AE0000        	   924: .long    dataTable5
+00:00008D84 04AD0000        	   925: .long    dataTable4
+00:00008D88 04AD0000        	   926: .long    dataTable4
+00:00008D8C 10B10000        	   927: .long    dataTable9
+00:00008D90 24AE0000        	   928: .long    dataTable5
+00:00008D94 8CB00000        	   929: .long    dataTable8
+00:00008D98 9CB20000        	   930: .long    dataTable10
+00:00008D9C 84B60000        	   931: .long    dataTable13
+00:00008DA0 84B60000        	   932: .long    dataTable13
+00:00008DA4 84B60000        	   933: .long    dataTable13
+00:00008DA8 84B60000        	   934: .long    dataTable13
+00:00008DAC 08B00000        	   935: .long    dataTable7
+00:00008DB0 84AF0000        	   936: .long    dataTable6
+00:00008DB4 84AF0000        	   937: .long    dataTable6
+00:00008DB8 84AF0000        	   938: .long    dataTable6
+00:00008DBC BCB50000        	   939: .long    dataTable12
+00:00008DC0 08B00000        	   940: .long    dataTable7
+00:00008DC4 08B00000        	   941: .long    dataTable7
+00:00008DC8 BCB40000        	   942: .long    dataTable11
+00:00008DCC 08B00000        	   943: .long    dataTable7
+00:00008DD0 84AF0000        	   944: .long    dataTable6
+00:00008DD4 84AF0000        	   945: .long    dataTable6
+00:00008DD8 84AF0000        	   946: .long    dataTable6
                             	   947: sub_8DDC:
 00:00008DDC E05F2DE9        	   948:  STMFD   R13!, {R5-R12, R14}
 00:00008DE0 3C019BE5        	   949:  LDR     R0, [R11, #0x13C]
@@ -1020,10 +1020,10 @@ Source: "3-assembled-output/Lander.arm"
 00:00008EB0 15FFFFEB        	  1007:  BL      sub_8B0C
 00:00008EB4 FF02BDE8        	  1008:  LDMFD   R13!, {R0-R7, R9}
 00:00008EB8 F0FFFFEA        	  1009:  B       lab_8E80
-                            	  1010: var_8EBC:
-00:00008EBC 8CAB0000        	  1011: .long    var_AB8C
-                            	  1012: var_8EC0:
-00:00008EC0 60A90000        	  1013: .long    var_A960
+                            	  1010: dataTable3Addr:
+00:00008EBC 8CAB0000        	  1011: .long    dataTable3
+                            	  1012: dataTable1Addr:
+00:00008EC0 60A90000        	  1013: .long    dataTable1
                             	  1014: sub_8EC4:
 00:00008EC4 C05F2DE9        	  1015:  STMFD   R13!, {R6-R12, R14}
 00:00008EC8 7CC39FE5        	  1016:  LDR     R12, var_924C
@@ -2877,7 +2877,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A954 30008032        	  2848:  ADDLO   R0, R0, #0x30
 00:0000A958 000000EF        	  2849:  SWI     OS_WriteC
 00:0000A95C 0EF0A0E1        	  2850:  MOV     PC, R14
-                            	  2851: var_A960:
+                            	  2851: dataTable1:
 00:0000A960 06000000        	  2852: .long    0x00000006
 00:0000A964 08000000        	  2853: .long    0x00000008
 00:0000A968 58000000        	  2854: .long    0x00000058
@@ -2956,7 +2956,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AA8C 02000000        	  2927: .long    0x00000002
 00:0000AA90 04000000        	  2928: .long    0x00000004
 00:0000AA94 44040000        	  2929: .long    0x00000444
-                            	  2930: var_AA98:
+                            	  2930: dataTable2:
 00:0000AA98 05000000        	  2931: .long    0x00000005
 00:0000AA9C 06000000        	  2932: .long    0x00000006
 00:0000AAA0 4C000000        	  2933: .long    0x0000004C
@@ -3018,7 +3018,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AB80 03000000        	  2989: .long    0x00000003
 00:0000AB84 04000000        	  2990: .long    0x00000004
 00:0000AB88 08000000        	  2991: .long    0x00000008
-                            	  2992: var_AB8C:
+                            	  2992: dataTable3:
 00:0000AB8C 09000000        	  2993: .long    0x00000009
 00:0000AB90 09000000        	  2994: .long    0x00000009
 00:0000AB94 7C000000        	  2995: .long    0x0000007C
@@ -3113,7 +3113,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000ACF8 07000000        	  3084: .long    0x00000007
 00:0000ACFC 08000000        	  3085: .long    0x00000008
 00:0000AD00 800C0000        	  3086: .long    0x00000C80
-                            	  3087: var_AD04:
+                            	  3087: dataTable4:
 00:0000AD04 0B000000        	  3088: .long    0x0000000B
 00:0000AD08 05000000        	  3089: .long    0x00000005
 00:0000AD0C 94000000        	  3090: .long    0x00000094
@@ -3186,7 +3186,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AE18 07000000        	  3157: .long    0x00000007
 00:0000AE1C 08000000        	  3158: .long    0x00000008
 00:0000AE20 80000000        	  3159: .long    0x00000080
-                            	  3160: var_AE24:
+                            	  3160: dataTable5:
 00:0000AE24 0E000000        	  3161: .long    0x0000000E
 00:0000AE28 06000000        	  3162: .long    0x00000006
 00:0000AE2C B8000000        	  3163: .long    0x000000B8
@@ -3275,7 +3275,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AF78 07000000        	  3246: .long    0x00000007
 00:0000AF7C 08000000        	  3247: .long    0x00000008
 00:0000AF80 40000000        	  3248: .long    0x00000040
-                            	  3249: var_AF84:
+                            	  3249: dataTable6:
 00:0000AF84 05000000        	  3250: .long    0x00000005
 00:0000AF88 02000000        	  3251: .long    0x00000002
 00:0000AF8C 4C000000        	  3252: .long    0x0000004C
@@ -3309,7 +3309,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AFFC 03000000        	  3280: .long    0x00000003
 00:0000B000 04000000        	  3281: .long    0x00000004
 00:0000B004 00000000        	  3282: .long    0x00000000
-                            	  3283: var_B008:
+                            	  3283: dataTable7:
 00:0000B008 05000000        	  3284: .long    0x00000005
 00:0000B00C 02000000        	  3285: .long    0x00000002
 00:0000B010 4C000000        	  3286: .long    0x0000004C
@@ -3343,7 +3343,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000B080 03000000        	  3314: .long    0x00000003
 00:0000B084 04000000        	  3315: .long    0x00000004
 00:0000B088 00000000        	  3316: .long    0x00000000
-                            	  3317: var_B08C:
+                            	  3317: dataTable8:
 00:0000B08C 05000000        	  3318: .long    0x00000005
 00:0000B090 02000000        	  3319: .long    0x00000002
 00:0000B094 4C000000        	  3320: .long    0x0000004C
@@ -3377,7 +3377,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000B104 01000000        	  3348: .long    0x00000001
 00:0000B108 02000000        	  3349: .long    0x00000002
 00:0000B10C 40000000        	  3350: .long    0x00000040
-                            	  3351: var_B110:
+                            	  3351: dataTable9:
 00:0000B110 0D000000        	  3352: .long    0x0000000D
 00:0000B114 08000000        	  3353: .long    0x00000008
 00:0000B118 AC000000        	  3354: .long    0x000000AC
@@ -3477,7 +3477,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000B290 02000000        	  3448: .long    0x00000002
 00:0000B294 03000000        	  3449: .long    0x00000003
 00:0000B298 00040000        	  3450: .long    0x00000400
-                            	  3451: var_B29C:
+                            	  3451: dataTable10:
 00:0000B29C 10000000        	  3452: .long    0x00000010
 00:0000B2A0 0C000000        	  3453: .long    0x0000000C
 00:0000B2A4 D0000000        	  3454: .long    0x000000D0
@@ -3614,7 +3614,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000B4B0 03000000        	  3585: .long    0x00000003
 00:0000B4B4 07000000        	  3586: .long    0x00000007
 00:0000B4B8 00080000        	  3587: .long    0x00000800
-                            	  3588: var_B4BC:
+                            	  3588: dataTable11:
 00:0000B4BC 06000000        	  3589: .long    0x00000006
 00:0000B4C0 06000000        	  3590: .long    0x00000006
 00:0000B4C4 58000000        	  3591: .long    0x00000058
@@ -3679,7 +3679,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000B5B0 03000000        	  3650: .long    0x00000003
 00:0000B5B4 05000000        	  3651: .long    0x00000005
 00:0000B5B8 77070000        	  3652: .long    0x00000777
-                            	  3653: var_B5BC:
+                            	  3653: dataTable12:
 00:0000B5BC 06000000        	  3654: .long    0x00000006
 00:0000B5C0 04000000        	  3655: .long    0x00000004
 00:0000B5C4 58000000        	  3656: .long    0x00000058
@@ -3730,7 +3730,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000B678 01000000        	  3701: .long    0x00000001
 00:0000B67C 05000000        	  3702: .long    0x00000005
 00:0000B680 00000000        	  3703: .long    0x00000000
-                            	  3704: var_B684:
+                            	  3704: dataTable13:
 00:0000B684 0D000000        	  3705: .long    0x0000000D
 00:0000B688 08000000        	  3706: .long    0x00000008
 00:0000B68C AC000000        	  3707: .long    0x000000AC
@@ -10121,6 +10121,21 @@ OS_WriteC                        S:00000000
 OS_WriteS                        S:00000001
 arctanTable                      A:0000C810
 arctanTableAddr                  A:000091F4
+dataTable1                       A:0000A960
+dataTable10                      A:0000B29C
+dataTable11                      A:0000B4BC
+dataTable12                      A:0000B5BC
+dataTable13                      A:0000B684
+dataTable1Addr                   A:00008EC0
+dataTable2                       A:0000AA98
+dataTable3                       A:0000AB8C
+dataTable3Addr                   A:00008EBC
+dataTable4                       A:0000AD04
+dataTable5                       A:0000AE24
+dataTable6                       A:0000AF84
+dataTable7                       A:0000B008
+dataTable8                       A:0000B08C
+dataTable9                       A:0000B110
 divisionTable                    A:0000DA10
 endCode                          A:00011A10
 lab_80DC                         A:000080DC
@@ -10331,8 +10346,6 @@ var_802C                         A:0000802C
 var_805C                         A:0000805C
 var_87EC                         A:000087EC
 var_8D78                         A:00008D78
-var_8EBC                         A:00008EBC
-var_8EC0                         A:00008EC0
 var_91EC                         A:000091EC
 var_924C                         A:0000924C
 var_9250                         A:00009250
@@ -10358,19 +10371,6 @@ var_A57C                         A:0000A57C
 var_A580                         A:0000A580
 var_A588                         A:0000A588
 var_A590                         A:0000A590
-var_A960                         A:0000A960
-var_AA98                         A:0000AA98
-var_AB8C                         A:0000AB8C
-var_AD04                         A:0000AD04
-var_AE24                         A:0000AE24
-var_AF84                         A:0000AF84
-var_B008                         A:0000B008
-var_B08C                         A:0000B08C
-var_B110                         A:0000B110
-var_B29C                         A:0000B29C
-var_B4BC                         A:0000B4BC
-var_B5BC                         A:0000B5BC
-var_B684                         A:0000B684
 workspace                        S:00012200
 workspaceAddr                    A:0000A56C
 
@@ -10450,8 +10450,8 @@ Symbols by value:
 00008E38 lab_8E38
 00008E80 lab_8E80
 00008E8C lab_8E8C
-00008EBC var_8EBC
-00008EC0 var_8EC0
+00008EBC dataTable3Addr
+00008EC0 dataTable1Addr
 00008EC4 sub_8EC4
 00008EFC lab_8EFC
 00008F54 lab_8F54
@@ -10617,19 +10617,19 @@ Symbols by value:
 0000A8E0 sub_A8E0
 0000A8F0 sub_A8F0
 0000A948 sub_A948
-0000A960 var_A960
-0000AA98 var_AA98
-0000AB8C var_AB8C
-0000AD04 var_AD04
-0000AE24 var_AE24
-0000AF84 var_AF84
-0000B008 var_B008
-0000B08C var_B08C
-0000B110 var_B110
-0000B29C var_B29C
-0000B4BC var_B4BC
-0000B5BC var_B5BC
-0000B684 var_B684
+0000A960 dataTable1
+0000AA98 dataTable2
+0000AB8C dataTable3
+0000AD04 dataTable4
+0000AE24 dataTable5
+0000AF84 dataTable6
+0000B008 dataTable7
+0000B08C dataTable8
+0000B110 dataTable9
+0000B29C dataTable10
+0000B4BC dataTable11
+0000B5BC dataTable12
+0000B684 dataTable13
 0000B810 sinTable
 0000C810 arctanTable
 0000CA10 squareRootTable

@@ -358,7 +358,7 @@ lab_850C:
  CMP     R1, #0
  MOVMI   R1, #0
  ADD     R3, R11, #0x30
- LDR     R14, var_8EBC
+ LDR     R14, dataTable3Addr
  STR     R14, [R11, #0x110]
  MOV     R0, #0
  MOV     R2, #0xF000000
@@ -601,7 +601,7 @@ lab_880C:
 lab_88E8:
  LDMFD   R13!, {R0-R2}
  BLO     sub_86C4
- LDR     R14, var_8EC0
+ LDR     R14, dataTable1Addr
  STR     R14, [R11, #0x110]
  ADD     R3, R11, #0x30
  BL      sub_8EC4
@@ -919,31 +919,31 @@ sub_8D40:
  BL      sub_8BD8
  LDMIA   R13!, {PC}
 var_8D78:
-.long    var_AA98
-.long    var_AD04
-.long    var_AE24
-.long    var_AD04
-.long    var_AD04
-.long    var_B110
-.long    var_AE24
-.long    var_B08C
-.long    var_B29C
-.long    var_B684
-.long    var_B684
-.long    var_B684
-.long    var_B684
-.long    var_B008
-.long    var_AF84
-.long    var_AF84
-.long    var_AF84
-.long    var_B5BC
-.long    var_B008
-.long    var_B008
-.long    var_B4BC
-.long    var_B008
-.long    var_AF84
-.long    var_AF84
-.long    var_AF84
+.long    dataTable2
+.long    dataTable4
+.long    dataTable5
+.long    dataTable4
+.long    dataTable4
+.long    dataTable9
+.long    dataTable5
+.long    dataTable8
+.long    dataTable10
+.long    dataTable13
+.long    dataTable13
+.long    dataTable13
+.long    dataTable13
+.long    dataTable7
+.long    dataTable6
+.long    dataTable6
+.long    dataTable6
+.long    dataTable12
+.long    dataTable7
+.long    dataTable7
+.long    dataTable11
+.long    dataTable7
+.long    dataTable6
+.long    dataTable6
+.long    dataTable6
 sub_8DDC:
  STMFD   R13!, {R5-R12, R14}
  LDR     R0, [R11, #0x13C]
@@ -1007,10 +1007,10 @@ lab_8E8C:
  BL      sub_8B0C
  LDMFD   R13!, {R0-R7, R9}
  B       lab_8E80
-var_8EBC:
-.long    var_AB8C
-var_8EC0:
-.long    var_A960
+dataTable3Addr:
+.long    dataTable3
+dataTable1Addr:
+.long    dataTable1
 sub_8EC4:
  STMFD   R13!, {R6-R12, R14}
  LDR     R12, var_924C
@@ -2848,7 +2848,7 @@ sub_A948:
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
  MOV     PC, R14
-var_A960:
+dataTable1:
 .long    0x00000006
 .long    0x00000008
 .long    0x00000058
@@ -2927,7 +2927,7 @@ var_A960:
 .long    0x00000002
 .long    0x00000004
 .long    0x00000444
-var_AA98:
+dataTable2:
 .long    0x00000005
 .long    0x00000006
 .long    0x0000004C
@@ -2989,7 +2989,7 @@ var_AA98:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000008
-var_AB8C:
+dataTable3:
 .long    0x00000009
 .long    0x00000009
 .long    0x0000007C
@@ -3084,7 +3084,7 @@ var_AB8C:
 .long    0x00000007
 .long    0x00000008
 .long    0x00000C80
-var_AD04:
+dataTable4:
 .long    0x0000000B
 .long    0x00000005
 .long    0x00000094
@@ -3157,7 +3157,7 @@ var_AD04:
 .long    0x00000007
 .long    0x00000008
 .long    0x00000080
-var_AE24:
+dataTable5:
 .long    0x0000000E
 .long    0x00000006
 .long    0x000000B8
@@ -3246,7 +3246,7 @@ var_AE24:
 .long    0x00000007
 .long    0x00000008
 .long    0x00000040
-var_AF84:
+dataTable6:
 .long    0x00000005
 .long    0x00000002
 .long    0x0000004C
@@ -3280,7 +3280,7 @@ var_AF84:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000000
-var_B008:
+dataTable7:
 .long    0x00000005
 .long    0x00000002
 .long    0x0000004C
@@ -3314,7 +3314,7 @@ var_B008:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000000
-var_B08C:
+dataTable8:
 .long    0x00000005
 .long    0x00000002
 .long    0x0000004C
@@ -3348,7 +3348,7 @@ var_B08C:
 .long    0x00000001
 .long    0x00000002
 .long    0x00000040
-var_B110:
+dataTable9:
 .long    0x0000000D
 .long    0x00000008
 .long    0x000000AC
@@ -3448,7 +3448,7 @@ var_B110:
 .long    0x00000002
 .long    0x00000003
 .long    0x00000400
-var_B29C:
+dataTable10:
 .long    0x00000010
 .long    0x0000000C
 .long    0x000000D0
@@ -3585,7 +3585,7 @@ var_B29C:
 .long    0x00000003
 .long    0x00000007
 .long    0x00000800
-var_B4BC:
+dataTable11:
 .long    0x00000006
 .long    0x00000006
 .long    0x00000058
@@ -3650,7 +3650,7 @@ var_B4BC:
 .long    0x00000003
 .long    0x00000005
 .long    0x00000777
-var_B5BC:
+dataTable12:
 .long    0x00000006
 .long    0x00000004
 .long    0x00000058
@@ -3701,7 +3701,7 @@ var_B5BC:
 .long    0x00000001
 .long    0x00000005
 .long    0x00000000
-var_B684:
+dataTable13:
 .long    0x0000000D
 .long    0x00000008
 .long    0x000000AC

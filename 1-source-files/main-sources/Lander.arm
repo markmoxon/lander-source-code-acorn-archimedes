@@ -551,7 +551,7 @@
  CMP     R1, #0                     ; 
  MOVMI   R1, #0                     ; 
  ADD     R3, R11, #&30              ; 
- LDR     R14, var_8EBC              ; 
+ LDR     R14, dataTable3Addr        ; 
  STR     R14, [R11, #&110]          ; 
  MOV     R0, #0                     ; 
  MOV     R2, #&F000000              ; 
@@ -866,7 +866,7 @@
 
  LDMFD   R13!, {R0-R2}              ; 
  BLO     sub_86C4                   ; 
- LDR     R14, var_8EC0              ; 
+ LDR     R14, dataTable1Addr        ; 
  STR     R14, [R11, #&110]          ; 
  ADD     R3, R11, #&30              ; 
  BL      sub_8EC4                   ; 
@@ -1393,31 +1393,31 @@
 
 .var_8D78
 
- EQUD    var_AA98
- EQUD    var_AD04
- EQUD    var_AE24
- EQUD    var_AD04
- EQUD    var_AD04
- EQUD    var_B110
- EQUD    var_AE24
- EQUD    var_B08C
- EQUD    var_B29C
- EQUD    var_B684
- EQUD    var_B684
- EQUD    var_B684
- EQUD    var_B684
- EQUD    var_B008
- EQUD    var_AF84
- EQUD    var_AF84
- EQUD    var_AF84
- EQUD    var_B5BC
- EQUD    var_B008
- EQUD    var_B008
- EQUD    var_B4BC
- EQUD    var_B008
- EQUD    var_AF84
- EQUD    var_AF84
- EQUD    var_AF84
+ EQUD    dataTable2
+ EQUD    dataTable4
+ EQUD    dataTable5
+ EQUD    dataTable4
+ EQUD    dataTable4
+ EQUD    dataTable9
+ EQUD    dataTable5
+ EQUD    dataTable8
+ EQUD    dataTable10
+ EQUD    dataTable13
+ EQUD    dataTable13
+ EQUD    dataTable13
+ EQUD    dataTable13
+ EQUD    dataTable7
+ EQUD    dataTable6
+ EQUD    dataTable6
+ EQUD    dataTable6
+ EQUD    dataTable12
+ EQUD    dataTable7
+ EQUD    dataTable7
+ EQUD    dataTable11
+ EQUD    dataTable7
+ EQUD    dataTable6
+ EQUD    dataTable6
+ EQUD    dataTable6
 
 ; ******************************************************************************
 ;
@@ -1507,29 +1507,29 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_8EBC
+;       Name: dataTable3Addr
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_8EBC
+.dataTable3Addr
 
- EQUD    var_AB8C
+ EQUD    dataTable3
 
 ; ******************************************************************************
 ;
-;       Name: var_8EC0
+;       Name: dataTable1Addr
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_8EC0
+.dataTable1Addr
 
- EQUD    var_A960
+ EQUD    dataTable1
 
 ; ******************************************************************************
 ;
@@ -4282,14 +4282,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_A960
+;       Name: dataTable1
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_A960
+.dataTable1
 
  EQUD    &00000006
  EQUD    &00000008
@@ -4372,14 +4372,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_AA98
+;       Name: dataTable2
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_AA98
+.dataTable2
 
  EQUD    &00000005
  EQUD    &00000006
@@ -4445,14 +4445,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_AB8C
+;       Name: dataTable3
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_AB8C
+.dataTable3
 
  EQUD    &00000009
  EQUD    &00000009
@@ -4551,14 +4551,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_AD04
+;       Name: dataTable4
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_AD04
+.dataTable4
 
  EQUD    &0000000B
  EQUD    &00000005
@@ -4635,14 +4635,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_AE24
+;       Name: dataTable5
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_AE24
+.dataTable5
 
  EQUD    &0000000E
  EQUD    &00000006
@@ -4735,14 +4735,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_AF84
+;       Name: dataTable6
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_AF84
+.dataTable6
 
  EQUD    &00000005
  EQUD    &00000002
@@ -4780,14 +4780,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_B008
+;       Name: dataTable7
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_B008
+.dataTable7
 
  EQUD    &00000005
  EQUD    &00000002
@@ -4825,14 +4825,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_B08C
+;       Name: dataTable8
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_B08C
+.dataTable8
 
  EQUD    &00000005
  EQUD    &00000002
@@ -4870,14 +4870,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_B110
+;       Name: dataTable9
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_B110
+.dataTable9
 
  EQUD    &0000000D
  EQUD    &00000008
@@ -4981,14 +4981,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_B29C
+;       Name: dataTable10
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_B29C
+.dataTable10
 
  EQUD    &00000010
  EQUD    &0000000C
@@ -5129,14 +5129,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_B4BC
+;       Name: dataTable11
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_B4BC
+.dataTable11
 
  EQUD    &00000006
  EQUD    &00000006
@@ -5205,14 +5205,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_B5BC
+;       Name: dataTable12
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_B5BC
+.dataTable12
 
  EQUD    &00000006
  EQUD    &00000004
@@ -5267,14 +5267,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_B684
+;       Name: dataTable13
 ;       Type: Variable
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.var_B684
+.dataTable13
 
  EQUD    &0000000D
  EQUD    &00000008
