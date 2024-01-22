@@ -49,10 +49,11 @@ for line in bbc_basic_file:
     line = re.sub(r"^ ?EQUB ", ".byte ", line)
 
     # ALIGN -> .balign
-    line = re.sub(r"^ ?ALIGN ", ".balign ", line)
+    line = re.sub(r"^ ?ALIGN", ".balign 4", line)
 
     # Write updated line
-    vasm_file.write(line)
+    if line.strip():
+        vasm_file.write(line)
 
 bbc_basic_file.close()
 
