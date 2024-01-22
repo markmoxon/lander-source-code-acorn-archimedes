@@ -41,6 +41,11 @@
  OS_Mouse = &1C
  OS_BinaryToDecimal = &28
 
+ stack = &000121FC                  ; The stack is after the end of the main
+                                    ; game code and descends from this address
+
+ workspace = stack + 4              ; The variable workspace is after the stack
+
 ; ******************************************************************************
 ;
 ; LANDER
@@ -667,7 +672,16 @@
  STR     R1, [R11, #&98]            ; 
  MOV     PC, R14                    ; 
 
-.lab_86C4
+; ******************************************************************************
+;
+;       Name: sub_86C4
+;       Type: Subroutine
+;   Category: ???
+;    Summary: ???
+;
+; ******************************************************************************
+
+.sub_86C4
 
  LDMFD   R13!, {R10, R12}           ; 
 
@@ -727,9 +741,10 @@
  SWI     OS_WriteC                  ; 
  SWI     OS_WriteS                  ; 
 
- EQUS    "GAME OVER - press a key to start again"
+ EQUS    "GAME OVER - press a "
+ EQUS    "key to start again"
  EQUB    0
- ALIGN   4
+ ALIGN
 
  MOV     R0, #&70                   ; 
  MOV     R1, #2                     ; 
@@ -742,9 +757,10 @@
  SWI     OS_WriteC                  ; 
  SWI     OS_WriteS                  ; 
 
- EQUS    "GAME OVER - press a key to start again"
+ EQUS    "GAME OVER - press a "
+ EQUS    "key to start again"
  EQUB    0
- ALIGN   4
+ ALIGN
 
  SWI     OS_ReadC                   ; 
  B       lab_A734                   ; 
@@ -846,7 +862,7 @@
 .lab_88E8
 
  LDMFD   R13!, {R0-R2}              ; 
- BLO     lab_86C4                   ; 
+ BLO     sub_86C4                   ; 
  LDR     R14, var_8EC0              ; 
  STR     R14, [R11, #&110]          ; 
  ADD     R3, R11, #&30              ; 
@@ -1284,8 +1300,6 @@
 
 .sub_8CDC
 
-                                    ; 
-
  STMDB   R13!, {R14}                ; 
  MOV     R8, #&32                   ; 
  LDR     R0, [R11, #&13C]           ; 
@@ -1305,8 +1319,6 @@
 ; ******************************************************************************
 
 .sub_8CFC
-
-                                    ; 
 
  STMFD   R13!, {R6-R9, R14}         ; 
  MOV     R8, #&96                   ; 
@@ -1332,8 +1344,6 @@
 ; ******************************************************************************
 
 .sub_8D24
-
-                                    ; 
 
  STMFD   R13!, {R6-R9, R14}         ; 
  LDR     R0, [R11, #&13C]           ; 
@@ -1368,6 +1378,17 @@
  SUB     R2, R2, #&6000000          ; 
  BL      sub_8BD8                   ; 
  LDMIA   R13!, {PC}                 ; 
+
+; ******************************************************************************
+;
+;       Name: var_8D78
+;       Type: Variable
+;   Category: ???
+;    Summary: ???
+;
+; ******************************************************************************
+
+.var_8D78
 
  EQUD    var_AA98
  EQUD    var_AD04
@@ -1997,8 +2018,6 @@
 
 .sub_937C
 
-                                    ; 
-
  ADD     R2, R11, #&30              ; 
  LDR     R0, [R2, #4]               ; 
  LDR     R1, [R2, #&C]              ; 
@@ -2024,8 +2043,6 @@
 ; ******************************************************************************
 
 .sub_93B4
-
-                                    ; 
 
  STMFD   R13!, {R5-R6, R14}         ; 
  LDMIA   R0, {R2-R4}                ; 
@@ -2576,8 +2593,6 @@
 
 .sub_9948
 
-                                    ; 
-
  STMFD   R13!, {R5-R8, R14}         ; 
  LDMIA   R1, {R1-R3, R14}           ; 
  MOV     R8, R0                     ; 
@@ -2934,6 +2949,17 @@
  STMIA   R9!, {R0-R5, R8}           ; 
  STR     R9, [R12, R14, LSR #22]    ; 
  LDMFD   R13!, {R9, PC}             ; 
+
+; ******************************************************************************
+;
+;       Name: var_9C8C
+;       Type: Variable
+;   Category: ???
+;    Summary: ???
+;
+; ******************************************************************************
+
+.var_9C8C
 
  EQUD    lab_9B40
  EQUD    lab_9B40
@@ -3727,6 +3753,17 @@
  BNE     lab_A414                   ; 
  LDMIA   R13!, {PC}                 ; 
 
+; ******************************************************************************
+;
+;       Name: var_A480
+;       Type: Variable
+;   Category: ???
+;    Summary: ???
+;
+; ******************************************************************************
+
+.var_A480
+
  EQUD    var_A524 + 17 * 4
  EQUD    var_A524 + 16 * 4
  EQUD    var_A524 + 15 * 4
@@ -3816,29 +3853,29 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_A56C
+;       Name: workspaceAddr
 ;       Type: Variable
 ;   Category: ???
-;    Summary: ???
+;    Summary: The address of the game's variable workspace
 ;
 ; ******************************************************************************
 
-.var_A56C
+.workspaceAddr
 
- EQUD    &00012200
+ EQUD    workspace
 
 ; ******************************************************************************
 ;
-;       Name: var_A570
+;       Name: stackAddr
 ;       Type: Variable
 ;   Category: ???
-;    Summary: ???
+;    Summary: The address of the game's stack
 ;
 ; ******************************************************************************
 
-.var_A570
+.stackAddr
 
- EQUD    &000121FC
+ EQUD    stack
 
 ; ******************************************************************************
 ;
@@ -3894,14 +3931,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_A584
+;       Name: returnAddr
 ;       Type: Variable
 ;   Category: ???
-;    Summary: ???
+;    Summary: Stores the return address for exiting the game
 ;
 ; ******************************************************************************
 
-.var_A584
+.returnAddr
 
  EQUD    &00000000
 
@@ -3953,11 +3990,14 @@
  STRB    R1, [R0]                   ; 
  SWI     OS_WriteS                  ; 
 
- EQUS    "There is not enough memory to run this game."
+ EQUS    "There is not enough "
+ EQUS    "memory to run this game."
  EQUW    &0D0A
- EQUS    "Please *CONFIGURE your machine to free more memory."
+ EQUS    "Please *CONFIGURE your "
+ EQUS    "machine to free more "
+ EQUS    "memory."
  EQUB    0
- ALIGN   4
+ ALIGN
 
  B       lab_A8D4                   ; 
 
@@ -3976,9 +4016,9 @@
  SWI     OS_WriteC                  ; 
  MOV     R0, #&F                    ; 
  SWI     OS_WriteC                  ; 
- STR     R13, var_A584              ; 
- LDR     R13, var_A570              ; 
- LDR     R11, var_A56C              ; 
+ STR     R13, returnAddr            ; 
+ LDR     R13, stackAddr             ; 
+ LDR     R11, workspaceAddr         ; 
  STMDB   R13!, {R14}                ; 
  LDR     R0, var_A574               ; 
  LDRB    R1, [R0]                   ; 
@@ -4004,9 +4044,10 @@
  SWI     OS_WriteC                  ; 
  SWI     OS_WriteS                  ; 
 
- EQUS    "Lander Demo/Practice (C) D.J.Braben 1987"
+ EQUS    "Lander Demo/Practice "
+ EQUS    "(C) D.J.Braben 1987"
  EQUB    0
- ALIGN   4
+ ALIGN
 
  BL      sub_9D3C                   ; 
  MOV     R0, #&16                   ; 
@@ -4027,9 +4068,10 @@
  BNE     lab_A6E4                   ; 
  SWI     OS_WriteS                  ; 
 
- EQUS    "Lander Demo/Practice (C) D.J.Braben 1987"
+ EQUS    "Lander Demo/Practice "
+ EQUS    "(C) D.J.Braben 1987"
  EQUB    0
- ALIGN   4
+ ALIGN
 
  LDR     R0, var_A578               ; 
  STR     R0, [R11, #&124]           ; 
@@ -4164,7 +4206,7 @@
 .lab_A8D4
 
  LDMIA   R13!, {R14}                ; 
- LDR     R13, var_A584              ; 
+ LDR     R13, returnAddr            ; 
  MOV     PC, R14                    ; 
 
 ; ******************************************************************************
@@ -4177,8 +4219,6 @@
 ; ******************************************************************************
 
 .sub_A8E0
-
-                                    ; 
 
  MOV     R0, #&1E                   ; 
  SWI     OS_WriteC                  ; 
@@ -4195,8 +4235,6 @@
 ; ******************************************************************************
 
 .sub_A8F0
-
-                                    ; 
 
  STMFD   R13!, {R0-R12, R14}        ; 
  MOV     R0, R1, LSR #28            ; 
