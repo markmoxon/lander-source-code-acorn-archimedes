@@ -493,7 +493,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008704 7C0500EB        	   488:  BL      sub_9CFC
 00:00008708 5FFEFFEB        	   489:  BL      sub_808C
 00:0000870C 7D0200EB        	   490:  BL      sub_9108
-00:00008710 890500EB        	   491:  BL      sub_9D3C
+00:00008710 890500EB        	   491:  BL      SwitchScreenBank
 00:00008714 18019BE5        	   492:  LDR     R0, [R11, #0x118]
 00:00008718 010080E2        	   493:  ADD     R0, R0, #1
 00:0000871C 18018BE5        	   494:  STR     R0, [R11, #0x118]
@@ -1252,7 +1252,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009208 021051E0        	  1239:  SUBS    R1, R1, R2
 00:0000920C 0010A043        	  1240:  MOVMI   R1, #0
 00:00009210 28118BE5        	  1241:  STR     R1, [R11, #0x128]
-00:00009214 50789FE5        	  1242:  LDR     R7, var_9A6C
+00:00009214 50789FE5        	  1242:  LDR     R7, screenAddr
 00:00009218 05BD87E2        	  1243:  ADD     R11, R7, #0x140
 00:0000921C 38801FE5        	  1244:  LDR     R8, var_91EC
 00:00009220 21A2A0E1        	  1245:  MOV     R10, R1, LSR #4
@@ -1832,8 +1832,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00009A60 30100FE5        	  1819:  STR     R1, var_9A38
 00:00009A64 30000FE5        	  1820:  STR     R0, var_9A3C
 00:00009A68 0080BDE8        	  1821:  LDMIA   R13!, {PC}
-                            	  1822: var_9A6C:
-00:00009A6C 0094FD01        	  1823: .long    0x01FD9400
+                            	  1822: screenAddr:
+00:00009A6C 0094FD01        	  1823: .long    0x01FD8000 + 16 * 320
                             	  1824: var_9A70:
 00:00009A70 00000000        	  1825: .long    0x00000000
 00:00009A74 01010101        	  1826: .long    0x01010101
@@ -2006,7 +2006,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009CDC C05F2DE9        	  1993:  STMFD   R13!, {R6-R12, R14}
 00:00009CE0 9C1A1FE5        	  1994:  LDR     R1, var_924C
 00:00009CE4 009191E7        	  1995:  LDR     R9, [R1, R0, LSL #2]
-00:00009CE8 84C21FE5        	  1996:  LDR     R12, var_9A6C
+00:00009CE8 84C21FE5        	  1996:  LDR     R12, screenAddr
                             	  1997: lab_9CEC:
 00:00009CEC 040099E4        	  1998:  LDR     R0, [R9], #4
 00:00009CF0 00018FE0        	  1999:  ADD     R0, PC, R0, LSL #2
@@ -2027,29 +2027,29 @@ Source: "3-assembled-output/Lander.arm"
 00:00009D20 010050E2        	  2014:  SUBS    R0, R0, #1
 00:00009D24 F9FFFF5A        	  2015:  BPL     lab_9D10
 00:00009D28 0090BDE8        	  2016:  LDMFD   R13!, {R12, PC}
-                            	  2017: var_9D2C:
-00:00009D2C 0094FD01        	  2018: .long    0x01FD9400
-                            	  2019: var_9D30:
-00:00009D30 00D4FE01        	  2020: .long    0x01FED400
-                            	  2021: var_9D34:
-00:00009D34 00000000        	  2022: .long    0x00000000
+                            	  2017: screenBank0Addr:
+00:00009D2C 0094FD01        	  2018: .long    0x01FD8000 + 320 * 16
+                            	  2019: screenBank1Addr:
+00:00009D30 00D4FE01        	  2020: .long    0x01FEC000 + 320 * 16
+                            	  2021: screenBankNumber:
+00:00009D34 00000000        	  2022: .long    0
                             	  2023: var_9D38:
 00:00009D38 10DA0000        	  2024: .long    divisionTable
-                            	  2025: sub_9D3C:
-00:00009D3C 10005FE5        	  2026:  LDRB    R0, var_9D34
+                            	  2025: SwitchScreenBank:
+00:00009D3C 10005FE5        	  2026:  LDRB    R0, screenBankNumber
 00:00009D40 010030E2        	  2027:  EORS    R0, R0, #1
-00:00009D44 18004FE5        	  2028:  STRB    R0, var_9D34
-00:00009D48 24101F15        	  2029:  LDRNE   R1, var_9D2C
-00:00009D4C 24101F05        	  2030:  LDREQ   R1, var_9D30
-00:00009D50 EC120FE5        	  2031:  STR     R1, var_9A6C
+00:00009D44 18004FE5        	  2028:  STRB    R0, screenBankNumber
+00:00009D48 24101F15        	  2029:  LDRNE   R1, screenBank0Addr
+00:00009D4C 24101F05        	  2030:  LDREQ   R1, screenBank1Addr
+00:00009D50 EC120FE5        	  2031:  STR     R1, screenAddr
 00:00009D54 000030E3        	  2032:  TEQ     R0, #0
 00:00009D58 0110A003        	  2033:  MOVEQ   R1, #1
 00:00009D5C 0210A013        	  2034:  MOVNE   R1, #2
-00:00009D60 7100A0E3        	  2035:  MOV     R0, #0x71
+00:00009D60 7100A0E3        	  2035:  MOV     R0, #113
 00:00009D64 060000EF        	  2036:  SWI     OS_Byte
-00:00009D68 7000A0E3        	  2037:  MOV     R0, #0x70
+00:00009D68 7000A0E3        	  2037:  MOV     R0, #112
 00:00009D6C 060000EF        	  2038:  SWI     OS_Byte
-00:00009D70 1300A0E3        	  2039:  MOV     R0, #0x13
+00:00009D70 1300A0E3        	  2039:  MOV     R0, #19
 00:00009D74 060000EF        	  2040:  SWI     OS_Byte
 00:00009D78 005A2DE9        	  2041:  STMFD   R13!, {R9, R11-R12, R14}
 00:00009D7C 0000A0E3        	  2042:  MOV     R0, #0
@@ -2062,15 +2062,15 @@ Source: "3-assembled-output/Lander.arm"
 00:00009D98 0070A0E3        	  2049:  MOV     R7, #0
 00:00009D9C 0080A0E3        	  2050:  MOV     R8, #0
 00:00009DA0 0090A0E3        	  2051:  MOV     R9, #0
-00:00009DA4 40B31FE5        	  2052:  LDR     R11, var_9A6C
+00:00009DA4 40B31FE5        	  2052:  LDR     R11, screenAddr
 00:00009DA8 4BCB8BE2        	  2053:  ADD     R12, R11, #0x12C00
-                            	  2054: lab_9DAC:
+                            	  2054: bank1:
 00:00009DAC FF032CE9        	  2055:  STMDB   R12!, {R0-R9}
 00:00009DB0 FF032CE9        	  2056:  STMDB   R12!, {R0-R9}
 00:00009DB4 FF032CE9        	  2057:  STMDB   R12!, {R0-R9}
 00:00009DB8 FF032CE9        	  2058:  STMDB   R12!, {R0-R9}
 00:00009DBC 0B005CE1        	  2059:  CMP     R12, R11
-00:00009DC0 F9FFFF1A        	  2060:  BNE     lab_9DAC
+00:00009DC0 F9FFFF1A        	  2060:  BNE     bank1
 00:00009DC4 009ABDE8        	  2061:  LDMFD   R13!, {R9, R11-R12, PC}
                             	  2062: sub_9DC8:
 00:00009DC8 FC5E2DE9        	  2063:  STMFD   R13!, {R2-R7, R9-R12, R14}
@@ -2087,7 +2087,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009DF0 EF005533        	  2074:  CMPLO   R5, #0xEF
 00:00009DF4 C500002A        	  2075:  BHS     lab_A110
 00:00009DF8 00402DE9        	  2076:  STMDB   R13!, {R14}
-00:00009DFC 98C31FE5        	  2077:  LDR     R12, var_9A6C
+00:00009DFC 98C31FE5        	  2077:  LDR     R12, screenAddr
 00:00009E00 030051E1        	  2078:  CMP     R1, R3
 00:00009E04 0500002A        	  2079:  BHS     lab_9E20
 00:00009E08 0060A0E1        	  2080:  MOV     R6, R0
@@ -2316,7 +2316,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A128 050D5423        	  2303:  CMPHS   R4, #0x140
 00:0000A12C 0EF0A021        	  2304:  MOVHS   PC, R14
 00:0000A130 00402DE9        	  2305:  STMDB   R13!, {R14}
-00:0000A134 D0C61FE5        	  2306:  LDR     R12, var_9A6C
+00:0000A134 D0C61FE5        	  2306:  LDR     R12, screenAddr
 00:0000A138 030051E1        	  2307:  CMP     R1, R3
 00:0000A13C 050000CA        	  2308:  BGT     lab_A158
 00:0000A140 0060A0E1        	  2309:  MOV     R6, R0
@@ -2444,7 +2444,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A2F8 FF50C513        	  2431:  BICNE   R5, R5, #0xFF
 00:0000A2FC 02598513        	  2432:  ORRNE   R5, R5, #0x8000
                             	  2433: lab_A300:
-00:0000A300 9CC81FE5        	  2434:  LDR     R12, var_9A6C
+00:0000A300 9CC81FE5        	  2434:  LDR     R12, screenAddr
 00:0000A304 3F0000EB        	  2435:  BL      sub_A408
 00:0000A308 0080BDE8        	  2436:  LDMIA   R13!, {PC}
                             	  2437: lab_A30C:
@@ -2699,7 +2699,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A6B5 393837
 00:0000A6B8 00              	  2675: .byte    0
                             	  2676: .balign 4
-00:0000A6BC 9EFDFFEB        	  2677:  BL      sub_9D3C
+00:0000A6BC 9EFDFFEB        	  2677:  BL      SwitchScreenBank
 00:0000A6C0 1600A0E3        	  2678:  MOV     R0, #0x16
 00:0000A6C4 000000EF        	  2679:  SWI     OS_WriteC
 00:0000A6C8 8D00A0E3        	  2680:  MOV     R0, #0x8D
@@ -2822,7 +2822,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A88C FEF5FFEB        	  2793:  BL      sub_808C
 00:0000A890 1CFAFFEB        	  2794:  BL      sub_9108
 00:0000A894 58FAFFEB        	  2795:  BL      sub_91FC
-00:0000A898 27FDFFEB        	  2796:  BL      sub_9D3C
+00:0000A898 27FDFFEB        	  2796:  BL      SwitchScreenBank
 00:0000A89C 18E19BE5        	  2797:  LDR     R14, [R11, #0x118]
 00:0000A8A0 01E08EE2        	  2798:  ADD     R14, R14, #1
 00:0000A8A4 18E18BE5        	  2799:  STR     R14, [R11, #0x118]
@@ -10119,8 +10119,10 @@ OS_ReadC                         S:00000004
 OS_Word                          S:00000007
 OS_WriteC                        S:00000000
 OS_WriteS                        S:00000001
+SwitchScreenBank                 A:00009D3C
 arctanTable                      A:0000C810
 arctanTableAddr                  A:000091F4
+bank1                            A:00009DAC
 dataTable1                       A:0000A960
 dataTable10                      A:0000B29C
 dataTable11                      A:0000B4BC
@@ -10214,7 +10216,6 @@ lab_9B78                         A:00009B78
 lab_9BA4                         A:00009BA4
 lab_9CEC                         A:00009CEC
 lab_9D10                         A:00009D10
-lab_9DAC                         A:00009DAC
 lab_9E20                         A:00009E20
 lab_9E40                         A:00009E40
 lab_9E60                         A:00009E60
@@ -10274,6 +10275,10 @@ lab_A850                         A:0000A850
 lab_A8AC                         A:0000A8AC
 lab_A8D4                         A:0000A8D4
 returnAddr                       A:0000A584
+screenAddr                       A:00009A6C
+screenBank0Addr                  A:00009D2C
+screenBank1Addr                  A:00009D30
+screenBankNumber                 A:00009D34
 sinTable                         A:0000B810
 sinTableAddr                     A:000091F0
 squareRootTable                  A:0000CA10
@@ -10329,7 +10334,6 @@ sub_9C58                         A:00009C58
 sub_9CDC                         A:00009CDC
 sub_9CF8                         A:00009CF8
 sub_9CFC                         A:00009CFC
-sub_9D3C                         A:00009D3C
 sub_9DC8                         A:00009DC8
 sub_9DDC                         A:00009DDC
 sub_A408                         A:0000A408
@@ -10355,13 +10359,9 @@ var_98EC                         A:000098EC
 var_9938                         A:00009938
 var_9A38                         A:00009A38
 var_9A3C                         A:00009A3C
-var_9A6C                         A:00009A6C
 var_9A70                         A:00009A70
 var_9AC0                         A:00009AC0
 var_9C8C                         A:00009C8C
-var_9D2C                         A:00009D2C
-var_9D30                         A:00009D30
-var_9D34                         A:00009D34
 var_9D38                         A:00009D38
 var_A480                         A:0000A480
 var_A524                         A:0000A524
@@ -10514,7 +10514,7 @@ Symbols by value:
 00009A38 var_9A38
 00009A3C var_9A3C
 00009A40 sub_9A40
-00009A6C var_9A6C
+00009A6C screenAddr
 00009A70 var_9A70
 00009AC0 var_9AC0
 00009AC4 lab_9AC4
@@ -10533,12 +10533,12 @@ Symbols by value:
 00009CF8 sub_9CF8
 00009CFC sub_9CFC
 00009D10 lab_9D10
-00009D2C var_9D2C
-00009D30 var_9D30
-00009D34 var_9D34
+00009D2C screenBank0Addr
+00009D30 screenBank1Addr
+00009D34 screenBankNumber
 00009D38 var_9D38
-00009D3C sub_9D3C
-00009DAC lab_9DAC
+00009D3C SwitchScreenBank
+00009DAC bank1
 00009DC8 sub_9DC8
 00009DDC sub_9DDC
 00009E20 lab_9E20

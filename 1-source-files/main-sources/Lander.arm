@@ -41,6 +41,12 @@
  OS_Mouse = &1C
  OS_BinaryToDecimal = &28
 
+; ******************************************************************************
+;
+; Workspace variables
+;
+; ******************************************************************************
+
  stack = &000121FC                  ; The stack is after the end of the main
                                     ; game code and descends from this address
                                     ; down to &00012000 (to give a stack size of
@@ -720,7 +726,7 @@
  BL      sub_9CFC                   ; 
  BL      sub_808C                   ; 
  BL      sub_9108                   ; 
- BL      sub_9D3C                   ; 
+ BL      SwitchScreenBank           ; 
  LDR     R0, [R11, #&118]           ; 
  ADD     R0, R0, #1                 ; 
  STR     R0, [R11, #&118]           ; 
@@ -1862,7 +1868,7 @@
  SUBS    R1, R1, R2                 ; 
  MOVMI   R1, #0                     ; 
  STR     R1, [R11, #&128]           ; 
- LDR     R7, var_9A6C               ; 
+ LDR     R7, screenAddr             ; 
  ADD     R11, R7, #&140             ; 
  LDR     R8, var_91EC               ; 
  MOV     R10, R1, LSR #4            ; 
@@ -2717,16 +2723,17 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_9A6C
+;       Name: screenAddr
 ;       Type: Variable
-;   Category: ???
-;    Summary: ???
+;   Category: Drawing the screen
+;    Summary: The screen address for the start of the 17th pixel line in the
+;             current bank (i.e. the line just below the two rows of text)
 ;
 ; ******************************************************************************
 
-.var_9A6C
+.screenAddr
 
- EQUD    &01FD9400
+ EQUD    &01FD8000 + 16 * 320
 
 ; ******************************************************************************
 ;
@@ -2999,7 +3006,7 @@
  STMFD   R13!, {R6-R12, R14}        ; 
  LDR     R1, var_924C               ; 
  LDR     R9, [R1, R0, LSL #2]       ; 
- LDR     R12, var_9A6C              ; 
+ LDR     R12, screenAddr            ; 
 
 .lab_9CEC
 
@@ -3049,42 +3056,44 @@
 
 ; ******************************************************************************
 ;
-;       Name: var_9D2C
+;       Name: screenBank0Addr
 ;       Type: Variable
-;   Category: ???
-;    Summary: ???
+;   Category: Drawing the screen
+;    Summary: The screen address for the start of the 17th pixel line in screen
+;             bank 0 (i.e. the line just below the two rows of text)
 ;
 ; ******************************************************************************
 
-.var_9D2C
+.screenBank0Addr
 
- EQUD    &01FD9400
+ EQUD    &01FD8000 + 320 * 16
 
 ; ******************************************************************************
 ;
-;       Name: var_9D30
+;       Name: screenBank1Addr
 ;       Type: Variable
-;   Category: ???
-;    Summary: ???
+;   Category: Drawing the screen
+;    Summary: The screen address for the start of the 17th pixel line in screen
+;             bank 1 (i.e. the line just below the two rows of text)
 ;
 ; ******************************************************************************
 
-.var_9D30
+.screenBank1Addr
 
- EQUD    &01FED400
+ EQUD    &01FEC000 + 320 * 16
 
 ; ******************************************************************************
 ;
-;       Name: var_9D34
+;       Name: screenBankNumber
 ;       Type: Variable
-;   Category: ???
-;    Summary: ???
+;   Category: Drawing the screen
+;    Summary: The number of the current screen bank (0 or 1)
 ;
 ; ******************************************************************************
 
-.var_9D34
+.screenBankNumber
 
- EQUD    &00000000
+ EQUD    0
 
 ; ******************************************************************************
 ;
@@ -3101,53 +3110,81 @@
 
 ; ******************************************************************************
 ;
-;       Name: sub_9D3C
+;       Name: SwitchScreenBank
 ;       Type: Subroutine
-;   Category: ???
-;    Summary: ???
+;   Category: Drawing the screen
+;    Summary: Switch screen bank and reset the newly hidden screen bank to black
 ;
 ; ******************************************************************************
 
-.sub_9D3C
+.SwitchScreenBank
 
- LDRB    R0, var_9D34               ; 
- EORS    R0, R0, #1                 ; 
- STRB    R0, var_9D34               ; 
- LDRNE   R1, var_9D2C               ; 
- LDREQ   R1, var_9D30               ; 
- STR     R1, var_9A6C               ; 
- TEQ     R0, #0                     ; 
- MOVEQ   R1, #1                     ; 
- MOVNE   R1, #2                     ; 
- MOV     R0, #&71                   ; 
- SWI     OS_Byte                    ; 
- MOV     R0, #&70                   ; 
- SWI     OS_Byte                    ; 
- MOV     R0, #&13                   ; 
- SWI     OS_Byte                    ; 
- STMFD   R13!, {R9, R11-R12, R14}   ; 
- MOV     R0, #0                     ; 
- MOV     R1, #0                     ; 
- MOV     R2, #0                     ; 
- MOV     R3, #0                     ; 
- MOV     R4, #0                     ; 
- MOV     R5, #0                     ; 
- MOV     R6, #0                     ; 
- MOV     R7, #0                     ; 
- MOV     R8, #0                     ; 
- MOV     R9, #0                     ; 
- LDR     R11, var_9A6C              ; 
- ADD     R12, R11, #&12C00          ; 
+ LDRB    R0, screenBankNumber       ; Flip the current screen bank number in
+ EORS    R0, R0, #1                 ; screenBankNumber between bank 0 and bank 1
+ STRB    R0, screenBankNumber
 
-.lab_9DAC
+ LDRNE   R1, screenBank0Addr        ; Set screenAddr to screenBank0Addr if the
+ LDREQ   R1, screenBank1Addr        ; new bank is 1, otherwise set it to
+ STR     R1, screenAddr             ; screenBank1Addr, so screenAddr points to
+                                    ; the screen that is no longer being shown
 
- STMDB   R12!, {R0-R9}              ; 
- STMDB   R12!, {R0-R9}              ; 
- STMDB   R12!, {R0-R9}              ; 
- STMDB   R12!, {R0-R9}              ; 
- CMP     R12, R11                   ; 
- BNE     lab_9DAC                   ; 
- LDMFD   R13!, {R9, R11-R12, PC}    ; 
+ TEQ     R0, #0                     ; Set R1 = screenBankNumber + 1
+ MOVEQ   R1, #1                     ;
+ MOVNE   R1, #2                     ; So R1 is bank 1 or 2
+
+ MOV     R0, #113                   ; Set the hardware and VDU screen banks to
+ SWI     OS_Byte                    ; R1, so bank 1 or 2 is displayed when the
+ MOV     R0, #112                   ; new bank number is 0 or 1
+ SWI     OS_Byte
+
+ MOV     R0, #19                    ; Wait for the vertical sync
+ SWI     OS_Byte
+
+                                    ; We now clear the screen bank that isn't
+                                    ; being shown, i.e. the bank at screenAddr
+
+ STMFD   R13!, {R9, R11-R12, R14}   ; Store registers on the stack
+
+ MOV     R0, #0                     ; Set R0 to R9 to zero so we can use them to
+ MOV     R1, #0                     ; clear the screen bank to black
+ MOV     R2, #0
+ MOV     R3, #0
+ MOV     R4, #0
+ MOV     R5, #0
+ MOV     R6, #0
+ MOV     R7, #0
+ MOV     R8, #0
+ MOV     R9, #0
+
+ LDR     R11, screenAddr            ; Set R11 = screenAddr
+                                    ;
+                                    ; So R11 contains the address of the screen
+                                    ; bank we want to clear, just below the two
+                                    ; lines of text at the top of the screen
+
+ ADD     R12, R11, #&12C00          ; Set R12 = screenAddr + 320 * 240
+                                    ;
+                                    ; So R12 points to the end of screen memory
+                                    ; for the bank at screenAddr, as the address
+                                    ; in screenAddr skips the first 16 pixel
+                                    ; rows of the 320 * 256 screen
+
+                                    ; We now zero screen memory from R12 down to
+                                    ; R11, which clears the hidden screen bank
+
+.bank1
+
+ STMDB   R12!, {R0-R9}              ; Zero 40 x 32-bit words of screen memory,
+ STMDB   R12!, {R0-R9}              ; decreasing the address in R12 as we go
+ STMDB   R12!, {R0-R9}
+ STMDB   R12!, {R0-R9}
+
+ CMP     R12, R11                   ; If R12 hasn't yet reached the start of the
+ BNE     bank1                      ; bank's screen memory in R11, loop back to
+                                    ; keep zeroing screen memory
+
+ LDMFD   R13!, {R9, R11-R12, PC}    ; Retrieve registers from the stack and
+                                    ; return from the subroutine
 
 ; ******************************************************************************
 ;
@@ -3185,7 +3222,7 @@
  CMPLO   R5, #&EF                   ; 
  BHS     lab_A110                   ; 
  STMDB   R13!, {R14}                ; 
- LDR     R12, var_9A6C              ; 
+ LDR     R12, screenAddr            ; 
  CMP     R1, R3                     ; 
  BHS     lab_9E20                   ; 
  MOV     R6, R0                     ; 
@@ -3460,7 +3497,7 @@
  CMPHS   R4, #&140                  ; 
  MOVHS   PC, R14                    ; 
  STMDB   R13!, {R14}                ; 
- LDR     R12, var_9A6C              ; 
+ LDR     R12, screenAddr            ; 
  CMP     R1, R3                     ; 
  BGT     lab_A158                   ; 
  MOV     R6, R0                     ; 
@@ -3614,7 +3651,7 @@
 
 .lab_A300
 
- LDR     R12, var_9A6C              ; 
+ LDR     R12, screenAddr            ; 
  BL      sub_A408                   ; 
  LDMIA   R13!, {PC}                 ; 
 
@@ -3858,7 +3895,7 @@
 ;
 ;       Name: workspaceAddr
 ;       Type: Variable
-;   Category: ???
+;   Category: Start and end
 ;    Summary: The address of the game's variable workspace
 ;
 ; ******************************************************************************
@@ -3871,7 +3908,7 @@
 ;
 ;       Name: stackAddr
 ;       Type: Variable
-;   Category: ???
+;   Category: Start and end
 ;    Summary: The address of the game's stack
 ;
 ; ******************************************************************************
@@ -4052,7 +4089,7 @@
  EQUB    0
  ALIGN
 
- BL      sub_9D3C                   ; 
+ BL      SwitchScreenBank           ; 
  MOV     R0, #&16                   ; 
  SWI     OS_WriteC                  ; 
  MOV     R0, #&8D                   ; 
@@ -4187,7 +4224,7 @@
  BL      sub_808C                   ; 
  BL      sub_9108                   ; 
  BL      sub_91FC                   ; 
- BL      sub_9D3C                   ; 
+ BL      SwitchScreenBank           ; 
  LDR     R14, [R11, #&118]          ; 
  ADD     R14, R14, #1               ; 
  STR     R14, [R11, #&118]          ; 

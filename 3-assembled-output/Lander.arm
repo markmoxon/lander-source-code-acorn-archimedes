@@ -488,7 +488,7 @@ lab_86EC:
  BL      sub_9CFC
  BL      sub_808C
  BL      sub_9108
- BL      sub_9D3C
+ BL      SwitchScreenBank
  LDR     R0, [R11, #0x118]
  ADD     R0, R0, #1
  STR     R0, [R11, #0x118]
@@ -1239,7 +1239,7 @@ sub_91FC:
  SUBS    R1, R1, R2
  MOVMI   R1, #0
  STR     R1, [R11, #0x128]
- LDR     R7, var_9A6C
+ LDR     R7, screenAddr
  ADD     R11, R7, #0x140
  LDR     R8, var_91EC
  MOV     R10, R1, LSR #4
@@ -1819,8 +1819,8 @@ sub_9A40:
  STR     R1, var_9A38
  STR     R0, var_9A3C
  LDMIA   R13!, {PC}
-var_9A6C:
-.long    0x01FD9400
+screenAddr:
+.long    0x01FD8000 + 16 * 320
 var_9A70:
 .long    0x00000000
 .long    0x01010101
@@ -1993,7 +1993,7 @@ sub_9CDC:
  STMFD   R13!, {R6-R12, R14}
  LDR     R1, var_924C
  LDR     R9, [R1, R0, LSL #2]
- LDR     R12, var_9A6C
+ LDR     R12, screenAddr
 lab_9CEC:
  LDR     R0, [R9], #4
  ADD     R0, PC, R0, LSL #2
@@ -2014,29 +2014,29 @@ lab_9D10:
  SUBS    R0, R0, #1
  BPL     lab_9D10
  LDMFD   R13!, {R12, PC}
-var_9D2C:
-.long    0x01FD9400
-var_9D30:
-.long    0x01FED400
-var_9D34:
-.long    0x00000000
+screenBank0Addr:
+.long    0x01FD8000 + 320 * 16
+screenBank1Addr:
+.long    0x01FEC000 + 320 * 16
+screenBankNumber:
+.long    0
 var_9D38:
 .long    divisionTable
-sub_9D3C:
- LDRB    R0, var_9D34
+SwitchScreenBank:
+ LDRB    R0, screenBankNumber
  EORS    R0, R0, #1
- STRB    R0, var_9D34
- LDRNE   R1, var_9D2C
- LDREQ   R1, var_9D30
- STR     R1, var_9A6C
+ STRB    R0, screenBankNumber
+ LDRNE   R1, screenBank0Addr
+ LDREQ   R1, screenBank1Addr
+ STR     R1, screenAddr
  TEQ     R0, #0
  MOVEQ   R1, #1
  MOVNE   R1, #2
- MOV     R0, #0x71
+ MOV     R0, #113
  SWI     OS_Byte
- MOV     R0, #0x70
+ MOV     R0, #112
  SWI     OS_Byte
- MOV     R0, #0x13
+ MOV     R0, #19
  SWI     OS_Byte
  STMFD   R13!, {R9, R11-R12, R14}
  MOV     R0, #0
@@ -2049,15 +2049,15 @@ sub_9D3C:
  MOV     R7, #0
  MOV     R8, #0
  MOV     R9, #0
- LDR     R11, var_9A6C
+ LDR     R11, screenAddr
  ADD     R12, R11, #0x12C00
-lab_9DAC:
+bank1:
  STMDB   R12!, {R0-R9}
  STMDB   R12!, {R0-R9}
  STMDB   R12!, {R0-R9}
  STMDB   R12!, {R0-R9}
  CMP     R12, R11
- BNE     lab_9DAC
+ BNE     bank1
  LDMFD   R13!, {R9, R11-R12, PC}
 sub_9DC8:
  STMFD   R13!, {R2-R7, R9-R12, R14}
@@ -2074,7 +2074,7 @@ sub_9DDC:
  CMPLO   R5, #0xEF
  BHS     lab_A110
  STMDB   R13!, {R14}
- LDR     R12, var_9A6C
+ LDR     R12, screenAddr
  CMP     R1, R3
  BHS     lab_9E20
  MOV     R6, R0
@@ -2303,7 +2303,7 @@ lab_A110:
  CMPHS   R4, #0x140
  MOVHS   PC, R14
  STMDB   R13!, {R14}
- LDR     R12, var_9A6C
+ LDR     R12, screenAddr
  CMP     R1, R3
  BGT     lab_A158
  MOV     R6, R0
@@ -2431,7 +2431,7 @@ lab_A2C4:
  BICNE   R5, R5, #0xFF
  ORRNE   R5, R5, #0x8000
 lab_A300:
- LDR     R12, var_9A6C
+ LDR     R12, screenAddr
  BL      sub_A408
  LDMIA   R13!, {PC}
 lab_A30C:
@@ -2674,7 +2674,7 @@ Entry:
 .byte    "(C) D.J.Braben 1987"
 .byte    0
 .balign 4
- BL      sub_9D3C
+ BL      SwitchScreenBank
  MOV     R0, #0x16
  SWI     OS_WriteC
  MOV     R0, #0x8D
@@ -2793,7 +2793,7 @@ lab_A850:
  BL      sub_808C
  BL      sub_9108
  BL      sub_91FC
- BL      sub_9D3C
+ BL      SwitchScreenBank
  LDR     R14, [R11, #0x118]
  ADD     R14, R14, #1
  STR     R14, [R11, #0x118]
