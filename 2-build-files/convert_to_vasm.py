@@ -33,6 +33,9 @@ for line in bbc_basic_file:
     # ORG -> .org
     line = re.sub(r"^ ?ORG ", ".org ", line)
 
+    # SKIP -> .skip
+    line = re.sub(r"^ ?SKIP ", ".skip ", line)
+
     # Hexadecimal & -> 0x
     line = re.sub(r"&", "0x", line)
 
