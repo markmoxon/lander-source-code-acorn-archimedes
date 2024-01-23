@@ -2614,7 +2614,7 @@ var_A57C:
 .long    0x000001F4
 var_A580:
 .long    0x00000D55
-returnAddr:
+stackPointerOnEntry:
 .long    0x00000000
 var_A588:
 .long    0xFF01FF03
@@ -2643,7 +2643,7 @@ Entry:
  SWI     OS_WriteC
  MOV     R0, #0xF
  SWI     OS_WriteC
- STR     R13, returnAddr
+ STR     R13, stackPointerOnEntry
  LDR     R13, stackAddr
  LDR     R11, workspaceAddr
  STMDB   R13!, {R14}
@@ -2811,7 +2811,7 @@ EndGame:
  SWI     OS_Byte
 ReturnToDesktop:
  LDMIA   R13!, {R14}
- LDR     R13, returnAddr
+ LDR     R13, stackPointerOnEntry
  MOV     PC, R14
 sub_A8E0:
  MOV     R0, #0x1E

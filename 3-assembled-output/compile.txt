@@ -2627,7 +2627,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A57C F4010000        	  2614: .long    0x000001F4
                             	  2615: var_A580:
 00:0000A580 550D0000        	  2616: .long    0x00000D55
-                            	  2617: returnAddr:
+                            	  2617: stackPointerOnEntry:
 00:0000A584 00000000        	  2618: .long    0x00000000
                             	  2619: var_A588:
 00:0000A588 03FF01FF        	  2620: .long    0xFF01FF03
@@ -2664,7 +2664,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A618 000000EF        	  2643:  SWI     OS_WriteC
 00:0000A61C 0F00A0E3        	  2644:  MOV     R0, #0xF
 00:0000A620 000000EF        	  2645:  SWI     OS_WriteC
-00:0000A624 A8D00FE5        	  2646:  STR     R13, returnAddr
+00:0000A624 A8D00FE5        	  2646:  STR     R13, stackPointerOnEntry
 00:0000A628 C0D01FE5        	  2647:  LDR     R13, stackAddr
 00:0000A62C C8B01FE5        	  2648:  LDR     R11, workspaceAddr
 00:0000A630 00402DE9        	  2649:  STMDB   R13!, {R14}
@@ -2840,7 +2840,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A8D0 060000EF        	  2811:  SWI     OS_Byte
                             	  2812: ReturnToDesktop:
 00:0000A8D4 0040BDE8        	  2813:  LDMIA   R13!, {R14}
-00:0000A8D8 5CD31FE5        	  2814:  LDR     R13, returnAddr
+00:0000A8D8 5CD31FE5        	  2814:  LDR     R13, stackPointerOnEntry
 00:0000A8DC 0EF0A0E1        	  2815:  MOV     PC, R14
                             	  2816: sub_A8E0:
 00:0000A8E0 1E00A0E3        	  2817:  MOV     R0, #0x1E
@@ -10274,7 +10274,6 @@ lab_A78C                         A:0000A78C
 lab_A7A0                         A:0000A7A0
 lab_A7E0                         A:0000A7E0
 lab_A7F8                         A:0000A7F8
-returnAddr                       A:0000A584
 screenAddr                       A:00009A6C
 screenBank0Addr                  A:00009D2C
 screenBank1Addr                  A:00009D30
@@ -10285,6 +10284,7 @@ squareRootTable                  A:0000CA10
 squareRootTableAddr              A:000091F8
 stack                            S:000121FC
 stackAddr                        A:0000A570
+stackPointerOnEntry              A:0000A584
 sub_808C                         A:0000808C
 sub_81F4                         A:000081F4
 sub_82AC                         A:000082AC
@@ -10599,7 +10599,7 @@ Symbols by value:
 0000A578 var_A578
 0000A57C var_A57C
 0000A580 var_A580
-0000A584 returnAddr
+0000A584 stackPointerOnEntry
 0000A588 var_A588
 0000A590 var_A590
 0000A594 sub_A594

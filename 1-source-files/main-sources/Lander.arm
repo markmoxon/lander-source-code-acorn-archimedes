@@ -3971,14 +3971,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: returnAddr
+;       Name: stackPointerOnEntry
 ;       Type: Variable
 ;   Category: ???
-;    Summary: Stores the return address for exiting the game
+;    Summary: Stores the stack pointer from when the game was run
 ;
 ; ******************************************************************************
 
-.returnAddr
+.stackPointerOnEntry
 
  EQUD    &00000000
 
@@ -4069,7 +4069,7 @@
  SWI     OS_WriteC                  ; 
  MOV     R0, #&F                    ; 
  SWI     OS_WriteC                  ; 
- STR     R13, returnAddr            ; 
+ STR     R13, stackPointerOnEntry   ; 
  LDR     R13, stackAddr             ; 
  LDR     R11, workspaceAddr         ; 
  STMDB   R13!, {R14}                ; 
@@ -4292,7 +4292,7 @@
 
  LDMIA   R13!, {R14}                ; 
 
- LDR     R13, returnAddr            ; 
+ LDR     R13, stackPointerOnEntry   ; 
 
  MOV     PC, R14                    ; 
 
