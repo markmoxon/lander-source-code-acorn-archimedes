@@ -194,6 +194,7 @@ lander_code.extend(lander_file.read())
 lander_file.close()
 
 # Extend bytearray to cover 0x8000 to 0x20000
+
 lander_code.extend(bytearray(0x20000 - 0x8000 - len(lander_code)))
 
 print()
@@ -201,12 +202,12 @@ print("[ Read    ] 4-reference-binaries/riscos2/!RunImage")
 
 # Do decryption
 
-                        # 0000EDB0   0x00009A10
-                        # 0000EDB4   0x000050F2
-                        # 0000EDB8   0x00001CBA
-                        # 0000EDBC   0x00000700
-                        # 0000EDC0   0x00000700
-                        # 0000EDC4   0x00000160
+pass                    # 0000EDB0   0x00009A10
+pass                    # 0000EDB4   0x000050F2
+pass                    # 0000EDB8   0x00001CBA
+pass                    # 0000EDBC   0x00000700
+pass                    # 0000EDC0   0x00000700
+pass                    # 0000EDC4   0x00000160
 
 r0 = 0x0000EDB0         # 0000EDD8 ADR     R0, 0x0000EDB0
 r8 = 0x00009A10         # 0000EDD8 LDMIA   R0, {R8-R13}
