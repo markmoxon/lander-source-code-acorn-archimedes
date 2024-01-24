@@ -2014,19 +2014,19 @@ lab_9D10:
  SUBS    R0, R0, #1
  BPL     lab_9D10
  LDMFD   R13!, {R12, PC}
-screenBank0Addr:
+screenBank2Addr:
 .long    0x01FD8000 + 320 * 16
 screenBank1Addr:
 .long    0x01FEC000 + 320 * 16
 screenBankNumber:
 .long    0
-var_9D38:
+divisionTableAddr:
 .long    divisionTable
 SwitchScreenBank:
  LDRB    R0, screenBankNumber
  EORS    R0, R0, #1
  STRB    R0, screenBankNumber
- LDRNE   R1, screenBank0Addr
+ LDRNE   R1, screenBank2Addr
  LDREQ   R1, screenBank1Addr
  STR     R1, screenAddr
  TEQ     R0, #0
@@ -2112,7 +2112,7 @@ lab_9E60:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_9E98
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R6, [R10, R9, LSL #2]
  B       lab_9EBC
@@ -2136,7 +2136,7 @@ lab_9EBC:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_9EEC
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R7, [R10, R9, LSL #2]
  B       lab_9F10
@@ -2180,7 +2180,7 @@ lab_9F38:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_9F8C
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R11, [R10, R9, LSL #2]
  B       lab_9FB0
@@ -2238,7 +2238,7 @@ lab_A030:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A05C
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R6, [R10, R9, LSL #2]
  B       lab_A080
@@ -2262,7 +2262,7 @@ lab_A080:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A0B0
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R7, [R10, R9, LSL #2]
  B       lab_A0D4
@@ -2340,7 +2340,7 @@ lab_A198:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A1CC
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R6, [R10, R9, LSL #2]
  B       lab_A1F0
@@ -2364,7 +2364,7 @@ lab_A1F0:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A220
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R7, [R10, R9, LSL #2]
  B       lab_A244
@@ -2399,7 +2399,7 @@ lab_A244:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A2A0
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R12, [R10, R9, LSL #2]
  B       lab_A2C4
@@ -2450,7 +2450,7 @@ lab_A328:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A354
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R6, [R10, R9, LSL #2]
  B       lab_A378
@@ -2474,7 +2474,7 @@ lab_A378:
  CMP     R14, #0x40
  CMPLO   R9, #0x40
  BHS     lab_A3A8
- LDR     R10, var_9D38
+ LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
  LDR     R7, [R10, R9, LSL #2]
  B       lab_A3CC

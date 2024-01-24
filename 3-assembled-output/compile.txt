@@ -2027,19 +2027,19 @@ Source: "3-assembled-output/Lander.arm"
 00:00009D20 010050E2        	  2014:  SUBS    R0, R0, #1
 00:00009D24 F9FFFF5A        	  2015:  BPL     lab_9D10
 00:00009D28 0090BDE8        	  2016:  LDMFD   R13!, {R12, PC}
-                            	  2017: screenBank0Addr:
+                            	  2017: screenBank2Addr:
 00:00009D2C 0094FD01        	  2018: .long    0x01FD8000 + 320 * 16
                             	  2019: screenBank1Addr:
 00:00009D30 00D4FE01        	  2020: .long    0x01FEC000 + 320 * 16
                             	  2021: screenBankNumber:
 00:00009D34 00000000        	  2022: .long    0
-                            	  2023: var_9D38:
+                            	  2023: divisionTableAddr:
 00:00009D38 10DA0000        	  2024: .long    divisionTable
                             	  2025: SwitchScreenBank:
 00:00009D3C 10005FE5        	  2026:  LDRB    R0, screenBankNumber
 00:00009D40 010030E2        	  2027:  EORS    R0, R0, #1
 00:00009D44 18004FE5        	  2028:  STRB    R0, screenBankNumber
-00:00009D48 24101F15        	  2029:  LDRNE   R1, screenBank0Addr
+00:00009D48 24101F15        	  2029:  LDRNE   R1, screenBank2Addr
 00:00009D4C 24101F05        	  2030:  LDREQ   R1, screenBank1Addr
 00:00009D50 EC120FE5        	  2031:  STR     R1, screenAddr
 00:00009D54 000030E3        	  2032:  TEQ     R0, #0
@@ -2125,7 +2125,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009E7C 40005EE3        	  2112:  CMP     R14, #0x40
 00:00009E80 40005933        	  2113:  CMPLO   R9, #0x40
 00:00009E84 0300002A        	  2114:  BHS     lab_9E98
-00:00009E88 58A11FE5        	  2115:  LDR     R10, var_9D38
+00:00009E88 58A11FE5        	  2115:  LDR     R10, divisionTableAddr
 00:00009E8C 0EA48AE0        	  2116:  ADD     R10, R10, R14, LSL #8
 00:00009E90 09619AE7        	  2117:  LDR     R6, [R10, R9, LSL #2]
 00:00009E94 080000EA        	  2118:  B       lab_9EBC
@@ -2149,7 +2149,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009ED0 40005EE3        	  2136:  CMP     R14, #0x40
 00:00009ED4 40005933        	  2137:  CMPLO   R9, #0x40
 00:00009ED8 0300002A        	  2138:  BHS     lab_9EEC
-00:00009EDC ACA11FE5        	  2139:  LDR     R10, var_9D38
+00:00009EDC ACA11FE5        	  2139:  LDR     R10, divisionTableAddr
 00:00009EE0 0EA48AE0        	  2140:  ADD     R10, R10, R14, LSL #8
 00:00009EE4 09719AE7        	  2141:  LDR     R7, [R10, R9, LSL #2]
 00:00009EE8 080000EA        	  2142:  B       lab_9F10
@@ -2193,7 +2193,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009F70 40005EE3        	  2180:  CMP     R14, #0x40
 00:00009F74 40005933        	  2181:  CMPLO   R9, #0x40
 00:00009F78 0300002A        	  2182:  BHS     lab_9F8C
-00:00009F7C 4CA21FE5        	  2183:  LDR     R10, var_9D38
+00:00009F7C 4CA21FE5        	  2183:  LDR     R10, divisionTableAddr
 00:00009F80 0EA48AE0        	  2184:  ADD     R10, R10, R14, LSL #8
 00:00009F84 09B19AE7        	  2185:  LDR     R11, [R10, R9, LSL #2]
 00:00009F88 080000EA        	  2186:  B       lab_9FB0
@@ -2251,7 +2251,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A040 40005EE3        	  2238:  CMP     R14, #0x40
 00:0000A044 40005933        	  2239:  CMPLO   R9, #0x40
 00:0000A048 0300002A        	  2240:  BHS     lab_A05C
-00:0000A04C 1CA31FE5        	  2241:  LDR     R10, var_9D38
+00:0000A04C 1CA31FE5        	  2241:  LDR     R10, divisionTableAddr
 00:0000A050 0EA48AE0        	  2242:  ADD     R10, R10, R14, LSL #8
 00:0000A054 09619AE7        	  2243:  LDR     R6, [R10, R9, LSL #2]
 00:0000A058 080000EA        	  2244:  B       lab_A080
@@ -2275,7 +2275,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A094 40005EE3        	  2262:  CMP     R14, #0x40
 00:0000A098 40005933        	  2263:  CMPLO   R9, #0x40
 00:0000A09C 0300002A        	  2264:  BHS     lab_A0B0
-00:0000A0A0 70A31FE5        	  2265:  LDR     R10, var_9D38
+00:0000A0A0 70A31FE5        	  2265:  LDR     R10, divisionTableAddr
 00:0000A0A4 0EA48AE0        	  2266:  ADD     R10, R10, R14, LSL #8
 00:0000A0A8 09719AE7        	  2267:  LDR     R7, [R10, R9, LSL #2]
 00:0000A0AC 080000EA        	  2268:  B       lab_A0D4
@@ -2353,7 +2353,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A1B0 40005EE3        	  2340:  CMP     R14, #0x40
 00:0000A1B4 40005933        	  2341:  CMPLO   R9, #0x40
 00:0000A1B8 0300002A        	  2342:  BHS     lab_A1CC
-00:0000A1BC 8CA41FE5        	  2343:  LDR     R10, var_9D38
+00:0000A1BC 8CA41FE5        	  2343:  LDR     R10, divisionTableAddr
 00:0000A1C0 0EA48AE0        	  2344:  ADD     R10, R10, R14, LSL #8
 00:0000A1C4 09619AE7        	  2345:  LDR     R6, [R10, R9, LSL #2]
 00:0000A1C8 080000EA        	  2346:  B       lab_A1F0
@@ -2377,7 +2377,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A204 40005EE3        	  2364:  CMP     R14, #0x40
 00:0000A208 40005933        	  2365:  CMPLO   R9, #0x40
 00:0000A20C 0300002A        	  2366:  BHS     lab_A220
-00:0000A210 E0A41FE5        	  2367:  LDR     R10, var_9D38
+00:0000A210 E0A41FE5        	  2367:  LDR     R10, divisionTableAddr
 00:0000A214 0EA48AE0        	  2368:  ADD     R10, R10, R14, LSL #8
 00:0000A218 09719AE7        	  2369:  LDR     R7, [R10, R9, LSL #2]
 00:0000A21C 080000EA        	  2370:  B       lab_A244
@@ -2412,7 +2412,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A284 40005EE3        	  2399:  CMP     R14, #0x40
 00:0000A288 40005933        	  2400:  CMPLO   R9, #0x40
 00:0000A28C 0300002A        	  2401:  BHS     lab_A2A0
-00:0000A290 60A51FE5        	  2402:  LDR     R10, var_9D38
+00:0000A290 60A51FE5        	  2402:  LDR     R10, divisionTableAddr
 00:0000A294 0EA48AE0        	  2403:  ADD     R10, R10, R14, LSL #8
 00:0000A298 09C19AE7        	  2404:  LDR     R12, [R10, R9, LSL #2]
 00:0000A29C 080000EA        	  2405:  B       lab_A2C4
@@ -2463,7 +2463,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A338 40005EE3        	  2450:  CMP     R14, #0x40
 00:0000A33C 40005933        	  2451:  CMPLO   R9, #0x40
 00:0000A340 0300002A        	  2452:  BHS     lab_A354
-00:0000A344 14A61FE5        	  2453:  LDR     R10, var_9D38
+00:0000A344 14A61FE5        	  2453:  LDR     R10, divisionTableAddr
 00:0000A348 0EA48AE0        	  2454:  ADD     R10, R10, R14, LSL #8
 00:0000A34C 09619AE7        	  2455:  LDR     R6, [R10, R9, LSL #2]
 00:0000A350 080000EA        	  2456:  B       lab_A378
@@ -2487,7 +2487,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A38C 40005EE3        	  2474:  CMP     R14, #0x40
 00:0000A390 40005933        	  2475:  CMPLO   R9, #0x40
 00:0000A394 0300002A        	  2476:  BHS     lab_A3A8
-00:0000A398 68A61FE5        	  2477:  LDR     R10, var_9D38
+00:0000A398 68A61FE5        	  2477:  LDR     R10, divisionTableAddr
 00:0000A39C 0EA48AE0        	  2478:  ADD     R10, R10, R14, LSL #8
 00:0000A3A0 09719AE7        	  2479:  LDR     R7, [R10, R9, LSL #2]
 00:0000A3A4 080000EA        	  2480:  B       lab_A3CC
@@ -10143,6 +10143,7 @@ dataTable7                       A:0000B008
 dataTable8                       A:0000B08C
 dataTable9                       A:0000B110
 divisionTable                    A:0000DA10
+divisionTableAddr                A:00009D38
 endCode                          A:00011A10
 lab_80DC                         A:000080DC
 lab_8114                         A:00008114
@@ -10275,8 +10276,8 @@ lab_A7A0                         A:0000A7A0
 lab_A7E0                         A:0000A7E0
 lab_A7F8                         A:0000A7F8
 screenAddr                       A:00009A6C
-screenBank0Addr                  A:00009D2C
 screenBank1Addr                  A:00009D30
+screenBank2Addr                  A:00009D2C
 screenBankNumber                 A:00009D34
 sinTable                         A:0000B810
 sinTableAddr                     A:000091F0
@@ -10362,7 +10363,6 @@ var_9A3C                         A:00009A3C
 var_9A70                         A:00009A70
 var_9AC0                         A:00009AC0
 var_9C8C                         A:00009C8C
-var_9D38                         A:00009D38
 var_A480                         A:0000A480
 var_A524                         A:0000A524
 var_A574                         A:0000A574
@@ -10533,10 +10533,10 @@ Symbols by value:
 00009CF8 sub_9CF8
 00009CFC sub_9CFC
 00009D10 lab_9D10
-00009D2C screenBank0Addr
+00009D2C screenBank2Addr
 00009D30 screenBank1Addr
 00009D34 screenBankNumber
-00009D38 var_9D38
+00009D38 divisionTableAddr
 00009D3C SwitchScreenBank
 00009DAC bank1
 00009DC8 sub_9DC8

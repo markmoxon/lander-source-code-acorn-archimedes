@@ -3056,7 +3056,7 @@
 
 ; ******************************************************************************
 ;
-;       Name: screenBank0Addr
+;       Name: screenBank2Addr
 ;       Type: Variable
 ;   Category: Drawing the screen
 ;    Summary: The screen address for the start of the 17th pixel line in screen
@@ -3064,7 +3064,7 @@
 ;
 ; ******************************************************************************
 
-.screenBank0Addr
+.screenBank2Addr
 
  EQUD    &01FD8000 + 320 * 16
 
@@ -3093,18 +3093,23 @@
 
 .screenBankNumber
 
- EQUD    0
+ EQUD    0                          ; Stores the details of the current bank, as
+                                    ; follows:
+                                    ;
+                                    ;   * 0 = draw bank 1, show bank 2
+                                    ;
+                                    ;   * 1 = draw bank 2, show bank 1
 
 ; ******************************************************************************
 ;
-;       Name: var_9D38
+;       Name: divisionTableAddr
 ;       Type: Variable
-;   Category: ???
-;    Summary: ???
+;   Category: Maths (Arithmetic)
+;    Summary: The address of the division lookup table
 ;
 ; ******************************************************************************
 
-.var_9D38
+.divisionTableAddr
 
  EQUD    divisionTable
 
@@ -3121,20 +3126,39 @@
 
  LDRB    R0, screenBankNumber       ; Flip the current screen bank number in
  EORS    R0, R0, #1                 ; screenBankNumber between bank 0 and bank 1
- STRB    R0, screenBankNumber
+ STRB    R0, screenBankNumber       ; which means:
+                                    ;
+                                    ;   * 0 = draw bank 1, show bank 2
+                                    ;
+                                    ;   * 1 = draw bank 2, show bank 1
 
- LDRNE   R1, screenBank0Addr        ; Set screenAddr to screenBank0Addr if the
- LDREQ   R1, screenBank1Addr        ; new bank is 1, otherwise set it to
- STR     R1, screenAddr             ; screenBank1Addr, so screenAddr points to
-                                    ; the screen that is no longer being shown
+ LDRNE   R1, screenBank2Addr        ; Set screenAddr as follows:
+ LDREQ   R1, screenBank1Addr        ;
+ STR     R1, screenAddr             ;   * If screenBankNumber = 0, set it to the
+                                    ;     address of bank 2 in screenBank2Addr
+                                    ;
+                                    ;   * If screenBankNumber = 1, set it to the
+                                    ;     address of bank 1 in screenBank1Addr
+                                    ;
+                                    ; So screenAddr points to the screen that is
+                                    ; no longer being shown, i.e. the bank that
+                                    ; we should now draw into
 
  TEQ     R0, #0                     ; Set R1 = screenBankNumber + 1
  MOVEQ   R1, #1                     ;
- MOVNE   R1, #2                     ; So R1 is bank 1 or 2
+ MOVNE   R1, #2                     ; So this sets R1 as follows:
+                                    ;
+                                    ;   * If screenBankNumber = 0, R1 = 1
+                                    ;
+                                    ;   * If screenBankNumber = 1, R1 = 2
+                                    ;
+                                    ; So R1 is the number of the opposite bank
+                                    ; to the one in screenAddr, i.e. the bank
+                                    ; that we should now show on-screen
 
  MOV     R0, #113                   ; Set the hardware and VDU screen banks to
- SWI     OS_Byte                    ; R1, so bank 1 or 2 is displayed when the
- MOV     R0, #112                   ; new bank number is 0 or 1
+ SWI     OS_Byte                    ; R1, so the correct bank is shown on-screen
+ MOV     R0, #112
  SWI     OS_Byte
 
  MOV     R0, #19                    ; Wait for the vertical sync
@@ -3143,11 +3167,12 @@
                                     ; We now clear the screen bank that isn't
                                     ; being shown, i.e. the bank at screenAddr
 
- STMFD   R13!, {R9, R11-R12, R14}   ; Store registers on the stack
+ STMFD   R13!, {R9, R11-R12, R14}   ; Store the registers that we want to use on
+                                    ; the stack so they can be preserved
 
  MOV     R0, #0                     ; Set R0 to R9 to zero so we can use them to
- MOV     R1, #0                     ; clear the screen bank to black
- MOV     R2, #0
+ MOV     R1, #0                     ; clear the screen bank to black (as black
+ MOV     R2, #0                     ; is represented by zero in screen memory)
  MOV     R3, #0
  MOV     R4, #0
  MOV     R5, #0
@@ -3159,18 +3184,20 @@
  LDR     R11, screenAddr            ; Set R11 = screenAddr
                                     ;
                                     ; So R11 contains the address of the screen
-                                    ; bank we want to clear, just below the two
-                                    ; lines of text at the top of the screen
+                                    ; bank we want to clear, pointing just below
+                                    ; the two lines of text at the top of the
+                                    ; screen
 
  ADD     R12, R11, #&12C00          ; Set R12 = screenAddr + 320 * 240
                                     ;
                                     ; So R12 points to the end of screen memory
                                     ; for the bank at screenAddr, as the address
-                                    ; in screenAddr skips the first 16 pixel
-                                    ; rows of the 320 * 256 screen
+                                    ; in R11 skips the first 16 pixel rows of
+                                    ; the 320 * 256 screen
 
                                     ; We now zero screen memory from R12 down to
-                                    ; R11, which clears the hidden screen bank
+                                    ; R11, which clears the screen bank that we
+                                    ; are no longer showing on-screen
 
 .bank1
 
@@ -3181,10 +3208,12 @@
 
  CMP     R12, R11                   ; If R12 hasn't yet reached the start of the
  BNE     bank1                      ; bank's screen memory in R11, loop back to
-                                    ; keep zeroing screen memory
+                                    ; keep zeroing screen memory until it is all
+                                    ; cleared to black, leaving just the two
+                                    ; lines of text at the top
 
- LDMFD   R13!, {R9, R11-R12, PC}    ; Retrieve registers from the stack and
-                                    ; return from the subroutine
+ LDMFD   R13!, {R9, R11-R12, PC}    ; Retrieve the registers that we used from
+                                    ; the stack and return from the subroutine
 
 ; ******************************************************************************
 ;
@@ -3266,7 +3295,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_9E98                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R6, [R10, R9, LSL #2]      ; 
  B       lab_9EBC                   ; 
@@ -3296,7 +3325,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_9EEC                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R7, [R10, R9, LSL #2]      ; 
  B       lab_9F10                   ; 
@@ -3348,7 +3377,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_9F8C                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R11, [R10, R9, LSL #2]     ; 
  B       lab_9FB0                   ; 
@@ -3418,7 +3447,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_A05C                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R6, [R10, R9, LSL #2]      ; 
  B       lab_A080                   ; 
@@ -3448,7 +3477,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_A0B0                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R7, [R10, R9, LSL #2]      ; 
  B       lab_A0D4                   ; 
@@ -3540,7 +3569,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_A1CC                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R6, [R10, R9, LSL #2]      ; 
  B       lab_A1F0                   ; 
@@ -3570,7 +3599,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_A220                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R7, [R10, R9, LSL #2]      ; 
  B       lab_A244                   ; 
@@ -3611,7 +3640,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_A2A0                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R12, [R10, R9, LSL #2]     ; 
  B       lab_A2C4                   ; 
@@ -3674,7 +3703,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_A354                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R6, [R10, R9, LSL #2]      ; 
  B       lab_A378                   ; 
@@ -3704,7 +3733,7 @@
  CMP     R14, #&40                  ; 
  CMPLO   R9, #&40                   ; 
  BHS     lab_A3A8                   ; 
- LDR     R10, var_9D38              ; 
+ LDR     R10, divisionTableAddr     ; 
  ADD     R10, R10, R14, LSL #8      ; 
  LDR     R7, [R10, R9, LSL #2]      ; 
  B       lab_A3CC                   ; 
