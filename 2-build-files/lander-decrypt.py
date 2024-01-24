@@ -11,42 +11,40 @@
 
 def write_word(addr, word):
     if addr < 0x8000:
-        print("Write error to " + hex(addr))
+        print("Write error to !" + hex(addr))
         return
-    print("!" + hex(addr - 0x8000) + " (" + hex(addr) + ") = " + hex(word))
-    # print("1. " + hex(word & 0xFF))
+    # print("!" + hex(addr - 0x8000) + " (" + hex(addr) + ") = " + hex(word))
     lander_code[addr - 0x8000] = word & 0xFF
-    # print("2. " + hex(((word & (0xFF << 8)) >> 8)))
     lander_code[addr - 0x8000 + 1] = ((word & (0xFF << 8)) >> 8)
-    # print("3. " + hex(((word & (0xFF << 16)) >> 16)))
     lander_code[addr - 0x8000 + 2] = ((word & (0xFF << 16)) >> 16)
-    # print("4. " + hex(((word & (0xFF << 24)) >> 24)))
     lander_code[addr - 0x8000 + 3] = ((word & (0xFF << 24)) >> 24)
 
 
 def write_byte(addr, byte):
-    print("?" + hex(addr - 0x8000) + " (" + hex(addr) + ") = " + hex(byte))
+    if addr < 0x8000:
+        print("Write error to ?" + hex(addr))
+        return
+    # print("?" + hex(addr - 0x8000) + " (" + hex(addr) + ") = " + hex(byte))
     lander_code[addr - 0x8000] = byte & 0xFF
 
 
 def fetch_word(addr):
-    print("Fetch !" + hex(addr - 0x8000) + " (" + hex(addr) + ")")
+    # print("Fetch !" + hex(addr - 0x8000) + " (" + hex(addr) + ")")
     word = lander_code[addr - 0x8000 + 3] << 24
     word += lander_code[addr - 0x8000 + 2] << 16
     word += lander_code[addr - 0x8000 + 1] << 8
     word += lander_code[addr - 0x8000]
-    # print("word fetched " + hex(word))
     return word
 
 
 def fetch_byte(addr):
-    print("Fetch ?" + hex(addr - 0x8000)+ " (" + hex(addr) + ")")
+    # print("Fetch ?" + hex(addr - 0x8000)+ " (" + hex(addr) + ")")
     return lander_code[addr - 0x8000]
 
 
 def run_moved_code():
     global r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13
-    print("run_moved_code() with r4 = " + hex(r4) + ", r7 = " + hex(r7) + ", r8 = " + hex(r8) + ", r9 = " + hex(r9) + ", r10 = " + hex(r10) + ", r11 = " + hex(r11) + ", r12 = " + hex(r12) + ", r13 = " + hex(r13))
+    # print("run_moved_code() with r4 = " + hex(r4) + ", r7 = " + hex(r7) + ", r8 = " + hex(r8) + ", r9 = " + hex(r9) + ", r10 = " + hex(r10) + ", r11 = " + hex(r11) + ", r12 = " + hex(r12) + ", r13 = " + hex(r13))
     # .0x0000EEF0
     while True:
         r9 += r13                                           # 0000EEF0 ADD     R9, R9, R13
@@ -54,13 +52,13 @@ def run_moved_code():
         # .0x0000EEF8
         while True:
             if r10 <= r9:                                   # 0000EEF8 CMP     R10, R9
-                print("run_moved_code() with r10 <= r9 with r10 = " + hex(r10) + ", r9 = " + hex(r10))
+                # print("run_moved_code() with r10 <= r9 with r10 = " + hex(r10) + ", r9 = " + hex(r10))
                 # .0x0000EFE0                               # 0000EEFC BLE     0x0000EFE0
                 if r13 <= 0:                                # 0000EFE0 CMP     R13, #0
                     # .0x0000F008
                     r8 += 0x14                              # 0000F008 ADD     R8, R8, #0x14
                     r8 += 0x2600                            # 0000F00C ADD     R8, R8, #0x2600
-                    print("Jump to r8 = " + hex(r8) + " to run game")
+                    print("[ Info    ] Jump to " + hex(r8) + " to run game")
                     return                                  # 0000F010 MOV     PC, R8
                 else:
                     r6 = r9 - r13                           # 0000EFE8 SUB     R6, R9, R13
@@ -85,7 +83,7 @@ def run_moved_code():
                             break
                     continue                                # 0000F004 B       0x0000EEF8
             else:
-                print("run_moved_code() with r10 > r9 with r10 = " + hex(r10) + ", r9 = " + hex(r10))
+                # print("run_moved_code() with r10 > r9 with r10 = " + hex(r10) + ", r9 = " + hex(r10))
                 r10 -= 1                                    # 0000EF00 LDRB    R6, [R10, #-1]!
                 r6 = fetch_byte(r10)
                 r3 = r6 & 0xF                               # 0000EF04 AND     R3, R6, #0xF
@@ -138,7 +136,7 @@ def run_moved_code():
                     # .0x0000EFAC
                     if r3 == 0:                             # 0000EFAC CMP     R3, #0
                         r5 = r3                             # 0000EFB0 MOVEQ   R5, R3
-                        print("1, r10 = " + hex(r10) + ", r9 = " + hex(r9) + ", r8 = " + hex(r8))
+                        # print("1, r10 = " + hex(r10) + ", r9 = " + hex(r9) + ", r8 = " + hex(r8))
                         write_word(r8 - 4, r5)              # 0000EFB4 STMDBEQ R8!, {R4-R5}
                         write_word(r8 - 8, r4)
                         r8 -= 8
@@ -154,7 +152,7 @@ def run_moved_code():
                     r10 -= 1                                # 0000EFD0 LDRB    R1, [R10, #-1]!
                     r1 = fetch_byte(r10)
                     r5 = r0 | (r1 << 24)                    # 0000EFD4 ORR     R5, R0, R1, LSL #24
-                    print("2, r10 = " + hex(r10) + ", r9 = " + hex(r9) + ", r8 = " + hex(r8))
+                    # print("2, r10 = " + hex(r10) + ", r9 = " + hex(r9) + ", r8 = " + hex(r8))
                     write_word(r8 - 4, r5)                  # 0000EFD8 STMDB   R8!, {R4-R5}
                     write_word(r8 - 8, r4)
                     r8 -= 8
@@ -167,7 +165,7 @@ def run_moved_code():
                     r10 -= 1                                # 0000EF9C LDRB    R1, [R10, #-1]!
                     r1 = fetch_byte(r10)
                     r5 = r1 | (r0 << 8)                     # 0000EFA0 ORR     R5, R1, R0, LSL #8
-                    print("3, r10 = " + hex(r10) + ", r9 = " + hex(r9) + ", r8 = " + hex(r8))
+                    # print("3, r10 = " + hex(r10) + ", r9 = " + hex(r9) + ", r8 = " + hex(r8))
                     write_word(r8 - 4, r5)                  # 0000EFA4 STMDB   R8!, {R4-R5}
                     write_word(r8 - 8, r4)
                     r8 -= 8
@@ -177,7 +175,7 @@ def run_moved_code():
                 r1 = fetch_byte(r10)
                 r0 = r1 | (r0 << 8)                         # 0000EF78 ORR     R0, R1, R0, LSL #8
                 r5 = fetch_word(r12 + (r0 << 2))            # 0000EF7C LDR     R5, [R12, R0, LSL #2]
-                print("4, r10 = " + hex(r10) + ", r9 = " + hex(r9) + ", r8 = " + hex(r8))
+                # print("4, r10 = " + hex(r10) + ", r9 = " + hex(r9) + ", r8 = " + hex(r8))
                 write_word(r8 - 4, r5)                      # 0000EF80 STMDB   R8!, {R4-R5}
                 write_word(r8 - 8, r4)
                 r8 -= 8
@@ -241,7 +239,7 @@ while True:
         r5 += 1
         r0 = r1 - 0xA                       # 0000EE10 SUBS    R0, R1, #0xA
         if r0 >= 0:                         # 0000EE14 BGE     0x0000EE64
-            print("main loop with r0 >= 0 with r0 = " + hex(r0))
+            # print("main loop with r0 >= 0 with r0 = " + hex(r0))
             # .0x0000EE64
             if r1 < 0x5C:                   # 0000EE64 CMP     R1, #0x5C
                 r3 = r3 + r0                # 0000EE68 ADDLT   R3, R3, R0
@@ -270,7 +268,7 @@ while True:
             r6 += 4
             continue                        # 0000EE94 B       0x0000EE04
         elif r1 != 0:                       # 0000EE18 CMP     R1, #0
-            print("main loop with r0 < 0 and r1 != 0 with r0 = " + hex(r0) + ", r1 = " + hex(r1))
+            # print("main loop with r0 < 0 and r1 != 0 with r0 = " + hex(r0) + ", r1 = " + hex(r1))
             # .0x0000EE48                   # 0000EE1C BNE     0x0000EE48
             r11 -= r1                       # 0000EE48 SUB     R11, R11, R1
             r11 += 1                        # 0000EE4C ADD     R11, R11, #1
@@ -286,7 +284,7 @@ while True:
                     break
             continue                        # 0000EE60 B       0x0000EE04
         else:
-            print("main loop else with r0 = " + hex(r0) + ", r1 = " + hex(r1))
+            # print("main loop else with r0 = " + hex(r0) + ", r1 = " + hex(r1))
             r0 = fetch_byte(r5)             # 0000EE20 LDRB    R0, [R5], #1
             r5 += 1
             r1 = fetch_byte(r5)             # 0000EE24 LDRB    R1, [R5], #1
@@ -305,30 +303,24 @@ while True:
 
     # 0x0000EEB0
     if r4 != 0:                             # 0000EEB0 CMP     R4, #0
-        print("main loop with r4 != 0 with r4 = " + hex(r4))
+        # print("main loop with r4 != 0 with r4 = " + hex(r4))
         # .0x0000EECC                       # 0000EEB4 BNE     0x0000EECC
         r11 = r2                            # 0000EECC MOV     R11, R2
         r5 = 0x0000EEF0                     # 0000EED0 ADR     R5, 0x0000EEF0
         r6 = 0x0000F018                     # 0000EED4 ADR     R6, 0x0000F018
         r4 = r7                             # 0000EED8 MOV     R4, R7
-        print("Moving from r5 = " + hex(r5) + " to r7 = " + hex(r7))
+        # print("Moving code from r5 = " + hex(r5) + " to r7 = " + hex(r7))
         # .0x0000EEDC
         while True:
             r0 = fetch_word(r5)             # 0000EEDC LDMIA   R5!, {R0-R3}        # Copy 0x0000EEF0-0x0000F018 to address in r7
             r1 = fetch_word(r5 + 4)
             r2 = fetch_word(r5 + 8)
             r3 = fetch_word(r5 + 12)
-            # print("r0 = " + hex(r0))
-            # print("r1 = " + hex(r1))
-            # print("r2 = " + hex(r2))
-            # print("r3 = " + hex(r3))
             r5 += 16
             write_word(r7, r0)              # 0000EEE0 STMIA   R7!, {R0-R3}
             write_word(r7 + 4, r1)
             write_word(r7 + 8, r2)
             write_word(r7 + 12, r3)
-            # temp = fetch_word(r7)
-            # print("r0-fetch = " + hex(temp))
             r7 += 16
             if r5 < r6:                     # 0000EEE4 CMP     R5, R6
                 continue                    # 0000EEE8 BLT     0x0000EEDC
@@ -337,7 +329,7 @@ while True:
         run_moved_code()                    # 0000EEEC MOV PC, R4                  # Jump to location in r4, i.e. to start of copied code
         break                               # End program
     else:
-        print("main loop with r4 != 0 with r4 = " + hex(r4))
+        # print("main loop with r4 != 0 with r4 = " + hex(r4))
         r11 = r12                           # 0000EEB8 MOV     R11, R12
         r12 = r2                            # 0000EEBC MOV     R12, R2
         r2 = r6                             # 0000EEC0 MOV     R2, R6
