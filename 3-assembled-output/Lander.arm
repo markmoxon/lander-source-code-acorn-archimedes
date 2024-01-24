@@ -1,3 +1,4 @@
+.set CODE, 0x00008000
 .set OS_WriteC, 0x00
 .set OS_WriteS, 0x01
 .set OS_ReadC, 0x04
@@ -7,7 +8,54 @@
 .set OS_BinaryToDecimal, 0x28
 .set stack, 0x000121FC
 .set workspace, stack + 4
-.org     0x00008000
+.set var_030, 0x30
+.set var_034, 0x34
+.set var_038, 0x38
+.set var_03C, 0x3C
+.set var_040, 0x40
+.set var_044, 0x44
+.set var_048, 0x48
+.set var_04C, 0x4C
+.set var_050, 0x50
+.set var_054, 0x54
+.set var_058, 0x58
+.set var_078, 0x78
+.set var_098, 0x98
+.set var_0A0, 0xA0
+.set var_0A4, 0xA4
+.set var_0A8, 0xA8
+.set var_0C4, 0xC4
+.set var_0E4, 0xE4
+.set var_0F0, 0xF0
+.set var_0F4, 0xF4
+.set var_0F8, 0xF8
+.set var_100, 0x100
+.set var_104, 0x104
+.set var_108, 0x108
+.set var_10C, 0x10C
+.set var_110, 0x110
+.set var_114, 0x114
+.set var_118, 0x118
+.set var_11C, 0x11C
+.set var_120, 0x120
+.set var_124, 0x124
+.set var_128, 0x128
+.set var_12C, 0x12C
+.set var_130, 0x130
+.set var_134, 0x134
+.set var_138, 0x138
+.set var_13C, 0x13C
+.set var_140, 0x140
+.set var_144, 0x144
+.set var_148, 0x148
+.set var_150, 0x150
+.set var_154, 0x154
+.set var_158, 0x158
+.set var_15C, 0x15C
+.set var_168, 0x168
+.set var_170, 0x170
+.set var_174, 0x174
+.org     CODE
 var_8000:
 .long    0xFA800000
 .long    0x00000000
@@ -51,14 +99,14 @@ var_805C:
 .long    0x00031F1C
 DrawWorld:
  STMFD   R13!, {R5-R9, R14}
- LDR     R3, [R11, #0x144]
+ LDR     R3, [R11, #var_144]
  AND     R9, R3, #0xFF000000
  SUB     R3, R3, R9
- STR     R9, [R11, #0x150]
- LDR     R4, [R11, #0x13C]
+ STR     R9, [R11, #var_150]
+ LDR     R4, [R11, #var_13C]
  AND     R8, R4, #0xFF000000
  SUB     R4, R4, R8
- STR     R8, [R11, #0x148]
+ STR     R8, [R11, #var_148]
  ADD     R5, R11, #0x160
  LDR     R0, var_800C
  LDMIA   R0, {R0-R2}
@@ -66,30 +114,30 @@ DrawWorld:
  SUB     R2, R2, R3
  STMIA   R5, {R0-R2}
  MOV     R0, #0
- STRB    R0, [R11, #0xE4]
+ STRB    R0, [R11, #var_0E4]
  MOV     R6, #0
  ADD     R7, R11, #0x400
- STRB    R6, [R11, #0xF8]
+ STRB    R6, [R11, #var_0F8]
 lab_80DC:
- LDRB    R1, [R11, #0xE4]
+ LDRB    R1, [R11, #var_0E4]
  LDR     R0, var_8028
  ADD     R0, R0, R1, LSL #1
  LDRB    R10, [R0, #1]
  LDRB    R0, [R0]
- STRB    R0, [R11, #0xF0]
+ STRB    R0, [R11, #var_0F0]
  ADD     R0, R11, #0x160
  LDMIA   R0, {R0-R2}
  ADD     R4, R11, #0x170
  STMIA   R4, {R0-R2}
- LDR     R8, [R11, #0x148]
+ LDR     R8, [R11, #var_148]
  SUB     R8, R8, #0x5800000
  MOV     R0, #0x80000000
- STR     R0, [R11, #0xC4]
+ STR     R0, [R11, #var_0C4]
 lab_8114:
  BL      sub_81F4
- LDR     R14, [R11, #0x140]
+ LDR     R14, [R11, #var_140]
  SUB     R0, R0, R14
- STR     R0, [R11, #0x174]
+ STR     R0, [R11, #var_174]
  ADD     R0, R11, #0x170
  BL      sub_9748
  BHS     lab_8170
@@ -112,28 +160,28 @@ lab_816C:
  LDMFD   R13!, {R6-R8}
 lab_8170:
  SUBS    R10, R10, #1
- LDRNE   R0, [R11, #0x170]
+ LDRNE   R0, [R11, #var_170]
  ADDNE   R0, R0, #0x1000000
- STRNE   R0, [R11, #0x170]
+ STRNE   R0, [R11, #var_170]
  ADDNE   R8, R8, #0x1000000
  BNE     lab_8114
- LDRB    R0, [R11, #0xE4]
+ LDRB    R0, [R11, #var_0E4]
  SUBS    R0, R0, #2
  BLPL    sub_9CDC
- LDRB    R0, [R11, #0xE4]
+ LDRB    R0, [R11, #var_0E4]
  ADDS    R0, R0, #1
  CMP     R0, #0xB
  BEQ     lab_81E0
- STRB    R0, [R11, #0xE4]
- LDR     R0, [R11, #0x168]
+ STRB    R0, [R11, #var_0E4]
+ LDR     R0, [R11, #var_168]
  SUB     R0, R0, #0x1000000
- STR     R0, [R11, #0x168]
+ STR     R0, [R11, #var_168]
  SUB     R9, R9, #0x1000000
  MOV     R0, #0x80000000
  STR     R0, [R7]
- LDRB    R0, [R11, #0xF8]
+ LDRB    R0, [R11, #var_0F8]
  EORS    R0, R0, #1
- STRB    R0, [R11, #0xF8]
+ STRB    R0, [R11, #var_0F8]
  ADDNE   R6, R11, #0x400
  ADDEQ   R6, R11, #0x500
  ADDEQ   R7, R11, #0x400
@@ -146,8 +194,8 @@ lab_81E0:
  BL      sub_9CDC
  LDMFD   R13!, {R5-R9, PC}
 sub_81F4:
- LDR     R0, [R11, #0x100]
- STR     R0, [R11, #0x104]
+ LDR     R0, [R11, #var_100]
+ STR     R0, [R11, #var_104]
  SUB     R0, R8, R9, LSL #1
  LDR     R2, sinTableAddr
  BIC     R0, R0, #0x300000
@@ -190,25 +238,25 @@ sub_81F4:
  CMP     R8, #0x8000000
  CMPLO   R9, #0x8000000
  MOVLO   R0, #0x3500000
- STR     R0, [R11, #0x100]
+ STR     R0, [R11, #var_100]
  MOV     PC, R14
 sub_82AC:
  STMFD   R13!, {R8-R9, R14}
  LDR     R8, [R0]
- LDR     R1, [R11, #0x13C]
+ LDR     R1, [R11, #var_13C]
  ADD     R8, R8, R1
  LDR     R9, [R0, #8]
- LDR     R1, [R11, #0x144]
+ LDR     R1, [R11, #var_144]
  ADD     R9, R9, R1
  SUB     R9, R9, #0x14000000
  BL      sub_81F4
- LDR     R14, [R11, #0x140]
+ LDR     R14, [R11, #var_140]
  SUB     R0, R0, R14
  LDMFD   R13!, {R8-R9, PC}
 sub_82DC:
  STMFD   R13!, {R0-R4, R14}
- LDR     R3, [R11, #0x104]
- LDR     R4, [R11, #0x100]
+ LDR     R3, [R11, #var_104]
+ LDR     R4, [R11, #var_100]
  SUBS    R14, R3, R4
  MOVMI   R14, #0
  AND     R2, R4, #0x10
@@ -226,7 +274,7 @@ sub_82DC:
  MOVEQ   R1, #0
  MOVEQ   R2, #4
  MOVEQ   R0, #0
- LDRB    R8, [R11, #0xE4]
+ LDRB    R8, [R11, #var_0E4]
  ADD     R3, R8, R14, LSR #22
  ADD     R0, R0, R3
  ADD     R1, R1, R3
@@ -256,10 +304,10 @@ sub_82DC:
 DrawPlayer:
  STMDB   R13!, {R14}
  SWI     OS_Mouse
- STRB    R2, [R11, #0x15C]
- LDR     R14, [R11, #0x128]
+ STRB    R2, [R11, #var_15C]
+ LDR     R14, [R11, #var_128]
  CMP     R14, #0
- STREQB  R14, [R11, #0x15C]
+ STREQB  R14, [R11, #var_15C]
  CMP     R0, #0x400
  MOVHS   R0, #0x400
  SUBHS   R0, R0, #1
@@ -273,8 +321,8 @@ DrawPlayer:
  MOVHS   R0, #0x40000000
  SUBHS   R0, R0, #1
  MOV     R0, R0, LSL #1
- LDR     R2, [R11, #0x158]
- LDR     R3, [R11, #0x154]
+ LDR     R2, [R11, #var_158]
+ LDR     R3, [R11, #var_154]
  SUBS    R4, R3, R1
  BMI     lab_8400
  CMP     R4, #0x30000000
@@ -295,19 +343,19 @@ lab_841C:
 lab_8424:
  SUB     R0, R2, R5, ASR #1
  SUB     R1, R3, R4, ASR #1
- STR     R0, [R11, #0x158]
- STR     R1, [R11, #0x154]
+ STR     R0, [R11, #var_158]
+ STR     R1, [R11, #var_154]
  BL      sub_93E4
  ADD     R14, R11, #0x94
  LDMIA   R14, {R0-R5}
  CMN     R1, #0x34000000
- LDRLTB  R9, [R11, #0x15C]
+ LDRLTB  R9, [R11, #var_15C]
  BICLT   R9, R9, #6
- STRLTB  R9, [R11, #0x15C]
- LDR     R6, [R11, #0x34]
- LDR     R7, [R11, #0x40]
- LDR     R8, [R11, #0x4C]
- LDRB    R9, [R11, #0x15C]
+ STRLTB  R9, [R11, #var_15C]
+ LDR     R6, [R11, #var_034]
+ LDR     R7, [R11, #var_040]
+ LDR     R8, [R11, #var_04C]
+ LDRB    R9, [R11, #var_15C]
  TST     R9, #4
  SUB     R3, R3, R3, ASR #6
  SUBNE   R3, R3, R6, ASR #11
@@ -322,7 +370,7 @@ lab_8424:
  SUBNE   R3, R3, R6, ASR #13
  SUBNE   R4, R4, R7, ASR #13
  SUBNE   R5, R5, R8, ASR #13
- LDR     R9, [R11, #0x12C]
+ LDR     R9, [R11, #var_12C]
  ADD     R4, R4, R9
  STMIA   R14, {R0-R8}
  CMP     R1, #0
@@ -335,7 +383,7 @@ lab_8424:
  SUB     R9, R9, #0x5000000
  BL      sub_81F4
  SUB     R0, R0, #0x640000
- LDR     R1, [R11, #0x98]
+ LDR     R1, [R11, #var_098]
  SUB     R14, R0, R1
  CMP     R14, #0x1800000
  BHS     lab_850C
@@ -359,14 +407,14 @@ lab_850C:
  MOVMI   R1, #0
  ADD     R3, R11, #0x30
  LDR     R14, dataTable3Addr
- STR     R14, [R11, #0x110]
+ STR     R14, [R11, #var_110]
  MOV     R0, #0
  MOV     R2, #0xF000000
  BL      sub_8EC4
- LDRB    R10, [R11, #0x120]
+ LDRB    R10, [R11, #var_120]
  CMP     R10, #0
  BLNE    sub_86C8
- LDRB    R10, [R11, #0x15C]
+ LDRB    R10, [R11, #var_15C]
  TST     R10, #6
  BEQ     lab_85F4
  ADD     R14, R11, #0xA0
@@ -414,14 +462,14 @@ lab_850C:
 lab_85F4:
  TST     R10, #1
  BEQ     lab_8650
- LDR     R8, [R11, #0x124]
+ LDR     R8, [R11, #var_124]
  SUB     R8, R8, #1
- STR     R8, [R11, #0x124]
+ STR     R8, [R11, #var_124]
  ADD     R14, R11, #0x94
  LDMIA   R14, {R0-R5}
- LDR     R6, [R11, #0x30]
- LDR     R7, [R11, #0x3C]
- LDR     R8, [R11, #0x48]
+ LDR     R6, [R11, #var_030]
+ LDR     R7, [R11, #var_03C]
+ LDR     R8, [R11, #var_048]
  ADD     R3, R3, R6, ASR #8
  ADD     R4, R4, R7, ASR #8
  ADD     R5, R5, R8, ASR #8
@@ -454,32 +502,32 @@ sub_8654:
  CMP     R3, #0x200000
  MOVHS   PC, R14
  MOV     R1, #0x2EC0000
- LDR     R3, [R11, #0x128]
+ LDR     R3, [R11, #var_128]
  ADD     R3, R3, #0x20
  CMP     R3, #0x1400
- STRLO   R3, [R11, #0x128]
+ STRLO   R3, [R11, #var_128]
  MOV     R3, #0
  MOV     R4, #0
  MOV     R5, #0
- STR     R3, [R11, #0xA0]
- STR     R4, [R11, #0xA4]
- STR     R5, [R11, #0xA8]
- STR     R1, [R11, #0x98]
+ STR     R3, [R11, #var_0A0]
+ STR     R4, [R11, #var_0A4]
+ STR     R5, [R11, #var_0A8]
+ STR     R1, [R11, #var_098]
  MOV     PC, R14
 sub_86C4:
  LDMFD   R13!, {R10, R12}
 sub_86C8:
  MOV     R0, #0
- STR     R0, [R11, #0x130]
+ STR     R0, [R11, #var_130]
  MOV     R0, #0x1E
- STR     R0, [R11, #0x11C]
+ STR     R0, [R11, #var_11C]
  MOV     R8, #0x51
  ADD     R0, R11, #0x94
  LDMIA   R0, {R0-R2}
  SUB     R1, R1, #0x500000
  BL      sub_8CBC
 lab_86EC:
- LDR     R0, [R11, #0x118]
+ LDR     R0, [R11, #var_118]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
  BL      sub_93E4
@@ -489,16 +537,16 @@ lab_86EC:
  BL      DrawWorld
  BL      PrintScore
  BL      SwitchScreenBank
- LDR     R0, [R11, #0x118]
+ LDR     R0, [R11, #var_118]
  ADD     R0, R0, #1
- STR     R0, [R11, #0x118]
- LDR     R0, [R11, #0x11C]
+ STR     R0, [R11, #var_118]
+ LDR     R0, [R11, #var_11C]
  SUBS    R0, R0, #1
- STR     R0, [R11, #0x11C]
+ STR     R0, [R11, #var_11C]
  BPL     lab_86EC
- LDR     R0, [R11, #0x134]
+ LDR     R0, [R11, #var_134]
  SUBS    R0, R0, #1
- STR     R0, [R11, #0x134]
+ STR     R0, [R11, #var_134]
  ADD     R13, R13, #4
  BNE     lab_A7F8
  MOV     R0, #0x70
@@ -549,7 +597,7 @@ lab_880C:
  ADD     R1, R1, R4
  ADD     R2, R2, R5
  TST     R7, #0x100000
- LDRNE   R14, [R11, #0x12C]
+ LDRNE   R14, [R11, #var_12C]
  ADDNE   R4, R4, R14
  TST     R7, #0x10000
  BLNE    sub_893C
@@ -564,12 +612,12 @@ lab_880C:
  CMP     R1, R9
  BLGT    sub_8998
  STMIA   R10!, {R0-R7}
- LDR     R8, [R11, #0x13C]
+ LDR     R8, [R11, #var_13C]
  SUB     R0, R0, R8
- LDR     R8, [R11, #0x144]
+ LDR     R8, [R11, #var_144]
  SUB     R2, R2, R8
  ADD     R2, R2, #0x14000000
- LDR     R8, [R11, #0x140]
+ LDR     R8, [R11, #var_140]
  SUB     R1, R1, R8
  CMP     R2, #0x14000000
  BHS     lab_8800
@@ -582,7 +630,7 @@ lab_880C:
  TST     R7, #0x20000
  BEQ     lab_8904
  STMFD   R13!, {R0-R2}
- LDR     R14, [R11, #0x130]
+ LDR     R14, [R11, #var_130]
  CMP     R14, #0
  BEQ     lab_88E8
  CMP     R0, #0
@@ -592,9 +640,9 @@ lab_880C:
  CMP     R0, #0x1000000
  CMPLO   R2, #0x1000000
  BHS     lab_88E8
- LDR     R0, [R11, #0x140]
+ LDR     R0, [R11, #var_140]
  ADD     R1, R1, R0
- LDR     R0, [R11, #0x98]
+ LDR     R0, [R11, #var_098]
  SUBS    R1, R1, R0
  RSBMI   R1, R1, #0
  CMP     R1, #0x1000000
@@ -602,13 +650,13 @@ lab_88E8:
  LDMFD   R13!, {R0-R2}
  BLO     sub_86C4
  LDR     R14, dataTable1Addr
- STR     R14, [R11, #0x110]
+ STR     R14, [R11, #var_110]
  ADD     R3, R11, #0x30
  BL      sub_8EC4
  B       lab_8800
 lab_8904:
  STMFD   R13!, {R0-R2, R7}
- LDR     R14, [R11, #0x140]
+ LDR     R14, [R11, #var_140]
  SUB     R1, R9, R14
  MOV     R8, R2
  BL      sub_9670
@@ -663,7 +711,7 @@ sub_89C8:
  CMP     R8, #0x1800000
  MOVHS   PC, R14
  STMDB   R13!, {R2}
- STR     R14, [R11, #0xF4]
+ STR     R14, [R11, #var_0F4]
  ADD     R14, R11, #0x4400
  AND     R2, R2, #0xFF000000
  ADD     R14, R14, R0, LSR #24
@@ -671,15 +719,15 @@ sub_89C8:
  LDMIA   R13!, {R2}
  LDRB    R8, [R14]
  CMP     R8, #0xFF
- LDREQ   PC, [R11, #0xF4]
+ LDREQ   PC, [R11, #var_0F4]
  CMP     R8, #0xC
  BHS     lab_8A28
  ADD     R8, R8, #0xC
  STRB    R8, [R14]
  TST     R7, #0x20000
- LDREQ   R8, [R11, #0x124]
+ LDREQ   R8, [R11, #var_124]
  ADDEQ   R8, R8, #0x14
- STREQ   R8, [R11, #0x124]
+ STREQ   R8, [R11, #var_124]
  MOV     R8, #0x14
  BL      sub_8CBC
  B       lab_8A58
@@ -699,16 +747,16 @@ lab_8A4C:
  SUBS    R8, R8, #1
  BNE     lab_8A4C
 lab_8A58:
- LDR     R8, [R11, #0x108]
+ LDR     R8, [R11, #var_108]
  SUB     R8, R8, #0x20
- STR     R8, [R11, #0x108]
+ STR     R8, [R11, #var_108]
  LDMIA   R8, {R0-R7}
  STMIA   R10, {R0-R7}
  MOV     R7, #0
  STR     R7, [R8, #0x1C]
- LDR     R8, [R11, #0x10C]
+ LDR     R8, [R11, #var_10C]
  SUB     R8, R8, #1
- STR     R8, [R11, #0x10C]
+ STR     R8, [R11, #var_10C]
  B       lab_8800
 sub_8A84:
  STMFD   R13!, {R8, R14}
@@ -733,23 +781,23 @@ lab_8AA0:
  ADD     R6, R6, R0, LSR R9
  LDMFD   R13!, {R0-R1}
 lab_8AC8:
- LDR     R8, [R11, #0x10C]
+ LDR     R8, [R11, #var_10C]
  CMP     R8, #0x1E4
  LDMHSFD R13!, {R8, PC}
  ADD     R8, R8, #1
- STR     R8, [R11, #0x10C]
- LDR     R8, [R11, #0x108]
+ STR     R8, [R11, #var_10C]
+ LDR     R8, [R11, #var_108]
  STMIA   R8!, {R0-R7}
- STR     R8, [R11, #0x108]
+ STR     R8, [R11, #var_108]
  MOV     R9, #0
  STR     R9, [R8, #0x1C]
  LDMFD   R13!, {R8, PC}
 sub_8AF4:
  ADD     R0, R11, #0x700
- STR     R0, [R11, #0x108]
+ STR     R0, [R11, #var_108]
  MOV     R1, #0
  STR     R1, [R0, #0x1C]
- STR     R1, [R11, #0x10C]
+ STR     R1, [R11, #var_10C]
  MOV     PC, R14
 sub_8B0C:
  STMFD   R13!, {R0-R2, R8, R14}
@@ -877,18 +925,18 @@ lab_8CC0:
 sub_8CDC:
  STMDB   R13!, {R14}
  MOV     R8, #0x32
- LDR     R0, [R11, #0x13C]
+ LDR     R0, [R11, #var_13C]
  MOV     R1, #0
- LDR     R2, [R11, #0x144]
+ LDR     R2, [R11, #var_144]
  SUB     R2, R2, #0x6000000
  BL      sub_8CBC
  LDMIA   R13!, {PC}
 sub_8CFC:
  STMFD   R13!, {R6-R9, R14}
  MOV     R8, #0x96
- LDR     R0, [R11, #0x13C]
+ LDR     R0, [R11, #var_13C]
  MOV     R1, #0
- LDR     R2, [R11, #0x144]
+ LDR     R2, [R11, #var_144]
  SUB     R2, R2, #0x6000000
 lab_8D14:
  BL      sub_8C40
@@ -897,14 +945,14 @@ lab_8D14:
  LDMFD   R13!, {R6-R9, PC}
 sub_8D24:
  STMFD   R13!, {R6-R9, R14}
- LDR     R0, [R11, #0x13C]
+ LDR     R0, [R11, #var_13C]
  MVN     R1, #0x10000000
- LDR     R2, [R11, #0x144]
+ LDR     R2, [R11, #var_144]
  SUB     R2, R2, #0x6000000
  BL      sub_8BD8
  LDMFD   R13!, {R6-R9, PC}
 sub_8D40:
- LDR     R4, [R11, #0x124]
+ LDR     R4, [R11, #var_124]
  SUBS    R4, R4, #0x320
  MOVMI   PC, R14
  STMDB   R13!, {R14}
@@ -912,9 +960,9 @@ sub_8D40:
  MOV     R0, R0, LSR #18
  CMP     R0, R4
  LDMHSIA R13!, {PC}
- LDR     R0, [R11, #0x13C]
+ LDR     R0, [R11, #var_13C]
  MVN     R1, #0x20000000
- LDR     R2, [R11, #0x144]
+ LDR     R2, [R11, #var_144]
  SUB     R2, R2, #0x6000000
  BL      sub_8BD8
  LDMIA   R13!, {PC}
@@ -946,16 +994,16 @@ var_8D78:
 .long    dataTable6
 DrawObjects:
  STMFD   R13!, {R5-R12, R14}
- LDR     R0, [R11, #0x13C]
+ LDR     R0, [R11, #var_13C]
  AND     R8, R0, #0xFF000000
- LDR     R1, [R11, #0x144]
+ LDR     R1, [R11, #var_144]
  AND     R9, R1, #0xFF000000
  SUB     R8, R8, #0x5800000
- STR     R8, [R11, #0x148]
+ STR     R8, [R11, #var_148]
  MOV     R7, #0xB
 lab_8DFC:
  MOV     R6, #0xD
- LDR     R8, [R11, #0x148]
+ LDR     R8, [R11, #var_148]
 lab_8E04:
  ADD     R14, R11, #0x4400
  ADD     R14, R14, R8, LSR #24
@@ -972,22 +1020,22 @@ lab_8E1C:
  BNE     lab_8DFC
  LDMFD   R13!, {R5-R12, PC}
 lab_8E38:
- STRB    R0, [R11, #0xF4]
+ STRB    R0, [R11, #var_0F4]
  ADD     R0, PC, R0, LSL #2
  LDR     R14, [R0, #-0xCC]
- STR     R14, [R11, #0x110]
+ STR     R14, [R11, #var_110]
  BL      sub_81F4
  MOV     R1, R0
  CMP     R0, #0x5500000
  BEQ     lab_8E1C
- LDR     R14, [R11, #0x13C]
+ LDR     R14, [R11, #var_13C]
  SUB     R0, R8, R14
- LDR     R14, [R11, #0x144]
+ LDR     R14, [R11, #var_144]
  SUB     R2, R9, R14
  ADD     R2, R2, #0x14000000
- LDR     R14, [R11, #0x140]
+ LDR     R14, [R11, #var_140]
  SUB     R1, R1, R14
- LDRB    R14, [R11, #0xF4]
+ LDRB    R14, [R11, #var_0F4]
  CMP     R14, #0xC
  BHS     lab_8E8C
 lab_8E80:
@@ -995,11 +1043,11 @@ lab_8E80:
  BL      sub_8EC4
  B       lab_8E1C
 lab_8E8C:
- LDR     R14, [R11, #0x118]
+ LDR     R14, [R11, #var_118]
  TST     R14, #3
  BNE     lab_8E80
  STMFD   R13!, {R0-R7, R9}
- LDR     R14, [R11, #0x140]
+ LDR     R14, [R11, #var_140]
  ADD     R1, R1, R14
  MOV     R0, R8
  MOV     R2, R9
@@ -1025,7 +1073,7 @@ sub_8EC4:
  ORRS    R4, R4, #1
  MOVPL   R4, R4, LSL #1
  MOV     R5, #0
- STRB    R5, [R11, #0x120]
+ STRB    R5, [R11, #var_120]
 lab_8EFC:
  MOVS    R4, R4, LSL #1
  ADDPL   R5, R5, #1
@@ -1043,12 +1091,12 @@ lab_8EFC:
  STMNEIA R4!, {R0-R2}
  LDMNEIA R3!, {R0-R2}
  STMNEIA R4!, {R0-R2}
- LDR     R0, [R11, #0x110]
+ LDR     R0, [R11, #var_110]
  LDR     R8, [R0]
  ADD     R9, R0, #0x10
  ADD     R10, R11, #0x600
  LDRB    R1, [R0, #0xC]
- STRB    R1, [R11, #0x114]
+ STRB    R1, [R11, #var_114]
 lab_8F54:
  LDMIA   R9!, {R2-R4}
  ADD     R0, R11, #0x54
@@ -1062,17 +1110,17 @@ lab_8F54:
  STMIA   R10!, {R0-R1}
  ADD     R0, R11, #0x74
  BL      sub_82AC
- STR     R0, [R11, #0x78]
+ STR     R0, [R11, #var_078]
  ADD     R0, R11, #0x74
  BL      sub_9748
  STMIA   R10!, {R0-R1}
  LDR     R14, [R10, #-0xC]
  CMP     R14, R1
  MVNHS   R14, #0
- STRHSB  R14, [R11, #0x120]
+ STRHSB  R14, [R11, #var_120]
  SUBS    R8, R8, #1
  BNE     lab_8F54
- LDR     R1, [R11, #0x110]
+ LDR     R1, [R11, #var_110]
  LDR     R0, [R1, #8]
  ADD     R9, R1, R0
  LDR     R8, [R1, #4]
@@ -1081,8 +1129,8 @@ lab_8FBC:
  ADD     R9, R9, #0xC
  ADD     R1, R11, #0x54
  BL      sub_9254
- LDR     R1, [R11, #0x58]
- LDRB    R14, [R11, #0x114]
+ LDR     R1, [R11, #var_058]
+ LDRB    R14, [R11, #var_114]
  TST     R14, #1
  MVNEQ   R3, #0
  MVNEQ   R1, #0
@@ -1092,7 +1140,7 @@ lab_8FBC:
  STMFD   R13!, {R8-R9, R11-R12}
  CMP     R1, #0
  BPL     lab_9038
- LDRB    R14, [R11, #0x114]
+ LDRB    R14, [R11, #var_114]
  TST     R14, #2
  BEQ     lab_9038
  STMFD   R13!, {R3, R9, R11}
@@ -1113,8 +1161,8 @@ lab_9038:
  BPL     lab_90F4
  LDMIA   R9, {R4-R7}
  ADD     R10, R11, #0x600
- LDR     R1, [R11, #0x58]
- LDR     R0, [R11, #0x54]
+ LDR     R1, [R11, #var_058]
+ LDR     R0, [R11, #var_054]
  RSB     R1, R1, #0x80000000
  MOV     R1, R1, LSR #28
  CMP     R0, #0
@@ -1163,15 +1211,15 @@ lab_90F4:
  BNE     lab_8FBC
  LDMFD   R13!, {R6-R12, PC}
 PrintScore:
- LDR     R0, [R11, #0x124]
+ LDR     R0, [R11, #var_124]
  ADD     R1, R11, #0x200
  MOV     R2, #0x13
  CMP     R0, #0x400
  MOVHS   R4, #0x50000
- STRHS   R4, [R11, #0x12C]
+ STRHS   R4, [R11, #var_12C]
  CMP     R0, #0x5D0
  MOVHS   R4, #0x70000
- STRHS   R4, [R11, #0x12C]
+ STRHS   R4, [R11, #var_12C]
  SWI     OS_BinaryToDecimal
  MOV     R0, #0x1E
  SWI     OS_WriteC
@@ -1234,11 +1282,11 @@ squareRootTableAddr:
 .long    squareRootTable
 DrawFuelLevel:
  STMFD   R13!, {R10-R12, R14}
- LDR     R1, [R11, #0x128]
- LDRB    R2, [R11, #0x15C]
+ LDR     R1, [R11, #var_128]
+ LDRB    R2, [R11, #var_15C]
  SUBS    R1, R1, R2
  MOVMI   R1, #0
- STR     R1, [R11, #0x128]
+ STR     R1, [R11, #var_128]
  LDR     R7, screenAddr
  ADD     R11, R7, #0x140
  LDR     R8, var_91EC
@@ -1258,7 +1306,7 @@ var_924C:
 var_9250:
 .long    var_802C
 sub_9254:
- LDRB    R2, [R11, #0x114]
+ LDRB    R2, [R11, #var_114]
  TST     R2, #1
  LDMEQIA R0, {R2-R4}
  STMEQIA R1, {R2-R4}
@@ -1400,7 +1448,7 @@ lab_9450:
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
- STR     R4, [R11, #0x30]
+ STR     R4, [R11, #var_030]
  EOR     R14, R0, R1
  TEQ     R0, #0
  RSBMI   R0, R0, #0
@@ -1419,7 +1467,7 @@ lab_9498:
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
- STR     R4, [R11, #0x4C]
+ STR     R4, [R11, #var_04C]
  LDMIA   R13, {R0-R3}
  EOR     R14, R1, R2
  TEQ     R1, #0
@@ -1440,7 +1488,7 @@ lab_94E4:
  TEQ     R14, #0
  RSBMI   R4, R4, #0
  RSB     R4, R4, #0
- STR     R4, [R11, #0x48]
+ STR     R4, [R11, #var_048]
  EOR     R14, R0, R3
  TEQ     R0, #0
  RSBMI   R0, R0, #0
@@ -1460,14 +1508,14 @@ lab_9530:
  TEQ     R14, #0
  RSBMI   R4, R4, #0
  RSB     R4, R4, #0
- STR     R4, [R11, #0x34]
+ STR     R4, [R11, #var_034]
  LDMFD   R13!, {R0-R3, R14}
- STR     R0, [R11, #0x3C]
- STR     R1, [R11, #0x38]
- STR     R2, [R11, #0x40]
- STR     R3, [R11, #0x50]
+ STR     R0, [R11, #var_03C]
+ STR     R1, [R11, #var_038]
+ STR     R2, [R11, #var_040]
+ STR     R3, [R11, #var_050]
  MOV     R0, #0
- STR     R0, [R11, #0x44]
+ STR     R0, [R11, #var_044]
  MOV     PC, R14
 sub_9574:
  STMDB   R13!, {R14}
@@ -2695,26 +2743,26 @@ lab_A6E4:
 .byte    0
 .balign 4
  LDR     R0, var_A578
- STR     R0, [R11, #0x124]
+ STR     R0, [R11, #var_124]
  LDR     R0, var_A57C
- STR     R0, [R11, #0x138]
+ STR     R0, [R11, #var_138]
 lab_A734:
- LDR     R0, [R11, #0x138]
- LDR     R1, [R11, #0x124]
+ LDR     R0, [R11, #var_138]
+ LDR     R1, [R11, #var_124]
  CMP     R1, R0
  MOVPL   R0, R1
- STRHS   R0, [R11, #0x138]
+ STRHS   R0, [R11, #var_138]
  MOV     R1, #0x23
  MOV     R2, #1
  BL      sub_9160
  LDR     R0, var_A578
- STR     R0, [R11, #0x124]
+ STR     R0, [R11, #var_124]
  LDR     R0, var_A580
- STR     R0, [R11, #0x128]
+ STR     R0, [R11, #var_128]
  MOV     R0, #0x30000
- STR     R0, [R11, #0x12C]
+ STR     R0, [R11, #var_12C]
  MOV     R0, #3
- STR     R0, [R11, #0x134]
+ STR     R0, [R11, #var_134]
  MVN     R0, #0
  MVN     R1, #0
  MVN     R2, #0
@@ -2752,18 +2800,18 @@ lab_A7E0:
  STRB    R0, [R6, #0x307]
  STRB    R0, [R6, #0x507]
 lab_A7F8:
- LDR     R0, [R11, #0x134]
+ LDR     R0, [R11, #var_134]
  MOV     R1, #0x1E
  MOV     R2, #1
  BL      sub_9160
  MVN     R0, #0
- STR     R0, [R11, #0x130]
+ STR     R0, [R11, #var_130]
  MOV     R0, #0
- STR     R0, [R11, #0x13C]
- STR     R0, [R11, #0x144]
- STR     R0, [R11, #0x154]
+ STR     R0, [R11, #var_13C]
+ STR     R0, [R11, #var_144]
+ STR     R0, [R11, #var_154]
  MOV     R0, #1
- STR     R0, [R11, #0x158]
+ STR     R0, [R11, #var_158]
  MOV     R0, #0x4000000
  MOV     R2, R0
  ADD     R3, R11, #0x94
@@ -2782,7 +2830,7 @@ MainLoop:
  TEQ     R2, #0x1B
  BEQ     EndGame
  BL      DrawPlayer
- LDR     R0, [R11, #0x118]
+ LDR     R0, [R11, #var_118]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
  BL      sub_93E4
@@ -2794,9 +2842,9 @@ MainLoop:
  BL      PrintScore
  BL      DrawFuelLevel
  BL      SwitchScreenBank
- LDR     R14, [R11, #0x118]
+ LDR     R14, [R11, #var_118]
  ADD     R14, R14, #1
- STR     R14, [R11, #0x118]
+ STR     R14, [R11, #var_118]
  B       MainLoop
 EndGame:
  MOV     R0, #0x7E
