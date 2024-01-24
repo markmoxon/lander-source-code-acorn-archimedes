@@ -1,0 +1,8 @@
+| !Run file for !Lander, version 0.41 (16-Dec-88)
+WimpSlot 0 0
+RMEnsure MemAlloc 0 RMLoad <Obey$Dir>.MemAlloc
+Echo <22><141>
+ScreenSize 160 Error Not enough memory to run Lander
+Echo <22><141>
+WimpSlot -min 168K -max 168K
+Run <Obey$Dir>.!RunImage

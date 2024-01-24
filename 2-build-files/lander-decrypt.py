@@ -341,9 +341,9 @@ print("[ Decrypt ] 4-reference-binaries/riscos2/!RunImage")
 
 # Write output file for !RunImage.decrypt
 
-output_file = open("3-assembled-output/!RunImage.decrypt.bin", "wb")
+output_file = open("3-assembled-output/!RunImage.unprot.bin", "wb")
 output_file.write(lander_code[0: 0x9A10])
 output_file.close()
 
-print("[ Save    ] 3-assembled-output/!RunImage.decrypt.bin")
+print("[ Save    ] 3-assembled-output/!RunImage.unprot.bin")
 print()
