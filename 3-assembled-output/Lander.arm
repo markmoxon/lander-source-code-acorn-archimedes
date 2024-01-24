@@ -49,7 +49,7 @@ var_805C:
 .long    0x0002FD74
 .long    0x00030E48
 .long    0x00031F1C
-sub_808C:
+DrawWorld:
  STMFD   R13!, {R5-R9, R14}
  LDR     R3, [R11, #0x144]
  AND     R9, R3, #0xFF000000
@@ -253,7 +253,7 @@ sub_82DC:
  ORR     R8, R8, R8, LSL #16
  ORR     R8, R8, R8, LSL #24
  LDMFD   R13!, {R0-R4, PC}
-sub_8398:
+DrawPlayer:
  STMDB   R13!, {R14}
  SWI     OS_Mouse
  STRB    R2, [R11, #0x15C]
@@ -483,11 +483,11 @@ lab_86EC:
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
  BL      sub_93E4
- BL      sub_87F4
- BL      sub_8DDC
+ BL      DrawExhaustAndBullets
+ BL      DrawObjects
  BL      sub_9CFC
- BL      sub_808C
- BL      sub_9108
+ BL      DrawWorld
+ BL      PrintScore
  BL      SwitchScreenBank
  LDR     R0, [R11, #0x118]
  ADD     R0, R0, #1
@@ -534,7 +534,7 @@ lab_86EC:
 var_87EC:
 .long    var_805C
 .long    var_802C
-sub_87F4:
+DrawExhaustAndBullets:
  STMFD   R13!, {R10, R12, R14}
  ADD     R10, R11, #0x700
  LDR     R12, var_87EC
@@ -944,7 +944,7 @@ var_8D78:
 .long    dataTable6
 .long    dataTable6
 .long    dataTable6
-sub_8DDC:
+DrawObjects:
  STMFD   R13!, {R5-R12, R14}
  LDR     R0, [R11, #0x13C]
  AND     R8, R0, #0xFF000000
@@ -1162,7 +1162,7 @@ lab_90F4:
  SUBS    R8, R8, #1
  BNE     lab_8FBC
  LDMFD   R13!, {R6-R12, PC}
-sub_9108:
+PrintScore:
  LDR     R0, [R11, #0x124]
  ADD     R1, R11, #0x200
  MOV     R2, #0x13
@@ -1232,7 +1232,7 @@ arctanTableAddr:
 .long    arctanTable
 squareRootTableAddr:
 .long    squareRootTable
-sub_91FC:
+DrawFuelLevel:
  STMFD   R13!, {R10-R12, R14}
  LDR     R1, [R11, #0x128]
  LDRB    R2, [R11, #0x15C]
@@ -2781,18 +2781,18 @@ MainLoop:
  SWI     OS_Byte
  TEQ     R2, #0x1B
  BEQ     EndGame
- BL      sub_8398
+ BL      DrawPlayer
  LDR     R0, [R11, #0x118]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
  BL      sub_93E4
  BL      sub_8D40
- BL      sub_87F4
- BL      sub_8DDC
+ BL      DrawExhaustAndBullets
+ BL      DrawObjects
  BL      sub_9CFC
- BL      sub_808C
- BL      sub_9108
- BL      sub_91FC
+ BL      DrawWorld
+ BL      PrintScore
+ BL      DrawFuelLevel
  BL      SwitchScreenBank
  LDR     R14, [R11, #0x118]
  ADD     R14, R14, #1

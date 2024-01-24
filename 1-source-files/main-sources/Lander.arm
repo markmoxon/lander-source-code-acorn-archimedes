@@ -174,14 +174,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: sub_808C
+;       Name: DrawWorld
 ;       Type: Subroutine
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.sub_808C
+.DrawWorld
 
  STMFD   R13!, {R5-R9, R14}         ; 
  LDR     R3, [R11, #&144]           ; 
@@ -432,14 +432,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: sub_8398
+;       Name: DrawPlayer
 ;       Type: Subroutine
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.sub_8398
+.DrawPlayer
 
  STMDB   R13!, {R14}                ; 
  SWI     OS_Mouse                   ; 
@@ -717,16 +717,28 @@
 
 .lab_86EC
 
+                                    ; This is a repeat of the main loop but with
+                                    ; minor differences (e.g. there is no call
+                                    ; to DrawFuelLevel)
+
  LDR     R0, [R11, #&118]           ; 
  MOV     R0, R0, LSL #24            ; 
  MOV     R1, R0, LSL #1             ; 
- BL      sub_93E4                   ; 
- BL      sub_87F4                   ; 
- BL      sub_8DDC                   ; 
+
+ BL      sub_93E4                   ;
+
+ BL      DrawExhaustAndBullets      ; 
+
+ BL      DrawObjects                ; 
+
  BL      sub_9CFC                   ; 
- BL      sub_808C                   ; 
- BL      sub_9108                   ; 
+
+ BL      DrawWorld                  ; 
+
+ BL      PrintScore                 ; 
+
  BL      SwitchScreenBank           ; 
+
  LDR     R0, [R11, #&118]           ; 
  ADD     R0, R0, #1                 ; 
  STR     R0, [R11, #&118]           ; 
@@ -734,6 +746,7 @@
  SUBS    R0, R0, #1                 ; 
  STR     R0, [R11, #&11C]           ; 
  BPL     lab_86EC                   ; 
+
  LDR     R0, [R11, #&134]           ; 
  SUBS    R0, R0, #1                 ; 
  STR     R0, [R11, #&134]           ; 
@@ -791,14 +804,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: sub_87F4
+;       Name: DrawExhaustAndBullets
 ;       Type: Subroutine
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.sub_87F4
+.DrawExhaustAndBullets
 
  STMFD   R13!, {R10, R12, R14}      ; 
  ADD     R10, R11, #&700            ; 
@@ -1427,14 +1440,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: sub_8DDC
+;       Name: DrawObjects
 ;       Type: Subroutine
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.sub_8DDC
+.DrawObjects
 
  STMFD   R13!, {R5-R12, R14}        ; 
  LDR     R0, [R11, #&13C]           ; 
@@ -1711,14 +1724,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: sub_9108
+;       Name: PrintScore
 ;       Type: Subroutine
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.sub_9108
+.PrintScore
 
  LDR     R0, [R11, #&124]           ; 
  ADD     R1, R11, #&200             ; 
@@ -1853,14 +1866,14 @@
 
 ; ******************************************************************************
 ;
-;       Name: sub_91FC
+;       Name: DrawFuelLevel
 ;       Type: Subroutine
 ;   Category: ???
 ;    Summary: ???
 ;
 ; ******************************************************************************
 
-.sub_91FC
+.DrawFuelLevel
 
  STMFD   R13!, {R10-R12, R14}       ; 
  LDR     R1, [R11, #&128]           ; 
@@ -4264,20 +4277,31 @@
  TEQ     R2, #&1B                   ; 
  BEQ     EndGame                    ; 
 
- BL      sub_8398                   ; 
+ BL      DrawPlayer                 ; Commenting this out stops player appearing
+                                    ; and also stops flying
 
  LDR     R0, [R11, #&118]           ; 
  MOV     R0, R0, LSL #24            ; 
  MOV     R1, R0, LSL #1             ; 
 
- BL      sub_93E4                   ; 
- BL      sub_8D40                   ; 
- BL      sub_87F4                   ; 
- BL      sub_8DDC                   ; 
- BL      sub_9CFC                   ; 
- BL      sub_808C                   ; 
- BL      sub_9108                   ; 
- BL      sub_91FC                   ; 
+ BL      sub_93E4                   ; Commenting this out does nothing obvious
+
+ BL      sub_8D40                   ; Commenting this out does nothing obvious
+
+ BL      DrawExhaustAndBullets      ; Comment this out hides engine exhaust and
+                                    ; bullets
+
+ BL      DrawObjects                ; Commenting this out hides trees, buildings
+                                    ; etc.
+
+ BL      sub_9CFC                   ; Commenting this out crashes game
+
+ BL      DrawWorld                  ; Commenting this out hides everything
+
+ BL      PrintScore                 ; Commenting this out stops score updating
+
+ BL      DrawFuelLevel              ; Commenting this out hides fuel bar
+
  BL      SwitchScreenBank           ; 
 
  LDR     R14, [R11, #&118]          ; 

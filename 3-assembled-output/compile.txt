@@ -54,7 +54,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008080 74FD0200        	    49: .long    0x0002FD74
 00:00008084 480E0300        	    50: .long    0x00030E48
 00:00008088 1C1F0300        	    51: .long    0x00031F1C
-                            	    52: sub_808C:
+                            	    52: DrawWorld:
 00:0000808C E0432DE9        	    53:  STMFD   R13!, {R5-R9, R14}
 00:00008090 44319BE5        	    54:  LDR     R3, [R11, #0x144]
 00:00008094 FF9403E2        	    55:  AND     R9, R3, #0xFF000000
@@ -258,7 +258,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000838C 088888E1        	   253:  ORR     R8, R8, R8, LSL #16
 00:00008390 088C88E1        	   254:  ORR     R8, R8, R8, LSL #24
 00:00008394 1F80BDE8        	   255:  LDMFD   R13!, {R0-R4, PC}
-                            	   256: sub_8398:
+                            	   256: DrawPlayer:
 00:00008398 00402DE9        	   257:  STMDB   R13!, {R14}
 00:0000839C 1C0000EF        	   258:  SWI     OS_Mouse
 00:000083A0 5C21CBE5        	   259:  STRB    R2, [R11, #0x15C]
@@ -488,11 +488,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000086F0 000CA0E1        	   483:  MOV     R0, R0, LSL #24
 00:000086F4 8010A0E1        	   484:  MOV     R1, R0, LSL #1
 00:000086F8 390300EB        	   485:  BL      sub_93E4
-00:000086FC 3C0000EB        	   486:  BL      sub_87F4
-00:00008700 B50100EB        	   487:  BL      sub_8DDC
+00:000086FC 3C0000EB        	   486:  BL      DrawExhaustAndBullets
+00:00008700 B50100EB        	   487:  BL      DrawObjects
 00:00008704 7C0500EB        	   488:  BL      sub_9CFC
-00:00008708 5FFEFFEB        	   489:  BL      sub_808C
-00:0000870C 7D0200EB        	   490:  BL      sub_9108
+00:00008708 5FFEFFEB        	   489:  BL      DrawWorld
+00:0000870C 7D0200EB        	   490:  BL      PrintScore
 00:00008710 890500EB        	   491:  BL      SwitchScreenBank
 00:00008714 18019BE5        	   492:  LDR     R0, [R11, #0x118]
 00:00008718 010080E2        	   493:  ADD     R0, R0, #1
@@ -547,7 +547,7 @@ Source: "3-assembled-output/Lander.arm"
                             	   534: var_87EC:
 00:000087EC 5C800000        	   535: .long    var_805C
 00:000087F0 2C800000        	   536: .long    var_802C
-                            	   537: sub_87F4:
+                            	   537: DrawExhaustAndBullets:
 00:000087F4 00542DE9        	   538:  STMFD   R13!, {R10, R12, R14}
 00:000087F8 07AC8BE2        	   539:  ADD     R10, R11, #0x700
 00:000087FC 18C01FE5        	   540:  LDR     R12, var_87EC
@@ -957,7 +957,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008DD0 84AF0000        	   944: .long    dataTable6
 00:00008DD4 84AF0000        	   945: .long    dataTable6
 00:00008DD8 84AF0000        	   946: .long    dataTable6
-                            	   947: sub_8DDC:
+                            	   947: DrawObjects:
 00:00008DDC E05F2DE9        	   948:  STMFD   R13!, {R5-R12, R14}
 00:00008DE0 3C019BE5        	   949:  LDR     R0, [R11, #0x13C]
 00:00008DE4 FF8400E2        	   950:  AND     R8, R0, #0xFF000000
@@ -1175,7 +1175,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000090FC 018058E2        	  1162:  SUBS    R8, R8, #1
 00:00009100 ADFFFF1A        	  1163:  BNE     lab_8FBC
 00:00009104 C09FBDE8        	  1164:  LDMFD   R13!, {R6-R12, PC}
-                            	  1165: sub_9108:
+                            	  1165: PrintScore:
 00:00009108 24019BE5        	  1166:  LDR     R0, [R11, #0x124]
 00:0000910C 021C8BE2        	  1167:  ADD     R1, R11, #0x200
 00:00009110 1320A0E3        	  1168:  MOV     R2, #0x13
@@ -1245,7 +1245,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000091F4 10C80000        	  1232: .long    arctanTable
                             	  1233: squareRootTableAddr:
 00:000091F8 10CA0000        	  1234: .long    squareRootTable
-                            	  1235: sub_91FC:
+                            	  1235: DrawFuelLevel:
 00:000091FC 005C2DE9        	  1236:  STMFD   R13!, {R10-R12, R14}
 00:00009200 28119BE5        	  1237:  LDR     R1, [R11, #0x128]
 00:00009204 5C21DBE5        	  1238:  LDRB    R2, [R11, #0x15C]
@@ -2810,18 +2810,18 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A85C 060000EF        	  2781:  SWI     OS_Byte
 00:0000A860 1B0032E3        	  2782:  TEQ     R2, #0x1B
 00:0000A864 1000000A        	  2783:  BEQ     EndGame
-00:0000A868 CAF6FFEB        	  2784:  BL      sub_8398
+00:0000A868 CAF6FFEB        	  2784:  BL      DrawPlayer
 00:0000A86C 18019BE5        	  2785:  LDR     R0, [R11, #0x118]
 00:0000A870 000CA0E1        	  2786:  MOV     R0, R0, LSL #24
 00:0000A874 8010A0E1        	  2787:  MOV     R1, R0, LSL #1
 00:0000A878 D9FAFFEB        	  2788:  BL      sub_93E4
 00:0000A87C 2FF9FFEB        	  2789:  BL      sub_8D40
-00:0000A880 DBF7FFEB        	  2790:  BL      sub_87F4
-00:0000A884 54F9FFEB        	  2791:  BL      sub_8DDC
+00:0000A880 DBF7FFEB        	  2790:  BL      DrawExhaustAndBullets
+00:0000A884 54F9FFEB        	  2791:  BL      DrawObjects
 00:0000A888 1BFDFFEB        	  2792:  BL      sub_9CFC
-00:0000A88C FEF5FFEB        	  2793:  BL      sub_808C
-00:0000A890 1CFAFFEB        	  2794:  BL      sub_9108
-00:0000A894 58FAFFEB        	  2795:  BL      sub_91FC
+00:0000A88C FEF5FFEB        	  2793:  BL      DrawWorld
+00:0000A890 1CFAFFEB        	  2794:  BL      PrintScore
+00:0000A894 58FAFFEB        	  2795:  BL      DrawFuelLevel
 00:0000A898 27FDFFEB        	  2796:  BL      SwitchScreenBank
 00:0000A89C 18E19BE5        	  2797:  LDR     R14, [R11, #0x118]
 00:0000A8A0 01E08EE2        	  2798:  ADD     R14, R14, #1
@@ -10112,6 +10112,11 @@ Source: "3-assembled-output/Lander.arm"
 
 Symbols by name:
 AbortWithMemoryError             A:0000A5A4
+DrawExhaustAndBullets            A:000087F4
+DrawFuelLevel                    A:000091FC
+DrawObjects                      A:00008DDC
+DrawPlayer                       A:00008398
+DrawWorld                        A:0000808C
 EndGame                          A:0000A8AC
 Entry                            A:0000A614
 MainLoop                         A:0000A850
@@ -10122,6 +10127,7 @@ OS_ReadC                         S:00000004
 OS_Word                          S:00000007
 OS_WriteC                        S:00000000
 OS_WriteS                        S:00000001
+PrintScore                       A:00009108
 ReturnToDesktop                  A:0000A8D4
 SwitchScreenBank                 A:00009D3C
 arctanTable                      A:0000C810
@@ -10286,15 +10292,12 @@ squareRootTableAddr              A:000091F8
 stack                            S:000121FC
 stackAddr                        A:0000A570
 stackPointerOnEntry              A:0000A584
-sub_808C                         A:0000808C
 sub_81F4                         A:000081F4
 sub_82AC                         A:000082AC
 sub_82DC                         A:000082DC
-sub_8398                         A:00008398
 sub_8654                         A:00008654
 sub_86C4                         A:000086C4
 sub_86C8                         A:000086C8
-sub_87F4                         A:000087F4
 sub_893C                         A:0000893C
 sub_8998                         A:00008998
 sub_89C8                         A:000089C8
@@ -10311,11 +10314,8 @@ sub_8CDC                         A:00008CDC
 sub_8CFC                         A:00008CFC
 sub_8D24                         A:00008D24
 sub_8D40                         A:00008D40
-sub_8DDC                         A:00008DDC
 sub_8EC4                         A:00008EC4
-sub_9108                         A:00009108
 sub_9160                         A:00009160
-sub_91FC                         A:000091FC
 sub_9254                         A:00009254
 sub_928C                         A:0000928C
 sub_937C                         A:0000937C
@@ -10388,7 +10388,7 @@ Symbols by value:
 00008028 var_8028
 0000802C var_802C
 0000805C var_805C
-0000808C sub_808C
+0000808C DrawWorld
 000080DC lab_80DC
 00008114 lab_8114
 0000816C lab_816C
@@ -10397,7 +10397,7 @@ Symbols by value:
 000081F4 sub_81F4
 000082AC sub_82AC
 000082DC sub_82DC
-00008398 sub_8398
+00008398 DrawPlayer
 00008400 lab_8400
 00008408 lab_8408
 0000841C lab_841C
@@ -10411,7 +10411,7 @@ Symbols by value:
 000086C8 sub_86C8
 000086EC lab_86EC
 000087EC var_87EC
-000087F4 sub_87F4
+000087F4 DrawExhaustAndBullets
 00008800 lab_8800
 0000880C lab_880C
 000088E8 lab_88E8
@@ -10443,7 +10443,7 @@ Symbols by value:
 00008D24 sub_8D24
 00008D40 sub_8D40
 00008D78 var_8D78
-00008DDC sub_8DDC
+00008DDC DrawObjects
 00008DFC lab_8DFC
 00008E04 lab_8E04
 00008E1C lab_8E1C
@@ -10458,7 +10458,7 @@ Symbols by value:
 00008FBC lab_8FBC
 00009038 lab_9038
 000090F4 lab_90F4
-00009108 sub_9108
+00009108 PrintScore
 00009140 lab_9140
 00009160 sub_9160
 000091A0 lab_91A0
@@ -10467,7 +10467,7 @@ Symbols by value:
 000091F0 sinTableAddr
 000091F4 arctanTableAddr
 000091F8 squareRootTableAddr
-000091FC sub_91FC
+000091FC DrawFuelLevel
 0000924C var_924C
 00009250 var_9250
 00009254 sub_9254
