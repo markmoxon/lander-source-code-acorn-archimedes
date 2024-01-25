@@ -32,9 +32,11 @@
 \
 \ ******************************************************************************
 
- OS_WriteC = &00                    \ 
+ OS_WriteC = &00                    \ The operating system call to write a
+                                    \ character to all the output streams
 
- OS_WriteS = &01                    \ 
+ OS_WriteS = &01                    \ The operating system call to write a
+                                    \ string to all the output streams
 
  OS_ReadC = &04                     \ 
 
@@ -114,7 +116,7 @@
 
  var_104 = &104                     \ 
 
- var_108 = &108                     \ 
+ var_108 = &108                     \ Contains the address of var_700
 
  var_10C = &10C                     \ 
 
@@ -128,7 +130,7 @@
 
  var_120 = &120                     \ 
 
- var_124 = &124                     \ 
+ var_124 = &124                     \ Initialised to contents of var_A578
 
  var_128 = &128                     \ 
 
@@ -138,7 +140,7 @@
 
  var_134 = &134                     \ 
 
- var_138 = &138                     \ 
+ var_138 = &138                     \ Initialised to contents of var_A57C
 
  var_13C = &13C                     \ 
 
@@ -161,6 +163,15 @@
  var_170 = &170                     \ 
 
  var_174 = &174                     \ 
+
+ stringBuffer = &200                \ String buffer for strings in sub_9160
+
+ var_700 = &700                     \ 
+
+ var_71C = &71C                     \ Zeroed in sub_8AF4
+
+ var_4400 = &4400                   \ &1000 words, initialised to &FFFFFFFF in
+                                    \ Entry
 
 \ ******************************************************************************
 \
@@ -1228,18 +1239,21 @@ ENDIF
 \       Name: sub_8AF4
 \       Type: Subroutine
 \   Category: ???
-\    Summary: ???
+\    Summary: Sets up some variables ???
 \
 \ ******************************************************************************
 
 .sub_8AF4
 
- ADD     R0, R11, #&700             \ 
- STR     R0, [R11, #var_108]        \ 
- MOV     R1, #0                     \ 
- STR     R1, [R0, #&1C]             \ 
- STR     R1, [R11, #var_10C]        \ 
- MOV     PC, R14                    \ 
+ ADD     R0, R11, #var_700          \ Set var_108 to the address of var_700
+ STR     R0, [R11, #var_108]
+
+ MOV     R1, #0                     \ Set var_71C = 0 (as var_71C - var_700 =
+ STR     R1, [R0, #&1C]             \ &1C)
+
+ STR     R1, [R11, #var_10C]        \ Set var_10C = 0
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -1884,29 +1898,56 @@ ENDIF
 \
 \       Name: sub_9160
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Text
+\    Summary: Print a number at a specified text column
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The unsigned number to print
+\
+\   R1                              Text column (x-coordinate)
+\
+\   R2                              Text row (y-coordinate)
 \
 \ ******************************************************************************
 
 .sub_9160
 
- STMFD   R13!, {R1-R2}              \ 
- ADD     R1, R11, #&200             \ 
- MOV     R2, #&13                   \ 
- SWI     OS_BinaryToDecimal         \ 
- MOV     R0, #&1F                   \ 
- SWI     OS_WriteC                  \ 
- LDMFD   R13!, {R3-R4}              \ 
- MOV     R0, R3                     \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, R4                     \ 
- SWI     OS_WriteC                  \ 
- STMFD   R13!, {R1-R2}              \ 
- MOV     R0, #&70                   \ 
- MOV     R1, #1                     \ 
- SWI     OS_Byte                    \ 
- LDMIA   R13, {R1-R2}               \ 
+ STMFD   R13!, {R1-R2}              \ Store the arguments in R1 and R2 on the
+                                    \ stack so can retrieve them below
+
+ ADD     R1, R11, #stringBuffer     \ Set R1 = stringBuffer to use as a string
+                                    \ buffer for the following call
+
+ MOV     R2, #19                    \ Set R2 = 19, to use as the size of the
+                                    \ string buffer in the following call
+
+ SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
+                                    \ string and store it in the buffer at R1
+                                    \ with a maximum string size of R2
+
+ MOV     R0, #31                    \ Start a VDU 31, x, y command, which moves
+ SWI     OS_WriteC                  \ the text cursor to column x on row y
+
+ LDMFD   R13!, {R3-R4}              \ Fetch R1 and R2 into R3 and R4 and write
+ MOV     R0, R3                     \ them to complete the VDU 31 command, so
+ SWI     OS_WriteC                  \ this moves the text cursor to the position
+ MOV     R0, R4                     \ defined in the subroutine arguments,
+ SWI     OS_WriteC                  \ leaving the text coordinates in (R3, R4)
+
+ STMFD   R13!, {R1-R2}              \ Store R1 and R2 on the stack so we can
+                                    \ preserve them through the following
+                                    \ OS_Byte call
+
+ MOV     R0, #112                   \ Set the hardware and VDU screen banks to
+ MOV     R1, #1                     \ screen bank 1
+ SWI     OS_Byte
+
+ LDMIA   R13, {R1-R2}               \ Retrieve R1 and R2 from the stack, but
+                                    \ don't update the stack pointer so we can
+                                    \ retrieve them again below
 
 .lab_91A0
 
@@ -1914,16 +1955,19 @@ ENDIF
  SWI     OS_WriteC                  \ 
  SUBS    R2, R2, #1                 \ 
  BNE     lab_91A0                   \ 
- MOV     R0, #&70                   \ 
- MOV     R1, #2                     \ 
- SWI     OS_Byte                    \ 
- MOV     R0, #&1F                   \ 
+
+ MOV     R0, #112                   \ Set the hardware and VDU screen banks to
+ MOV     R1, #2                     \ screen bank 1
+ SWI     OS_Byte
+
+ MOV     R0, #31                    \ VDU 31, R3, R4
  SWI     OS_WriteC                  \ 
  MOV     R0, R3                     \ 
  SWI     OS_WriteC                  \ 
  MOV     R0, R4                     \ 
  SWI     OS_WriteC                  \ 
- LDMFD   R13!, {R1-R2}              \ 
+
+ LDMFD   R13!, {R1-R2}              \ Retrieve R1 and R2 from the stack
 
 .lab_91D8
 
@@ -1931,7 +1975,8 @@ ENDIF
  SWI     OS_WriteC                  \ 
  SUBS    R2, R2, #1                 \ 
  BNE     lab_91D8                   \ 
- MOV     PC, R14                    \ 
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3291,8 +3336,8 @@ ENDIF
                                     \ that we should now show on-screen
 
  MOV     R0, #113                   \ Set the hardware and VDU screen banks to
- SWI     OS_Byte                    \ R1, so the correct bank is shown on-screen
- MOV     R0, #112
+ SWI     OS_Byte                    \ the bank in R1, so the correct bank is
+ MOV     R0, #112                   \ shown on-screen
  SWI     OS_Byte
 
  MOV     R0, #19                    \ Wait for the vertical sync
@@ -4082,14 +4127,15 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_A574
+\       Name: memoryTestAddr
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Start and end
+\    Summary: The memory location to check to ensure we have enough memory for
+\             the game
 \
 \ ******************************************************************************
 
-.var_A574
+.memoryTestAddr
 
  EQUD    &00000000
 
@@ -4104,7 +4150,7 @@ ENDIF
 
 .var_A578
 
- EQUD    &000001F4
+ EQUD    500
 
 \ ******************************************************************************
 \
@@ -4117,7 +4163,7 @@ ENDIF
 
 .var_A57C
 
- EQUD    &000001F4
+ EQUD    500
 
 \ ******************************************************************************
 \
@@ -4203,10 +4249,10 @@ ENDIF
                                     \ in the Entry routine to determine whether
                                     \ there is enough memory
 
- SWI     OS_WriteS                  \ Print the following string
-
- EQUS    "There is not enough "
- EQUS    "memory to run this game."
+ SWI     OS_WriteS                  \ Print an error explaining that there isn't
+ EQUS    "There is not enough "     \ enough free memory to run the game
+ EQUS    "memory to run this "
+ EQUS    "game."
  EQUW    &0D0A
  EQUS    "Please *CONFIGURE your "
  EQUS    "machine to free more "
@@ -4228,108 +4274,166 @@ ENDIF
 
 .Entry
 
- MOV     R0, #&16                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&F                    \ 
- SWI     OS_WriteC                  \ 
- STR     R13, stackPointerOnEntry   \ 
- LDR     R13, stackAddr             \ 
- LDR     R11, workspaceAddr         \ 
- STMDB   R13!, {R14}                \ 
- LDR     R0, var_A574               \ 
- LDRB    R1, [R0]                   \ 
- MOV     R2, #&AA                   \ 
- STRB    R2, [R0]                   \ 
- LDRB    R3, [R0]                   \ 
- CMP     R2, R3                     \ 
- BNE     AbortWithMemoryError       \ 
- MOV     R2, #&55                   \ 
- STRB    R2, [R0]                   \ 
- LDRB    R3, [R0]                   \ 
- CMP     R2, R3                     \ 
- BNE     AbortWithMemoryError       \ 
- STRB    R1, [R0]                   \ 
- MOV     R0, #4                     \ 
- MOV     R1, #1                     \ 
- MOV     R2, #0                     \ 
- SWI     OS_Byte                    \ 
- BL      sub_8AF4                   \ 
- MOV     R0, #&16                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&D                    \ 
- SWI     OS_WriteC                  \ 
- SWI     OS_WriteS                  \ 
+ MOV     R0, #22                    \ Change to screen mode 15, which uses 160K
+ SWI     OS_WriteC                  \ of screen memory, the same amount that we
+ MOV     R0, #15                    \ need for the game (though in the game we
+ SWI     OS_WriteC                  \ actually use two mode 13 screens, each of
+                                    \ which is 80K)
 
- EQUS    "Lander Demo/Practice "
- EQUS    "(C) D.J.Braben 1987"
+ STR     R13, stackPointerOnEntry   \ Store the stack pointer from when the game
+                                    \ started in stackPointerOnEntry, so we can
+                                    \ retore it when we quit the game
+
+ LDR     R13, stackAddr             \ Set the stack pointer in R13 to stackAddr,
+                                    \ so the 512 bytes descending from stackAddr
+                                    \ can be used as the game's stack
+
+ LDR     R11, workspaceAddr         \ Set R11 to the address of the workspace,
+                                    \ which is stored in workspaceAddr, so we
+                                    \ can access workspace variables by applying
+                                    \ an offset to R11 using [R11, #offset]
+
+ STMDB   R13!, {R14}                \ R14 contains the address we should return
+                                    \ to when quitting the game, so store it on
+                                    \ the stack so we can retrieve it later
+
+ LDR     R0, memoryTestAddr         \ Set R0 to the address in memoryTestAddr,
+                                    \ which points to a byte that will be
+                                    \ writable if there is enough free memory
+                                    \ for running the game
+
+ LDRB    R1, [R0]                   \ Set R1 to the current contents of memory
+                                    \ at R0, so we can restore it after running
+                                    \ our memory tests
+
+ MOV     R2, #&AA                   \ Store the value &AA in our test memory
+ STRB    R2, [R0]                   \ location in R0, read it back, and if the
+ LDRB    R3, [R0]                   \ returned value is different to &AA, jump
+ CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
+ BNE     AbortWithMemoryError       \ as there isn't enough free memory
+
+ MOV     R2, #&55                   \ Store the value &55 in our test memory
+ STRB    R2, [R0]                   \ location in R0, read it back, and if the
+ LDRB    R3, [R0]                   \ returned value is different to &55, jump
+ CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
+ BNE     AbortWithMemoryError       \ as there isn't enough free memory
+
+ STRB    R1, [R0]                   \ Restore the original contents of address
+                                    \ R0 so it's unchanged by our memory tests
+
+ MOV     R0, #4                     \ Call OS_Byte 4 to set the cursor keys to
+ MOV     R1, #1                     \ return ASCII values, so they don't move
+ MOV     R2, #0                     \ the cursor during the game
+ SWI     OS_Byte
+
+ BL      sub_8AF4                   \ Set up var_108, var_71C, var_10C ???
+
+ MOV     R0, #22                    \ Change to screen mode 13 (320×256 pixels
+ SWI     OS_WriteC                  \ with 256 colours), which will display
+ MOV     R0, #13                    \ screen bank 1
+ SWI     OS_WriteC
+
+ SWI     OS_WriteS                  \ Write the game's title into the top line
+ EQUS    "Lander Demo/Practice "    \ of the screen, where it remains for the
+ EQUS    "(C) D.J.Braben 1987"      \ whole game
  EQUB    0
  ALIGN
 
- BL      SwitchScreenBank           \ 
- MOV     R0, #&16                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&8D                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&17                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #1                     \ 
- SWI     OS_WriteC                  \ 
- MOV     R8, #8                     \ 
+ BL      SwitchScreenBank           \ Switch screen bank, so VDU commands go to
+                                    \ screen bank 2
 
-.lab_A6E4
-
- MOV     R0, #0                     \ 
+ MOV     R0, #22                    \ Change to screen mode 13 with shadow
+ SWI     OS_WriteC                  \ memory enabled (i.e. mode 128 + 13), which
+ MOV     R0, #128+13                \ creates two mode 13 screen banks
  SWI     OS_WriteC                  \ 
- SUBS    R8, R8, #1                 \ 
- BNE     lab_A6E4                   \ 
- SWI     OS_WriteS                  \ 
 
- EQUS    "Lander Demo/Practice "
- EQUS    "(C) D.J.Braben 1987"
+ MOV     R0, #23                    \ Print the following VDU command:
+ SWI     OS_WriteC                  \ 
+ MOV     R0, #1                     \   VDU 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
+ SWI     OS_WriteC                  \ 
+ MOV     R8, #8                     \ to disable the cursor
+
+.entr1
+
+ MOV     R0, #0                     \ This loop prints the eight zeroes in the
+ SWI     OS_WriteC                  \ above VDU command
+ SUBS    R8, R8, #1
+ BNE     entr1
+
+ SWI     OS_WriteS                  \ Write the game's title into the top line
+ EQUS    "Lander Demo/Practice "    \ of screen bank 2, so the same title
+ EQUS    "(C) D.J.Braben 1987"      \ appears at the top of both screen banks
  EQUB    0
  ALIGN
 
- LDR     R0, var_A578               \ 
- STR     R0, [R11, #var_124]        \ 
- LDR     R0, var_A57C               \ 
+ LDR     R0, var_A578               \ Set var_124 to the contents of var_A578
+ STR     R0, [R11, #var_124]        \ ???
+
+ LDR     R0, var_A57C               \ Set var_138 to the contents of var_A57C
  STR     R0, [R11, #var_138]        \ 
 
 .lab_A734
 
- LDR     R0, [R11, #var_138]        \ 
- LDR     R1, [R11, #var_124]        \ 
- CMP     R1, R0                     \ 
- MOVPL   R0, R1                     \ 
- STRHS   R0, [R11, #var_138]        \ 
- MOV     R1, #&23                   \ 
- MOV     R2, #1                     \ 
- BL      sub_9160                   \ 
- LDR     R0, var_A578               \ 
- STR     R0, [R11, #var_124]        \ 
- LDR     R0, var_A580               \ 
- STR     R0, [R11, #var_128]        \ 
- MOV     R0, #&30000                \ 
- STR     R0, [R11, #var_12C]        \ 
- MOV     R0, #3                     \ 
- STR     R0, [R11, #var_134]        \ 
- MVN     R0, #0                     \ 
- MVN     R1, #0                     \ 
- MVN     R2, #0                     \ 
- MVN     R3, #0                     \ 
- MOV     R4, #&10000                \ 
- ADD     R6, R11, #&4400            \ 
+ LDR     R0, [R11, #var_138]        \ Set R0 = var_138
+
+ LDR     R1, [R11, #var_124]        \ Set R1 = var_124
+
+ CMP     R1, R0                     \ If R1 - R0 is positive, i.e. R1 >= R0, set
+ MOVPL   R0, R1                     \ R0 = R1, so R0 = min(R0, R1)
+
+ STRHS   R0, [R11, #var_138]        \ If R1 >= R0, set var_138 = min(R0, R1)
+                                    \
+                                    \ So var_138 = min(var_138, var_124)
+
+ MOV     R1, #35                    \ Set (R1, R2) = (35, 1) to pass to sub_9160
+ MOV     R2, #1                     \ so we print at column 35 on row 1
+
+ BL      sub_9160                   \ Some kind of number printing routine ???
+
+ LDR     R0, var_A578               \ Set var_124 to the contents of var_A578
+ STR     R0, [R11, #var_124]        \ ???
+
+ LDR     R0, var_A580               \ Set var_128 to the contents of var_A580
+ STR     R0, [R11, #var_128]        \ ???
+
+ MOV     R0, #&30000                \ Set var_12C = &30000 ???
+ STR     R0, [R11, #var_12C]
+
+ MOV     R0, #3                     \ Set var_134 = 3 ???
+ STR     R0, [R11, #var_134]
+
+                                    \ We now set &10000 bytes (i.e. &1000 words)
+                                    \ at var_4400 to &FFFFFFFF
+
+ MVN     R0, #0                     \ Set R0 to R3 to &FFFFFFFF so we can poke
+ MVN     R1, #0                     \ them into memory at var_4400
+ MVN     R2, #0
+ MVN     R3, #0
+
+ MOV     R4, #&10000                \ Set R4 = &10000 to use as a byte counter
+                                    \ in the following loop (so that's &1000
+                                    \ four-byte words)
+
+ ADD     R6, R11, #var_4400         \ Set R6 to the address of var_4400
 
 .lab_A78C
 
- STMIA   R6!, {R0-R3}               \ 
- SUBS    R4, R4, #&10               \ 
- BNE     lab_A78C                   \ 
- ADD     R6, R11, #&4400            \ 
+ STMIA   R6!, {R0-R3}               \ Store four words (16 bytes) of &FFFFFFFF
+                                    \ at R6, updating R6 as we go
+
+ SUBS    R4, R4, #16                \ Subtract 16 from the byte counter in R4
+
+ BNE     lab_A78C                   \ Loop back until we have set all &10000
+                                    \ bytes to &FFFFFFFF
+
+ ADD     R6, R11, #var_4400         \ Set R6 to the address of var_4400
+
  MOV     R5, #&800                  \ 
 
 .lab_A7A0
 
  BL      sub_9A40                   \ 
+
  MOV     R8, R0                     \ 
  MOV     R9, R0, LSL #8             \ 
  STMDB   R13!, {R0}                 \ 
@@ -4358,9 +4462,11 @@ ENDIF
 .lab_A7F8
 
  LDR     R0, [R11, #var_134]        \ 
+
  MOV     R1, #&1E                   \ 
  MOV     R2, #1                     \ 
  BL      sub_9160                   \ 
+
  MVN     R0, #0                     \ 
  STR     R0, [R11, #var_130]        \ 
  MOV     R0, #0                     \ 

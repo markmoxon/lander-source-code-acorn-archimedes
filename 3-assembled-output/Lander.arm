@@ -55,6 +55,10 @@
 .set var_168, 0x168
 .set var_170, 0x170
 .set var_174, 0x174
+.set stringBuffer, 0x200
+.set var_700, 0x700
+.set var_71C, 0x71C
+.set var_4400, 0x4400
 .org     CODE
 var_8000:
 .ifdef _RISCOS
@@ -797,7 +801,7 @@ lab_8AC8:
  STR     R9, [R8, #0x1C]
  LDMFD   R13!, {R8, PC}
 sub_8AF4:
- ADD     R0, R11, #0x700
+ ADD     R0, R11, #var_700
  STR     R0, [R11, #var_108]
  MOV     R1, #0
  STR     R1, [R0, #0x1C]
@@ -1240,10 +1244,10 @@ lab_9140:
  MOV     PC, R14
 sub_9160:
  STMFD   R13!, {R1-R2}
- ADD     R1, R11, #0x200
- MOV     R2, #0x13
+ ADD     R1, R11, #stringBuffer
+ MOV     R2, #19
  SWI     OS_BinaryToDecimal
- MOV     R0, #0x1F
+ MOV     R0, #31
  SWI     OS_WriteC
  LDMFD   R13!, {R3-R4}
  MOV     R0, R3
@@ -1251,7 +1255,7 @@ sub_9160:
  MOV     R0, R4
  SWI     OS_WriteC
  STMFD   R13!, {R1-R2}
- MOV     R0, #0x70
+ MOV     R0, #112
  MOV     R1, #1
  SWI     OS_Byte
  LDMIA   R13, {R1-R2}
@@ -1260,10 +1264,10 @@ lab_91A0:
  SWI     OS_WriteC
  SUBS    R2, R2, #1
  BNE     lab_91A0
- MOV     R0, #0x70
+ MOV     R0, #112
  MOV     R1, #2
  SWI     OS_Byte
- MOV     R0, #0x1F
+ MOV     R0, #31
  SWI     OS_WriteC
  MOV     R0, R3
  SWI     OS_WriteC
@@ -2658,12 +2662,12 @@ workspaceAddr:
 .long    workspace
 stackAddr:
 .long    stack
-var_A574:
+memoryTestAddr:
 .long    0x00000000
 var_A578:
-.long    0x000001F4
+.long    500
 var_A57C:
-.long    0x000001F4
+.long    500
 var_A580:
 .long    0x00000D55
 stackPointerOnEntry:
@@ -2682,7 +2686,8 @@ AbortWithMemoryError:
  STRB    R1, [R0]
  SWI     OS_WriteS
 .byte    "There is not enough "
-.byte    "memory to run this game."
+.byte    "memory to run this "
+.byte    "game."
 .word    0x0D0A
 .byte    "Please *CONFIGURE your "
 .byte    "machine to free more "
@@ -2691,15 +2696,15 @@ AbortWithMemoryError:
 .balign 4
  B       ReturnToDesktop
 Entry:
- MOV     R0, #0x16
+ MOV     R0, #22
  SWI     OS_WriteC
- MOV     R0, #0xF
+ MOV     R0, #15
  SWI     OS_WriteC
  STR     R13, stackPointerOnEntry
  LDR     R13, stackAddr
  LDR     R11, workspaceAddr
  STMDB   R13!, {R14}
- LDR     R0, var_A574
+ LDR     R0, memoryTestAddr
  LDRB    R1, [R0]
  MOV     R2, #0xAA
  STRB    R2, [R0]
@@ -2717,9 +2722,9 @@ Entry:
  MOV     R2, #0
  SWI     OS_Byte
  BL      sub_8AF4
- MOV     R0, #0x16
+ MOV     R0, #22
  SWI     OS_WriteC
- MOV     R0, #0xD
+ MOV     R0, #13
  SWI     OS_WriteC
  SWI     OS_WriteS
 .byte    "Lander Demo/Practice "
@@ -2727,20 +2732,20 @@ Entry:
 .byte    0
 .balign 4
  BL      SwitchScreenBank
- MOV     R0, #0x16
+ MOV     R0, #22
  SWI     OS_WriteC
- MOV     R0, #0x8D
+ MOV     R0, #128+13
  SWI     OS_WriteC
- MOV     R0, #0x17
+ MOV     R0, #23
  SWI     OS_WriteC
  MOV     R0, #1
  SWI     OS_WriteC
  MOV     R8, #8
-lab_A6E4:
+entr1:
  MOV     R0, #0
  SWI     OS_WriteC
  SUBS    R8, R8, #1
- BNE     lab_A6E4
+ BNE     entr1
  SWI     OS_WriteS
 .byte    "Lander Demo/Practice "
 .byte    "(C) D.J.Braben 1987"
@@ -2756,7 +2761,7 @@ lab_A734:
  CMP     R1, R0
  MOVPL   R0, R1
  STRHS   R0, [R11, #var_138]
- MOV     R1, #0x23
+ MOV     R1, #35
  MOV     R2, #1
  BL      sub_9160
  LDR     R0, var_A578
@@ -2772,12 +2777,12 @@ lab_A734:
  MVN     R2, #0
  MVN     R3, #0
  MOV     R4, #0x10000
- ADD     R6, R11, #0x4400
+ ADD     R6, R11, #var_4400
 lab_A78C:
  STMIA   R6!, {R0-R3}
- SUBS    R4, R4, #0x10
+ SUBS    R4, R4, #16
  BNE     lab_A78C
- ADD     R6, R11, #0x4400
+ ADD     R6, R11, #var_4400
  MOV     R5, #0x800
 lab_A7A0:
  BL      sub_9A40
