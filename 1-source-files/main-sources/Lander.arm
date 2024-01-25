@@ -11,7 +11,7 @@
 \ in the documentation are entirely my fault
 \
 \ The terminology and notations used in this commentary are explained at
-\ https://lander.bbcelite.com/about_site/terminology_used_in_this_commentary.html
+\ https://lander.bbcelite.com/terminology
 \
 \ The deep dive articles referred to in this commentary can be found at
 \ https://lander.bbcelite.com/deep_dives
@@ -183,7 +183,21 @@
 
 .var_8000
 
+IF _RISCOS
+
+ B       DecryptGameBinary          \ RISC OS runs !RunImage as an Absolute file
+                                    \ which executes from the first instruction
+                                    \ rather than having an execute address, so
+                                    \ this jumps to the decrytption routine to
+                                    \ decrypt the game binary before jumping to
+                                    \ Entry to start the game
+
+ELSE
+
  EQUD    &FA800000
+
+ENDIF
+
  EQUD    &00000000
  EQUD    &14000000
 
@@ -4200,8 +4214,8 @@
  EQUB    0
  ALIGN
 
- B       ReturnToDesktop            \ Jump to ReturnToDesktop to return to quit
-                                    \ the game and return to the desktop
+ B       ReturnToDesktop            \ Jump to ReturnToDesktop to quit the game
+                                    \ and return to the desktop
 
 \ ******************************************************************************
 \
@@ -7332,5 +7346,27 @@
  EQUD     &00013627, &0001304D, &00012AAA, &0001253C
  EQUD     &00012000, &00011AF2, &00011611, &0001115B
  EQUD     &00010CCC, &00010864, &00010421, &00010000
+
+IF _RISCOS
+
+\ ******************************************************************************
+\
+\       Name: DecryptGameBinary
+\       Type: Subroutine
+\   Category: Copy protection
+\    Summary: Placeholder routine to enable binary to run as an Absolute file
+\             when not encrypted
+\
+\ ******************************************************************************
+
+.DecryptGameBinary
+
+ MOV     R0, #&FA800000             \ Restore the first word of the game to the
+ MOV     R1, #var_8000              \ value it had before we replaced it with a
+ STR     R0, [R1]                   \ jump command to this routine
+
+ B       Entry                      \ Start the game
+
+ENDIF
 
 .endCode

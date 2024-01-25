@@ -54,6 +54,15 @@ for line in bbc_basic_file:
     # ALIGN -> .balign
     line = re.sub(r"^ ?ALIGN", ".balign 4", line)
 
+    # IF -> .ifdef
+    line = re.sub(r"^ ?IF ", ".ifdef ", line)
+
+    # ENDIF -> .endif
+    line = re.sub(r"^ ?ENDIF", ".endif", line)
+
+    # ELSE -> .else
+    line = re.sub(r"^ ?ELSE", ".else", line)
+
     # Write updated line
     if line.strip():
         vasm_file.write(line)
