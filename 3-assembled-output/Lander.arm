@@ -1296,15 +1296,15 @@ DrawFuelLevel:
  MOVMI   R1, #0
  STR     R1, [R11, #var_128]
  LDR     R7, screenAddr
- ADD     R11, R7, #0x140
+ ADD     R11, R7, #320
  LDR     R8, var_91EC
  MOV     R10, R1, LSR #4
  BL      sub_A4C8
- ADD     R11, R7, #0x280
+ ADD     R11, R7, #2*320
  LDR     R8, var_91EC
  MOV     R10, R1, LSR #4
  BL      sub_A4C8
- ADD     R11, R7, #0x3C0
+ ADD     R11, R7, #3*320
  LDR     R8, var_91EC
  MOV     R10, R1, LSR #4
  BL      sub_A4C8
@@ -1650,7 +1650,7 @@ lab_9700:
  TEQ     R1, #0
  ADDPL   R1, R6, #0x40
  RSBMI   R1, R6, #0x40
- CMP     R0, #0x140
+ CMP     R0, #320
  CMPLO   R1, #0xEF
  LDMFD   R13!, {R7, PC}
 sub_9748:
@@ -1931,8 +1931,8 @@ lab_9B10:
  ADD     R3, R3, R1, LSL #6
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
- STRB    R7, [R3, #0x140]
- STRB    R7, [R3, #0x141]
+ STRB    R7, [R3, #320]
+ STRB    R7, [R3, #320+1]
  B       lab_9CEC
 lab_9B40:
  LDR     R1, [R9], #4
@@ -1945,9 +1945,9 @@ lab_9B40:
  STRB    R7, [R3, #-1]
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
- STRB    R7, [R3, #0x13F]
- STRB    R7, [R3, #0x140]
- STRB    R7, [R3, #0x141]
+ STRB    R7, [R3, #320-1]
+ STRB    R7, [R3, #320]
+ STRB    R7, [R3, #320+1]
  B       lab_9CEC
 lab_9B78:
  LDR     R1, [R9], #4
@@ -2122,11 +2122,11 @@ sub_9DC8:
  BL      sub_9DDC
  LDMFD   R13!, {R9-R12, PC}
 sub_9DDC:
- CMP     R0, #0x140
+ CMP     R0, #320
  CMPLO   R1, #0xEF
- CMPLO   R2, #0x140
+ CMPLO   R2, #320
  CMPLO   R3, #0xEF
- CMPLO   R4, #0x140
+ CMPLO   R4, #320
  CMPLO   R5, #0xEF
  BHS     lab_A110
  STMDB   R13!, {R14}
@@ -2225,7 +2225,7 @@ lab_9F38:
  MOV     R10, R5, LSR #16
  SUBS    R10, R10, R4, LSR #16
  BLPL    sub_A4C8
- SUB     R12, R12, #0x140
+ SUB     R12, R12, #320
  SUBS    R9, R9, #1
  BNE     lab_9F38
  LDMFD   R13!, {R0-R1}
@@ -2274,7 +2274,7 @@ lab_9FEC:
  MOV     R10, R5, LSR #16
  SUBS    R10, R10, R4, LSR #16
  BLPL    sub_A4C8
- SUB     R12, R12, #0x140
+ SUB     R12, R12, #320
  SUBS    R9, R9, #1
  BNE     lab_9FEC
  LDMIA   R13!, {PC}
@@ -2354,9 +2354,9 @@ lab_A110:
  CMPHS   R3, #0xEF
  CMPHS   R5, #0xEF
  MOVHS   PC, R14
- CMP     R0, #0x140
- CMPHS   R2, #0x140
- CMPHS   R4, #0x140
+ CMP     R0, #320
+ CMPHS   R2, #320
+ CMPHS   R4, #320
  MOVHS   PC, R14
  STMDB   R13!, {R14}
  LDR     R12, screenAddr
@@ -2585,7 +2585,7 @@ lab_A414:
  MOVMI   R0, #0
  CMP     R5, #0x1400000
  RSBLO   R10, R0, R5, LSR #16
- RSBHS   R10, R0, #0x140
+ RSBHS   R10, R0, #320
  CMP     R10, #0
  BLPL    sub_A4C8
 lab_A46C:
@@ -2870,35 +2870,34 @@ ReturnToDesktop:
  LDMIA   R13!, {R14}
  LDR     R13, stackPointerOnEntry
  MOV     PC, R14
-sub_A8E0:
+PrintHexNumber:
  MOV     R0, #0x1E
  SWI     OS_WriteC
  MOV     R0, #0xA
  SWI     OS_WriteC
-sub_A8F0:
  STMFD   R13!, {R0-R12, R14}
  MOV     R0, R1, LSR #28
- BL      sub_A948
+ BL      PrintHexDigit
  MOV     R0, R1, LSR #24
- BL      sub_A948
+ BL      PrintHexDigit
  MOV     R0, R1, LSR #20
- BL      sub_A948
+ BL      PrintHexDigit
  MOV     R0, R1, LSR #16
- BL      sub_A948
+ BL      PrintHexDigit
  MOV     R0, R1, LSR #12
- BL      sub_A948
+ BL      PrintHexDigit
  MOV     R0, R1, LSR #8
- BL      sub_A948
+ BL      PrintHexDigit
  MOV     R0, R1, LSR #4
- BL      sub_A948
+ BL      PrintHexDigit
  MOV     R0, R1
- BL      sub_A948
+ BL      PrintHexDigit
  MOV     R0, #0xA
  SWI     OS_WriteC
  MOV     R0, #0xD
  SWI     OS_WriteC
  LDMFD   R13!, {R0-R12, PC}
-sub_A948:
+PrintHexDigit:
  AND     R0, R0, #0xF
  CMP     R0, #0xA
  ADDHS   R0, R0, #0x37

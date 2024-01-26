@@ -1861,7 +1861,7 @@ ENDIF
 \
 \       Name: PrintScore
 \       Type: Subroutine
-\   Category: ???
+\   Category: Text
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -2048,15 +2048,15 @@ ENDIF
  MOVMI   R1, #0                     \ 
  STR     R1, [R11, #var_128]        \ 
  LDR     R7, screenAddr             \ 
- ADD     R11, R7, #&140             \ 
+ ADD     R11, R7, #320              \ 
  LDR     R8, var_91EC               \ 
  MOV     R10, R1, LSR #4            \ 
  BL      sub_A4C8                   \ 
- ADD     R11, R7, #&280             \ 
+ ADD     R11, R7, #2*320            \ 
  LDR     R8, var_91EC               \ 
  MOV     R10, R1, LSR #4            \ 
  BL      sub_A4C8                   \ 
- ADD     R11, R7, #&3C0             \ 
+ ADD     R11, R7, #3*320            \ 
  LDR     R8, var_91EC               \ 
  MOV     R10, R1, LSR #4            \ 
  BL      sub_A4C8                   \ 
@@ -2533,7 +2533,7 @@ ENDIF
  TEQ     R1, #0                     \ 
  ADDPL   R1, R6, #&40               \ 
  RSBMI   R1, R6, #&40               \ 
- CMP     R0, #&140                  \ 
+ CMP     R0, #320                   \ 
  CMPLO   R1, #&EF                   \ 
  LDMFD   R13!, {R7, PC}             \ 
 
@@ -2995,8 +2995,8 @@ ENDIF
  ADD     R3, R3, R1, LSL #6         \ 
  STRB    R7, [R3]                   \ 
  STRB    R7, [R3, #1]               \ 
- STRB    R7, [R3, #&140]            \ 
- STRB    R7, [R3, #&141]            \ 
+ STRB    R7, [R3, #320]             \ 
+ STRB    R7, [R3, #320+1]           \ 
  B       lab_9CEC                   \ 
 
 .lab_9B40
@@ -3011,9 +3011,9 @@ ENDIF
  STRB    R7, [R3, #-1]              \ 
  STRB    R7, [R3]                   \ 
  STRB    R7, [R3, #1]               \ 
- STRB    R7, [R3, #&13F]            \ 
- STRB    R7, [R3, #&140]            \ 
- STRB    R7, [R3, #&141]            \ 
+ STRB    R7, [R3, #320-1]           \ 
+ STRB    R7, [R3, #320]             \ 
+ STRB    R7, [R3, #320+1]           \ 
  B       lab_9CEC                   \ 
 
 .lab_9B78
@@ -3422,11 +3422,11 @@ ENDIF
 
 .sub_9DDC
 
- CMP     R0, #&140                  \ 
+ CMP     R0, #320                   \ 
  CMPLO   R1, #&EF                   \ 
- CMPLO   R2, #&140                  \ 
+ CMPLO   R2, #320                   \ 
  CMPLO   R3, #&EF                   \ 
- CMPLO   R4, #&140                  \ 
+ CMPLO   R4, #320                   \ 
  CMPLO   R5, #&EF                   \ 
  BHS     lab_A110                   \ 
  STMDB   R13!, {R14}                \ 
@@ -3545,7 +3545,7 @@ ENDIF
  MOV     R10, R5, LSR #16           \ 
  SUBS    R10, R10, R4, LSR #16      \ 
  BLPL    sub_A4C8                   \ 
- SUB     R12, R12, #&140            \ 
+ SUB     R12, R12, #320             \ 
  SUBS    R9, R9, #1                 \ 
  BNE     lab_9F38                   \ 
  LDMFD   R13!, {R0-R1}              \ 
@@ -3602,7 +3602,7 @@ ENDIF
  MOV     R10, R5, LSR #16           \ 
  SUBS    R10, R10, R4, LSR #16      \ 
  BLPL    sub_A4C8                   \ 
- SUB     R12, R12, #&140            \ 
+ SUB     R12, R12, #320             \ 
  SUBS    R9, R9, #1                 \ 
  BNE     lab_9FEC                   \ 
  LDMIA   R13!, {PC}                 \ 
@@ -3700,9 +3700,9 @@ ENDIF
  CMPHS   R3, #&EF                   \ 
  CMPHS   R5, #&EF                   \ 
  MOVHS   PC, R14                    \ 
- CMP     R0, #&140                  \ 
- CMPHS   R2, #&140                  \ 
- CMPHS   R4, #&140                  \ 
+ CMP     R0, #320                   \ 
+ CMPHS   R2, #320                   \ 
+ CMPHS   R4, #320                   \ 
  MOVHS   PC, R14                    \ 
  STMDB   R13!, {R14}                \ 
  LDR     R12, screenAddr            \ 
@@ -3986,7 +3986,7 @@ ENDIF
  MOVMI   R0, #0                     \ 
  CMP     R5, #&1400000              \ 
  RSBLO   R10, R0, R5, LSR #16       \ 
- RSBHS   R10, R0, #&140             \ 
+ RSBHS   R10, R0, #320              \ 
  CMP     R10, #0                    \ 
  BLPL    sub_A4C8                   \ 
 
@@ -4578,48 +4578,37 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_A8E0
+\       Name: PrintHexNumber
 \       Type: Subroutine
-\   Category: ???
+\   Category: Text
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_A8E0
+.PrintHexNumber
 
  MOV     R0, #&1E                   \ 
  SWI     OS_WriteC                  \ 
  MOV     R0, #&A                    \ 
  SWI     OS_WriteC                  \ 
 
-\ ******************************************************************************
-\
-\       Name: sub_A8F0
-\       Type: Subroutine
-\   Category: ???
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.sub_A8F0
-
  STMFD   R13!, {R0-R12, R14}        \ 
  MOV     R0, R1, LSR #28            \ 
- BL      sub_A948                   \ 
+ BL      PrintHexDigit              \ 
  MOV     R0, R1, LSR #24            \ 
- BL      sub_A948                   \ 
+ BL      PrintHexDigit              \ 
  MOV     R0, R1, LSR #20            \ 
- BL      sub_A948                   \ 
+ BL      PrintHexDigit              \ 
  MOV     R0, R1, LSR #16            \ 
- BL      sub_A948                   \ 
+ BL      PrintHexDigit              \ 
  MOV     R0, R1, LSR #12            \ 
- BL      sub_A948                   \ 
+ BL      PrintHexDigit              \ 
  MOV     R0, R1, LSR #8             \ 
- BL      sub_A948                   \ 
+ BL      PrintHexDigit              \ 
  MOV     R0, R1, LSR #4             \ 
- BL      sub_A948                   \ 
+ BL      PrintHexDigit              \ 
  MOV     R0, R1                     \ 
- BL      sub_A948                   \ 
+ BL      PrintHexDigit              \ 
  MOV     R0, #&A                    \ 
  SWI     OS_WriteC                  \ 
  MOV     R0, #&D                    \ 
@@ -4628,14 +4617,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_A948
+\       Name: PrintHexDigit
 \       Type: Subroutine
-\   Category: ???
+\   Category: Text
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_A948
+.PrintHexDigit
 
  AND     R0, R0, #&F                \ 
  CMP     R0, #&A                    \ 
@@ -5751,7 +5740,7 @@ ENDIF
 \
 \ At byte n, the table contains:
 \
-\   (2^31 - 1) * SIN(n * (2 * PI / 1024))
+\   (2^31 - 1) * SIN(2 * PI * (n / 1024))
 \
 \ For n = 0 to 1023
 \
