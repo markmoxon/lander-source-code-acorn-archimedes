@@ -43,12 +43,12 @@ Source: "3-assembled-output/Lander.arm"
                             	    38: .set var_118, 0x118
                             	    39: .set var_11C, 0x11C
                             	    40: .set var_120, 0x120
-                            	    41: .set var_124, 0x124
+                            	    41: .set currentScore, 0x124
                             	    42: .set var_128, 0x128
                             	    43: .set var_12C, 0x12C
                             	    44: .set var_130, 0x130
                             	    45: .set var_134, 0x134
-                            	    46: .set var_138, 0x138
+                            	    46: .set highScore, 0x138
                             	    47: .set var_13C, 0x13C
                             	    48: .set var_140, 0x140
                             	    49: .set var_144, 0x144
@@ -475,9 +475,9 @@ Source: "3-assembled-output/Lander.arm"
                             	   470: lab_85F4:
 00:000085F4 01001AE3        	   471:  TST     R10, #1
 00:000085F8 1400000A        	   472:  BEQ     lab_8650
-00:000085FC 24819BE5        	   473:  LDR     R8, [R11, #var_124]
+00:000085FC 24819BE5        	   473:  LDR     R8, [R11, #currentScore]
 00:00008600 018048E2        	   474:  SUB     R8, R8, #1
-00:00008604 24818BE5        	   475:  STR     R8, [R11, #var_124]
+00:00008604 24818BE5        	   475:  STR     R8, [R11, #currentScore]
 00:00008608 94E08BE2        	   476:  ADD     R14, R11, #0x94
 00:0000860C 3F009EE8        	   477:  LDMIA   R14, {R0-R5}
 00:00008610 30609BE5        	   478:  LDR     R6, [R11, #var_030]
@@ -548,7 +548,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008700 B50100EB        	   543:  BL      DrawObjects
 00:00008704 7C0500EB        	   544:  BL      sub_9CFC
 00:00008708 5FFEFFEB        	   545:  BL      DrawWorld
-00:0000870C 7D0200EB        	   546:  BL      PrintScore
+00:0000870C 7D0200EB        	   546:  BL      PrintCurrentScore
 00:00008710 890500EB        	   547:  BL      SwitchScreenBank
 00:00008714 18019BE5        	   548:  LDR     R0, [R11, #var_118]
 00:00008718 010080E2        	   549:  ADD     R0, R0, #1
@@ -599,7 +599,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000087E2 00              	   586: .byte    0
                             	   587: .balign 4
 00:000087E4 040000EF        	   588:  SWI     OS_ReadC
-00:000087E8 D10700EA        	   589:  B       lab_A734
+00:000087E8 D10700EA        	   589:  B       StartNewGame
                             	   590: var_87EC:
 00:000087EC 5C800000        	   591: .long    var_805C
 00:000087F0 2C800000        	   592: .long    var_802C
@@ -746,9 +746,9 @@ Source: "3-assembled-output/Lander.arm"
 00:00008A04 0C8088E2        	   733:  ADD     R8, R8, #0xC
 00:00008A08 0080CEE5        	   734:  STRB    R8, [R14]
 00:00008A0C 020817E3        	   735:  TST     R7, #0x20000
-00:00008A10 24819B05        	   736:  LDREQ   R8, [R11, #var_124]
-00:00008A14 14808802        	   737:  ADDEQ   R8, R8, #0x14
-00:00008A18 24818B05        	   738:  STREQ   R8, [R11, #var_124]
+00:00008A10 24819B05        	   736:  LDREQ   R8, [R11, #currentScore]
+00:00008A14 14808802        	   737:  ADDEQ   R8, R8, #20
+00:00008A18 24818B05        	   738:  STREQ   R8, [R11, #currentScore]
 00:00008A1C 1480A0E3        	   739:  MOV     R8, #0x14
 00:00008A20 A50000EB        	   740:  BL      sub_8CBC
 00:00008A24 0B0000EA        	   741:  B       lab_8A58
@@ -973,8 +973,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D38 A6FFFFEB        	   960:  BL      sub_8BD8
 00:00008D3C C083BDE8        	   961:  LDMFD   R13!, {R6-R9, PC}
                             	   962: sub_8D40:
-00:00008D40 24419BE5        	   963:  LDR     R4, [R11, #var_124]
-00:00008D44 324E54E2        	   964:  SUBS    R4, R4, #0x320
+00:00008D40 24419BE5        	   963:  LDR     R4, [R11, #currentScore]
+00:00008D44 324E54E2        	   964:  SUBS    R4, R4, #800
 00:00008D48 0EF0A041        	   965:  MOVMI   PC, R14
 00:00008D4C 00402DE9        	   966:  STMDB   R13!, {R14}
 00:00008D50 3A0300EB        	   967:  BL      sub_9A40
@@ -1231,31 +1231,31 @@ Source: "3-assembled-output/Lander.arm"
 00:000090FC 018058E2        	  1218:  SUBS    R8, R8, #1
 00:00009100 ADFFFF1A        	  1219:  BNE     lab_8FBC
 00:00009104 C09FBDE8        	  1220:  LDMFD   R13!, {R6-R12, PC}
-                            	  1221: PrintScore:
-00:00009108 24019BE5        	  1222:  LDR     R0, [R11, #var_124]
-00:0000910C 021C8BE2        	  1223:  ADD     R1, R11, #0x200
-00:00009110 1320A0E3        	  1224:  MOV     R2, #0x13
-00:00009114 010B50E3        	  1225:  CMP     R0, #0x400
+                            	  1221: PrintCurrentScore:
+00:00009108 24019BE5        	  1222:  LDR     R0, [R11, #currentScore]
+00:0000910C 021C8BE2        	  1223:  ADD     R1, R11, #stringBuffer
+00:00009110 1320A0E3        	  1224:  MOV     R2, #19
+00:00009114 010B50E3        	  1225:  CMP     R0, #1024
 00:00009118 0548A023        	  1226:  MOVHS   R4, #0x50000
 00:0000911C 2C418B25        	  1227:  STRHS   R4, [R11, #var_12C]
-00:00009120 5D0E50E3        	  1228:  CMP     R0, #0x5D0
+00:00009120 5D0E50E3        	  1228:  CMP     R0, #1488
 00:00009124 0748A023        	  1229:  MOVHS   R4, #0x70000
 00:00009128 2C418B25        	  1230:  STRHS   R4, [R11, #var_12C]
 00:0000912C 280000EF        	  1231:  SWI     OS_BinaryToDecimal
-00:00009130 1E00A0E3        	  1232:  MOV     R0, #0x1E
+00:00009130 1E00A0E3        	  1232:  MOV     R0, #30
 00:00009134 000000EF        	  1233:  SWI     OS_WriteC
-00:00009138 0A00A0E3        	  1234:  MOV     R0, #0xA
+00:00009138 0A00A0E3        	  1234:  MOV     R0, #0x0A
 00:0000913C 000000EF        	  1235:  SWI     OS_WriteC
-                            	  1236: lab_9140:
+                            	  1236: prsc1:
 00:00009140 0100D1E4        	  1237:  LDRB    R0, [R1], #1
 00:00009144 000000EF        	  1238:  SWI     OS_WriteC
 00:00009148 012052E2        	  1239:  SUBS    R2, R2, #1
-00:0000914C FBFFFF1A        	  1240:  BNE     lab_9140
+00:0000914C FBFFFF1A        	  1240:  BNE     prsc1
 00:00009150 2000A0E3        	  1241:  MOV     R0, #0x20
 00:00009154 000000EF        	  1242:  SWI     OS_WriteC
 00:00009158 000000EF        	  1243:  SWI     OS_WriteC
 00:0000915C 0EF0A0E1        	  1244:  MOV     PC, R14
-                            	  1245: sub_9160:
+                            	  1245: PrintScoreInBothBanks:
 00:00009160 06002DE9        	  1246:  STMFD   R13!, {R1-R2}
 00:00009164 021C8BE2        	  1247:  ADD     R1, R11, #stringBuffer
 00:00009168 1320A0E3        	  1248:  MOV     R2, #19
@@ -1272,11 +1272,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00009194 0110A0E3        	  1259:  MOV     R1, #1
 00:00009198 060000EF        	  1260:  SWI     OS_Byte
 00:0000919C 06009DE8        	  1261:  LDMIA   R13, {R1-R2}
-                            	  1262: lab_91A0:
+                            	  1262: prsb1:
 00:000091A0 0100D1E4        	  1263:  LDRB    R0, [R1], #1
 00:000091A4 000000EF        	  1264:  SWI     OS_WriteC
 00:000091A8 012052E2        	  1265:  SUBS    R2, R2, #1
-00:000091AC FBFFFF1A        	  1266:  BNE     lab_91A0
+00:000091AC FBFFFF1A        	  1266:  BNE     prsb1
 00:000091B0 7000A0E3        	  1267:  MOV     R0, #112
 00:000091B4 0210A0E3        	  1268:  MOV     R1, #2
 00:000091B8 060000EF        	  1269:  SWI     OS_Byte
@@ -1287,11 +1287,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000091CC 0400A0E1        	  1274:  MOV     R0, R4
 00:000091D0 000000EF        	  1275:  SWI     OS_WriteC
 00:000091D4 0600BDE8        	  1276:  LDMFD   R13!, {R1-R2}
-                            	  1277: lab_91D8:
+                            	  1277: prsb2:
 00:000091D8 0100D1E4        	  1278:  LDRB    R0, [R1], #1
 00:000091DC 000000EF        	  1279:  SWI     OS_WriteC
 00:000091E0 012052E2        	  1280:  SUBS    R2, R2, #1
-00:000091E4 FBFFFF1A        	  1281:  BNE     lab_91D8
+00:000091E4 FBFFFF1A        	  1281:  BNE     prsb2
 00:000091E8 0EF0A0E1        	  1282:  MOV     PC, R14
                             	  1283: var_91EC:
 00:000091EC 37373737        	  1284: .long    0x37373737
@@ -2677,9 +2677,9 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A570 FC210100        	  2664: .long    stack
                             	  2665: memoryTestAddr:
 00:0000A574 00000000        	  2666: .long    0x00000000
-                            	  2667: var_A578:
+                            	  2667: initialScore:
 00:0000A578 F4010000        	  2668: .long    500
-                            	  2669: var_A57C:
+                            	  2669: initialHighScore:
 00:0000A57C F4010000        	  2670: .long    500
                             	  2671: var_A580:
 00:0000A580 550D0000        	  2672: .long    0x00000D55
@@ -2780,21 +2780,21 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A71D 393837
 00:0000A720 00              	  2752: .byte    0
                             	  2753: .balign 4
-00:0000A724 B4011FE5        	  2754:  LDR     R0, var_A578
-00:0000A728 24018BE5        	  2755:  STR     R0, [R11, #var_124]
-00:0000A72C B8011FE5        	  2756:  LDR     R0, var_A57C
-00:0000A730 38018BE5        	  2757:  STR     R0, [R11, #var_138]
-                            	  2758: lab_A734:
-00:0000A734 38019BE5        	  2759:  LDR     R0, [R11, #var_138]
-00:0000A738 24119BE5        	  2760:  LDR     R1, [R11, #var_124]
+00:0000A724 B4011FE5        	  2754:  LDR     R0, initialScore
+00:0000A728 24018BE5        	  2755:  STR     R0, [R11, #currentScore]
+00:0000A72C B8011FE5        	  2756:  LDR     R0, initialHighScore
+00:0000A730 38018BE5        	  2757:  STR     R0, [R11, #highScore]
+                            	  2758: StartNewGame:
+00:0000A734 38019BE5        	  2759:  LDR     R0, [R11, #highScore]
+00:0000A738 24119BE5        	  2760:  LDR     R1, [R11, #currentScore]
 00:0000A73C 000051E1        	  2761:  CMP     R1, R0
 00:0000A740 0100A051        	  2762:  MOVPL   R0, R1
-00:0000A744 38018B25        	  2763:  STRHS   R0, [R11, #var_138]
+00:0000A744 38018B25        	  2763:  STRHS   R0, [R11, #highScore]
 00:0000A748 2310A0E3        	  2764:  MOV     R1, #35
 00:0000A74C 0120A0E3        	  2765:  MOV     R2, #1
-00:0000A750 82FAFFEB        	  2766:  BL      sub_9160
-00:0000A754 E4011FE5        	  2767:  LDR     R0, var_A578
-00:0000A758 24018BE5        	  2768:  STR     R0, [R11, #var_124]
+00:0000A750 82FAFFEB        	  2766:  BL      PrintScoreInBothBanks
+00:0000A754 E4011FE5        	  2767:  LDR     R0, initialScore
+00:0000A758 24018BE5        	  2768:  STR     R0, [R11, #currentScore]
 00:0000A75C E4011FE5        	  2769:  LDR     R0, var_A580
 00:0000A760 28018BE5        	  2770:  STR     R0, [R11, #var_128]
 00:0000A764 0308A0E3        	  2771:  MOV     R0, #0x30000
@@ -2839,9 +2839,9 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A7F4 0705C6E5        	  2810:  STRB    R0, [R6, #0x507]
                             	  2811: lab_A7F8:
 00:0000A7F8 34019BE5        	  2812:  LDR     R0, [R11, #var_134]
-00:0000A7FC 1E10A0E3        	  2813:  MOV     R1, #0x1E
+00:0000A7FC 1E10A0E3        	  2813:  MOV     R1, #30
 00:0000A800 0120A0E3        	  2814:  MOV     R2, #1
-00:0000A804 55FAFFEB        	  2815:  BL      sub_9160
+00:0000A804 55FAFFEB        	  2815:  BL      PrintScoreInBothBanks
 00:0000A808 0000E0E3        	  2816:  MVN     R0, #0
 00:0000A80C 30018BE5        	  2817:  STR     R0, [R11, #var_130]
 00:0000A810 0000A0E3        	  2818:  MOV     R0, #0
@@ -2877,7 +2877,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A884 54F9FFEB        	  2848:  BL      DrawObjects
 00:0000A888 1BFDFFEB        	  2849:  BL      sub_9CFC
 00:0000A88C FEF5FFEB        	  2850:  BL      DrawWorld
-00:0000A890 1CFAFFEB        	  2851:  BL      PrintScore
+00:0000A890 1CFAFFEB        	  2851:  BL      PrintCurrentScore
 00:0000A894 58FAFFEB        	  2852:  BL      DrawFuelLevel
 00:0000A898 27FDFFEB        	  2853:  BL      SwitchScreenBank
 00:0000A89C 18E19BE5        	  2854:  LDR     R14, [R11, #var_118]
@@ -10192,14 +10192,17 @@ OS_ReadC                         S:00000004
 OS_Word                          S:00000007
 OS_WriteC                        S:00000000
 OS_WriteS                        S:00000001
+PrintCurrentScore                A:00009108
 PrintHexDigit                    A:0000A948
 PrintHexNumber                   A:0000A8E0
-PrintScore                       A:00009108
+PrintScoreInBothBanks            A:00009160
 ReturnToDesktop                  A:0000A8D4
+StartNewGame                     A:0000A734
 SwitchScreenBank                 A:00009D3C
 arctanTable                      A:0000C810
 arctanTableAddr                  A:000091F4
 bank1                            A:00009DAC
+currentScore                     S:00000124
 dataTable1                       A:0000A960
 dataTable10                      A:0000B29C
 dataTable11                      A:0000B4BC
@@ -10219,6 +10222,9 @@ divisionTable                    A:0000DA10
 divisionTableAddr                A:00009D38
 endCode                          A:00011A24
 entr1                            A:0000A6E4
+highScore                        S:00000138
+initialHighScore                 A:0000A57C
+initialScore                     A:0000A578
 lab_80DC                         A:000080DC
 lab_8114                         A:00008114
 lab_816C                         A:0000816C
@@ -10258,9 +10264,6 @@ lab_8F54                         A:00008F54
 lab_8FBC                         A:00008FBC
 lab_9038                         A:00009038
 lab_90F4                         A:000090F4
-lab_9140                         A:00009140
-lab_91A0                         A:000091A0
-lab_91D8                         A:000091D8
 lab_92BC                         A:000092BC
 lab_9308                         A:00009308
 lab_9358                         A:00009358
@@ -10343,12 +10346,14 @@ lab_A414                         A:0000A414
 lab_A46C                         A:0000A46C
 lab_A470                         A:0000A470
 lab_A4F4                         A:0000A4F4
-lab_A734                         A:0000A734
 lab_A78C                         A:0000A78C
 lab_A7A0                         A:0000A7A0
 lab_A7E0                         A:0000A7E0
 lab_A7F8                         A:0000A7F8
 memoryTestAddr                   A:0000A574
+prsb1                            A:000091A0
+prsb2                            A:000091D8
+prsc1                            A:00009140
 screenAddr                       A:00009A6C
 screenBank1Addr                  A:00009D30
 screenBank2Addr                  A:00009D2C
@@ -10384,7 +10389,6 @@ sub_8CFC                         A:00008CFC
 sub_8D24                         A:00008D24
 sub_8D40                         A:00008D40
 sub_8EC4                         A:00008EC4
-sub_9160                         A:00009160
 sub_9254                         A:00009254
 sub_928C                         A:0000928C
 sub_937C                         A:0000937C
@@ -10439,12 +10443,10 @@ var_114                          S:00000114
 var_118                          S:00000118
 var_11C                          S:0000011C
 var_120                          S:00000120
-var_124                          S:00000124
 var_128                          S:00000128
 var_12C                          S:0000012C
 var_130                          S:00000130
 var_134                          S:00000134
-var_138                          S:00000138
 var_13C                          S:0000013C
 var_140                          S:00000140
 var_144                          S:00000144
@@ -10480,8 +10482,6 @@ var_9AC0                         A:00009AC0
 var_9C8C                         A:00009C8C
 var_A480                         A:0000A480
 var_A524                         A:0000A524
-var_A578                         A:0000A578
-var_A57C                         A:0000A57C
 var_A580                         A:0000A580
 var_A588                         A:0000A588
 var_A590                         A:0000A590
@@ -10526,12 +10526,12 @@ Symbols by value:
 00000118 var_118
 0000011C var_11C
 00000120 var_120
-00000124 var_124
+00000124 currentScore
 00000128 var_128
 0000012C var_12C
 00000130 var_130
 00000134 var_134
-00000138 var_138
+00000138 highScore
 0000013C var_13C
 00000140 var_140
 00000144 var_144
@@ -10546,8 +10546,8 @@ Symbols by value:
 00000200 stringBuffer
 00000700 var_700
 00004400 var_4400
-00008000 CODE
 00008000 var_8000
+00008000 CODE
 0000800C var_800C
 00008010 var_8010
 00008028 var_8028
@@ -10623,11 +10623,11 @@ Symbols by value:
 00008FBC lab_8FBC
 00009038 lab_9038
 000090F4 lab_90F4
-00009108 PrintScore
-00009140 lab_9140
-00009160 sub_9160
-000091A0 lab_91A0
-000091D8 lab_91D8
+00009108 PrintCurrentScore
+00009140 prsc1
+00009160 PrintScoreInBothBanks
+000091A0 prsb1
+000091D8 prsb2
 000091EC var_91EC
 000091F0 sinTableAddr
 000091F4 arctanTableAddr
@@ -10761,8 +10761,8 @@ Symbols by value:
 0000A56C workspaceAddr
 0000A570 stackAddr
 0000A574 memoryTestAddr
-0000A578 var_A578
-0000A57C var_A57C
+0000A578 initialScore
+0000A57C initialHighScore
 0000A580 var_A580
 0000A584 stackPointerOnEntry
 0000A588 var_A588
@@ -10771,7 +10771,7 @@ Symbols by value:
 0000A5A4 AbortWithMemoryError
 0000A614 Entry
 0000A6E4 entr1
-0000A734 lab_A734
+0000A734 StartNewGame
 0000A78C lab_A78C
 0000A7A0 lab_A7A0
 0000A7E0 lab_A7E0

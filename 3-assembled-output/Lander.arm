@@ -38,12 +38,12 @@
 .set var_118, 0x118
 .set var_11C, 0x11C
 .set var_120, 0x120
-.set var_124, 0x124
+.set currentScore, 0x124
 .set var_128, 0x128
 .set var_12C, 0x12C
 .set var_130, 0x130
 .set var_134, 0x134
-.set var_138, 0x138
+.set highScore, 0x138
 .set var_13C, 0x13C
 .set var_140, 0x140
 .set var_144, 0x144
@@ -470,9 +470,9 @@ lab_850C:
 lab_85F4:
  TST     R10, #1
  BEQ     lab_8650
- LDR     R8, [R11, #var_124]
+ LDR     R8, [R11, #currentScore]
  SUB     R8, R8, #1
- STR     R8, [R11, #var_124]
+ STR     R8, [R11, #currentScore]
  ADD     R14, R11, #0x94
  LDMIA   R14, {R0-R5}
  LDR     R6, [R11, #var_030]
@@ -543,7 +543,7 @@ lab_86EC:
  BL      DrawObjects
  BL      sub_9CFC
  BL      DrawWorld
- BL      PrintScore
+ BL      PrintCurrentScore
  BL      SwitchScreenBank
  LDR     R0, [R11, #var_118]
  ADD     R0, R0, #1
@@ -586,7 +586,7 @@ lab_86EC:
 .byte    0
 .balign 4
  SWI     OS_ReadC
- B       lab_A734
+ B       StartNewGame
 var_87EC:
 .long    var_805C
 .long    var_802C
@@ -733,9 +733,9 @@ sub_89C8:
  ADD     R8, R8, #0xC
  STRB    R8, [R14]
  TST     R7, #0x20000
- LDREQ   R8, [R11, #var_124]
- ADDEQ   R8, R8, #0x14
- STREQ   R8, [R11, #var_124]
+ LDREQ   R8, [R11, #currentScore]
+ ADDEQ   R8, R8, #20
+ STREQ   R8, [R11, #currentScore]
  MOV     R8, #0x14
  BL      sub_8CBC
  B       lab_8A58
@@ -960,8 +960,8 @@ sub_8D24:
  BL      sub_8BD8
  LDMFD   R13!, {R6-R9, PC}
 sub_8D40:
- LDR     R4, [R11, #var_124]
- SUBS    R4, R4, #0x320
+ LDR     R4, [R11, #currentScore]
+ SUBS    R4, R4, #800
  MOVMI   PC, R14
  STMDB   R13!, {R14}
  BL      sub_9A40
@@ -1218,31 +1218,31 @@ lab_90F4:
  SUBS    R8, R8, #1
  BNE     lab_8FBC
  LDMFD   R13!, {R6-R12, PC}
-PrintScore:
- LDR     R0, [R11, #var_124]
- ADD     R1, R11, #0x200
- MOV     R2, #0x13
- CMP     R0, #0x400
+PrintCurrentScore:
+ LDR     R0, [R11, #currentScore]
+ ADD     R1, R11, #stringBuffer
+ MOV     R2, #19
+ CMP     R0, #1024
  MOVHS   R4, #0x50000
  STRHS   R4, [R11, #var_12C]
- CMP     R0, #0x5D0
+ CMP     R0, #1488
  MOVHS   R4, #0x70000
  STRHS   R4, [R11, #var_12C]
  SWI     OS_BinaryToDecimal
- MOV     R0, #0x1E
+ MOV     R0, #30
  SWI     OS_WriteC
- MOV     R0, #0xA
+ MOV     R0, #0x0A
  SWI     OS_WriteC
-lab_9140:
+prsc1:
  LDRB    R0, [R1], #1
  SWI     OS_WriteC
  SUBS    R2, R2, #1
- BNE     lab_9140
+ BNE     prsc1
  MOV     R0, #0x20
  SWI     OS_WriteC
  SWI     OS_WriteC
  MOV     PC, R14
-sub_9160:
+PrintScoreInBothBanks:
  STMFD   R13!, {R1-R2}
  ADD     R1, R11, #stringBuffer
  MOV     R2, #19
@@ -1259,11 +1259,11 @@ sub_9160:
  MOV     R1, #1
  SWI     OS_Byte
  LDMIA   R13, {R1-R2}
-lab_91A0:
+prsb1:
  LDRB    R0, [R1], #1
  SWI     OS_WriteC
  SUBS    R2, R2, #1
- BNE     lab_91A0
+ BNE     prsb1
  MOV     R0, #112
  MOV     R1, #2
  SWI     OS_Byte
@@ -1274,11 +1274,11 @@ lab_91A0:
  MOV     R0, R4
  SWI     OS_WriteC
  LDMFD   R13!, {R1-R2}
-lab_91D8:
+prsb2:
  LDRB    R0, [R1], #1
  SWI     OS_WriteC
  SUBS    R2, R2, #1
- BNE     lab_91D8
+ BNE     prsb2
  MOV     PC, R14
 var_91EC:
 .long    0x37373737
@@ -2664,9 +2664,9 @@ stackAddr:
 .long    stack
 memoryTestAddr:
 .long    0x00000000
-var_A578:
+initialScore:
 .long    500
-var_A57C:
+initialHighScore:
 .long    500
 var_A580:
 .long    0x00000D55
@@ -2751,21 +2751,21 @@ entr1:
 .byte    "(C) D.J.Braben 1987"
 .byte    0
 .balign 4
- LDR     R0, var_A578
- STR     R0, [R11, #var_124]
- LDR     R0, var_A57C
- STR     R0, [R11, #var_138]
-lab_A734:
- LDR     R0, [R11, #var_138]
- LDR     R1, [R11, #var_124]
+ LDR     R0, initialScore
+ STR     R0, [R11, #currentScore]
+ LDR     R0, initialHighScore
+ STR     R0, [R11, #highScore]
+StartNewGame:
+ LDR     R0, [R11, #highScore]
+ LDR     R1, [R11, #currentScore]
  CMP     R1, R0
  MOVPL   R0, R1
- STRHS   R0, [R11, #var_138]
+ STRHS   R0, [R11, #highScore]
  MOV     R1, #35
  MOV     R2, #1
- BL      sub_9160
- LDR     R0, var_A578
- STR     R0, [R11, #var_124]
+ BL      PrintScoreInBothBanks
+ LDR     R0, initialScore
+ STR     R0, [R11, #currentScore]
  LDR     R0, var_A580
  STR     R0, [R11, #var_128]
  MOV     R0, #0x30000
@@ -2810,9 +2810,9 @@ lab_A7E0:
  STRB    R0, [R6, #0x507]
 lab_A7F8:
  LDR     R0, [R11, #var_134]
- MOV     R1, #0x1E
+ MOV     R1, #30
  MOV     R2, #1
- BL      sub_9160
+ BL      PrintScoreInBothBanks
  MVN     R0, #0
  STR     R0, [R11, #var_130]
  MOV     R0, #0
@@ -2848,7 +2848,7 @@ MainLoop:
  BL      DrawObjects
  BL      sub_9CFC
  BL      DrawWorld
- BL      PrintScore
+ BL      PrintCurrentScore
  BL      DrawFuelLevel
  BL      SwitchScreenBank
  LDR     R14, [R11, #var_118]

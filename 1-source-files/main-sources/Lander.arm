@@ -130,7 +130,15 @@
 
  var_120 = &120                     \ 
 
- var_124 = &124                     \ Initialised to contents of var_A578
+ currentScore = &124                \ Our current score, which is displayed at
+                                    \ the left end of the score bar
+                                    \
+                                    \ It is initialised to initialScore at the
+                                    \ start of each new game
+                                    \
+                                    \ It goes down by one each time we fire a
+                                    \ bullet, and goes up by 20 for each object
+                                    \ we destroy
 
  var_128 = &128                     \ 
 
@@ -140,7 +148,11 @@
 
  var_134 = &134                     \ 
 
- var_138 = &138                     \ Initialised to contents of var_A57C
+ highScore = &138                   \ The high score, which is displayed at the
+                                    \ right end of the score bar
+                                    \
+                                    \ It is initialised to initialHighScore when
+                                    \ the game is loaded
 
  var_13C = &13C                     \ 
 
@@ -164,7 +176,8 @@
 
  var_174 = &174                     \ 
 
- stringBuffer = &200                \ String buffer for strings in sub_9160
+ stringBuffer = &200                \ A string buffer that's used when printing
+                                    \ the scores
 
  var_700 = &700                     \ 
 
@@ -747,9 +760,11 @@ ENDIF
 
  TST     R10, #1                    \ 
  BEQ     lab_8650                   \ 
- LDR     R8, [R11, #var_124]        \ 
- SUB     R8, R8, #1                 \ 
- STR     R8, [R11, #var_124]        \ 
+
+ LDR     R8, [R11, #currentScore]   \ Decrement the current score by one
+ SUB     R8, R8, #1
+ STR     R8, [R11, #currentScore]
+
  ADD     R14, R11, #&94             \ 
  LDMIA   R14, {R0-R5}               \ 
  LDR     R6, [R11, #var_030]        \ 
@@ -867,7 +882,8 @@ ENDIF
 
  BL      DrawWorld                  \ 
 
- BL      PrintScore                 \ 
+ BL      PrintCurrentScore          \ Print the number of remaining bullets at
+                                    \ the left end of the score bar
 
  BL      SwitchScreenBank           \ 
 
@@ -884,6 +900,7 @@ ENDIF
  STR     R0, [R11, #var_134]        \ 
  ADD     R13, R13, #4               \ 
  BNE     lab_A7F8                   \ 
+
  MOV     R0, #&70                   \ 
  MOV     R1, #1                     \ 
  SWI     OS_Byte                    \ 
@@ -917,7 +934,8 @@ ENDIF
  ALIGN
 
  SWI     OS_ReadC                   \ 
- B       lab_A734                   \ 
+
+ B       StartNewGame               \ 
 
 \ ******************************************************************************
 \
@@ -1128,9 +1146,11 @@ ENDIF
  ADD     R8, R8, #&C                \ 
  STRB    R8, [R14]                  \ 
  TST     R7, #&20000                \ 
- LDREQ   R8, [R11, #var_124]        \ 
- ADDEQ   R8, R8, #&14               \ 
- STREQ   R8, [R11, #var_124]        \ 
+
+ LDREQ   R8, [R11, #currentScore]   \ If ???, increment the current score by 20
+ ADDEQ   R8, R8, #20
+ STREQ   R8, [R11, #currentScore]
+
  MOV     R8, #&14                   \ 
  BL      sub_8CBC                   \ 
  B       lab_8A58                   \ 
@@ -1521,9 +1541,16 @@ ENDIF
 
 .sub_8D40
 
- LDR     R4, [R11, #var_124]        \ 
- SUBS    R4, R4, #&320              \ 
- MOVMI   PC, R14                    \ 
+ LDR     R4, [R11, #currentScore]   \ Set R4 to the current score minus 800
+ SUBS    R4, R4, #800
+
+ MOVMI   PC, R14                    \ If the result is negative, then the
+                                    \ current score is 800 or less, so return
+                                    \ from the subroutine
+
+                                    \ If we get here then the current score is
+                                    \ greater than 800, so ???
+
  STMDB   R13!, {R14}                \ 
  BL      sub_9A40                   \ 
  MOV     R0, R0, LSR #18            \ 
@@ -1859,47 +1886,70 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: PrintScore
+\       Name: PrintCurrentScore
 \       Type: Subroutine
 \   Category: Text
-\    Summary: ???
+\    Summary: Print the current score at the left end of the score bar
 \
 \ ******************************************************************************
 
-.PrintScore
+.PrintCurrentScore
 
- LDR     R0, [R11, #var_124]        \ 
- ADD     R1, R11, #&200             \ 
- MOV     R2, #&13                   \ 
- CMP     R0, #&400                  \ 
+ LDR     R0, [R11, #currentScore]   \ Set R0 to the current score
+
+ ADD     R1, R11, #stringBuffer     \ Set R1 = stringBuffer to use as a string
+                                    \ buffer for the following call
+
+ MOV     R2, #19                    \ Set R2 = 19, to use as the size of the
+                                    \ string buffer in the following call
+
+ CMP     R0, #1024                  \ If R0 >= 1024, set var_12C = &50000 ???
  MOVHS   R4, #&50000                \ 
  STRHS   R4, [R11, #var_12C]        \ 
- CMP     R0, #&5D0                  \ 
- MOVHS   R4, #&70000                \ 
- STRHS   R4, [R11, #var_12C]        \ 
- SWI     OS_BinaryToDecimal         \ 
- MOV     R0, #&1E                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&A                    \ 
- SWI     OS_WriteC                  \ 
 
-.lab_9140
+ CMP     R0, #1488                  \ If R0 >= 1488, set var_12C = &70000 ???
+ MOVHS   R4, #&70000
+ STRHS   R4, [R11, #var_12C]
 
- LDRB    R0, [R1], #1               \ 
- SWI     OS_WriteC                  \ 
- SUBS    R2, R2, #1                 \ 
- BNE     lab_9140                   \ 
- MOV     R0, #&20                   \ 
- SWI     OS_WriteC                  \ 
- SWI     OS_WriteC                  \ 
- MOV     PC, R14                    \ 
+ SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
+                                    \ string and store it in the buffer at R1
+                                    \ with a maximum string size of R2
+
+ MOV     R0, #30                    \ Issue a VDU 30 command to move the text
+ SWI     OS_WriteC                  \ cursor to the top-left corner of the
+                                    \ screen
+
+ MOV     R0, #&0A                   \ Print a line feed (ASCII &0A) to move the
+ SWI     OS_WriteC                  \ cursor to the start of the second line,
+                                    \ which is where we print the scores
+
+                                    \ We now print the contents of the string
+                                    \ buffer, which updates the number of
+                                    \ remaining bullets on-screen
+
+.prsc1
+
+ LDRB    R0, [R1], #1               \ Print the character in the buffer at R1,
+ SWI     OS_WriteC                  \ incrementing R1 as we go
+
+ SUBS    R2, R2, #1                 \ Decrement the loop counter in R2
+
+ BNE     prsc1                      \ Loop back to print the next character from
+                                    \ the buffer until we have printed all R2 of
+                                    \ them
+
+ MOV     R0, #&20                   \ Print two spaces (ASCII &20) to ensure we
+ SWI     OS_WriteC                  \ remove any characters from the previous
+ SWI     OS_WriteC                  \ bullet count
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: sub_9160
+\       Name: PrintScoreInBothBanks
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print a number at a specified text column
+\    Summary: Print a number at a specified text column in the score line
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1913,7 +1963,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.sub_9160
+.PrintScoreInBothBanks
 
  STMFD   R13!, {R1-R2}              \ Store the arguments in R1 and R2 on the
                                     \ stack so can retrieve them below
@@ -1928,8 +1978,12 @@ ENDIF
                                     \ string and store it in the buffer at R1
                                     \ with a maximum string size of R2
 
- MOV     R0, #31                    \ Start a VDU 31, x, y command, which moves
- SWI     OS_WriteC                  \ the text cursor to column x on row y
+ MOV     R0, #31                    \ Start the following VDU command:
+ SWI     OS_WriteC                  \
+                                    \   VDU 31, x, y
+                                    \
+                                    \ which moves the text cursor to column x
+                                    \ on row y
 
  LDMFD   R13!, {R3-R4}              \ Fetch R1 and R2 into R3 and R4 and write
  MOV     R0, R3                     \ them to complete the VDU 31 command, so
@@ -1945,36 +1999,52 @@ ENDIF
  MOV     R1, #1                     \ screen bank 1
  SWI     OS_Byte
 
- LDMIA   R13, {R1-R2}               \ Retrieve R1 and R2 from the stack, but
-                                    \ don't update the stack pointer so we can
-                                    \ retrieve them again below
+ LDMIA   R13, {R1-R2}               \ Retrieve R1 and R2 from the stack, so R1
+                                    \ points to the string buffer and R2 is the
+                                    \ buffer size
+                                    \
+                                    \ Note that we don't update the stack
+                                    \ pointer, so we can retrieve them again
+                                    \ below
 
-.lab_91A0
+.prsb1
 
- LDRB    R0, [R1], #1               \ 
- SWI     OS_WriteC                  \ 
- SUBS    R2, R2, #1                 \ 
- BNE     lab_91A0                   \ 
+ LDRB    R0, [R1], #1               \ Print the character in the buffer at R1,
+ SWI     OS_WriteC                  \ incrementing R1 as we go
+
+ SUBS    R2, R2, #1                 \ Decrement the loop counter in R2
+
+ BNE     prsb1                      \ Loop back to print the next character from
+                                    \ the buffer until we have printed all R2 of
+                                    \ them
 
  MOV     R0, #112                   \ Set the hardware and VDU screen banks to
  MOV     R1, #2                     \ screen bank 1
  SWI     OS_Byte
 
- MOV     R0, #31                    \ VDU 31, R3, R4
- SWI     OS_WriteC                  \ 
- MOV     R0, R3                     \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, R4                     \ 
- SWI     OS_WriteC                  \ 
+ MOV     R0, #31                    \ Issue the following VDU command:
+ SWI     OS_WriteC                  \
+ MOV     R0, R3                     \   VDU 31, R3, R4
+ SWI     OS_WriteC                  \
+ MOV     R0, R4                     \ which moves the text cursor to column R3
+ SWI     OS_WriteC                  \ on row R4, i.e. the same text coordinates
+                                    \ as the text we printed in screen bank 1
+                                    \ above
 
- LDMFD   R13!, {R1-R2}              \ Retrieve R1 and R2 from the stack
+ LDMFD   R13!, {R1-R2}              \ Retrieve R1 and R2 from the stack, so R1
+                                    \ points to the string buffer and R2 is the
+                                    \ buffer size
 
-.lab_91D8
+.prsb2
 
- LDRB    R0, [R1], #1               \ 
- SWI     OS_WriteC                  \ 
- SUBS    R2, R2, #1                 \ 
- BNE     lab_91D8                   \ 
+ LDRB    R0, [R1], #1               \ Print the character in the buffer at R1,
+ SWI     OS_WriteC                  \ incrementing R1 as we go
+
+ SUBS    R2, R2, #1                 \ Decrement the loop counter in R2
+
+ BNE     prsb2                      \ Loop back to print the next character from
+                                    \ the buffer until we have printed all R2 of
+                                    \ them
 
  MOV     PC, R14                    \ Return from the subroutine
 
@@ -4141,27 +4211,27 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_A578
+\       Name: initialScore
 \       Type: Variable
 \   Category: ???
-\    Summary: ???
+\    Summary: The score at the start of each game
 \
 \ ******************************************************************************
 
-.var_A578
+.initialScore
 
  EQUD    500
 
 \ ******************************************************************************
 \
-\       Name: var_A57C
+\       Name: initialHighScore
 \       Type: Variable
 \   Category: ???
-\    Summary: ???
+\    Summary: The high score when we first load the game
 \
 \ ******************************************************************************
 
-.var_A57C
+.initialHighScore
 
  EQUD    500
 
@@ -4347,18 +4417,25 @@ ENDIF
  MOV     R0, #128+13                \ creates two mode 13 screen banks
  SWI     OS_WriteC                  \ 
 
- MOV     R0, #23                    \ Print the following VDU command:
+ MOV     R0, #23                    \ Start the following VDU command:
  SWI     OS_WriteC                  \ 
  MOV     R0, #1                     \   VDU 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
  SWI     OS_WriteC                  \ 
- MOV     R8, #8                     \ to disable the cursor
+                                    \ which disables the cursor
+
+ MOV     R8, #8                     \ We now want to print the eight zeroes in
+                                    \ the above command, so set a loop counter
+                                    \ in R8
 
 .entr1
 
  MOV     R0, #0                     \ This loop prints the eight zeroes in the
  SWI     OS_WriteC                  \ above VDU command
- SUBS    R8, R8, #1
- BNE     entr1
+
+ SUBS    R8, R8, #1                 \ Decrement the loop counter
+
+ BNE     entr1                      \ Loop back until we have printed all eight
+                                    \ zeroes
 
  SWI     OS_WriteS                  \ Write the game's title into the top line
  EQUS    "Lander Demo/Practice "    \ of screen bank 2, so the same title
@@ -4366,32 +4443,52 @@ ENDIF
  EQUB    0
  ALIGN
 
- LDR     R0, var_A578               \ Set var_124 to the contents of var_A578
- STR     R0, [R11, #var_124]        \ ???
+ LDR     R0, initialScore           \ Initialise currentScore to the score that
+ STR     R0, [R11, #currentScore]   \ we start each game with, which is set in
+                                    \ initialScore
 
- LDR     R0, var_A57C               \ Set var_138 to the contents of var_A57C
- STR     R0, [R11, #var_138]        \ 
+ LDR     R0, initialHighScore       \ Initialise highScore to the high score
+ STR     R0, [R11, #highScore]      \ that we start the game with, which is set
+                                    \ in initialHighScore
 
-.lab_A734
+\ ******************************************************************************
+\
+\       Name: StartNewGame
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: The main entry point for the game
+\
+\ ******************************************************************************
 
- LDR     R0, [R11, #var_138]        \ Set R0 = var_138
+.StartNewGame
 
- LDR     R1, [R11, #var_124]        \ Set R1 = var_124
+ LDR     R0, [R11, #highScore]      \ Set R0 to the current high score
 
- CMP     R1, R0                     \ If R1 - R0 is positive, i.e. R1 >= R0, set
- MOVPL   R0, R1                     \ R0 = R1, so R0 = min(R0, R1)
+ LDR     R1, [R11, #currentScore]   \ Set R1 to our current score
 
- STRHS   R0, [R11, #var_138]        \ If R1 >= R0, set var_138 = min(R0, R1)
+ CMP     R1, R0                     \ If R1 - R0 is positive, i.e. R1 >= R0,
+ MOVPL   R0, R1                     \ then our latest score is higher than the
+                                    \ high score, so set R0 to our latest score
                                     \
-                                    \ So var_138 = min(var_138, var_124)
+                                    \ So R0 is set to the maximum of highScore
+                                    \ and currentScore, which is the new high
+                                    \ score
 
- MOV     R1, #35                    \ Set (R1, R2) = (35, 1) to pass to sub_9160
- MOV     R2, #1                     \ so we print at column 35 on row 1
+ STRHS   R0, [R11, #highScore]      \ If R1 >= R0 then we just updated the high
+                                    \ score and the new high score is in R0, so
+                                    \ store the new high score in highScore
 
- BL      sub_9160                   \ Some kind of number printing routine ???
+ MOV     R1, #35                    \ Set (R1, R2) = (35, 1) so the following
+ MOV     R2, #1                     \ call to PrintScoreInBothBanks prints the
+                                    \ high score at column 35 on row 1
 
- LDR     R0, var_A578               \ Set var_124 to the contents of var_A578
- STR     R0, [R11, #var_124]        \ ???
+ BL      PrintScoreInBothBanks      \ Print the high score in R0 at column 35 on
+                                    \ row 1, at the right end of the second text
+                                    \ line, which is where we print the scores
+
+ LDR     R0, initialScore           \ Initialise currentScore to the score that
+ STR     R0, [R11, #currentScore]   \ we start each game with, which is set in
+                                    \ initialScore
 
  LDR     R0, var_A580               \ Set var_128 to the contents of var_A580
  STR     R0, [R11, #var_128]        \ ???
@@ -4463,9 +4560,11 @@ ENDIF
 
  LDR     R0, [R11, #var_134]        \ 
 
- MOV     R1, #&1E                   \ 
- MOV     R2, #1                     \ 
- BL      sub_9160                   \ 
+ MOV     R1, #30                    \ Set (R1, R2) = (30, 1) so the following
+ MOV     R2, #1                     \ call to PrintScoreInBothBanks prints the
+                                    \ number of lives at column 30 on row 1
+
+ BL      PrintScoreInBothBanks      \ 
 
  MVN     R0, #0                     \ 
  STR     R0, [R11, #var_130]        \ 
@@ -4525,7 +4624,8 @@ ENDIF
 
  BL      DrawWorld                  \ Commenting this out hides everything
 
- BL      PrintScore                 \ Commenting this out stops score updating
+ BL      PrintCurrentScore          \ Print the number of remaining bullets at
+                                    \ the left end of the score bar
 
  BL      DrawFuelLevel              \ Commenting this out hides fuel bar
 
@@ -4541,7 +4641,7 @@ ENDIF
 \
 \       Name: EndGame
 \       Type: Subroutine
-\   Category: Start and end
+\   Category: Main loop
 \    Summary: Finish the game
 \
 \ ******************************************************************************
@@ -4581,7 +4681,14 @@ ENDIF
 \       Name: PrintHexNumber
 \       Type: Subroutine
 \   Category: Text
-\    Summary: ???
+\    Summary: Print an 8-digit hexadecimal number on the second character row of
+\             the screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R1                              The number to print
 \
 \ ******************************************************************************
 
