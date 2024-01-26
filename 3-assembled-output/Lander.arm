@@ -20,7 +20,9 @@
 .set var_054, 0x54
 .set var_058, 0x58
 .set var_078, 0x78
+.set var_094, 0x94
 .set var_098, 0x98
+.set var_09C, 0x9C
 .set var_0A0, 0xA0
 .set var_0A4, 0xA4
 .set var_0A8, 0xA8
@@ -42,7 +44,7 @@
 .set var_128, 0x128
 .set var_12C, 0x12C
 .set var_130, 0x130
-.set var_134, 0x134
+.set remainingLives, 0x134
 .set highScore, 0x138
 .set var_13C, 0x13C
 .set var_140, 0x140
@@ -396,7 +398,7 @@ lab_8424:
  CMP     R14, #0x1800000
  BHS     lab_850C
  STMDB   R13!, {R0}
- ADD     R14, R11, #0x4400
+ ADD     R14, R11, #var_4400
  AND     R9, R9, #0xFF000000
  ADD     R14, R14, R8, LSR #24
  ADD     R14, R14, R9, LSR #16
@@ -552,9 +554,9 @@ lab_86EC:
  SUBS    R0, R0, #1
  STR     R0, [R11, #var_11C]
  BPL     lab_86EC
- LDR     R0, [R11, #var_134]
+ LDR     R0, [R11, #remainingLives]
  SUBS    R0, R0, #1
- STR     R0, [R11, #var_134]
+ STR     R0, [R11, #remainingLives]
  ADD     R13, R13, #4
  BNE     lab_A7F8
  MOV     R0, #0x70
@@ -720,7 +722,7 @@ sub_89C8:
  MOVHS   PC, R14
  STMDB   R13!, {R2}
  STR     R14, [R11, #var_0F4]
- ADD     R14, R11, #0x4400
+ ADD     R14, R11, #var_4400
  AND     R2, R2, #0xFF000000
  ADD     R14, R14, R0, LSR #24
  ADD     R14, R14, R2, LSR #16
@@ -1013,7 +1015,7 @@ lab_8DFC:
  MOV     R6, #0xD
  LDR     R8, [R11, #var_148]
 lab_8E04:
- ADD     R14, R11, #0x4400
+ ADD     R14, R11, #var_4400
  ADD     R14, R14, R8, LSR #24
  ADD     R14, R14, R9, LSR #16
  LDRB    R0, [R14]
@@ -2672,14 +2674,16 @@ var_A580:
 .long    0x00000D55
 stackPointerOnEntry:
 .long    0x00000000
-var_A588:
-.long    0xFF01FF03
-.long    0x00000001
-var_A590:
-.long    var_A588
-sub_A594:
- LDR     R1, var_A590
- MOV     R0, #0x15
+mouseParameters:
+.byte 3
+.word 511
+.word 511
+.balign 4
+mouseParametersAddr:
+.long    mouseParameters
+ResetMousePosition:
+ LDR     R1, mouseParametersAddr
+ MOV     R0, #21
  SWI     OS_Word
  MOV     PC, R14
 AbortWithMemoryError:
@@ -2771,20 +2775,20 @@ StartNewGame:
  MOV     R0, #0x30000
  STR     R0, [R11, #var_12C]
  MOV     R0, #3
- STR     R0, [R11, #var_134]
+ STR     R0, [R11, #remainingLives]
  MVN     R0, #0
  MVN     R1, #0
  MVN     R2, #0
  MVN     R3, #0
  MOV     R4, #0x10000
  ADD     R6, R11, #var_4400
-lab_A78C:
+snew1:
  STMIA   R6!, {R0-R3}
  SUBS    R4, R4, #16
- BNE     lab_A78C
+ BNE     snew1
  ADD     R6, R11, #var_4400
  MOV     R5, #0x800
-lab_A7A0:
+snew2:
  BL      sub_9A40
  MOV     R8, R0
  MOV     R9, R0, LSL #8
@@ -2794,22 +2798,22 @@ lab_A7A0:
  LDMIA   R13!, {R0}
  CMP     R14, #0x5500000
  CMPNE   R14, #0x3500000
- BEQ     lab_A7E0
+ BEQ     snew3
  AND     R0, R0, #7
  ADD     R0, R0, #1
  AND     R9, R9, #0xFF000000
  ADD     R14, R6, R8, LSR #24
  ADD     R14, R14, R9, LSR #16
  STRB    R0, [R14]
-lab_A7E0:
+snew3:
  SUBS    R5, R5, #1
- BPL     lab_A7A0
+ BPL     snew2
  MOV     R0, #9
  STRB    R0, [R6, #0x107]
  STRB    R0, [R6, #0x307]
  STRB    R0, [R6, #0x507]
 lab_A7F8:
- LDR     R0, [R11, #var_134]
+ LDR     R0, [R11, #remainingLives]
  MOV     R1, #30
  MOV     R2, #1
  BL      PrintScoreInBothBanks
@@ -2823,16 +2827,16 @@ lab_A7F8:
  STR     R0, [R11, #var_158]
  MOV     R0, #0x4000000
  MOV     R2, R0
- ADD     R3, R11, #0x94
+ ADD     R3, R11, #var_094
  MOV     R1, #0x2EC0000
  STMIA   R3!, {R0-R2}
  MOV     R0, #0
  MOV     R1, #0
  MOV     R2, #0
  STMIA   R3!, {R0-R2}
- BL      sub_A594
+ BL      ResetMousePosition
 MainLoop:
- MOV     R0, #0x81
+ MOV     R0, #129
  MOV     R1, #0
  MOV     R2, #0
  SWI     OS_Byte
@@ -2856,9 +2860,9 @@ MainLoop:
  STR     R14, [R11, #var_118]
  B       MainLoop
 EndGame:
- MOV     R0, #0x7E
+ MOV     R0, #126
  SWI     OS_Byte
- MOV     R0, #0x16
+ MOV     R0, #22
  SWI     OS_WriteC
  MOV     R0, #0
  SWI     OS_WriteC
@@ -2871,9 +2875,9 @@ ReturnToDesktop:
  LDR     R13, stackPointerOnEntry
  MOV     PC, R14
 PrintHexNumber:
- MOV     R0, #0x1E
+ MOV     R0, #30
  SWI     OS_WriteC
- MOV     R0, #0xA
+ MOV     R0, #0x0A
  SWI     OS_WriteC
  STMFD   R13!, {R0-R12, R14}
  MOV     R0, R1, LSR #28

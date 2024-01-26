@@ -94,7 +94,11 @@
 
  var_078 = &78                      \ 
 
+ var_094 = &94                      \ 
+
  var_098 = &98                      \ 
+
+ var_09C = &9C                      \ 
 
  var_0A0 = &A0                      \ 
 
@@ -146,7 +150,12 @@
 
  var_130 = &130                     \ 
 
- var_134 = &134                     \ 
+ remainingLives = &134              \ The number of remaining lives, which is
+                                    \ displayed towards the right end of the
+                                    \ score bar, just before the high score
+                                    \
+                                    \ It is initialised to 3 at the start of
+                                    \ each new game
 
  highScore = &138                   \ The high score, which is displayed at the
                                     \ right end of the score bar
@@ -184,7 +193,7 @@
  var_71C = &71C                     \ Zeroed in sub_8AF4
 
  var_4400 = &4400                   \ &1000 words, initialised to &FFFFFFFF in
-                                    \ Entry
+                                    \ Entry and then populated with other values
 
 \ ******************************************************************************
 \
@@ -441,6 +450,12 @@ ENDIF
 \   Category: ???
 \    Summary: ???
 \
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R0                              
+\
 \ ******************************************************************************
 
 .sub_81F4
@@ -490,7 +505,8 @@ ENDIF
  CMPLO   R9, #&8000000              \ 
  MOVLO   R0, #&3500000              \ 
  STR     R0, [R11, #var_100]        \ 
- MOV     PC, R14                    \ 
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -680,7 +696,7 @@ ENDIF
  CMP     R14, #&1800000             \ 
  BHS     lab_850C                   \ 
  STMDB   R13!, {R0}                 \ 
- ADD     R14, R11, #&4400           \ 
+ ADD     R14, R11, #var_4400        \ 
  AND     R9, R9, #&FF000000         \ 
  ADD     R14, R14, R8, LSR #24      \ 
  ADD     R14, R14, R9, LSR #16      \ 
@@ -885,7 +901,8 @@ ENDIF
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
                                     \ the left end of the score bar
 
- BL      SwitchScreenBank           \ 
+ BL      SwitchScreenBank           \ Switch screen banks and clear the newly
+                                    \ hidden screen bank to black
 
  LDR     R0, [R11, #var_118]        \ 
  ADD     R0, R0, #1                 \ 
@@ -895,9 +912,10 @@ ENDIF
  STR     R0, [R11, #var_11C]        \ 
  BPL     lab_86EC                   \ 
 
- LDR     R0, [R11, #var_134]        \ 
+ LDR     R0, [R11, #remainingLives] \ Decrement the number of remaining lives
  SUBS    R0, R0, #1                 \ 
- STR     R0, [R11, #var_134]        \ 
+ STR     R0, [R11, #remainingLives] \ 
+
  ADD     R13, R13, #4               \ 
  BNE     lab_A7F8                   \ 
 
@@ -1133,7 +1151,7 @@ ENDIF
  MOVHS   PC, R14                    \ 
  STMDB   R13!, {R2}                 \ 
  STR     R14, [R11, #var_0F4]       \ 
- ADD     R14, R11, #&4400           \ 
+ ADD     R14, R11, #var_4400        \ 
  AND     R2, R2, #&FF000000         \ 
  ADD     R14, R14, R0, LSR #24      \ 
  ADD     R14, R14, R2, LSR #16      \ 
@@ -1627,7 +1645,7 @@ ENDIF
 
 .lab_8E04
 
- ADD     R14, R11, #&4400           \ 
+ ADD     R14, R11, #var_4400        \ 
  ADD     R14, R14, R8, LSR #24      \ 
  ADD     R14, R14, R9, LSR #16      \ 
  LDRB    R0, [R14]                  \ 
@@ -1915,13 +1933,14 @@ ENDIF
                                     \ string and store it in the buffer at R1
                                     \ with a maximum string size of R2
 
- MOV     R0, #30                    \ Issue a VDU 30 command to move the text
+ MOV     R0, #30                    \ Print a VDU 30 command to move the text
  SWI     OS_WriteC                  \ cursor to the top-left corner of the
                                     \ screen
 
  MOV     R0, #&0A                   \ Print a line feed (ASCII &0A) to move the
- SWI     OS_WriteC                  \ cursor to the start of the second line,
-                                    \ which is where we print the scores
+ SWI     OS_WriteC                  \ cursor down one line, to the start of the
+                                    \ second line, which is where we print the
+                                    \ score bar
 
                                     \ We now print the contents of the string
                                     \ buffer, which updates the number of
@@ -1949,7 +1968,7 @@ ENDIF
 \       Name: PrintScoreInBothBanks
 \       Type: Subroutine
 \   Category: Text
-\    Summary: Print a number at a specified text column in the score line
+\    Summary: Print a number at a specified text column in the score bar
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1978,7 +1997,7 @@ ENDIF
                                     \ string and store it in the buffer at R1
                                     \ with a maximum string size of R2
 
- MOV     R0, #31                    \ Start the following VDU command:
+ MOV     R0, #31                    \ Start printing the following VDU command:
  SWI     OS_WriteC                  \
                                     \   VDU 31, x, y
                                     \
@@ -2022,7 +2041,7 @@ ENDIF
  MOV     R1, #2                     \ screen bank 1
  SWI     OS_Byte
 
- MOV     R0, #31                    \ Issue the following VDU command:
+ MOV     R0, #31                    \ Print the following VDU command:
  SWI     OS_WriteC                  \
  MOV     R0, R3                     \   VDU 31, R3, R4
  SWI     OS_WriteC                  \
@@ -2954,21 +2973,44 @@ ENDIF
 \   Category: ???
 \    Summary: ???
 \
+\ ------------------------------------------------------------------------------
+\
+\ This gets called quite a bit. No idea what it does! The values of R0 and R1
+\ get used on return, and they are based on var_9A38 and var_9A3C.
+\
+\ Returns:
+\
+\   R0                              ???
+\
+\   R1                              ???
+\
 \ ******************************************************************************
 
 .sub_9A40
 
- STMDB   R13!, {R14}                \ 
- LDR     R0, var_9A38               \ 
- LDR     R1, var_9A3C               \ 
- TST     R1, R1, LSR #1             \ 
- MOVS    R14, R0, RRX               \ 
- ADC     R1, R1, R1                 \ 
- EOR     R14, R14, R0, LSL #12      \ 
- EOR     R0, R14, R14, LSR #20      \ 
- STR     R1, var_9A38               \ 
- STR     R0, var_9A3C               \ 
- LDMIA   R13!, {PC}                 \ 
+ STMDB   R13!, {R14}                \ Store the return address on the stack
+
+ LDR     R0, var_9A38               \ Set R0 = var_9A38
+
+ LDR     R1, var_9A3C               \ Set R1 = var_9A3C
+
+ TST     R1, R1, LSR #1             \ Set flags on R1 AND (R1 >> 1)
+
+ MOVS    R14, R0, RRX               \ Rotate R0 right, incorporating the C flag,
+                                    \ and store the result in R14, replacing the
+                                    \ C flag with bit 0 from R0
+
+ ADC     R1, R1, R1                 \ R1 = R1 + R1 + C
+
+ EOR     R14, R14, R0, LSL #12      \ R14 = R14 EOR (R0 << 12)
+
+ EOR     R0, R14, R14, LSR #20      \ R0 = R14 EOR (R14 >> 20)
+
+ STR     R1, var_9A38               \ Set var_9A38 = R1
+
+ STR     R0, var_9A3C               \ Set var_9A3C = R0
+
+ LDMIA   R13!, {PC}                 \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3367,7 +3409,8 @@ ENDIF
 \       Name: SwitchScreenBank
 \       Type: Subroutine
 \   Category: Drawing the screen
-\    Summary: Switch screen bank and reset the newly hidden screen bank to black
+\    Summary: Switch screen banks and clear the newly hidden screen bank to
+\             black
 \
 \ ******************************************************************************
 
@@ -4263,46 +4306,53 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_A588
+\       Name: mouseParameters
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Start and end
+\    Summary: The parameters for OS_Word 21,3 for resetting the mouse position
 \
 \ ******************************************************************************
 
-.var_A588
+.mouseParameters
 
- EQUD    &FF01FF03
- EQUD    &00000001
+ EQUB 3                             \ This is OS_Word 21,3, so the reason code
+                                    \ in the first byte is 3
+
+ EQUW 511                           \ The X position for the mouse
+
+ EQUW 511                           \ The Y position for the mouse
+
+ ALIGN
 
 \ ******************************************************************************
 \
-\       Name: var_A590
+\       Name: mouseParametersAddr
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Start and end
+\    Summary: The address of the OS_Word block for resetting the mouse position
 \
 \ ******************************************************************************
 
-.var_A590
+.mouseParametersAddr
 
- EQUD    var_A588
+ EQUD    mouseParameters
 
 \ ******************************************************************************
 \
-\       Name: sub_A594
+\       Name: ResetMousePosition
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Start and end
+\    Summary: Reset the mouse position to (511, 511), ready for the game
 \
 \ ******************************************************************************
 
-.sub_A594
+.ResetMousePosition
 
- LDR     R1, var_A590               \ 
- MOV     R0, #&15                   \ 
- SWI     OS_Word                    \ 
- MOV     PC, R14                    \ 
+ LDR     R1, mouseParametersAddr    \ Call OS_Word 21,3 to reset the mouse
+ MOV     R0, #21                    \ position to (511, 511)
+ SWI     OS_Word
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -4417,7 +4467,7 @@ ENDIF
  MOV     R0, #128+13                \ creates two mode 13 screen banks
  SWI     OS_WriteC                  \ 
 
- MOV     R0, #23                    \ Start the following VDU command:
+ MOV     R0, #23                    \ Start printing the following VDU command:
  SWI     OS_WriteC                  \ 
  MOV     R0, #1                     \   VDU 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
  SWI     OS_WriteC                  \ 
@@ -4462,6 +4512,9 @@ ENDIF
 
 .StartNewGame
 
+                                    \ We start by initialising the scores and
+                                    \ printing them on the score bar
+
  LDR     R0, [R11, #highScore]      \ Set R0 to the current high score
 
  LDR     R1, [R11, #currentScore]   \ Set R1 to our current score
@@ -4483,159 +4536,221 @@ ENDIF
                                     \ high score at column 35 on row 1
 
  BL      PrintScoreInBothBanks      \ Print the high score in R0 at column 35 on
-                                    \ row 1, at the right end of the second text
-                                    \ line, which is where we print the scores
+                                    \ row 1, at the right end of the score bar
 
  LDR     R0, initialScore           \ Initialise currentScore to the score that
  STR     R0, [R11, #currentScore]   \ we start each game with, which is set in
                                     \ initialScore
 
- LDR     R0, var_A580               \ Set var_128 to the contents of var_A580
- STR     R0, [R11, #var_128]        \ ???
+                                    \ We now initialise more variables ???
 
- MOV     R0, #&30000                \ Set var_12C = &30000 ???
+ LDR     R0, var_A580               \ Initialise var_128 to the contents of
+ STR     R0, [R11, #var_128]        \ var_A580 ???
+
+ MOV     R0, #&30000                \ Initialise var_12C = &30000 ???
  STR     R0, [R11, #var_12C]
 
- MOV     R0, #3                     \ Set var_134 = 3 ???
- STR     R0, [R11, #var_134]
+ MOV     R0, #3                     \ Initialise the number of remaining lives
+ STR     R0, [R11, #remainingLives] \ to 3
 
-                                    \ We now set &10000 bytes (i.e. &1000 words)
-                                    \ at var_4400 to &FFFFFFFF
+                                    \ Next we set up the table at var_4400,
+                                    \ starting by setting all &10000 bytes at
+                                    \ var_4400 to &FF (i.e. -1)
 
- MVN     R0, #0                     \ Set R0 to R3 to &FFFFFFFF so we can poke
- MVN     R1, #0                     \ them into memory at var_4400
- MVN     R2, #0
- MVN     R3, #0
+ MVN     R0, #0                     \ Set R0 to R3 to -1 so we can poke them
+ MVN     R1, #0                     \ into memory at var_4400 (this sets each
+ MVN     R2, #0                     \ 32-bit register to &FFFFFFFF, which is the
+ MVN     R3, #0                     \ same as four bytes, each of which is &FF,
+                                    \ or -1)
 
  MOV     R4, #&10000                \ Set R4 = &10000 to use as a byte counter
-                                    \ in the following loop (so that's &1000
-                                    \ four-byte words)
+                                    \ in the following loop
 
  ADD     R6, R11, #var_4400         \ Set R6 to the address of var_4400
 
-.lab_A78C
+.snew1
 
- STMIA   R6!, {R0-R3}               \ Store four words (16 bytes) of &FFFFFFFF
-                                    \ at R6, updating R6 as we go
+ STMIA   R6!, {R0-R3}               \ Store four words, or 16 bytes, at R6,
+                                    \ updating R6 as we go, with each byte
+                                    \ containing &FF (i.e. -1)
 
  SUBS    R4, R4, #16                \ Subtract 16 from the byte counter in R4
 
- BNE     lab_A78C                   \ Loop back until we have set all &10000
-                                    \ bytes to &FFFFFFFF
+ BNE     snew1                      \ Loop back until we have set all &10000
+                                    \ bytes to -1
+
+                                    \ We now update the contents of the var_4400
+                                    \ table
+                                    \
+                                    \ Is this the bit where the landscape is
+                                    \ generated? Is var_4400 the landscape
+                                    \ table? I can't see where else it can be
+                                    \ generated, but this is a total guess ???
+                                    \
+                                    \ The following loop updates individual
+                                    \ bytes in the var_4400 table
+                                    \
+                                    \ They are updated at the following
+                                    \ addresses:
+                                    \
+                                    \   var_4400 + (R8 >> 24) + (R9 >> 16)
+                                    \
+                                    \ The values stored are between 1 and 8
+                                    \
+                                    \ At the end, three locations are set to 9
 
  ADD     R6, R11, #var_4400         \ Set R6 to the address of var_4400
 
- MOV     R5, #&800                  \ 
+ MOV     R5, #&800                  \ Set R5 to a loop counter
 
-.lab_A7A0
+.snew2
 
- BL      sub_9A40                   \ 
+ BL      sub_9A40                   \ ??? Returns values in R0 and R1
 
- MOV     R8, R0                     \ 
- MOV     R9, R0, LSL #8             \ 
- STMDB   R13!, {R0}                 \ 
- BL      sub_81F4                   \ 
- MOV     R14, R0                    \ 
- LDMIA   R13!, {R0}                 \ 
- CMP     R14, #&5500000             \ 
- CMPNE   R14, #&3500000             \ 
- BEQ     lab_A7E0                   \ 
- AND     R0, R0, #7                 \ 
- ADD     R0, R0, #1                 \ 
- AND     R9, R9, #&FF000000         \ 
- ADD     R14, R6, R8, LSR #24       \ 
- ADD     R14, R14, R9, LSR #16      \ 
- STRB    R0, [R14]                  \ 
+ MOV     R8, R0                     \ Set R8 = R0
 
-.lab_A7E0
+ MOV     R9, R0, LSL #8             \ Set R9 = R0 << 8
 
- SUBS    R5, R5, #1                 \ 
- BPL     lab_A7A0                   \ 
- MOV     R0, #9                     \ 
- STRB    R0, [R6, #&107]            \ 
- STRB    R0, [R6, #&307]            \ 
- STRB    R0, [R6, #&507]            \ 
+ STMDB   R13!, {R0}                 \ Store R0 on the stack so it doesn't get
+                                    \ corrupted by the call to sub_81F4
+
+ BL      sub_81F4                   \ Sets var_100 and var_104 based on R8 and
+                                    \ R9 ???
+
+ MOV     R14, R0                    \ Set R14 to the value of R0 returned by the
+                                    \ call to sub_81F4
+
+ LDMIA   R13!, {R0}                 \ Retrieve the value of R0 from the stack
+                                    \ that we stored above
+
+ CMP     R14, #&5500000             \ If R14 = &3500000 or &3500000, jump to
+ CMPNE   R14, #&3500000             \ snew3 to skip the following
+ BEQ     snew3
+
+ AND     R0, R0, #7                 \ Reduce R0 to the range 1 to 8
+ ADD     R0, R0, #1
+
+ AND     R9, R9, #&FF000000         \ Set R9 to the top byte of R9
+
+ ADD     R14, R6, R8, LSR #24       \ Set R14 = R6 + (R8 >> 24) + (R9 >> 16)
+ ADD     R14, R14, R9, LSR #16
+
+ STRB    R0, [R14]                  \ Store R0 in the address in R14
+
+.snew3
+
+ SUBS    R5, R5, #1                 \ Decrement the loop counter
+
+ BPL     snew2                      \ Loop back until we have done all &800
+                                    \ iterations
+
+ MOV     R0, #9                     \ Set the values at the following locations
+ STRB    R0, [R6, #&107]            \ to 9:
+ STRB    R0, [R6, #&307]            \
+ STRB    R0, [R6, #&507]            \   var_4400 + &107
+                                    \   var_4400 + &307
+                                    \   var_4400 + &507
+                                    \
+                                    \ So this is a distinct value to the -1 from
+                                    \ initialising table, and the 1 to 8 from
+                                    \ the last part - what does 9 signify ???
 
 .lab_A7F8
 
- LDR     R0, [R11, #var_134]        \ 
+ LDR     R0, [R11, #remainingLives] \ Set R0 to the number of remaining lives
 
  MOV     R1, #30                    \ Set (R1, R2) = (30, 1) so the following
  MOV     R2, #1                     \ call to PrintScoreInBothBanks prints the
                                     \ number of lives at column 30 on row 1
 
- BL      PrintScoreInBothBanks      \ 
+ BL      PrintScoreInBothBanks      \ Print the number of lives in R0 at column
+                                    \ 30 on row 1, just before the high score
+                                    \ towards the right end of the score bar
 
- MVN     R0, #0                     \ 
+ MVN     R0, #0                     \ Set var_130 = -1
  STR     R0, [R11, #var_130]        \ 
- MOV     R0, #0                     \ 
+
+ MOV     R0, #0                     \ Set var_13C = 0
  STR     R0, [R11, #var_13C]        \ 
- STR     R0, [R11, #var_144]        \ 
- STR     R0, [R11, #var_154]        \ 
- MOV     R0, #1                     \ 
+
+ STR     R0, [R11, #var_144]        \ Set var_144 = 0
+
+ STR     R0, [R11, #var_154]        \ Set var_154 = 0
+
+ MOV     R0, #1                     \ Set var_158 = 1
  STR     R0, [R11, #var_158]        \ 
- MOV     R0, #&4000000              \ 
- MOV     R2, R0                     \ 
- ADD     R3, R11, #&94              \ 
- MOV     R1, #&2EC0000              \ 
+
+ MOV     R0, #&4000000              \ Set var_094 = &4000000
+ MOV     R2, R0                     \     var_098 = &2EC0000
+ ADD     R3, R11, #var_094          \     var_09C = &4000000
+ MOV     R1, #&2EC0000
+ STMIA   R3!, {R0-R2}
+
+ MOV     R0, #0                     \ Set var_0A0 = 0
+ MOV     R1, #0                     \     var_0A4 = 0
+ MOV     R2, #0                     \     var_0A8 = 0
  STMIA   R3!, {R0-R2}               \ 
- MOV     R0, #0                     \ 
- MOV     R1, #0                     \ 
- MOV     R2, #0                     \ 
- STMIA   R3!, {R0-R2}               \ 
- BL      sub_A594                   \ 
+
+ BL      ResetMousePosition         \ Reset the mouse position to (511, 511),
+                                    \ ready for the game
 
 \ ******************************************************************************
 \
 \       Name: MainLoop
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: The main game loop ???
+\    Summary: The main game loop
 \
 \ ******************************************************************************
 
 .MainLoop
 
- MOV     R0, #&81                   \ 
- MOV     R1, #0                     \ 
- MOV     R2, #0                     \ 
- SWI     OS_Byte                    \ 
- TEQ     R2, #&1B                   \ 
- BEQ     EndGame                    \ 
+ MOV     R0, #129                   \ Call OS_Byte 129 to read the keyboard with
+ MOV     R1, #0                     \ the time limit in R1 and R2 (so that's
+ MOV     R2, #0                     \ with no time limit as R1 and R2 are zero),
+ SWI     OS_Byte                    \ returning the result in R2
 
- BL      DrawPlayer                 \ Commenting this out stops player appearing
-                                    \ and also stops flying
+ TEQ     R2, #&1B                   \ If R2 = &1B then an escape condition
+ BEQ     EndGame                    \ occured during the keyboard scan (in other
+                                    \ words, Escape was pressed), so jump to
+                                    \ EndGame to acknowledge the escape
+                                    \ condition and quit the game
 
- LDR     R0, [R11, #var_118]        \ 
- MOV     R0, R0, LSL #24            \ 
- MOV     R1, R0, LSL #1             \ 
+ BL      DrawPlayer                 \ Draw the player's ship ???
+
+ LDR     R0, [R11, #var_118]        \ Set R0 = var_118 << 24 ???
+ MOV     R0, R0, LSL #24
+
+ MOV     R1, R0, LSL #1             \ Set R1 = var_118 << 25 ???
 
  BL      sub_93E4                   \ Commenting this out does nothing obvious
+                                    \ ???
 
  BL      sub_8D40                   \ Commenting this out does nothing obvious
+                                    \ ???
 
- BL      DrawExhaustAndBullets      \ Comment this out hides engine exhaust and
-                                    \ bullets
+ BL      DrawExhaustAndBullets      \ Draw the engine exhaust and bullets ???
 
- BL      DrawObjects                \ Commenting this out hides trees, buildings
-                                    \ etc.
+ BL      DrawObjects                \ Draw all the objects, such as trees and
+                                    \ buildings ???
 
- BL      sub_9CFC                   \ Commenting this out crashes game
+ BL      sub_9CFC                   \ Commenting this out crashes game ???
 
- BL      DrawWorld                  \ Commenting this out hides everything
+ BL      DrawWorld                  \ Draw everything ???
 
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
                                     \ the left end of the score bar
 
- BL      DrawFuelLevel              \ Commenting this out hides fuel bar
+ BL      DrawFuelLevel              \ Draw the fuel bar ???
 
- BL      SwitchScreenBank           \ 
+ BL      SwitchScreenBank           \ Switch screen banks and clear the newly
+                                    \ hidden screen bank to black
 
- LDR     R14, [R11, #var_118]       \ 
- ADD     R14, R14, #1               \ 
- STR     R14, [R11, #var_118]       \ 
+ LDR     R14, [R11, #var_118]       \ Increment var_118
+ ADD     R14, R14, #1
+ STR     R14, [R11, #var_118]
 
- B       MainLoop                   \ 
+ B       MainLoop                   \ Loop back to repeat the main loop
 
 \ ******************************************************************************
 \
@@ -4648,16 +4763,19 @@ ENDIF
 
 .EndGame
 
- MOV     R0, #&7E                   \ 
- SWI     OS_Byte                    \ 
- MOV     R0, #&16                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #0                     \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #4                     \ 
- MOV     R1, #0                     \ 
- MOV     R2, #0                     \ 
- SWI     OS_Byte                    \ 
+ MOV     R0, #126                   \ Call OS_Byte 126 to acknowledge the escape
+ SWI     OS_Byte                    \ condition caused by the player pressing
+                                    \ Escape in the main loop
+
+ MOV     R0, #22                    \ Change to screen mode 0
+ SWI     OS_WriteC
+ MOV     R0, #0
+ SWI     OS_WriteC
+
+ MOV     R0, #4                     \ Call OS_Byte 4 to set the cursor keys to
+ MOV     R1, #0                     \ move the cursor, so they work normally
+ MOV     R2, #0                     \ again
+ SWI     OS_Byte
 
 \ ******************************************************************************
 \
@@ -4670,11 +4788,26 @@ ENDIF
 
 .ReturnToDesktop
 
- LDMIA   R13!, {R14}                \ 
+ LDMIA   R13!, {R14}                \ Restore the value from the stack and store
+                                    \ it in R14, so R14 contains the same value
+                                    \ that it had when the game was first run,
+                                    \ and which we stored on the stack in the
+                                    \ Entry routine
+                                    \
+                                    \ So this sets R14 to the address we should
+                                    \ return to when quitting the game
 
- LDR     R13, stackPointerOnEntry   \ 
+ LDR     R13, stackPointerOnEntry   \ Set R13 to the value that we stored in the
+                                    \ Entry routine, so that the stack pointer
+                                    \ is restored to the value that it had when
+                                    \ the game was first run, and which we
+                                    \ stored in stackPointerOnEntry in the Entry
+                                    \ routine
 
- MOV     PC, R14                    \ 
+ MOV     PC, R14                    \ Exit from the game by jumping to the
+                                    \ address in R14, which will return us to
+                                    \ the Desktop (or wherever the game was run
+                                    \ from)
 
 \ ******************************************************************************
 \
@@ -4694,51 +4827,84 @@ ENDIF
 
 .PrintHexNumber
 
- MOV     R0, #&1E                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&A                    \ 
- SWI     OS_WriteC                  \ 
+ MOV     R0, #30                    \ Print a VDU 30 command to move the text
+ SWI     OS_WriteC                  \ cursor to the top-left corner of the
+                                    \ screen
 
- STMFD   R13!, {R0-R12, R14}        \ 
- MOV     R0, R1, LSR #28            \ 
- BL      PrintHexDigit              \ 
- MOV     R0, R1, LSR #24            \ 
- BL      PrintHexDigit              \ 
- MOV     R0, R1, LSR #20            \ 
- BL      PrintHexDigit              \ 
- MOV     R0, R1, LSR #16            \ 
- BL      PrintHexDigit              \ 
- MOV     R0, R1, LSR #12            \ 
- BL      PrintHexDigit              \ 
- MOV     R0, R1, LSR #8             \ 
- BL      PrintHexDigit              \ 
- MOV     R0, R1, LSR #4             \ 
- BL      PrintHexDigit              \ 
- MOV     R0, R1                     \ 
- BL      PrintHexDigit              \ 
- MOV     R0, #&A                    \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&D                    \ 
- SWI     OS_WriteC                  \ 
- LDMFD   R13!, {R0-R12, PC}         \ 
+ MOV     R0, #&0A                   \ Print a line feed (ASCII &0A) to move the
+ SWI     OS_WriteC                  \ cursor down one line, to the start of the
+                                    \ second line, which is where we print the
+                                    \ score bar
+
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R0, R1, LSR #28            \ Print the top nibble of the value in R1
+ BL      PrintHexDigit
+
+ MOV     R0, R1, LSR #24            \ Print the next nibble of the value in R1
+ BL      PrintHexDigit
+
+ MOV     R0, R1, LSR #20            \ Print the next nibble of the value in R1
+ BL      PrintHexDigit
+
+ MOV     R0, R1, LSR #16            \ Print the next nibble of the value in R1
+ BL      PrintHexDigit
+
+ MOV     R0, R1, LSR #12            \ Print the next nibble of the value in R1
+ BL      PrintHexDigit
+
+ MOV     R0, R1, LSR #8             \ Print the next nibble of the value in R1
+ BL      PrintHexDigit
+
+ MOV     R0, R1, LSR #4             \ Print the next nibble of the value in R1
+ BL      PrintHexDigit
+
+ MOV     R0, R1                     \ Print the bottom nibble of the value in R1
+ BL      PrintHexDigit
+
+ MOV     R0, #&A                    \ Print a line feed (ASCII &0A) and carriage
+ SWI     OS_WriteC                  \ return (ASCII &0D) to move the cursor down
+ MOV     R0, #&D                    \ to the start of the next line, ready to
+ SWI     OS_WriteC                  \ print further numbers if required
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we used from
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: PrintHexDigit
 \       Type: Subroutine
 \   Category: Text
-\    Summary: ???
+\    Summary: Print a single digit hexadecimal number
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The number to print (only the low nibble is
+\                                   printed, the rest of the number is ignored)
 \
 \ ******************************************************************************
 
 .PrintHexDigit
 
- AND     R0, R0, #&F                \ 
- CMP     R0, #&A                    \ 
- ADDHS   R0, R0, #&37               \ 
- ADDLO   R0, R0, #&30               \ 
- SWI     OS_WriteC                  \ 
- MOV     PC, R14                    \ 
+ AND     R0, R0, #&F                \ Extract the low nibble from the number in
+                                    \ R0
+
+ CMP     R0, #&A                    \ If the low nibble in R0 >= &A then the hex
+ ADDHS   R0, R0, #&37               \ digit is A to F, so add &37 to get the
+                                    \ corresponding hex digit (so this converts
+                                    \ &A into ASCII &37 + &A = &41, which gives
+                                    \ us "A", the hex digit we want)
+
+ ADDLO   R0, R0, #&30               \ Otherwise the low nibble in R0 is 0 to 9,
+                                    \ so add the ASCII value of "0" (ASCII &30)
+                                    \ to get the corresponding hex digit
+
+ SWI     OS_WriteC                  \ Print the character in R0
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
