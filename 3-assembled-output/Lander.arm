@@ -428,7 +428,7 @@ lab_850C:
  CMP     R1, #0
  MOVMI   R1, #0
  ADD     R3, R11, #0x30
- LDR     R14, dataTable3Addr
+ LDR     R14, objectPlayerAddr
  STR     R14, [R11, #var_110]
  MOV     R0, #0
  MOV     R2, #0xF000000
@@ -1078,8 +1078,8 @@ lab_8E8C:
  BL      sub_8B0C
  LDMFD   R13!, {R0-R7, R9}
  B       lab_8E80
-dataTable3Addr:
-.long    dataTable3
+objectPlayerAddr:
+.long    objectPlayer
 dataTable1Addr:
 .long    dataTable1
 sub_8EC4:
@@ -3065,7 +3065,7 @@ objectRock:
 .long    0x00000003
 .long    0x00000004
 .long    0x00000008
-dataTable3:
+objectPlayer:
 .long    0x00000009
 .long    0x00000009
 .long    0x0000007C

@@ -433,7 +433,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008514 000051E3        	   428:  CMP     R1, #0
 00:00008518 0010A043        	   429:  MOVMI   R1, #0
 00:0000851C 30308BE2        	   430:  ADD     R3, R11, #0x30
-00:00008520 94E99FE5        	   431:  LDR     R14, dataTable3Addr
+00:00008520 94E99FE5        	   431:  LDR     R14, objectPlayerAddr
 00:00008524 10E18BE5        	   432:  STR     R14, [R11, #var_110]
 00:00008528 0000A0E3        	   433:  MOV     R0, #0
 00:0000852C 0F24A0E3        	   434:  MOV     R2, #0xF000000
@@ -1091,8 +1091,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00008EB0 15FFFFEB        	  1078:  BL      sub_8B0C
 00:00008EB4 FF02BDE8        	  1079:  LDMFD   R13!, {R0-R7, R9}
 00:00008EB8 F0FFFFEA        	  1080:  B       lab_8E80
-                            	  1081: dataTable3Addr:
-00:00008EBC 8CAB0000        	  1082: .long    dataTable3
+                            	  1081: objectPlayerAddr:
+00:00008EBC 8CAB0000        	  1082: .long    objectPlayer
                             	  1083: dataTable1Addr:
 00:00008EC0 60A90000        	  1084: .long    dataTable1
                             	  1085: sub_8EC4:
@@ -3094,7 +3094,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AB80 03000000        	  3065: .long    0x00000003
 00:0000AB84 04000000        	  3066: .long    0x00000004
 00:0000AB88 08000000        	  3067: .long    0x00000008
-                            	  3068: dataTable3:
+                            	  3068: objectPlayer:
 00:0000AB8C 09000000        	  3069: .long    0x00000009
 00:0000AB90 09000000        	  3070: .long    0x00000009
 00:0000AB94 7C000000        	  3071: .long    0x0000007C
@@ -10230,8 +10230,6 @@ bank1                            A:00009DAC
 currentScore                     S:00000124
 dataTable1                       A:0000A960
 dataTable1Addr                   A:00008EC0
-dataTable3                       A:0000AB8C
-dataTable3Addr                   A:00008EBC
 divisionTable                    A:0000DA10
 divisionTableAddr                A:00009D38
 endCode                          A:00011A24
@@ -10362,6 +10360,8 @@ objectBuilding                   A:0000B29C
 objectFirTree                    A:0000B08C
 objectGazebo                     A:0000B110
 objectMap                        S:00004400
+objectPlayer                     A:0000AB8C
+objectPlayerAddr                 A:00008EBC
 objectRock                       A:0000AA98
 objectRocket                     A:0000B684
 objectSmallLeafyTree             A:0000AD04
@@ -10646,7 +10646,7 @@ Symbols by value:
 00008E38 lab_8E38
 00008E80 lab_8E80
 00008E8C lab_8E8C
-00008EBC dataTable3Addr
+00008EBC objectPlayerAddr
 00008EC0 dataTable1Addr
 00008EC4 sub_8EC4
 00008EFC lab_8EFC
@@ -10815,7 +10815,7 @@ Symbols by value:
 0000A948 PrintHexDigit
 0000A960 dataTable1
 0000AA98 objectRock
-0000AB8C dataTable3
+0000AB8C objectPlayer
 0000AD04 objectSmallLeafyTree
 0000AE24 objectTallLeafyTree
 0000AF84 objectSmokingRemainsLeft

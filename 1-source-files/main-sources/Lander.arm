@@ -770,7 +770,7 @@ ENDIF
  CMP     R1, #0                     \ 
  MOVMI   R1, #0                     \ 
  ADD     R3, R11, #&30              \ 
- LDR     R14, dataTable3Addr        \ 
+ LDR     R14, objectPlayerAddr      \ 
  STR     R14, [R11, #var_110]       \ 
  MOV     R0, #0                     \ 
  MOV     R2, #&F000000              \ 
@@ -1794,16 +1794,16 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable3Addr
+\       Name: objectPlayerAddr
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: The address of the object data for the player's ship
 \
 \ ******************************************************************************
 
-.dataTable3Addr
+.objectPlayerAddr
 
- EQUD    dataTable3
+ EQUD    objectPlayer
 
 \ ******************************************************************************
 \
@@ -5236,14 +5236,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable3
+\       Name: objectPlayer
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: ???
+\    Summary: Object data for the player's ship
 \
 \ ******************************************************************************
 
-.dataTable3
+.objectPlayer
 
  EQUD    &00000009
  EQUD    &00000009
