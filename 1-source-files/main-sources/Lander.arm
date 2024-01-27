@@ -3156,7 +3156,16 @@ ENDIF
 
  EQUD    var_9A70
 
-.lab_9AC4
+\ ******************************************************************************
+\
+\       Name: sub_9AC4
+\       Type: Subroutine
+\   Category: ???
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.sub_9AC4
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3168,7 +3177,16 @@ ENDIF
  STRB    R7, [R3]                   \ 
  B       lab_9CEC                   \ 
 
-.lab_9AE8
+\ ******************************************************************************
+\
+\       Name: sub_9AE8
+\       Type: Subroutine
+\   Category: ???
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.sub_9AE8
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3181,7 +3199,16 @@ ENDIF
  STRB    R7, [R3, #1]               \ 
  B       lab_9CEC                   \ 
 
-.lab_9B10
+\ ******************************************************************************
+\
+\       Name: sub_9B10
+\       Type: Subroutine
+\   Category: ???
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.sub_9B10
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3196,7 +3223,16 @@ ENDIF
  STRB    R7, [R3, #320+1]           \ 
  B       lab_9CEC                   \ 
 
-.lab_9B40
+\ ******************************************************************************
+\
+\       Name: sub_9B40
+\       Type: Subroutine
+\   Category: ???
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.sub_9B40
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3213,7 +3249,16 @@ ENDIF
  STRB    R7, [R3, #320+1]           \ 
  B       lab_9CEC                   \ 
 
-.lab_9B78
+\ ******************************************************************************
+\
+\       Name: sub_9B78
+\       Type: Subroutine
+\   Category: ???
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.sub_9B78
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3227,7 +3272,16 @@ ENDIF
  STRB    R7, [R3, #1]               \ 
  B       lab_9CEC                   \ 
 
-.lab_9BA4
+\ ******************************************************************************
+\
+\       Name: sub_9BA4
+\       Type: Subroutine
+\   Category: ???
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.sub_9BA4
 
  LDMIA   R9!, {R0-R5, R8}           \ 
  STMFD   R13!, {R9, R12}            \ 
@@ -3347,25 +3401,25 @@ ENDIF
 
 .var_9C8C
 
- EQUD    lab_9B40
- EQUD    lab_9B40
- EQUD    lab_9B40
- EQUD    lab_9B40
- EQUD    lab_9B40
- EQUD    lab_9B40
- EQUD    lab_9B10
- EQUD    lab_9AE8
- EQUD    lab_9AC4
- EQUD    lab_9B78
- EQUD    lab_9B78
- EQUD    lab_9B78
- EQUD    lab_9B78
- EQUD    lab_9B78
- EQUD    lab_9B78
- EQUD    lab_9AE8
- EQUD    lab_9AE8
- EQUD    lab_9AC4
- EQUD    lab_9BA4
+ EQUD    sub_9B40
+ EQUD    sub_9B40
+ EQUD    sub_9B40
+ EQUD    sub_9B40
+ EQUD    sub_9B40
+ EQUD    sub_9B40
+ EQUD    sub_9B10
+ EQUD    sub_9AE8
+ EQUD    sub_9AC4
+ EQUD    sub_9B78
+ EQUD    sub_9B78
+ EQUD    sub_9B78
+ EQUD    sub_9B78
+ EQUD    sub_9B78
+ EQUD    sub_9B78
+ EQUD    sub_9AE8
+ EQUD    sub_9AE8
+ EQUD    sub_9AC4
+ EQUD    sub_9BA4
  EQUD    sub_9CF8
 
 \ ******************************************************************************

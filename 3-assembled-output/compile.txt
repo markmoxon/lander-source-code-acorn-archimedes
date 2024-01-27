@@ -1928,7 +1928,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009ABC FFFFFFFF        	  1915: .long    0xFFFFFFFF
                             	  1916: var_9AC0:
 00:00009AC0 709A0000        	  1917: .long    var_9A70
-                            	  1918: lab_9AC4:
+                            	  1918: sub_9AC4:
 00:00009AC4 041099E4        	  1919:  LDR     R1, [R9], #4
 00:00009AC8 210AA0E1        	  1920:  MOV     R0, R1, LSR #20
 00:00009ACC 2176A0E1        	  1921:  MOV     R7, R1, LSR #12
@@ -1938,7 +1938,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009ADC 013383E0        	  1925:  ADD     R3, R3, R1, LSL #6
 00:00009AE0 0070C3E5        	  1926:  STRB    R7, [R3]
 00:00009AE4 800000EA        	  1927:  B       lab_9CEC
-                            	  1928: lab_9AE8:
+                            	  1928: sub_9AE8:
 00:00009AE8 041099E4        	  1929:  LDR     R1, [R9], #4
 00:00009AEC 210AA0E1        	  1930:  MOV     R0, R1, LSR #20
 00:00009AF0 2176A0E1        	  1931:  MOV     R7, R1, LSR #12
@@ -1949,7 +1949,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009B04 0070C3E5        	  1936:  STRB    R7, [R3]
 00:00009B08 0170C3E5        	  1937:  STRB    R7, [R3, #1]
 00:00009B0C 760000EA        	  1938:  B       lab_9CEC
-                            	  1939: lab_9B10:
+                            	  1939: sub_9B10:
 00:00009B10 041099E4        	  1940:  LDR     R1, [R9], #4
 00:00009B14 210AA0E1        	  1941:  MOV     R0, R1, LSR #20
 00:00009B18 2176A0E1        	  1942:  MOV     R7, R1, LSR #12
@@ -1962,7 +1962,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009B34 4071C3E5        	  1949:  STRB    R7, [R3, #320]
 00:00009B38 4171C3E5        	  1950:  STRB    R7, [R3, #320+1]
 00:00009B3C 6A0000EA        	  1951:  B       lab_9CEC
-                            	  1952: lab_9B40:
+                            	  1952: sub_9B40:
 00:00009B40 041099E4        	  1953:  LDR     R1, [R9], #4
 00:00009B44 210AA0E1        	  1954:  MOV     R0, R1, LSR #20
 00:00009B48 2176A0E1        	  1955:  MOV     R7, R1, LSR #12
@@ -1977,7 +1977,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009B6C 4071C3E5        	  1964:  STRB    R7, [R3, #320]
 00:00009B70 4171C3E5        	  1965:  STRB    R7, [R3, #320+1]
 00:00009B74 5C0000EA        	  1966:  B       lab_9CEC
-                            	  1967: lab_9B78:
+                            	  1967: sub_9B78:
 00:00009B78 041099E4        	  1968:  LDR     R1, [R9], #4
 00:00009B7C 210AA0E1        	  1969:  MOV     R0, R1, LSR #20
 00:00009B80 2176A0E1        	  1970:  MOV     R7, R1, LSR #12
@@ -1989,7 +1989,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009B98 0070C3E5        	  1976:  STRB    R7, [R3]
 00:00009B9C 0170C3E5        	  1977:  STRB    R7, [R3, #1]
 00:00009BA0 510000EA        	  1978:  B       lab_9CEC
-                            	  1979: lab_9BA4:
+                            	  1979: sub_9BA4:
 00:00009BA4 3F01B9E8        	  1980:  LDMIA   R9!, {R0-R5, R8}
 00:00009BA8 00122DE9        	  1981:  STMFD   R13!, {R9, R12}
 00:00009BAC 8A0000EB        	  1982:  BL      sub_9DDC
@@ -2053,25 +2053,25 @@ Source: "3-assembled-output/Lander.arm"
 00:00009C84 2E9B8CE7        	  2040:  STR     R9, [R12, R14, LSR #22]
 00:00009C88 0082BDE8        	  2041:  LDMFD   R13!, {R9, PC}
                             	  2042: var_9C8C:
-00:00009C8C 409B0000        	  2043: .long    lab_9B40
-00:00009C90 409B0000        	  2044: .long    lab_9B40
-00:00009C94 409B0000        	  2045: .long    lab_9B40
-00:00009C98 409B0000        	  2046: .long    lab_9B40
-00:00009C9C 409B0000        	  2047: .long    lab_9B40
-00:00009CA0 409B0000        	  2048: .long    lab_9B40
-00:00009CA4 109B0000        	  2049: .long    lab_9B10
-00:00009CA8 E89A0000        	  2050: .long    lab_9AE8
-00:00009CAC C49A0000        	  2051: .long    lab_9AC4
-00:00009CB0 789B0000        	  2052: .long    lab_9B78
-00:00009CB4 789B0000        	  2053: .long    lab_9B78
-00:00009CB8 789B0000        	  2054: .long    lab_9B78
-00:00009CBC 789B0000        	  2055: .long    lab_9B78
-00:00009CC0 789B0000        	  2056: .long    lab_9B78
-00:00009CC4 789B0000        	  2057: .long    lab_9B78
-00:00009CC8 E89A0000        	  2058: .long    lab_9AE8
-00:00009CCC E89A0000        	  2059: .long    lab_9AE8
-00:00009CD0 C49A0000        	  2060: .long    lab_9AC4
-00:00009CD4 A49B0000        	  2061: .long    lab_9BA4
+00:00009C8C 409B0000        	  2043: .long    sub_9B40
+00:00009C90 409B0000        	  2044: .long    sub_9B40
+00:00009C94 409B0000        	  2045: .long    sub_9B40
+00:00009C98 409B0000        	  2046: .long    sub_9B40
+00:00009C9C 409B0000        	  2047: .long    sub_9B40
+00:00009CA0 409B0000        	  2048: .long    sub_9B40
+00:00009CA4 109B0000        	  2049: .long    sub_9B10
+00:00009CA8 E89A0000        	  2050: .long    sub_9AE8
+00:00009CAC C49A0000        	  2051: .long    sub_9AC4
+00:00009CB0 789B0000        	  2052: .long    sub_9B78
+00:00009CB4 789B0000        	  2053: .long    sub_9B78
+00:00009CB8 789B0000        	  2054: .long    sub_9B78
+00:00009CBC 789B0000        	  2055: .long    sub_9B78
+00:00009CC0 789B0000        	  2056: .long    sub_9B78
+00:00009CC4 789B0000        	  2057: .long    sub_9B78
+00:00009CC8 E89A0000        	  2058: .long    sub_9AE8
+00:00009CCC E89A0000        	  2059: .long    sub_9AE8
+00:00009CD0 C49A0000        	  2060: .long    sub_9AC4
+00:00009CD4 A49B0000        	  2061: .long    sub_9BA4
 00:00009CD8 F89C0000        	  2062: .long    sub_9CF8
                             	  2063: sub_9CDC:
 00:00009CDC C05F2DE9        	  2064:  STMFD   R13!, {R6-R12, R14}
@@ -10305,12 +10305,6 @@ lab_9890                         A:00009890
 lab_997C                         A:0000997C
 lab_99C4                         A:000099C4
 lab_9A0C                         A:00009A0C
-lab_9AC4                         A:00009AC4
-lab_9AE8                         A:00009AE8
-lab_9B10                         A:00009B10
-lab_9B40                         A:00009B40
-lab_9B78                         A:00009B78
-lab_9BA4                         A:00009BA4
 lab_9CEC                         A:00009CEC
 lab_9D10                         A:00009D10
 lab_9E20                         A:00009E20
@@ -10432,6 +10426,12 @@ sub_9748                         A:00009748
 sub_991C                         A:0000991C
 sub_9924                         A:00009924
 sub_9948                         A:00009948
+sub_9AC4                         A:00009AC4
+sub_9AE8                         A:00009AE8
+sub_9B10                         A:00009B10
+sub_9B40                         A:00009B40
+sub_9B78                         A:00009B78
+sub_9BA4                         A:00009BA4
 sub_9BB8                         A:00009BB8
 sub_9BF4                         A:00009BF4
 sub_9C28                         A:00009C28
@@ -10713,12 +10713,12 @@ Symbols by value:
 00009A6C screenAddr
 00009A70 var_9A70
 00009AC0 var_9AC0
-00009AC4 lab_9AC4
-00009AE8 lab_9AE8
-00009B10 lab_9B10
-00009B40 lab_9B40
-00009B78 lab_9B78
-00009BA4 lab_9BA4
+00009AC4 sub_9AC4
+00009AE8 sub_9AE8
+00009B10 sub_9B10
+00009B40 sub_9B40
+00009B78 sub_9B78
+00009BA4 sub_9BA4
 00009BB8 sub_9BB8
 00009BF4 sub_9BF4
 00009C28 sub_9C28
