@@ -48,6 +48,19 @@
 
  OS_BinaryToDecimal = &28           \ 
 
+ OBJ_ROCK = 0                       \ Object types, add 12 for destroyed version
+ OBJ_SMALL_TREE_1 = 1
+ OBJ_TALL_TREE_1 = 2
+ OBJ_SMALL_TREE_2 = 3
+ OBJ_SMALL_TREE_3 = 4
+ OBJ_GAZEBO = 5
+ OBJ_TALL_TREE_2 = 6
+ OBJ_FIR_TREE = 7
+ OBJ_BUILDING = 8
+ OBJ_ROCKET1 = 9
+ OBJ_ROCKET2 = 10
+ OBJ_ROCKET3 = 11
+
 \ ******************************************************************************
 \
 \ Workspace variables
@@ -192,8 +205,47 @@
 
  var_71C = &71C                     \ Zeroed in sub_8AF4
 
- var_4400 = &4400                   \ &1000 words, initialised to &FFFFFFFF in
-                                    \ Entry and then populated with other values
+ objectMap = &4400                  \ The object map contains one byte for each
+                                    \ coordinate on the map
+                                    \
+                                    \ This byte determines which object appears
+                                    \ on the landscape at each coordinates (if
+                                    \ any), where objects are trees, buildings,
+                                    \ rockets and so on
+                                    \
+                                    \ The object map is 256 x 256 in size, with
+                                    \ each coordinate at the front-left corner
+                                    \ of the corresponding landscape tile
+                                    \
+                                    \ A byte of &FF indicates that there is no
+                                    \ object at that coordinate, while a value
+                                    \ of 0 to 24 indicates an oject of that
+                                    \ type is at this coordinate (there can be
+                                    \ only one object at each coordinate)
+                                    \
+                                    \ The origin is at the front-left corner of
+                                    \ the launchpad, with the x-axis going into
+                                    \ the screen, and the y-axis going to the
+                                    \ right
+                                    \
+                                    \ So a map coordinate of (1, 7) is 1 tile
+                                    \ into the screen and 7 tiles to the right
+                                    \ of the front-left corner of the launchpad;
+                                    \ in this case, that's the coordinate of the
+                                    \ front rocket of the three alongside the
+                                    \ launchpad when we start the game
+                                    \
+                                    \ The object at coordinate (x, y) is stored
+                                    \ at offset &xxyy within objectMap, so the
+                                    \ rocket at (1, 7) is at objectMap + &0107
+                                    \
+                                    \ The object map just places objects on the
+                                    \ landscape and doesn't record height (so it
+                                    \ is much like longitude and latitude); the
+                                    \ game uses a left-handed coordinate system
+                                    \ so the z-axis goes up the screen, but we
+                                    \ don't need to record this in the object
+                                    \ map
 
 \ ******************************************************************************
 \
@@ -696,7 +748,7 @@ ENDIF
  CMP     R14, #&1800000             \ 
  BHS     lab_850C                   \ 
  STMDB   R13!, {R0}                 \ 
- ADD     R14, R11, #var_4400        \ 
+ ADD     R14, R11, #objectMap       \ 
  AND     R9, R9, #&FF000000         \ 
  ADD     R14, R14, R8, LSR #24      \ 
  ADD     R14, R14, R9, LSR #16      \ 
@@ -917,7 +969,7 @@ ENDIF
  STR     R0, [R11, #remainingLives] \ 
 
  ADD     R13, R13, #4               \ 
- BNE     lab_A7F8                   \ 
+ BNE     PlacePlayerOnLaunchpad     \ 
 
  MOV     R0, #&70                   \ 
  MOV     R1, #1                     \ 
@@ -1151,7 +1203,7 @@ ENDIF
  MOVHS   PC, R14                    \ 
  STMDB   R13!, {R2}                 \ 
  STR     R14, [R11, #var_0F4]       \ 
- ADD     R14, R11, #var_4400        \ 
+ ADD     R14, R11, #objectMap       \ 
  AND     R2, R2, #&FF000000         \ 
  ADD     R14, R14, R0, LSR #24      \ 
  ADD     R14, R14, R2, LSR #16      \ 
@@ -1583,46 +1635,60 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_8D78
+\       Name: objectTypes
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: A table that maps object types to object data
+\
+\ ------------------------------------------------------------------------------
+\
+\ Each object in the object map has a type from 0 to 24. Types 0 to 11 are for
+\ intact objects, while adding 12 to get types 12 to 23 gives the object type
+\ when that object has been destroyed. Destroyed objects are shown with clouds
+\ of smoke rising up from the detritus.
+\
+\ This table links to the data for each object. Object data is shared, so types
+\ 1, 3 and 4 are all identical small leafy trees, for example. However, when
+\ destroyed, the smoking remains of type 1 bend to the right (type 13), while
+\ the smoking remains of types 3 and 4 bend to the left (types 15 and 16).
 \
 \ ******************************************************************************
 
-.var_8D78
+.objectTypes
 
- EQUD    dataTable2
- EQUD    dataTable4
- EQUD    dataTable5
- EQUD    dataTable4
- EQUD    dataTable4
- EQUD    dataTable9
- EQUD    dataTable5
- EQUD    dataTable8
- EQUD    dataTable10
- EQUD    dataTable13
- EQUD    dataTable13
- EQUD    dataTable13
- EQUD    dataTable13
- EQUD    dataTable7
- EQUD    dataTable6
- EQUD    dataTable6
- EQUD    dataTable6
- EQUD    dataTable12
- EQUD    dataTable7
- EQUD    dataTable7
- EQUD    dataTable11
- EQUD    dataTable7
- EQUD    dataTable6
- EQUD    dataTable6
- EQUD    dataTable6
+ EQUD    objectRock                 \ 0  = half a rock
+ EQUD    objectSmallLeafyTree       \ 1  = small leafy tree
+ EQUD    objectTallLeafyTree        \ 2  = tall leafy tree
+ EQUD    objectSmallLeafyTree       \ 3  = small leafy tree
+ EQUD    objectSmallLeafyTree       \ 4  = small leafy tree
+ EQUD    objectGazebo               \ 5  = gazebo
+ EQUD    objectTallLeafyTree        \ 6  = tall leafy tree
+ EQUD    objectFirTree              \ 7  = fir tree
+ EQUD    objectBuilding             \ 8  = building
+ EQUD    objectRocket               \ 9  = rocket
+ EQUD    objectRocket               \ 10 = rocket
+ EQUD    objectRocket               \ 11 = rocket
+
+ EQUD    objectRocket               \ 12 = intact rocket with smoke cloud
+ EQUD    objectSmokingRemainsRight  \ 13 = smoking remains (bends to the right)
+ EQUD    objectSmokingRemainsLeft   \ 14 = smoking remains (bends to the left)
+ EQUD    objectSmokingRemainsLeft   \ 15 = smoking remains (bends to the left)
+ EQUD    objectSmokingRemainsLeft   \ 16 = smoking remains (bends to the left)
+ EQUD    objectSmokingGazebo        \ 17 = smoking remains of a gazebo
+ EQUD    objectSmokingRemainsRight  \ 18 = smoking remains (bends to the right)
+ EQUD    objectSmokingRemainsRight  \ 19 = smoking remains (bends to the right)
+ EQUD    objectSmokingBuilding      \ 20 = smoking remains of a building
+ EQUD    objectSmokingRemainsRight  \ 21 = smoking remains (bends to the right)
+ EQUD    objectSmokingRemainsLeft   \ 22 = smoking remains (bends to the left)
+ EQUD    objectSmokingRemainsLeft   \ 23 = smoking remains (bends to the left)
+
+ EQUD    objectSmokingRemainsLeft   \ 24 = smoking remains (bends to the left)
 
 \ ******************************************************************************
 \
 \       Name: DrawObjects
 \       Type: Subroutine
-\   Category: ???
+\   Category: 3D objects
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -1645,7 +1711,7 @@ ENDIF
 
 .lab_8E04
 
- ADD     R14, R11, #var_4400        \ 
+ ADD     R14, R11, #objectMap       \ 
  ADD     R14, R14, R8, LSR #24      \ 
  ADD     R14, R14, R9, LSR #16      \ 
  LDRB    R0, [R14]                  \ 
@@ -1665,8 +1731,12 @@ ENDIF
 .lab_8E38
 
  STRB    R0, [R11, #var_0F4]        \ 
+
+ typeOffset = ($ + 8) - objectTypes \ &CC
+
  ADD     R0, PC, R0, LSL #2         \ 
- LDR     R14, [R0, #-&CC]           \ 
+ LDR     R14, [R0, #-typeOffset]    \ Fetch from objectTypes table
+
  STR     R14, [R11, #var_110]       \ 
  BL      sub_81F4                   \ 
  MOV     R1, R0                     \ 
@@ -3302,8 +3372,11 @@ ENDIF
 .lab_9CEC
 
  LDR     R0, [R9], #4               \ 
+
+ labOffset = ($ + 8) - var_9C8C     \ &6C
+
  ADD     R0, PC, R0, LSL #2         \ 
- LDR     PC, [R0, #-&6C]            \ 
+ LDR     PC, [R0, #-labOffset]      \ Fetch from var_9C8C table
 
 \ ******************************************************************************
 \
@@ -4156,8 +4229,12 @@ ENDIF
 .sub_A4C8
 
  CMP     R10, #&12                  \ 
+
+ varOffset = ($ + 8) - var_A480     \ &54
+
  ADDLO   R0, PC, R10, LSL #2        \ 
- LDRLO   PC, [R0, #-&54]            \ 
+ LDRLO   PC, [R0, #-varOffset]      \ Fetch from var_A480 table
+
  ADD     R10, R11, R10              \ 
  BIC     R0, R10, #3                \ 
  TST     R11, #3                    \ 
@@ -4506,7 +4583,8 @@ ENDIF
 \       Name: StartNewGame
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: The main entry point for the game
+\    Summary: Start a brand new game with a full set of lives and a newly
+\             generated set of objects
 \
 \ ******************************************************************************
 
@@ -4542,66 +4620,63 @@ ENDIF
  STR     R0, [R11, #currentScore]   \ we start each game with, which is set in
                                     \ initialScore
 
-                                    \ We now initialise more variables ???
+                                    \ We now initialise more game variables
 
- LDR     R0, var_A580               \ Initialise var_128 to the contents of
- STR     R0, [R11, #var_128]        \ var_A580 ???
+ LDR     R0, var_A580               \ Set var_128 to the contents of var_A580
+ STR     R0, [R11, #var_128]        \ ???
 
- MOV     R0, #&30000                \ Initialise var_12C = &30000 ???
+ MOV     R0, #&30000                \ Set var_12C = &30000 ???
  STR     R0, [R11, #var_12C]
 
- MOV     R0, #3                     \ Initialise the number of remaining lives
- STR     R0, [R11, #remainingLives] \ to 3
+ MOV     R0, #3                     \ Set the number of lives to 3
+ STR     R0, [R11, #remainingLives]
 
-                                    \ Next we set up the table at var_4400,
-                                    \ starting by setting all &10000 bytes at
-                                    \ var_4400 to &FF (i.e. -1)
+\ ******************************************************************************
+\
+\       Name: PlaceObjectsOnMap
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Randomly place a number of objects on the map
+\
+\ ******************************************************************************
 
- MVN     R0, #0                     \ Set R0 to R3 to -1 so we can poke them
- MVN     R1, #0                     \ into memory at var_4400 (this sets each
+.PlaceObjectsOnMap
+
+                                    \ We start by initialising the object map
+                                    \ at objectMap with values of &FF, which
+                                    \ indicates no objects on the map
+
+ MVN     R0, #0                     \ Set R0 to R3 to &FF so we can poke them
+ MVN     R1, #0                     \ into memory at objectMap (this sets each
  MVN     R2, #0                     \ 32-bit register to &FFFFFFFF, which is the
- MVN     R3, #0                     \ same as four bytes, each of which is &FF,
-                                    \ or -1)
+ MVN     R3, #0                     \ same as four bytes, each of which is &FF)
 
- MOV     R4, #&10000                \ Set R4 = &10000 to use as a byte counter
-                                    \ in the following loop
+ MOV     R4, #256*256               \ Set R4 to use as a byte counter in the
+                                    \ following loop, which works through each
+                                    \ of the coordinates in the 256x256 map
 
- ADD     R6, R11, #var_4400         \ Set R6 to the address of var_4400
+ ADD     R6, R11, #objectMap        \ Set R6 to the address of the object map
 
 .snew1
 
  STMIA   R6!, {R0-R3}               \ Store four words, or 16 bytes, at R6,
                                     \ updating R6 as we go, with each byte
-                                    \ containing &FF (i.e. -1)
+                                    \ containing &FF
 
  SUBS    R4, R4, #16                \ Subtract 16 from the byte counter in R4
+                                    \ as we just initialised 16 bytes
 
- BNE     snew1                      \ Loop back until we have set all &10000
-                                    \ bytes to -1
+ BNE     snew1                      \ Loop back until we have set all bytes in
+                                    \ the object map to &FF
 
-                                    \ We now update the contents of the var_4400
-                                    \ table
-                                    \
-                                    \ Is this the bit where the landscape is
-                                    \ generated? Is var_4400 the landscape
-                                    \ table? I can't see where else it can be
-                                    \ generated, but this is a total guess ???
-                                    \
-                                    \ The following loop updates individual
-                                    \ bytes in the var_4400 table
-                                    \
-                                    \ They are updated at the following
-                                    \ addresses:
-                                    \
-                                    \   var_4400 + (R8 >> 24) + (R9 >> 16)
-                                    \
-                                    \ The values stored are between 1 and 8
-                                    \
-                                    \ At the end, three locations are set to 9
+                                    \ We now update the contents of the object
+                                    \ map by adding 2048 objects, each at a
+                                    \ random coordinate
 
- ADD     R6, R11, #var_4400         \ Set R6 to the address of var_4400
+ ADD     R6, R11, #objectMap        \ Set R6 to the address of the object map
 
- MOV     R5, #&800                  \ Set R5 to a loop counter
+ MOV     R5, #2048                  \ Set R5 to a loop counter as we work
+                                    \ through all 2048 objects
 
 .snew2
 
@@ -4632,10 +4707,19 @@ ENDIF
 
  AND     R9, R9, #&FF000000         \ Set R9 to the top byte of R9
 
+                                    \ The object at coordinate (x, y) is stored
+                                    \ at offset &xxyy within objectMap, and in
+                                    \ the following the 
+                                    \
+                                    \   objectMap + (R8 >> 24) + (R9 >> 16)
+                                    \
+                                    \ The values stored are between 1 and 8
+
  ADD     R14, R6, R8, LSR #24       \ Set R14 = R6 + (R8 >> 24) + (R9 >> 16)
  ADD     R14, R14, R9, LSR #16
 
- STRB    R0, [R14]                  \ Store R0 in the address in R14
+ STRB    R0, [R14]                  \ Store R0 in the address in R14 to add the
+                                    \ object to the map
 
 .snew3
 
@@ -4644,18 +4728,30 @@ ENDIF
  BPL     snew2                      \ Loop back until we have done all &800
                                     \ iterations
 
- MOV     R0, #9                     \ Set the values at the following locations
- STRB    R0, [R6, #&107]            \ to 9:
- STRB    R0, [R6, #&307]            \
- STRB    R0, [R6, #&507]            \   var_4400 + &107
-                                    \   var_4400 + &307
-                                    \   var_4400 + &507
-                                    \
-                                    \ So this is a distinct value to the -1 from
-                                    \ initialising table, and the 1 to 8 from
-                                    \ the last part - what does 9 signify ???
+                                    \ We now place three rockets along the right
+                                    \ edge of the launchpad, with a rocket on
+                                    \ every other tile, working from front to
+                                    \ back, parallel to the x-axis and with a
+                                    \ y-coordinate of 7
 
-.lab_A7F8
+ MOV     R0, #OBJ_ROCKET1           \ Set R0 to the object type for the rocket
+
+ STRB    R0, [R6, #&0107]           \ Add the front rocket to coordinate (1, 7)
+
+ STRB    R0, [R6, #&0307]           \ Add the middle rocket to coordinate (3, 7)
+
+ STRB    R0, [R6, #&0507]           \ Add the rear rocket to coordinate (5, 7)
+
+\ ******************************************************************************
+\
+\       Name: PlacePlayerOnLaunchpad
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: The main entry point for the game
+\
+\ ******************************************************************************
+
+.PlacePlayerOnLaunchpad
 
  LDR     R0, [R11, #remainingLives] \ Set R0 to the number of remaining lives
 
@@ -4910,7 +5006,7 @@ ENDIF
 \
 \       Name: dataTable1
 \       Type: Variable
-\   Category: ???
+\   Category: 3D objects
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -4998,14 +5094,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable2
+\       Name: objectRock
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the rock
 \
 \ ******************************************************************************
 
-.dataTable2
+.objectRock
 
  EQUD    &00000005
  EQUD    &00000006
@@ -5073,7 +5169,7 @@ ENDIF
 \
 \       Name: dataTable3
 \       Type: Variable
-\   Category: ???
+\   Category: 3D objects
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -5177,14 +5273,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable4
+\       Name: objectSmallLeafyTree
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the small leafy tree
 \
 \ ******************************************************************************
 
-.dataTable4
+.objectSmallLeafyTree
 
  EQUD    &0000000B
  EQUD    &00000005
@@ -5261,14 +5357,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable5
+\       Name: objectTallLeafyTree
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the tall leafy tree
 \
 \ ******************************************************************************
 
-.dataTable5
+.objectTallLeafyTree
 
  EQUD    &0000000E
  EQUD    &00000006
@@ -5361,14 +5457,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable6
+\       Name: objectSmokingRemainsLeft
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the smoking remains that bend to the left
 \
 \ ******************************************************************************
 
-.dataTable6
+.objectSmokingRemainsLeft
 
  EQUD    &00000005
  EQUD    &00000002
@@ -5406,14 +5502,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable7
+\       Name: objectSmokingRemainsRight
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the smoking remains that bend to the right
 \
 \ ******************************************************************************
 
-.dataTable7
+.objectSmokingRemainsRight
 
  EQUD    &00000005
  EQUD    &00000002
@@ -5451,14 +5547,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable8
+\       Name: objectFirTree
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the fir tree
 \
 \ ******************************************************************************
 
-.dataTable8
+.objectFirTree
 
  EQUD    &00000005
  EQUD    &00000002
@@ -5496,14 +5592,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable9
+\       Name: objectGazebo
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the gazebo
 \
 \ ******************************************************************************
 
-.dataTable9
+.objectGazebo
 
  EQUD    &0000000D
  EQUD    &00000008
@@ -5607,14 +5703,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable10
+\       Name: objectBuilding
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the building
 \
 \ ******************************************************************************
 
-.dataTable10
+.objectBuilding
 
  EQUD    &00000010
  EQUD    &0000000C
@@ -5755,14 +5851,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable11
+\       Name: objectSmokingBuilding
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the smoking remains of a building
 \
 \ ******************************************************************************
 
-.dataTable11
+.objectSmokingBuilding
 
  EQUD    &00000006
  EQUD    &00000006
@@ -5831,14 +5927,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable12
+\       Name: objectSmokingGazebo
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the smoking remains of a gazebo
 \
 \ ******************************************************************************
 
-.dataTable12
+.objectSmokingGazebo
 
  EQUD    &00000006
  EQUD    &00000004
@@ -5893,14 +5989,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable13
+\       Name: objectRocket
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Object data for the rocket
 \
 \ ******************************************************************************
 
-.dataTable13
+.objectRocket
 
  EQUD    &0000000D
  EQUD    &00000008
