@@ -806,13 +806,13 @@ Source: "3-assembled-output/Lander.arm"
 00:00008A9C 0050A0E3        	   793:  MOV     R5, #0
                             	   794: lab_8AA0:
 00:00008AA0 03002DE9        	   795:  STMFD   R13!, {R0-R1}
-00:00008AA4 E50300EB        	   796:  BL      sub_9A40
+00:00008AA4 E50300EB        	   796:  BL      GetRandomNumbers
 00:00008AA8 503883E0        	   797:  ADD     R3, R3, R0, ASR R8
-00:00008AAC E30300EB        	   798:  BL      sub_9A40
+00:00008AAC E30300EB        	   798:  BL      GetRandomNumbers
 00:00008AB0 504884E0        	   799:  ADD     R4, R4, R0, ASR R8
-00:00008AB4 E10300EB        	   800:  BL      sub_9A40
+00:00008AB4 E10300EB        	   800:  BL      GetRandomNumbers
 00:00008AB8 505885E0        	   801:  ADD     R5, R5, R0, ASR R8
-00:00008ABC DF0300EB        	   802:  BL      sub_9A40
+00:00008ABC DF0300EB        	   802:  BL      GetRandomNumbers
 00:00008AC0 306986E0        	   803:  ADD     R6, R6, R0, LSR R9
 00:00008AC4 0300BDE8        	   804:  LDMFD   R13!, {R0-R1}
                             	   805: lab_8AC8:
@@ -836,7 +836,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008B08 0EF0A0E1        	   823:  MOV     PC, R14
                             	   824: sub_8B0C:
 00:00008B0C 07412DE9        	   825:  STMFD   R13!, {R0-R2, R8, R14}
-00:00008B10 CA0300EB        	   826:  BL      sub_9A40
+00:00008B10 CA0300EB        	   826:  BL      GetRandomNumbers
 00:00008B14 070000E2        	   827:  AND     R0, R0, #7
 00:00008B18 030080E2        	   828:  ADD     R0, R0, #3
 00:00008B1C 0010A0E1        	   829:  MOV     R1, R0
@@ -862,7 +862,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008B6C C9FFFFEA        	   849:  B       lab_8A98
                             	   850: sub_8B70:
 00:00008B70 07412DE9        	   851:  STMFD   R13!, {R0-R2, R8, R14}
-00:00008B74 B10300EB        	   852:  BL      sub_9A40
+00:00008B74 B10300EB        	   852:  BL      GetRandomNumbers
 00:00008B78 A11EA0E1        	   853:  MOV     R1, R1, LSR #29
 00:00008B7C 202FA0E1        	   854:  MOV     R2, R0, LSR #30
 00:00008B80 070000E2        	   855:  AND     R0, R0, #7
@@ -889,7 +889,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008BD4 AEFFFFEA        	   876:  B       lab_8A94
                             	   877: sub_8BD8:
 00:00008BD8 07412DE9        	   878:  STMFD   R13!, {R0-R2, R8, R14}
-00:00008BDC 970300EB        	   879:  BL      sub_9A40
+00:00008BDC 970300EB        	   879:  BL      GetRandomNumbers
 00:00008BE0 A11EA0E1        	   880:  MOV     R1, R1, LSR #29
 00:00008BE4 202FA0E1        	   881:  MOV     R2, R0, LSR #30
 00:00008BE8 070000E2        	   882:  AND     R0, R0, #7
@@ -923,7 +923,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008C54 8EFFFFEA        	   910:  B       lab_8A94
                             	   911: sub_8C58:
 00:00008C58 07412DE9        	   912:  STMFD   R13!, {R0-R2, R8, R14}
-00:00008C5C 770300EB        	   913:  BL      sub_9A40
+00:00008C5C 770300EB        	   913:  BL      GetRandomNumbers
 00:00008C60 032000E2        	   914:  AND     R2, R0, #3
 00:00008C64 0C2082E2        	   915:  ADD     R2, R2, #0xC
 00:00008C68 040000E2        	   916:  AND     R0, R0, #4
@@ -991,7 +991,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D44 324E54E2        	   978:  SUBS    R4, R4, #800
 00:00008D48 0EF0A041        	   979:  MOVMI   PC, R14
 00:00008D4C 00402DE9        	   980:  STMDB   R13!, {R14}
-00:00008D50 3A0300EB        	   981:  BL      sub_9A40
+00:00008D50 3A0300EB        	   981:  BL      GetRandomNumbers
 00:00008D54 2009A0E1        	   982:  MOV     R0, R0, LSR #18
 00:00008D58 040050E1        	   983:  CMP     R0, R4
 00:00008D5C 0080BD28        	   984:  LDMHSIA R13!, {PC}
@@ -1887,21 +1887,21 @@ Source: "3-assembled-output/Lander.arm"
 00:00009A2C 64808BE2        	  1874:  ADD     R8, R11, #0x64
 00:00009A30 E04088E8        	  1875:  STMIA   R8, {R5-R7, R14}
 00:00009A34 E081BDE8        	  1876:  LDMFD   R13!, {R5-R8, PC}
-                            	  1877: var_9A38:
+                            	  1877: randomSeed1:
 00:00009A38 90349C4F        	  1878: .long    0x4F9C3490
-                            	  1879: var_9A3C:
+                            	  1879: randomSeed2:
 00:00009A3C CF8303DA        	  1880: .long    0xDA0383CF
-                            	  1881: sub_9A40:
+                            	  1881: GetRandomNumbers:
 00:00009A40 00402DE9        	  1882:  STMDB   R13!, {R14}
-00:00009A44 14001FE5        	  1883:  LDR     R0, var_9A38
-00:00009A48 14101FE5        	  1884:  LDR     R1, var_9A3C
+00:00009A44 14001FE5        	  1883:  LDR     R0, randomSeed1
+00:00009A48 14101FE5        	  1884:  LDR     R1, randomSeed2
 00:00009A4C A10011E1        	  1885:  TST     R1, R1, LSR #1
 00:00009A50 60E0B0E1        	  1886:  MOVS    R14, R0, RRX
 00:00009A54 0110A1E0        	  1887:  ADC     R1, R1, R1
 00:00009A58 00E62EE0        	  1888:  EOR     R14, R14, R0, LSL #12
 00:00009A5C 2E0A2EE0        	  1889:  EOR     R0, R14, R14, LSR #20
-00:00009A60 30100FE5        	  1890:  STR     R1, var_9A38
-00:00009A64 30000FE5        	  1891:  STR     R0, var_9A3C
+00:00009A60 30100FE5        	  1890:  STR     R1, randomSeed1
+00:00009A64 30000FE5        	  1891:  STR     R0, randomSeed2
 00:00009A68 0080BDE8        	  1892:  LDMIA   R13!, {PC}
                             	  1893: screenAddr:
 00:00009A6C 0094FD01        	  1894: .long    0x01FD8000 + 16 * 320
@@ -2834,7 +2834,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A798 116B8BE2        	  2805:  ADD     R6, R11, #objectMap
 00:0000A79C 025BA0E3        	  2806:  MOV     R5, #2048
                             	  2807: snew2:
-00:0000A7A0 A6FCFFEB        	  2808:  BL      sub_9A40
+00:0000A7A0 A6FCFFEB        	  2808:  BL      GetRandomNumbers
 00:0000A7A4 0080A0E1        	  2809:  MOV     R8, R0
 00:0000A7A8 0094A0E1        	  2810:  MOV     R9, R0, LSL #8
 00:0000A7AC 01002DE9        	  2811:  STMDB   R13!, {R0}
@@ -10204,6 +10204,7 @@ DrawPlayer                       A:00008398
 DrawWorld                        A:0000808C
 EndGame                          A:0000A8AC
 Entry                            A:0000A614
+GetRandomNumbers                 A:00009A40
 MainLoop                         A:0000A850
 OBJ_ROCKET1                      S:00000009
 OS_BinaryToDecimal               S:00000028
@@ -10379,6 +10380,8 @@ objectTypes                      A:00008D78
 prsb1                            A:000091A0
 prsb2                            A:000091D8
 prsc1                            A:00009140
+randomSeed1                      A:00009A38
+randomSeed2                      A:00009A3C
 remainingLives                   S:00000134
 screenAddr                       A:00009A6C
 screenBank1Addr                  A:00009D30
@@ -10429,7 +10432,6 @@ sub_9748                         A:00009748
 sub_991C                         A:0000991C
 sub_9924                         A:00009924
 sub_9948                         A:00009948
-sub_9A40                         A:00009A40
 sub_9BB8                         A:00009BB8
 sub_9BF4                         A:00009BF4
 sub_9C28                         A:00009C28
@@ -10503,8 +10505,6 @@ var_98E4                         A:000098E4
 var_98E8                         A:000098E8
 var_98EC                         A:000098EC
 var_9938                         A:00009938
-var_9A38                         A:00009A38
-var_9A3C                         A:00009A3C
 var_9A70                         A:00009A70
 var_9AC0                         A:00009AC0
 var_9C8C                         A:00009C8C
@@ -10707,9 +10707,9 @@ Symbols by value:
 0000997C lab_997C
 000099C4 lab_99C4
 00009A0C lab_9A0C
-00009A38 var_9A38
-00009A3C var_9A3C
-00009A40 sub_9A40
+00009A38 randomSeed1
+00009A3C randomSeed2
+00009A40 GetRandomNumbers
 00009A6C screenAddr
 00009A70 var_9A70
 00009AC0 var_9AC0

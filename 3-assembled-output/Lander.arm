@@ -793,13 +793,13 @@ lab_8A98:
  MOV     R5, #0
 lab_8AA0:
  STMFD   R13!, {R0-R1}
- BL      sub_9A40
+ BL      GetRandomNumbers
  ADD     R3, R3, R0, ASR R8
- BL      sub_9A40
+ BL      GetRandomNumbers
  ADD     R4, R4, R0, ASR R8
- BL      sub_9A40
+ BL      GetRandomNumbers
  ADD     R5, R5, R0, ASR R8
- BL      sub_9A40
+ BL      GetRandomNumbers
  ADD     R6, R6, R0, LSR R9
  LDMFD   R13!, {R0-R1}
 lab_8AC8:
@@ -823,7 +823,7 @@ sub_8AF4:
  MOV     PC, R14
 sub_8B0C:
  STMFD   R13!, {R0-R2, R8, R14}
- BL      sub_9A40
+ BL      GetRandomNumbers
  AND     R0, R0, #7
  ADD     R0, R0, #3
  MOV     R1, R0
@@ -849,7 +849,7 @@ sub_8B0C:
  B       lab_8A98
 sub_8B70:
  STMFD   R13!, {R0-R2, R8, R14}
- BL      sub_9A40
+ BL      GetRandomNumbers
  MOV     R1, R1, LSR #29
  MOV     R2, R0, LSR #30
  AND     R0, R0, #7
@@ -876,7 +876,7 @@ sub_8B70:
  B       lab_8A94
 sub_8BD8:
  STMFD   R13!, {R0-R2, R8, R14}
- BL      sub_9A40
+ BL      GetRandomNumbers
  MOV     R1, R1, LSR #29
  MOV     R2, R0, LSR #30
  AND     R0, R0, #7
@@ -910,7 +910,7 @@ sub_8C40:
  B       lab_8A94
 sub_8C58:
  STMFD   R13!, {R0-R2, R8, R14}
- BL      sub_9A40
+ BL      GetRandomNumbers
  AND     R2, R0, #3
  ADD     R2, R2, #0xC
  AND     R0, R0, #4
@@ -978,7 +978,7 @@ sub_8D40:
  SUBS    R4, R4, #800
  MOVMI   PC, R14
  STMDB   R13!, {R14}
- BL      sub_9A40
+ BL      GetRandomNumbers
  MOV     R0, R0, LSR #18
  CMP     R0, R4
  LDMHSIA R13!, {PC}
@@ -1874,21 +1874,21 @@ lab_9A0C:
  ADD     R8, R11, #0x64
  STMIA   R8, {R5-R7, R14}
  LDMFD   R13!, {R5-R8, PC}
-var_9A38:
+randomSeed1:
 .long    0x4F9C3490
-var_9A3C:
+randomSeed2:
 .long    0xDA0383CF
-sub_9A40:
+GetRandomNumbers:
  STMDB   R13!, {R14}
- LDR     R0, var_9A38
- LDR     R1, var_9A3C
+ LDR     R0, randomSeed1
+ LDR     R1, randomSeed2
  TST     R1, R1, LSR #1
  MOVS    R14, R0, RRX
  ADC     R1, R1, R1
  EOR     R14, R14, R0, LSL #12
  EOR     R0, R14, R14, LSR #20
- STR     R1, var_9A38
- STR     R0, var_9A3C
+ STR     R1, randomSeed1
+ STR     R0, randomSeed2
  LDMIA   R13!, {PC}
 screenAddr:
 .long    0x01FD8000 + 16 * 320
@@ -2805,7 +2805,7 @@ snew1:
  ADD     R6, R11, #objectMap
  MOV     R5, #2048
 snew2:
- BL      sub_9A40
+ BL      GetRandomNumbers
  MOV     R8, R0
  MOV     R9, R0, LSL #8
  STMDB   R13!, {R0}

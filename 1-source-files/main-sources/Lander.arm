@@ -1300,13 +1300,21 @@ ENDIF
 .lab_8AA0
 
  STMFD   R13!, {R0-R1}              \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  ADD     R3, R3, R0, ASR R8         \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  ADD     R4, R4, R0, ASR R8         \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  ADD     R5, R5, R0, ASR R8         \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  ADD     R6, R6, R0, LSR R9         \ 
  LDMFD   R13!, {R0-R1}              \ 
 
@@ -1357,7 +1365,9 @@ ENDIF
 .sub_8B0C
 
  STMFD   R13!, {R0-R2, R8, R14}     \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  AND     R0, R0, #7                 \ 
  ADD     R0, R0, #3                 \ 
  MOV     R1, R0                     \ 
@@ -1394,7 +1404,9 @@ ENDIF
 .sub_8B70
 
  STMFD   R13!, {R0-R2, R8, R14}     \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  MOV     R1, R1, LSR #29            \ 
  MOV     R2, R0, LSR #30            \ 
  AND     R0, R0, #7                 \ 
@@ -1432,7 +1444,9 @@ ENDIF
 .sub_8BD8
 
  STMFD   R13!, {R0-R2, R8, R14}     \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  MOV     R1, R1, LSR #29            \ 
  MOV     R2, R0, LSR #30            \ 
  AND     R0, R0, #7                 \ 
@@ -1488,7 +1502,9 @@ ENDIF
 .sub_8C58
 
  STMFD   R13!, {R0-R2, R8, R14}     \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  AND     R2, R0, #3                 \ 
  ADD     R2, R2, #&C                \ 
  AND     R0, R0, #4                 \ 
@@ -1622,7 +1638,9 @@ ENDIF
                                     \ greater than 800, so ???
 
  STMDB   R13!, {R14}                \ 
- BL      sub_9A40                   \ 
+
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
+
  MOV     R0, R0, LSR #18            \ 
  CMP     R0, R4                     \ 
  LDMHSIA R13!, {PC}                 \ 
@@ -3012,57 +3030,54 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_9A38
+\       Name: randomSeed1
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Arithmetic)
+\    Summary: The first random seed for the random number generator
 \
 \ ******************************************************************************
 
-.var_9A38
+.randomSeed1
 
  EQUD    &4F9C3490
 
 \ ******************************************************************************
 \
-\       Name: var_9A3C
+\       Name: randomSeed2
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Arithmetic)
+\    Summary: The second random seed for the random number generator
 \
 \ ******************************************************************************
 
-.var_9A3C
+.randomSeed2
 
  EQUD    &DA0383CF
 
 \ ******************************************************************************
 \
-\       Name: sub_9A40
+\       Name: GetRandomNumbers
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Arithmetic)
+\    Summary: Generate pseudo-random numbers from the random number seeds
 \
 \ ------------------------------------------------------------------------------
 \
-\ This gets called quite a bit. No idea what it does! The values of R0 and R1
-\ get used on return, and they are based on var_9A38 and var_9A3C.
-\
 \ Returns:
 \
-\   R0                              ???
+\   R0                              A random number
 \
-\   R1                              ???
+\   R1                              A random number
 \
 \ ******************************************************************************
 
-.sub_9A40
+.GetRandomNumbers
 
  STMDB   R13!, {R14}                \ Store the return address on the stack
 
- LDR     R0, var_9A38               \ Set R0 = var_9A38
+ LDR     R0, randomSeed1            \ Set R0 = randomSeed1
 
- LDR     R1, var_9A3C               \ Set R1 = var_9A3C
+ LDR     R1, randomSeed2            \ Set R1 = randomSeed2
 
  TST     R1, R1, LSR #1             \ Set flags on R1 AND (R1 >> 1)
 
@@ -3076,9 +3091,9 @@ ENDIF
 
  EOR     R0, R14, R14, LSR #20      \ R0 = R14 EOR (R14 >> 20)
 
- STR     R1, var_9A38               \ Set var_9A38 = R1
+ STR     R1, randomSeed1            \ Set randomSeed1 = R1
 
- STR     R0, var_9A3C               \ Set var_9A3C = R0
+ STR     R0, randomSeed2            \ Set randomSeed2 = R0
 
  LDMIA   R13!, {PC}                 \ Return from the subroutine
 
@@ -4680,7 +4695,7 @@ ENDIF
 
 .snew2
 
- BL      sub_9A40                   \ ??? Returns values in R0 and R1
+ BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
  MOV     R8, R0                     \ Set R8 = R0
 
