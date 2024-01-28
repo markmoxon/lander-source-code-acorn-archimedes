@@ -53,7 +53,7 @@
 .set var_11C, 0x11C
 .set var_120, 0x120
 .set currentScore, 0x124
-.set var_128, 0x128
+.set fuelLevel, 0x128
 .set var_12C, 0x12C
 .set var_130, 0x130
 .set remainingLives, 0x134
@@ -65,7 +65,7 @@
 .set var_150, 0x150
 .set var_154, 0x154
 .set var_158, 0x158
-.set var_15C, 0x15C
+.set fuelBurnRate, 0x15C
 .set var_168, 0x168
 .set var_170, 0x170
 .set var_174, 0x174
@@ -326,10 +326,10 @@ sub_82DC:
 DrawPlayer:
  STMDB   R13!, {R14}
  SWI     OS_Mouse
- STRB    R2, [R11, #var_15C]
- LDR     R14, [R11, #var_128]
+ STRB    R2, [R11, #fuelBurnRate]
+ LDR     R14, [R11, #fuelLevel]
  CMP     R14, #0
- STREQB  R14, [R11, #var_15C]
+ STREQB  R14, [R11, #fuelBurnRate]
  CMP     R0, #0x400
  MOVHS   R0, #0x400
  SUBHS   R0, R0, #1
@@ -371,13 +371,13 @@ lab_8424:
  ADD     R14, R11, #0x94
  LDMIA   R14, {R0-R5}
  CMN     R1, #0x34000000
- LDRLTB  R9, [R11, #var_15C]
+ LDRLTB  R9, [R11, #fuelBurnRate]
  BICLT   R9, R9, #6
- STRLTB  R9, [R11, #var_15C]
+ STRLTB  R9, [R11, #fuelBurnRate]
  LDR     R6, [R11, #var_034]
  LDR     R7, [R11, #var_040]
  LDR     R8, [R11, #var_04C]
- LDRB    R9, [R11, #var_15C]
+ LDRB    R9, [R11, #fuelBurnRate]
  TST     R9, #4
  SUB     R3, R3, R3, ASR #6
  SUBNE   R3, R3, R6, ASR #11
@@ -419,7 +419,7 @@ lab_8424:
  BEQ     lab_8508
  CMP     R0, #0xC
  ADDLO   R13, R13, #4
- BLO     sub_86C8
+ BLO     LoseLife
 lab_8508:
  LDMIA   R13!, {R0}
 lab_850C:
@@ -435,8 +435,8 @@ lab_850C:
  BL      sub_8EC4
  LDRB    R10, [R11, #var_120]
  CMP     R10, #0
- BLNE    sub_86C8
- LDRB    R10, [R11, #var_15C]
+ BLNE    LoseLife
+ LDRB    R10, [R11, #fuelBurnRate]
  TST     R10, #6
  BEQ     lab_85F4
  ADD     R14, R11, #0xA0
@@ -512,7 +512,7 @@ sub_8654:
  LDMIA   R3, {R0-R5}
  CMP     R0, #0x8000000
  CMPLO   R2, #0x8000000
- BHS     sub_86C8
+ BHS     LoseLife
  CMP     R3, #0
  RSBMI   R3, R3, #0
  CMP     R4, #0
@@ -524,10 +524,10 @@ sub_8654:
  CMP     R3, #0x200000
  MOVHS   PC, R14
  MOV     R1, #0x2EC0000
- LDR     R3, [R11, #var_128]
+ LDR     R3, [R11, #fuelLevel]
  ADD     R3, R3, #0x20
  CMP     R3, #0x1400
- STRLO   R3, [R11, #var_128]
+ STRLO   R3, [R11, #fuelLevel]
  MOV     R3, #0
  MOV     R4, #0
  MOV     R5, #0
@@ -538,7 +538,7 @@ sub_8654:
  MOV     PC, R14
 sub_86C4:
  LDMFD   R13!, {R10, R12}
-sub_86C8:
+LoseLife:
  MOV     R0, #0
  STR     R0, [R11, #var_130]
  MOV     R0, #0x1E
@@ -571,6 +571,7 @@ lab_86EC:
  STR     R0, [R11, #remainingLives]
  ADD     R13, R13, #4
  BNE     PlacePlayerOnLaunchpad
+GameOver:
  MOV     R0, #0x70
  MOV     R1, #1
  SWI     OS_Byte
@@ -1305,11 +1306,11 @@ squareRootTableAddr:
 .long    squareRootTable
 DrawFuelLevel:
  STMFD   R13!, {R10-R12, R14}
- LDR     R1, [R11, #var_128]
- LDRB    R2, [R11, #var_15C]
+ LDR     R1, [R11, #fuelLevel]
+ LDRB    R2, [R11, #fuelBurnRate]
  SUBS    R1, R1, R2
  MOVMI   R1, #0
- STR     R1, [R11, #var_128]
+ STR     R1, [R11, #fuelLevel]
  LDR     R7, screenAddr
  ADD     R11, R7, #320
  LDR     R8, var_91EC
@@ -2612,24 +2613,24 @@ lab_A470:
  BNE     lab_A414
  LDMIA   R13!, {PC}
 var_A480:
-.long    var_A524 + 17 * 4
-.long    var_A524 + 16 * 4
-.long    var_A524 + 15 * 4
-.long    var_A524 + 14 * 4
-.long    var_A524 + 13 * 4
-.long    var_A524 + 12 * 4
-.long    var_A524 + 11 * 4
-.long    var_A524 + 10 * 4
-.long    var_A524 + 9 * 4
-.long    var_A524 + 8 * 4
-.long    var_A524 + 7 * 4
-.long    var_A524 + 6 * 4
-.long    var_A524 + 5 * 4
-.long    var_A524 + 4 * 4
-.long    var_A524 + 3 * 4
-.long    var_A524 + 2 * 4
-.long    var_A524 + 1 * 4
-.long    var_A524
+.long    sub_A524 + 17 * 4
+.long    sub_A524 + 16 * 4
+.long    sub_A524 + 15 * 4
+.long    sub_A524 + 14 * 4
+.long    sub_A524 + 13 * 4
+.long    sub_A524 + 12 * 4
+.long    sub_A524 + 11 * 4
+.long    sub_A524 + 10 * 4
+.long    sub_A524 + 9 * 4
+.long    sub_A524 + 8 * 4
+.long    sub_A524 + 7 * 4
+.long    sub_A524 + 6 * 4
+.long    sub_A524 + 5 * 4
+.long    sub_A524 + 4 * 4
+.long    sub_A524 + 3 * 4
+.long    sub_A524 + 2 * 4
+.long    sub_A524 + 1 * 4
+.long    sub_A524
 sub_A4C8:
  CMP     R10, #0x12
 .set varOffset, ($ + 8) - var_A480
@@ -2656,7 +2657,7 @@ lab_A4F4:
  CMPLO   R11, R10
  STRLOB  R8, [R11], #1
  MOV     PC, R14
-var_A524:
+sub_A524:
  STRB    R8, [R11, #0x10]
  STRB    R8, [R11, #0xF]
  STRB    R8, [R11, #0xE]
@@ -2680,15 +2681,15 @@ workspaceAddr:
 stackAddr:
 .long    stack
 memoryTestAddr:
-.long    0x00000000
+.long    0
 initialScore:
 .long    500
 initialHighScore:
 .long    500
-var_A580:
-.long    0x00000D55
+initialFuelLevel:
+.long    3413
 stackPointerOnEntry:
-.long    0x00000000
+.long    0
 mouseParameters:
 .byte 3
 .word 511
@@ -2785,8 +2786,8 @@ StartNewGame:
  BL      PrintScoreInBothBanks
  LDR     R0, initialScore
  STR     R0, [R11, #currentScore]
- LDR     R0, var_A580
- STR     R0, [R11, #var_128]
+ LDR     R0, initialFuelLevel
+ STR     R0, [R11, #fuelLevel]
  MOV     R0, #0x30000
  STR     R0, [R11, #var_12C]
  MOV     R0, #3

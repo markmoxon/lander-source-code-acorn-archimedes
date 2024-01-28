@@ -157,7 +157,7 @@
                                     \ bullet, and goes up by 20 for each object
                                     \ we destroy
 
- var_128 = &128                     \ 
+ fuelLevel = &128                   \ 
 
  var_12C = &12C                     \ 
 
@@ -190,7 +190,7 @@
 
  var_158 = &158                     \ 
 
- var_15C = &15C                     \ 
+ fuelBurnRate = &15C                \ 
 
  var_168 = &168                     \ 
 
@@ -656,10 +656,10 @@ ENDIF
 
  STMDB   R13!, {R14}                \ 
  SWI     OS_Mouse                   \ 
- STRB    R2, [R11, #var_15C]        \ 
- LDR     R14, [R11, #var_128]       \ 
+ STRB    R2, [R11, #fuelBurnRate]   \ 
+ LDR     R14, [R11, #fuelLevel]     \ 
  CMP     R14, #0                    \ 
- STREQB  R14, [R11, #var_15C]       \ 
+ STREQB  R14, [R11, #fuelBurnRate]  \ 
  CMP     R0, #&400                  \ 
  MOVHS   R0, #&400                  \ 
  SUBHS   R0, R0, #1                 \ 
@@ -709,13 +709,13 @@ ENDIF
  ADD     R14, R11, #&94             \ 
  LDMIA   R14, {R0-R5}               \ 
  CMN     R1, #&34000000             \ 
- LDRLTB  R9, [R11, #var_15C]        \ 
+ LDRLTB  R9, [R11, #fuelBurnRate]   \ 
  BICLT   R9, R9, #6                 \ 
- STRLTB  R9, [R11, #var_15C]        \ 
+ STRLTB  R9, [R11, #fuelBurnRate]   \ 
  LDR     R6, [R11, #var_034]        \ 
  LDR     R7, [R11, #var_040]        \ 
  LDR     R8, [R11, #var_04C]        \ 
- LDRB    R9, [R11, #var_15C]        \ 
+ LDRB    R9, [R11, #fuelBurnRate]   \ 
  TST     R9, #4                     \ 
  SUB     R3, R3, R3, ASR #6         \ 
  SUBNE   R3, R3, R6, ASR #11        \ 
@@ -757,7 +757,7 @@ ENDIF
  BEQ     lab_8508                   \ 
  CMP     R0, #&C                    \ 
  ADDLO   R13, R13, #4               \ 
- BLO     sub_86C8                   \ 
+ BLO     LoseLife                   \ 
 
 .lab_8508
 
@@ -777,8 +777,8 @@ ENDIF
  BL      sub_8EC4                   \ 
  LDRB    R10, [R11, #var_120]       \ 
  CMP     R10, #0                    \ 
- BLNE    sub_86C8                   \ 
- LDRB    R10, [R11, #var_15C]       \ 
+ BLNE    LoseLife                   \ 
+ LDRB    R10, [R11, #fuelBurnRate]  \ 
  TST     R10, #6                    \ 
  BEQ     lab_85F4                   \ 
  ADD     R14, R11, #&A0             \ 
@@ -871,7 +871,7 @@ ENDIF
  LDMIA   R3, {R0-R5}                \ 
  CMP     R0, #&8000000              \ 
  CMPLO   R2, #&8000000              \ 
- BHS     sub_86C8                   \ 
+ BHS     LoseLife                   \ 
  CMP     R3, #0                     \ 
  RSBMI   R3, R3, #0                 \ 
  CMP     R4, #0                     \ 
@@ -883,10 +883,10 @@ ENDIF
  CMP     R3, #&200000               \ 
  MOVHS   PC, R14                    \ 
  MOV     R1, #&2EC0000              \ 
- LDR     R3, [R11, #var_128]        \ 
+ LDR     R3, [R11, #fuelLevel]      \ 
  ADD     R3, R3, #&20               \ 
  CMP     R3, #&1400                 \ 
- STRLO   R3, [R11, #var_128]        \ 
+ STRLO   R3, [R11, #fuelLevel]      \ 
  MOV     R3, #0                     \ 
  MOV     R4, #0                     \ 
  MOV     R5, #0                     \ 
@@ -911,14 +911,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_86C8
+\       Name: LoseLife
 \       Type: Subroutine
 \   Category: ???
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_86C8
+.LoseLife
 
  MOV     R0, #0                     \ 
  STR     R0, [R11, #var_130]        \ 
@@ -970,6 +970,17 @@ ENDIF
 
  ADD     R13, R13, #4               \ 
  BNE     PlacePlayerOnLaunchpad     \ 
+
+\ ******************************************************************************
+\
+\       Name: GameOver
+\       Type: Subroutine
+\   Category: Main loop
+\    Summary: Display a Game Over message and start a new game
+\
+\ ******************************************************************************
+
+.GameOver
 
  MOV     R0, #&70                   \ 
  MOV     R1, #1                     \ 
@@ -1336,7 +1347,7 @@ ENDIF
 \
 \       Name: sub_8AF4
 \       Type: Subroutine
-\   Category: ???
+\   Category: Start and end
 \    Summary: Sets up some variables ???
 \
 \ ******************************************************************************
@@ -2219,11 +2230,11 @@ ENDIF
 .DrawFuelLevel
 
  STMFD   R13!, {R10-R12, R14}       \ 
- LDR     R1, [R11, #var_128]        \ 
- LDRB    R2, [R11, #var_15C]        \ 
+ LDR     R1, [R11, #fuelLevel]      \ 
+ LDRB    R2, [R11, #fuelBurnRate]   \ 
  SUBS    R1, R1, R2                 \ 
  MOVMI   R1, #0                     \ 
- STR     R1, [R11, #var_128]        \ 
+ STR     R1, [R11, #fuelLevel]      \ 
  LDR     R7, screenAddr             \ 
  ADD     R11, R7, #320              \ 
  LDR     R8, var_91EC               \ 
@@ -3062,6 +3073,23 @@ ENDIF
 \    Summary: Generate pseudo-random numbers from the random number seeds
 \
 \ ------------------------------------------------------------------------------
+\
+\ This algorithm appears in the original 1986 ARM Assembler manual that came
+\ with Acorn's ARM Evaluation System (it's in section 11.2 on page 96). It also
+\ appears in later Acorn manuals, such as Acorn Desktop Assembler (release 2),
+\ where it's on page 186.
+\
+\ Here's the algorithm's description from the manual:
+\
+\ "It is often necessary to generate (pseudo-)random numbers and the most
+\ efficient algorithms are based on shift generators with exclusive-or feedback
+\ rather like a cyclic redundancy check generator. Unfortunately the sequence of
+\ a 32-bit generator needs more than one feedback tap to be maximal length (that
+\ is 2^32-1 cycles before repetition). A 33-bit shift generator with taps at
+\ bits 20 and 33 is required. The basic algorithm is newbit := bit33 eor bit20,
+\ shift left the 33 bit number and put in newbit at the bottom. Then do this for
+\ all the newbits needed, that is 32 of them. Luckily this can all be done in
+\ five S cycles."
 \
 \ Returns:
 \
@@ -4267,24 +4295,24 @@ ENDIF
 
 .var_A480
 
- EQUD    var_A524 + 17 * 4
- EQUD    var_A524 + 16 * 4
- EQUD    var_A524 + 15 * 4
- EQUD    var_A524 + 14 * 4
- EQUD    var_A524 + 13 * 4
- EQUD    var_A524 + 12 * 4
- EQUD    var_A524 + 11 * 4
- EQUD    var_A524 + 10 * 4
- EQUD    var_A524 + 9 * 4
- EQUD    var_A524 + 8 * 4
- EQUD    var_A524 + 7 * 4
- EQUD    var_A524 + 6 * 4
- EQUD    var_A524 + 5 * 4
- EQUD    var_A524 + 4 * 4
- EQUD    var_A524 + 3 * 4
- EQUD    var_A524 + 2 * 4
- EQUD    var_A524 + 1 * 4
- EQUD    var_A524
+ EQUD    sub_A524 + 17 * 4
+ EQUD    sub_A524 + 16 * 4
+ EQUD    sub_A524 + 15 * 4
+ EQUD    sub_A524 + 14 * 4
+ EQUD    sub_A524 + 13 * 4
+ EQUD    sub_A524 + 12 * 4
+ EQUD    sub_A524 + 11 * 4
+ EQUD    sub_A524 + 10 * 4
+ EQUD    sub_A524 + 9 * 4
+ EQUD    sub_A524 + 8 * 4
+ EQUD    sub_A524 + 7 * 4
+ EQUD    sub_A524 + 6 * 4
+ EQUD    sub_A524 + 5 * 4
+ EQUD    sub_A524 + 4 * 4
+ EQUD    sub_A524 + 3 * 4
+ EQUD    sub_A524 + 2 * 4
+ EQUD    sub_A524 + 1 * 4
+ EQUD    sub_A524
 
 \ ******************************************************************************
 \
@@ -4330,14 +4358,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_A524
-\       Type: Variable
+\       Name: sub_A524
+\       Type: Subroutine
 \   Category: ???
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.var_A524
+.sub_A524
 
  STRB    R8, [R11, #&10]            \ 
  STRB    R8, [R11, #&F]             \ 
@@ -4396,13 +4424,13 @@ ENDIF
 
 .memoryTestAddr
 
- EQUD    &00000000
+ EQUD    0
 
 \ ******************************************************************************
 \
 \       Name: initialScore
 \       Type: Variable
-\   Category: ???
+\   Category: Start and end
 \    Summary: The score at the start of each game
 \
 \ ******************************************************************************
@@ -4415,7 +4443,7 @@ ENDIF
 \
 \       Name: initialHighScore
 \       Type: Variable
-\   Category: ???
+\   Category: Start and end
 \    Summary: The high score when we first load the game
 \
 \ ******************************************************************************
@@ -4426,16 +4454,16 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_A580
+\       Name: initialFuelLevel
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Start and end
+\    Summary: The fuel level at the start of each new game
 \
 \ ******************************************************************************
 
-.var_A580
+.initialFuelLevel
 
- EQUD    &00000D55
+ EQUD    3413
 
 \ ******************************************************************************
 \
@@ -4448,7 +4476,7 @@ ENDIF
 
 .stackPointerOnEntry
 
- EQUD    &00000000
+ EQUD    0
 
 \ ******************************************************************************
 \
@@ -4691,13 +4719,14 @@ ENDIF
 
                                     \ We now initialise more game variables
 
- LDR     R0, var_A580               \ Set var_128 to the contents of var_A580
- STR     R0, [R11, #var_128]        \ ???
+ LDR     R0, initialFuelLevel       \ Initialise fuelLevel to the fuel level
+ STR     R0, [R11, #fuelLevel]      \ that we start each game with, which is set
+                                    \ in initialFuelLevel
 
- MOV     R0, #&30000                \ Set var_12C = &30000 ???
+ MOV     R0, #&30000                \ Initialise var_12C to &30000 ???
  STR     R0, [R11, #var_12C]
 
- MOV     R0, #3                     \ Set the number of lives to 3
+ MOV     R0, #3                     \ Initialise the number of lives to 3
  STR     R0, [R11, #remainingLives]
 
 \ ******************************************************************************
