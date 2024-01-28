@@ -1309,7 +1309,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000091E0 012052E2        	  1296:  SUBS    R2, R2, #1
 00:000091E4 FBFFFF1A        	  1297:  BNE     prsb2
 00:000091E8 0EF0A0E1        	  1298:  MOV     PC, R14
-                            	  1299: var_91EC:
+                            	  1299: fuelBarColour:
 00:000091EC 37373737        	  1300: .long    0x37373737
                             	  1301: sinTableAddr: 
 00:000091F0 10B80000        	  1302: .long    sinTable
@@ -1326,17 +1326,17 @@ Source: "3-assembled-output/Lander.arm"
 00:00009210 28118BE5        	  1313:  STR     R1, [R11, #fuelLevel]
 00:00009214 50789FE5        	  1314:  LDR     R7, screenAddr
 00:00009218 05BD87E2        	  1315:  ADD     R11, R7, #320
-00:0000921C 38801FE5        	  1316:  LDR     R8, var_91EC
+00:0000921C 38801FE5        	  1316:  LDR     R8, fuelBarColour
 00:00009220 21A2A0E1        	  1317:  MOV     R10, R1, LSR #4
-00:00009224 A70400EB        	  1318:  BL      sub_A4C8
+00:00009224 A70400EB        	  1318:  BL      DrawHorizontalLine
 00:00009228 0ABD87E2        	  1319:  ADD     R11, R7, #2*320
-00:0000922C 48801FE5        	  1320:  LDR     R8, var_91EC
+00:0000922C 48801FE5        	  1320:  LDR     R8, fuelBarColour
 00:00009230 21A2A0E1        	  1321:  MOV     R10, R1, LSR #4
-00:00009234 A30400EB        	  1322:  BL      sub_A4C8
+00:00009234 A30400EB        	  1322:  BL      DrawHorizontalLine
 00:00009238 0FBD87E2        	  1323:  ADD     R11, R7, #3*320
-00:0000923C 58801FE5        	  1324:  LDR     R8, var_91EC
+00:0000923C 58801FE5        	  1324:  LDR     R8, fuelBarColour
 00:00009240 21A2A0E1        	  1325:  MOV     R10, R1, LSR #4
-00:00009244 9F0400EB        	  1326:  BL      sub_A4C8
+00:00009244 9F0400EB        	  1326:  BL      DrawHorizontalLine
 00:00009248 009CBDE8        	  1327:  LDMFD   R13!, {R10-R12, PC}
                             	  1328: var_924C:
 00:0000924C 5C800000        	  1329: .long    var_805C
@@ -2254,7 +2254,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009F40 24B88CE0        	  2241:  ADD     R11, R12, R4, LSR #16
 00:00009F44 25A8A0E1        	  2242:  MOV     R10, R5, LSR #16
 00:00009F48 24A85AE0        	  2243:  SUBS    R10, R10, R4, LSR #16
-00:00009F4C 5D01005B        	  2244:  BLPL    sub_A4C8
+00:00009F4C 5D01005B        	  2244:  BLPL    DrawHorizontalLine
 00:00009F50 05CD4CE2        	  2245:  SUB     R12, R12, #320
 00:00009F54 019059E2        	  2246:  SUBS    R9, R9, #1
 00:00009F58 F6FFFF1A        	  2247:  BNE     lab_9F38
@@ -2303,7 +2303,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009FF4 24B88CE0        	  2290:  ADD     R11, R12, R4, LSR #16
 00:00009FF8 25A8A0E1        	  2291:  MOV     R10, R5, LSR #16
 00:00009FFC 24A85AE0        	  2292:  SUBS    R10, R10, R4, LSR #16
-00:0000A000 3001005B        	  2293:  BLPL    sub_A4C8
+00:0000A000 3001005B        	  2293:  BLPL    DrawHorizontalLine
 00:0000A004 05CD4CE2        	  2294:  SUB     R12, R12, #320
 00:0000A008 019059E2        	  2295:  SUBS    R9, R9, #1
 00:0000A00C F6FFFF1A        	  2296:  BNE     lab_9FEC
@@ -2617,7 +2617,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A45C 25A86030        	  2604:  RSBLO   R10, R0, R5, LSR #16
 00:0000A460 05AD6022        	  2605:  RSBHS   R10, R0, #320
 00:0000A464 00005AE3        	  2606:  CMP     R10, #0
-00:0000A468 1600005B        	  2607:  BLPL    sub_A4C8
+00:0000A468 1600005B        	  2607:  BLPL    DrawHorizontalLine
                             	  2608: lab_A46C:
 00:0000A46C 0008BDE8        	  2609:  LDMIA   R13!, {R11}
                             	  2610: lab_A470:
@@ -2625,28 +2625,28 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A474 019059E2        	  2612:  SUBS    R9, R9, #1
 00:0000A478 E5FFFF1A        	  2613:  BNE     lab_A414
 00:0000A47C 0080BDE8        	  2614:  LDMIA   R13!, {PC}
-                            	  2615: var_A480:
-00:0000A480 68A50000        	  2616: .long    sub_A524 + 17 * 4
-00:0000A484 64A50000        	  2617: .long    sub_A524 + 16 * 4
-00:0000A488 60A50000        	  2618: .long    sub_A524 + 15 * 4
-00:0000A48C 5CA50000        	  2619: .long    sub_A524 + 14 * 4
-00:0000A490 58A50000        	  2620: .long    sub_A524 + 13 * 4
-00:0000A494 54A50000        	  2621: .long    sub_A524 + 12 * 4
-00:0000A498 50A50000        	  2622: .long    sub_A524 + 11 * 4
-00:0000A49C 4CA50000        	  2623: .long    sub_A524 + 10 * 4
-00:0000A4A0 48A50000        	  2624: .long    sub_A524 + 9 * 4
-00:0000A4A4 44A50000        	  2625: .long    sub_A524 + 8 * 4
-00:0000A4A8 40A50000        	  2626: .long    sub_A524 + 7 * 4
-00:0000A4AC 3CA50000        	  2627: .long    sub_A524 + 6 * 4
-00:0000A4B0 38A50000        	  2628: .long    sub_A524 + 5 * 4
-00:0000A4B4 34A50000        	  2629: .long    sub_A524 + 4 * 4
-00:0000A4B8 30A50000        	  2630: .long    sub_A524 + 3 * 4
-00:0000A4BC 2CA50000        	  2631: .long    sub_A524 + 2 * 4
-00:0000A4C0 28A50000        	  2632: .long    sub_A524 + 1 * 4
-00:0000A4C4 24A50000        	  2633: .long    sub_A524
-                            	  2634: sub_A4C8:
-00:0000A4C8 12005AE3        	  2635:  CMP     R10, #0x12
-                            	  2636: .set varOffset, ($ + 8) - var_A480
+                            	  2615: lineJump:
+00:0000A480 68A50000        	  2616: .long    DrawLineSegment + 17 * 4
+00:0000A484 64A50000        	  2617: .long    DrawLineSegment + 16 * 4
+00:0000A488 60A50000        	  2618: .long    DrawLineSegment + 15 * 4
+00:0000A48C 5CA50000        	  2619: .long    DrawLineSegment + 14 * 4
+00:0000A490 58A50000        	  2620: .long    DrawLineSegment + 13 * 4
+00:0000A494 54A50000        	  2621: .long    DrawLineSegment + 12 * 4
+00:0000A498 50A50000        	  2622: .long    DrawLineSegment + 11 * 4
+00:0000A49C 4CA50000        	  2623: .long    DrawLineSegment + 10 * 4
+00:0000A4A0 48A50000        	  2624: .long    DrawLineSegment + 9 * 4
+00:0000A4A4 44A50000        	  2625: .long    DrawLineSegment + 8 * 4
+00:0000A4A8 40A50000        	  2626: .long    DrawLineSegment + 7 * 4
+00:0000A4AC 3CA50000        	  2627: .long    DrawLineSegment + 6 * 4
+00:0000A4B0 38A50000        	  2628: .long    DrawLineSegment + 5 * 4
+00:0000A4B4 34A50000        	  2629: .long    DrawLineSegment + 4 * 4
+00:0000A4B8 30A50000        	  2630: .long    DrawLineSegment + 3 * 4
+00:0000A4BC 2CA50000        	  2631: .long    DrawLineSegment + 2 * 4
+00:0000A4C0 28A50000        	  2632: .long    DrawLineSegment + 1 * 4
+00:0000A4C4 24A50000        	  2633: .long    DrawLineSegment
+                            	  2634: DrawHorizontalLine:
+00:0000A4C8 12005AE3        	  2635:  CMP     R10, #18
+                            	  2636: .set varOffset, ($ + 8) - lineJump
 00:0000A4CC 0A018F30        	  2637:  ADDLO   R0, PC, R10, LSL #2
 00:0000A4D0 54F01035        	  2638:  LDRLO   PC, [R0, #-varOffset]
 00:0000A4D4 0AA08BE0        	  2639:  ADD     R10, R11, R10
@@ -2670,14 +2670,14 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A518 0A005B31        	  2657:  CMPLO   R11, R10
 00:0000A51C 0180CB34        	  2658:  STRLOB  R8, [R11], #1
 00:0000A520 0EF0A0E1        	  2659:  MOV     PC, R14
-                            	  2660: sub_A524:
-00:0000A524 1080CBE5        	  2661:  STRB    R8, [R11, #0x10]
-00:0000A528 0F80CBE5        	  2662:  STRB    R8, [R11, #0xF]
-00:0000A52C 0E80CBE5        	  2663:  STRB    R8, [R11, #0xE]
-00:0000A530 0D80CBE5        	  2664:  STRB    R8, [R11, #0xD]
-00:0000A534 0C80CBE5        	  2665:  STRB    R8, [R11, #0xC]
-00:0000A538 0B80CBE5        	  2666:  STRB    R8, [R11, #0xB]
-00:0000A53C 0A80CBE5        	  2667:  STRB    R8, [R11, #0xA]
+                            	  2660: DrawLineSegment:
+00:0000A524 1080CBE5        	  2661:  STRB    R8, [R11, #16]
+00:0000A528 0F80CBE5        	  2662:  STRB    R8, [R11, #15]
+00:0000A52C 0E80CBE5        	  2663:  STRB    R8, [R11, #14]
+00:0000A530 0D80CBE5        	  2664:  STRB    R8, [R11, #13]
+00:0000A534 0C80CBE5        	  2665:  STRB    R8, [R11, #12]
+00:0000A538 0B80CBE5        	  2666:  STRB    R8, [R11, #11]
+00:0000A53C 0A80CBE5        	  2667:  STRB    R8, [R11, #10]
 00:0000A540 0980CBE5        	  2668:  STRB    R8, [R11, #9]
 00:0000A544 0880CBE5        	  2669:  STRB    R8, [R11, #8]
 00:0000A548 0780CBE5        	  2670:  STRB    R8, [R11, #7]
@@ -10200,6 +10200,8 @@ CODE                             S:00008000
 DecryptGameBinary                A:00011A10
 DrawExhaustAndBullets            A:000087F4
 DrawFuelLevel                    A:000091FC
+DrawHorizontalLine               A:0000A4C8
+DrawLineSegment                  A:0000A524
 DrawObjects                      A:00008DDC
 DrawPlayer                       A:00008398
 DrawWorld                        A:0000808C
@@ -10235,6 +10237,7 @@ divisionTable                    A:0000DA10
 divisionTableAddr                A:00009D38
 endCode                          A:00011A24
 entr1                            A:0000A6E4
+fuelBarColour                    A:000091EC
 fuelBurnRate                     S:0000015C
 fuelLevel                        S:00000128
 highScore                        S:00000138
@@ -10357,6 +10360,7 @@ lab_A414                         A:0000A414
 lab_A46C                         A:0000A46C
 lab_A470                         A:0000A470
 lab_A4F4                         A:0000A4F4
+lineJump                         A:0000A480
 memoryTestAddr                   A:0000A574
 mouseParameters                  A:0000A588
 mouseParametersAddr              A:0000A590
@@ -10447,8 +10451,6 @@ sub_9CFC                         A:00009CFC
 sub_9DC8                         A:00009DC8
 sub_9DDC                         A:00009DDC
 sub_A408                         A:0000A408
-sub_A4C8                         A:0000A4C8
-sub_A524                         A:0000A524
 typeOffset                       S:000000CC
 varOffset                        S:00000054
 var_030                          S:00000030
@@ -10502,7 +10504,6 @@ var_8028                         A:00008028
 var_802C                         A:0000802C
 var_805C                         A:0000805C
 var_87EC                         A:000087EC
-var_91EC                         A:000091EC
 var_924C                         A:0000924C
 var_9250                         A:00009250
 var_98E4                         A:000098E4
@@ -10512,7 +10513,6 @@ var_9938                         A:00009938
 var_9A70                         A:00009A70
 var_9AC0                         A:00009AC0
 var_9C8C                         A:00009C8C
-var_A480                         A:0000A480
 workspace                        S:00012200
 workspaceAddr                    A:0000A56C
 
@@ -10534,8 +10534,8 @@ Symbols by value:
 00000048 var_048
 0000004C var_04C
 00000050 var_050
-00000054 varOffset
 00000054 var_054
+00000054 varOffset
 00000058 var_058
 0000006C labOffset
 00000078 var_078
@@ -10662,7 +10662,7 @@ Symbols by value:
 00009160 PrintScoreInBothBanks
 000091A0 prsb1
 000091D8 prsb2
-000091EC var_91EC
+000091EC fuelBarColour
 000091F0 sinTableAddr
 000091F4 arctanTableAddr
 000091F8 squareRootTableAddr
@@ -10788,10 +10788,10 @@ Symbols by value:
 0000A414 lab_A414
 0000A46C lab_A46C
 0000A470 lab_A470
-0000A480 var_A480
-0000A4C8 sub_A4C8
+0000A480 lineJump
+0000A4C8 DrawHorizontalLine
 0000A4F4 lab_A4F4
-0000A524 sub_A524
+0000A524 DrawLineSegment
 0000A56C workspaceAddr
 0000A570 stackAddr
 0000A574 memoryTestAddr

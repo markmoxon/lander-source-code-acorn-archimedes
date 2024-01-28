@@ -2173,14 +2173,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_91EC
+\       Name: fuelBarColour
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing the screen
+\    Summary: A pixel word for the colour of the fuel bar
 \
 \ ******************************************************************************
 
-.var_91EC
+.fuelBarColour
 
  EQUD    &37373737
 
@@ -2227,33 +2227,80 @@ ENDIF
 \
 \       Name: DrawFuelLevel
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing the screen
+\    Summary: Draw the bar at the top of the screen showing the current fuel
+\             level
 \
 \ ******************************************************************************
 
 .DrawFuelLevel
 
- STMFD   R13!, {R10-R12, R14}       \ 
- LDR     R1, [R11, #fuelLevel]      \ 
- LDRB    R2, [R11, #fuelBurnRate]   \ 
- SUBS    R1, R1, R2                 \ 
- MOVMI   R1, #0                     \ 
- STR     R1, [R11, #fuelLevel]      \ 
- LDR     R7, screenAddr             \ 
- ADD     R11, R7, #320              \ 
- LDR     R8, var_91EC               \ 
- MOV     R10, R1, LSR #4            \ 
- BL      sub_A4C8                   \ 
- ADD     R11, R7, #2*320            \ 
- LDR     R8, var_91EC               \ 
- MOV     R10, R1, LSR #4            \ 
- BL      sub_A4C8                   \ 
- ADD     R11, R7, #3*320            \ 
- LDR     R8, var_91EC               \ 
- MOV     R10, R1, LSR #4            \ 
- BL      sub_A4C8                   \ 
- LDMFD   R13!, {R10-R12, PC}        \ 
+ STMFD   R13!, {R10-R12, R14}       \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R1, [R11, #fuelLevel]      \ Set R1 to the current fuel level in
+                                    \ fuelLevel
+
+ LDRB    R2, [R11, #fuelBurnRate]   \ Set R2 to the current fuel burn rate in
+                                    \ fuelBurnRate
+
+ SUBS    R1, R1, R2                 \ Subtract the fuel burn rate from the fuel
+ MOVMI   R1, #0                     \ level, making sure it doesn't fall below
+ STR     R1, [R11, #fuelLevel]      \ zero, and store the updated fuel level in
+                                    \ fuelLevel (and leaving the value in R1)
+
+ LDR     R7, screenAddr             \ Set R7 to the address of the screen bank
+                                    \ we are drawing in, pointing just below
+                                    \ the two lines of text at the top of the
+                                    \ screen
+
+ ADD     R11, R7, #320              \ Set R11 to the address in R7, plus 320 to
+                                    \ move it down by one pixel line
+
+ LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
+                                    \ poke into screen memory to draw a pixel in
+                                    \ the correct colour for the fuel bar
+
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
+                                    \         = fuel level * 16
+
+ BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
+                                    \ starting at screen address R11 and drawing
+                                    \ to the right in the colour in R8, so
+                                    \ that's the top pixel row of the bar
+
+ ADD     R11, R7, #2*320            \ Set R11 to the address in R7, plus 640 to
+                                    \ move it down by two pixel lines
+
+ LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
+                                    \ poke into screen memory to draw a pixel in
+                                    \ the correct colour for the fuel bar
+
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
+                                    \         = fuel level * 16
+
+ BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
+                                    \ starting at screen address R11 and drawing
+                                    \ to the right in the colour in R8, so
+                                    \ that's the middle pixel row of the bar
+
+ ADD     R11, R7, #3*320            \ Set R11 to the address in R7, plus 960 to
+                                    \ move it down by two pixel lines
+
+ LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
+                                    \ poke into screen memory to draw a pixel in
+                                    \ the correct colour for the fuel bar
+
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
+                                    \         = fuel level * 16
+
+ BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
+                                    \ starting at screen address R11 and drawing
+                                    \ to the right in the colour in R8, so
+                                    \ that's the bottom pixel row of the bar
+
+ LDMFD   R13!, {R10-R12, PC}        \ Retrieve the registers that we used from
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3832,7 +3879,7 @@ ENDIF
  ADD     R11, R12, R4, LSR #16      \ 
  MOV     R10, R5, LSR #16           \ 
  SUBS    R10, R10, R4, LSR #16      \ 
- BLPL    sub_A4C8                   \ 
+ BLPL    DrawHorizontalLine         \ 
  SUB     R12, R12, #320             \ 
  SUBS    R9, R9, #1                 \ 
  BNE     lab_9F38                   \ 
@@ -3889,7 +3936,7 @@ ENDIF
  ADD     R11, R12, R4, LSR #16      \ 
  MOV     R10, R5, LSR #16           \ 
  SUBS    R10, R10, R4, LSR #16      \ 
- BLPL    sub_A4C8                   \ 
+ BLPL    DrawHorizontalLine         \ 
  SUB     R12, R12, #320             \ 
  SUBS    R9, R9, #1                 \ 
  BNE     lab_9FEC                   \ 
@@ -4276,7 +4323,7 @@ ENDIF
  RSBLO   R10, R0, R5, LSR #16       \ 
  RSBHS   R10, R0, #320              \ 
  CMP     R10, #0                    \ 
- BLPL    sub_A4C8                   \ 
+ BLPL    DrawHorizontalLine         \ 
 
 .lab_A46C
 
@@ -4291,51 +4338,62 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_A480
+\       Name: lineJump
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing lines
+\    Summary: Jump table for drawing a horizontal line of between 0 and 17
+\             pixels using the relevant entry point in DrawLineSegment
 \
 \ ******************************************************************************
 
-.var_A480
+.lineJump
 
- EQUD    sub_A524 + 17 * 4
- EQUD    sub_A524 + 16 * 4
- EQUD    sub_A524 + 15 * 4
- EQUD    sub_A524 + 14 * 4
- EQUD    sub_A524 + 13 * 4
- EQUD    sub_A524 + 12 * 4
- EQUD    sub_A524 + 11 * 4
- EQUD    sub_A524 + 10 * 4
- EQUD    sub_A524 + 9 * 4
- EQUD    sub_A524 + 8 * 4
- EQUD    sub_A524 + 7 * 4
- EQUD    sub_A524 + 6 * 4
- EQUD    sub_A524 + 5 * 4
- EQUD    sub_A524 + 4 * 4
- EQUD    sub_A524 + 3 * 4
- EQUD    sub_A524 + 2 * 4
- EQUD    sub_A524 + 1 * 4
- EQUD    sub_A524
+ EQUD    DrawLineSegment + 17 * 4   \ Draw a horizontal line of 0 pixels
+ EQUD    DrawLineSegment + 16 * 4   \ Draw a horizontal line of 1 pixels
+ EQUD    DrawLineSegment + 15 * 4   \ Draw a horizontal line of 2 pixels
+ EQUD    DrawLineSegment + 14 * 4   \ Draw a horizontal line of 3 pixels
+ EQUD    DrawLineSegment + 13 * 4   \ Draw a horizontal line of 4 pixels
+ EQUD    DrawLineSegment + 12 * 4   \ Draw a horizontal line of 5 pixels
+ EQUD    DrawLineSegment + 11 * 4   \ Draw a horizontal line of 6 pixels
+ EQUD    DrawLineSegment + 10 * 4   \ Draw a horizontal line of 7 pixels
+ EQUD    DrawLineSegment + 9 * 4    \ Draw a horizontal line of 8 pixels
+ EQUD    DrawLineSegment + 8 * 4    \ Draw a horizontal line of 9 pixels
+ EQUD    DrawLineSegment + 7 * 4    \ Draw a horizontal line of 10 pixels
+ EQUD    DrawLineSegment + 6 * 4    \ Draw a horizontal line of 11 pixels
+ EQUD    DrawLineSegment + 5 * 4    \ Draw a horizontal line of 12 pixels
+ EQUD    DrawLineSegment + 4 * 4    \ Draw a horizontal line of 13 pixels
+ EQUD    DrawLineSegment + 3 * 4    \ Draw a horizontal line of 14 pixels
+ EQUD    DrawLineSegment + 2 * 4    \ Draw a horizontal line of 15 pixels
+ EQUD    DrawLineSegment + 1 * 4    \ Draw a horizontal line of 16 pixels
+ EQUD    DrawLineSegment            \ Draw a horizontal line of 17 pixels
 
 \ ******************************************************************************
 \
-\       Name: sub_A4C8
+\       Name: DrawHorizontalLine
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing lines
+\    Summary: Draw a horizontal line
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R8                              Line colour (in the form of a pixel word)
+\
+\   R10                             Line length
+\
+\   R11                             Screen address of left end of line
 \
 \ ******************************************************************************
 
-.sub_A4C8
+.DrawHorizontalLine
 
- CMP     R10, #&12                  \ 
+ CMP     R10, #18                   \ 
 
- varOffset = ($ + 8) - var_A480     \ &54
+ varOffset = ($ + 8) - lineJump     \ &54
 
  ADDLO   R0, PC, R10, LSL #2        \ 
- LDRLO   PC, [R0, #-varOffset]      \ Fetch from var_A480 table
+ LDRLO   PC, [R0, #-varOffset]      \ Fetch from lineJump table
 
  ADD     R10, R11, R10              \ 
  BIC     R0, R10, #3                \ 
@@ -4363,33 +4421,59 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_A524
+\       Name: DrawLineSegment
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing lines
+\    Summary: Draw a horizontal line of between 0 and 17 pixels by jumping to
+\             the relevant entry point
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R8                              Line colour (in the form of a pixel word)
+\
+\   R11                             Screen address of left end of line
 \
 \ ******************************************************************************
 
-.sub_A524
+.DrawLineSegment
 
- STRB    R8, [R11, #&10]            \ 
- STRB    R8, [R11, #&F]             \ 
- STRB    R8, [R11, #&E]             \ 
- STRB    R8, [R11, #&D]             \ 
- STRB    R8, [R11, #&C]             \ 
- STRB    R8, [R11, #&B]             \ 
- STRB    R8, [R11, #&A]             \ 
- STRB    R8, [R11, #9]              \ 
- STRB    R8, [R11, #8]              \ 
- STRB    R8, [R11, #7]              \ 
- STRB    R8, [R11, #6]              \ 
- STRB    R8, [R11, #5]              \ 
- STRB    R8, [R11, #4]              \ 
- STRB    R8, [R11, #3]              \ 
- STRB    R8, [R11, #2]              \ 
- STRB    R8, [R11, #1]              \ 
- STRB    R8, [R11]                  \ 
- MOV     PC, R14                    \ 
+ STRB    R8, [R11, #16]             \ Draw a horizontal line of 17 pixels
+
+ STRB    R8, [R11, #15]             \ Draw a horizontal line of 16 pixels
+
+ STRB    R8, [R11, #14]             \ Draw a horizontal line of 15 pixels
+
+ STRB    R8, [R11, #13]             \ Draw a horizontal line of 14 pixels
+
+ STRB    R8, [R11, #12]             \ Draw a horizontal line of 13 pixels
+
+ STRB    R8, [R11, #11]             \ Draw a horizontal line of 12 pixels
+
+ STRB    R8, [R11, #10]             \ Draw a horizontal line of 11 pixels
+
+ STRB    R8, [R11, #9]              \ Draw a horizontal line of 10 pixels
+
+ STRB    R8, [R11, #8]              \ Draw a horizontal line of 9 pixels
+
+ STRB    R8, [R11, #7]              \ Draw a horizontal line of 8 pixels
+
+ STRB    R8, [R11, #6]              \ Draw a horizontal line of 7 pixels
+
+ STRB    R8, [R11, #5]              \ Draw a horizontal line of 6 pixels
+
+ STRB    R8, [R11, #4]              \ Draw a horizontal line of 5 pixels
+
+ STRB    R8, [R11, #3]              \ Draw a horizontal line of 4 pixels
+
+ STRB    R8, [R11, #2]              \ Draw a horizontal line of 3 pixels
+
+ STRB    R8, [R11, #1]              \ Draw a horizontal line of 2 pixels
+
+ STRB    R8, [R11]                  \ Draw a horizontal line of 1 pixel
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
