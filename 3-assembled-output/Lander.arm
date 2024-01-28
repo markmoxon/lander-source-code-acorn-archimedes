@@ -6,7 +6,7 @@
 .set OS_Word, 0x07
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
-.set OBJ_ROCK, 0
+.set OBJ_PYRAMID, 0
 .set OBJ_SMALL_TREE_1, 1
 .set OBJ_TALL_TREE_1, 2
 .set OBJ_SMALL_TREE_2, 3
@@ -672,7 +672,7 @@ lab_880C:
 lab_88E8:
  LDMFD   R13!, {R0-R2}
  BLO     sub_86C4
- LDR     R14, dataTable1Addr
+ LDR     R14, objectRockAddr
  STR     R14, [R11, #var_110]
  ADD     R3, R11, #0x30
  BL      sub_8EC4
@@ -990,7 +990,7 @@ sub_8D40:
  BL      sub_8BD8
  LDMIA   R13!, {PC}
 objectTypes:
-.long    objectRock
+.long    objectPulsatingPyramid
 .long    objectSmallLeafyTree
 .long    objectTallLeafyTree
 .long    objectSmallLeafyTree
@@ -1081,8 +1081,8 @@ lab_8E8C:
  B       lab_8E80
 objectPlayerAddr:
 .long    objectPlayer
-dataTable1Addr:
-.long    dataTable1
+objectRockAddr:
+.long    objectRock
 sub_8EC4:
  STMFD   R13!, {R6-R12, R14}
  LDR     R12, var_924C
@@ -2925,7 +2925,7 @@ PrintHexDigit:
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
  MOV     PC, R14
-dataTable1:
+objectRock:
 .long    0x00000006
 .long    0x00000008
 .long    0x00000058
@@ -3004,7 +3004,7 @@ dataTable1:
 .long    0x00000002
 .long    0x00000004
 .long    0x00000444
-objectRock:
+objectPulsatingPyramid:
 .long    0x00000005
 .long    0x00000006
 .long    0x0000004C

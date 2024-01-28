@@ -48,7 +48,7 @@
 
  OS_BinaryToDecimal = &28           \ 
 
- OBJ_ROCK = 0                       \ Object types, add 12 for destroyed version
+ OBJ_PYRAMID = 0                    \ Object types, add 12 for destroyed version
  OBJ_SMALL_TREE_1 = 1
  OBJ_TALL_TREE_1 = 2
  OBJ_SMALL_TREE_2 = 3
@@ -1116,7 +1116,7 @@ ENDIF
 
  LDMFD   R13!, {R0-R2}              \ 
  BLO     sub_86C4                   \ 
- LDR     R14, dataTable1Addr        \ 
+ LDR     R14, objectRockAddr        \ 
  STR     R14, [R11, #var_110]       \ 
  ADD     R3, R11, #&30              \ 
  BL      sub_8EC4                   \ 
@@ -1676,6 +1676,11 @@ ENDIF
 \ when that object has been destroyed. Destroyed objects are shown with clouds
 \ of smoke rising up from the detritus.
 \
+\ Objects 0, 12 and 24 do not appear to be used anywhere. There are two
+\ additional objects - the player's ship and the rock - which are defined in
+\ the objectPlayer and objectRock tables, but which do not have assigned types,
+\ so they can't be placed on the object map.
+\
 \ This table links to the data for each object. Object data is shared, so types
 \ 1, 3 and 4 are all identical small leafy trees, for example. However, when
 \ destroyed, the smoking remains of type 1 bend to the right (type 13), while
@@ -1685,7 +1690,7 @@ ENDIF
 
 .objectTypes
 
- EQUD    objectRock                 \ 0  = half a rock
+ EQUD    objectPulsatingPyramid     \ 0  = pulsating, rotating pyramid
  EQUD    objectSmallLeafyTree       \ 1  = small leafy tree
  EQUD    objectTallLeafyTree        \ 2  = tall leafy tree
  EQUD    objectSmallLeafyTree       \ 3  = small leafy tree
@@ -1818,16 +1823,16 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable1Addr
+\       Name: objectRockAddr
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: The address of the object data for a rock
 \
 \ ******************************************************************************
 
-.dataTable1Addr
+.objectRockAddr
 
- EQUD    dataTable1
+ EQUD    objectRock
 
 \ ******************************************************************************
 \
@@ -5102,14 +5107,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dataTable1
+\       Name: objectRock
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: ???
+\    Summary: Object data for a rock
 \
 \ ******************************************************************************
 
-.dataTable1
+.objectRock
 
  EQUD    &00000006
  EQUD    &00000008
@@ -5192,14 +5197,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: objectRock
+\       Name: objectPulsatingPyramid
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the rock
+\    Summary: Object data for a rotating pyramid with pulsating colours
 \
 \ ******************************************************************************
 
-.objectRock
+.objectPulsatingPyramid
 
  EQUD    &00000005
  EQUD    &00000006

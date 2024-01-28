@@ -11,7 +11,7 @@ Source: "3-assembled-output/Lander.arm"
                             	     6: .set OS_Word, 0x07
                             	     7: .set OS_Mouse, 0x1C
                             	     8: .set OS_BinaryToDecimal, 0x28
-                            	     9: .set OBJ_ROCK, 0
+                            	     9: .set OBJ_PYRAMID, 0
                             	    10: .set OBJ_SMALL_TREE_1, 1
                             	    11: .set OBJ_TALL_TREE_1, 2
                             	    12: .set OBJ_SMALL_TREE_2, 3
@@ -685,7 +685,7 @@ Source: "3-assembled-output/Lander.arm"
                             	   672: lab_88E8:
 00:000088E8 0700BDE8        	   673:  LDMFD   R13!, {R0-R2}
 00:000088EC 74FFFF3A        	   674:  BLO     sub_86C4
-00:000088F0 C8E59FE5        	   675:  LDR     R14, dataTable1Addr
+00:000088F0 C8E59FE5        	   675:  LDR     R14, objectRockAddr
 00:000088F4 10E18BE5        	   676:  STR     R14, [R11, #var_110]
 00:000088F8 30308BE2        	   677:  ADD     R3, R11, #0x30
 00:000088FC 700100EB        	   678:  BL      sub_8EC4
@@ -1003,7 +1003,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D70 98FFFFEB        	   990:  BL      sub_8BD8
 00:00008D74 0080BDE8        	   991:  LDMIA   R13!, {PC}
                             	   992: objectTypes:
-00:00008D78 98AA0000        	   993: .long    objectRock
+00:00008D78 98AA0000        	   993: .long    objectPulsatingPyramid
 00:00008D7C 04AD0000        	   994: .long    objectSmallLeafyTree
 00:00008D80 24AE0000        	   995: .long    objectTallLeafyTree
 00:00008D84 04AD0000        	   996: .long    objectSmallLeafyTree
@@ -1094,8 +1094,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00008EB8 F0FFFFEA        	  1081:  B       lab_8E80
                             	  1082: objectPlayerAddr:
 00:00008EBC 8CAB0000        	  1083: .long    objectPlayer
-                            	  1084: dataTable1Addr:
-00:00008EC0 60A90000        	  1085: .long    dataTable1
+                            	  1084: objectRockAddr:
+00:00008EC0 60A90000        	  1085: .long    objectRock
                             	  1086: sub_8EC4:
 00:00008EC4 C05F2DE9        	  1087:  STMFD   R13!, {R6-R12, R14}
 00:00008EC8 7CC39FE5        	  1088:  LDR     R12, var_924C
@@ -2954,7 +2954,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A954 30008032        	  2925:  ADDLO   R0, R0, #0x30
 00:0000A958 000000EF        	  2926:  SWI     OS_WriteC
 00:0000A95C 0EF0A0E1        	  2927:  MOV     PC, R14
-                            	  2928: dataTable1:
+                            	  2928: objectRock:
 00:0000A960 06000000        	  2929: .long    0x00000006
 00:0000A964 08000000        	  2930: .long    0x00000008
 00:0000A968 58000000        	  2931: .long    0x00000058
@@ -3033,7 +3033,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AA8C 02000000        	  3004: .long    0x00000002
 00:0000AA90 04000000        	  3005: .long    0x00000004
 00:0000AA94 44040000        	  3006: .long    0x00000444
-                            	  3007: objectRock:
+                            	  3007: objectPulsatingPyramid:
 00:0000AA98 05000000        	  3008: .long    0x00000005
 00:0000AA9C 06000000        	  3009: .long    0x00000006
 00:0000AAA0 4C000000        	  3010: .long    0x0000004C
@@ -10231,8 +10231,6 @@ arctanTable                      A:0000C810
 arctanTableAddr                  A:000091F4
 bank1                            A:00009DAC
 currentScore                     S:00000124
-dataTable1                       A:0000A960
-dataTable1Addr                   A:00008EC0
 divisionTable                    A:0000DA10
 divisionTableAddr                A:00009D38
 endCode                          A:00011A24
@@ -10368,7 +10366,9 @@ objectGazebo                     A:0000B110
 objectMap                        S:00004400
 objectPlayer                     A:0000AB8C
 objectPlayerAddr                 A:00008EBC
-objectRock                       A:0000AA98
+objectPulsatingPyramid           A:0000AA98
+objectRock                       A:0000A960
+objectRockAddr                   A:00008EC0
 objectRocket                     A:0000B684
 objectSmallLeafyTree             A:0000AD04
 objectSmokingBuilding            A:0000B4BC
@@ -10650,7 +10650,7 @@ Symbols by value:
 00008E80 lab_8E80
 00008E8C lab_8E8C
 00008EBC objectPlayerAddr
-00008EC0 dataTable1Addr
+00008EC0 objectRockAddr
 00008EC4 sub_8EC4
 00008EFC lab_8EFC
 00008F54 lab_8F54
@@ -10816,8 +10816,8 @@ Symbols by value:
 0000A8D4 ReturnToDesktop
 0000A8E0 PrintHexNumber
 0000A948 PrintHexDigit
-0000A960 dataTable1
-0000AA98 objectRock
+0000A960 objectRock
+0000AA98 objectPulsatingPyramid
 0000AB8C objectPlayer
 0000AD04 objectSmallLeafyTree
 0000AE24 objectTallLeafyTree
