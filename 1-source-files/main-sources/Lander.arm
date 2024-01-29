@@ -224,20 +224,21 @@
                                     \ only one object at each coordinate)
                                     \
                                     \ The origin is at the front-left corner of
-                                    \ the launchpad, with the x-axis going into
-                                    \ the screen, and the y-axis going to the
-                                    \ right
+                                    \ the launchpad, with the x-axis going to
+                                    \ the right, and the y-axis going into the
+                                    \ screen
                                     \
-                                    \ So a map coordinate of (1, 7) is 1 tile
-                                    \ into the screen and 7 tiles to the right
-                                    \ of the front-left corner of the launchpad;
-                                    \ in this case, that's the coordinate of the
-                                    \ front rocket of the three alongside the
-                                    \ launchpad when we start the game
+                                    \ So a map coordinate of (7, 1) is 7 tiles
+                                    \ to the right and 1 tile into the screen,
+                                    \ starting from the front-left corner of the
+                                    \ launchpad; in this case, that's the
+                                    \ coordinate of the front rocket of the
+                                    \ three alongside the launchpad when we
+                                    \ start the game
                                     \
                                     \ The object at coordinate (x, y) is stored
-                                    \ at offset &xxyy within objectMap, so the
-                                    \ rocket at (1, 7) is at objectMap + &0107
+                                    \ at offset &yyxx within objectMap, so the
+                                    \ rocket at (7, 1) is at objectMap + &0107
                                     \
                                     \ The object map just places objects on the
                                     \ landscape and doesn't record height (so it
@@ -504,59 +505,191 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
+\ Sets R0 = &5000000 - [
+\              (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+\            + (sin(5x + 11y) + sin(10x + 7y)) / 256
+\           ]
+\
+\ Capped to a maximum value of &5000000 (so if the sum of sines is negative, it
+\ is effectively zeroed)
+\
+\ Set to &3500000 if x and y are both < &8000000
+\
+\ On returning R0 to PlaceObjectsOnMap it is compared with &5500000 and &3500000
+\ and the object is not placed if it matches either.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R8                              Object map x-coordinate (in top byte)
+\
+\   R9                              Object map y-coordinate (in top byte)
+\
+\ ------------------------------------------------------------------------------
+\
 \ Returns:
 \
-\   R0                              
+\   R0                              ??? Gets compared to &3500000 or &5500000 in
+\                                   PlaceObjectsOnMap
 \
 \ ******************************************************************************
 
 .sub_81F4
 
- LDR     R0, [R11, #var_100]        \ 
- STR     R0, [R11, #var_104]        \ 
- SUB     R0, R8, R9, LSL #1         \ 
- LDR     R2, sinTableAddr           \ 
- BIC     R0, R0, #&300000           \ 
- LDR     R0, [R2, R0, LSR #20]      \ 
- MOV     R0, R0, ASR #7             \ 
- ADD     R1, R9, R8, LSL #1         \ 
- ADD     R1, R9, R1, LSL #1         \ 
- ADD     R3, R1, R8                 \ 
- LDR     R2, sinTableAddr           \ 
- BIC     R1, R1, #&300000           \ 
- LDR     R1, [R2, R1, LSR #20]      \ 
- ADD     R0, R0, R1, ASR #7         \ 
- SUB     R1, R9, R8, LSL #1         \ 
- RSB     R1, R8, R1, LSL #1         \ 
- ADD     R1, R1, R9                 \ 
- LDR     R2, sinTableAddr           \ 
- BIC     R1, R1, #&300000           \ 
- LDR     R1, [R2, R1, LSR #20]      \ 
- ADD     R0, R0, R1, ASR #7         \ 
- ADD     R1, R9, R8, LSL #1         \ 
- ADD     R1, R9, R1, LSL #2         \ 
- SUB     R1, R1, R8                 \ 
- LDR     R2, sinTableAddr           \ 
- BIC     R1, R1, #&300000           \ 
- LDR     R1, [R2, R1, LSR #20]      \ 
- ADD     R0, R0, R1, ASR #7         \ 
- ADD     R1, R3, R9, LSL #3         \ 
- LDR     R2, sinTableAddr           \ 
- BIC     R1, R1, #&300000           \ 
- LDR     R1, [R2, R1, LSR #20]      \ 
- ADD     R0, R0, R1, ASR #8         \ 
- ADD     R1, R9, R3, LSL #1         \ 
- LDR     R2, sinTableAddr           \ 
- BIC     R1, R1, #&300000           \ 
- LDR     R1, [R2, R1, LSR #20]      \ 
- ADD     R0, R0, R1, ASR #8         \ 
- RSB     R0, R0, #&5000000          \ 
- CMP     R0, #&5500000              \ 
- MOVGT   R0, #&5500000              \ 
- CMP     R8, #&8000000              \ 
- CMPLO   R9, #&8000000              \ 
- MOVLO   R0, #&3500000              \ 
- STR     R0, [R11, #var_100]        \ 
+ LDR     R0, [R11, #var_100]        \ Set var_104 = var_100
+ STR     R0, [R11, #var_104]
+
+                                    \ In the following, we call the coordinates
+                                    \ in R8 and R9: x and y
+
+ SUB     R0, R8, R9, LSL #1         \ Set R0 = R8 - R9 << 1
+                                    \        = x - 2y
+
+ LDR     R2, sinTableAddr           \ Set R2 to the address of the sine lookup
+                                    \ table
+
+ BIC     R0, R0, #&300000           \ R0 = R0 AND ~&300000
+                                    \
+                                    \ So this clears bits 21 and 22 of R0, so
+                                    \ R0 >> 20 ends in two clear bits (so it's
+                                    \ a multiple of 4, i.e. on a word boundary,
+                                    \ so the following lookup works)
+
+ LDR     R0, [R2, R0, LSR #20]      \ Set R0 =   (2^31 - 1)
+                                    \          * SIN(2 * PI * ((R0 >> 20) / 1024))
+                                    \
+                                    \ So R0 = sin(R0)
+                                    \       = sin(x - 2y)
+
+ MOV     R0, R0, ASR #7             \ Set R0 = R0 >> 7
+                                    \        = sin(x - 2y) / 128
+
+ ADD     R1, R9, R8, LSL #1         \ R1 = R9 + R8 << 1
+                                    \    = 2x + y
+
+ ADD     R1, R9, R1, LSL #1         \ R1 = R9 + R1 << 1
+                                    \    = y + (2x + y) << 1
+                                    \    = y + 4x + 2y
+                                    \    = 4x + 3y
+
+ ADD     R3, R1, R8                 \ R3 = R1 + R8
+                                    \    = 4x + 3y + x
+                                    \    = 5x + 3y
+
+                                    \ So the above gives us:
+                                    \
+                                    \   R0 = sin(x - 2y) / 128
+                                    \   R1 = 4x + 3y
+                                    \   R3 = 5x + 3y
+
+ LDR     R2, sinTableAddr           \ Using the same approach as above, set:
+ BIC     R1, R1, #&300000           \
+ LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
+                                    \      = sin(4x + 3y)
+
+ ADD     R0, R0, R1, ASR #7         \ R0 = R0 + R1 >> 7
+                                    \    = (sin(x - 2y) + sin(4x + 3y)) / 128
+
+ SUB     R1, R9, R8, LSL #1         \ R1 = R9 - R8 << 1
+                                    \    = y - 2x
+
+ RSB     R1, R8, R1, LSL #1         \ R1 = (R1 << 1) - R8
+                                    \    = (y - 2x) << 1 - x
+                                    \    = 2y - 4x - x
+                                    \    = 2y - 5x
+
+ ADD     R1, R1, R9                 \ R1 = R1 + R9
+                                    \    = 2y - 5x + y
+                                    \    = 3y - 5x
+
+                                    \ So the above gives us:
+                                    \
+                                    \   R0 = (sin(x - 2y) + sin(4x + 3y)) / 128
+                                    \   R1 = 3y - 5x
+
+ LDR     R2, sinTableAddr           \ Using the same approach as above, set:
+ BIC     R1, R1, #&300000           \
+ LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
+                                    \      = sin(3y - 5x)
+
+ ADD     R0, R0, R1, ASR #7         \ R0 = R0 + R1 >> 7
+                                    \    = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x)) / 128
+
+ ADD     R1, R9, R8, LSL #1         \ R1 = R9 + R8 << 1
+                                    \    = y + 2x
+                                    \    = 2x + y
+
+ ADD     R1, R9, R1, LSL #2         \ R1 = R9 + R1 << 2
+                                    \    = y + (2x + y) << 2
+                                    \    = y + 4x + 2y
+                                    \    = 4x + 3y
+
+ SUB     R1, R1, R8                 \ R1 = R1 - R8
+                                    \    = 4x + 3y - x
+                                    \    = 3x + 3y
+
+                                    \ So the above gives us:
+                                    \
+                                    \   R0 = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x)) / 128
+                                    \   R1 = 3x + 3y
+
+ LDR     R2, sinTableAddr           \ Using the same approach as above, set:
+ BIC     R1, R1, #&300000           \
+ LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
+                                    \      = sin(3x + 3y)
+
+ ADD     R0, R0, R1, ASR #7         \ R0 = R0 + R1 >> 7
+                                    \    = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+
+ ADD     R1, R3, R9, LSL #3         \ R1 = R3 + R9 << 3
+                                    \    = 5x + 3y + 8y
+                                    \    = 5x + 11y
+
+                                    \ So the above gives us:
+                                    \
+                                    \   R0 = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+                                    \   R1 = 5x + 11y
+
+ LDR     R2, sinTableAddr           \ Using the same approach as above, set:
+ BIC     R1, R1, #&300000           \
+ LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
+                                    \      = sin(5x + 11y)
+
+ ADD     R0, R0, R1, ASR #8         \ R0 = R0 + R1 >> 8
+                                    \    = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+                                    \      + sin(5x + 11y) / 256
+
+ ADD     R1, R9, R3, LSL #1         \ R1 = R9 + R3 << 1
+                                    \    = y + (5x + 3y) << 1
+                                    \    = y + 10x + 6y
+                                    \    = 10x + 7y
+
+                                    \ So the above gives us:
+                                    \
+                                    \   R0 = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+                                    \      + sin(5x + 11y) / 256
+                                    \   R1 = 10x + 7y
+
+ LDR     R2, sinTableAddr           \ Using the same approach as above, set:
+ BIC     R1, R1, #&300000           \
+ LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
+                                    \      = sin(10x + 7y)
+
+ ADD     R0, R0, R1, ASR #8         \ R0 = R0 + R1 >> 8
+                                    \    = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+                                    \      + (sin(5x + 11y) + sin(10x + 7y)) / 256
+
+ RSB     R0, R0, #&5000000          \ R0 = &5000000 - R0
+
+ CMP     R0, #&5500000              \ If R0 > &5500000, set R0 = &5500000
+ MOVGT   R0, #&5500000
+
+ CMP     R8, #&8000000              \ If R8 and R9 are both < &8000000, set
+ CMPLO   R9, #&8000000              \ R0 = &3500000
+ MOVLO   R0, #&3500000
+
+ STR     R0, [R11, #var_100]        \ Set var_100 = R0
 
  MOV     PC, R14                    \ Return from the subroutine
 
@@ -3165,6 +3298,8 @@ ENDIF
 \ all the newbits needed, that is 32 of them. Luckily this can all be done in
 \ five S cycles."
 \
+\ ------------------------------------------------------------------------------
+\
 \ Returns:
 \
 \   R0                              A random number
@@ -4894,12 +5029,12 @@ ENDIF
  MOV     R8, R0                     \ Set R8 = R0, so R8 is a random number
                                     \
                                     \ We use the top byte of R8 below as the
-                                    \ y-coordinate of the 3D object
+                                    \ x-coordinate of the 3D object
 
  MOV     R9, R0, LSL #8             \ Set R9 = R0 << 8
                                     \
                                     \ We use the top byte of R9 below as the
-                                    \ x-coordinate of the 3D object, so the
+                                    \ y-coordinate of the 3D object, so the
                                     \ shift ensures that the top bytes of R8
                                     \ and R9 are different
 
@@ -4941,22 +5076,22 @@ ENDIF
                                     \ leaving just the top byte
 
                                     \ The object at coordinate (x, y) is stored
-                                    \ at offset &xxyy within objectMap, and in
+                                    \ at offset &yyxx within objectMap, and in
                                     \ the following we set this address in R14:
                                     \
                                     \   objectMap + (R8 >> 24) + (R9 >> 16)
                                     \
                                     \ R8 is shifted into the bottom byte of R14,
-                                    \ so that's the y-coordinate, and R9 is
+                                    \ so that's the x-coordinate, and R9 is
                                     \ shifted into the second byte of R14, so
-                                    \ that's the x-coordinate
+                                    \ that's the y-coordinate
 
  ADD     R14, R6, R8, LSR #24       \ Set R14 = R6 + (R8 >> 24) + (R9 >> 16)
  ADD     R14, R14, R9, LSR #16
 
  STRB    R0, [R14]                  \ Store R0 in the address in R14 to add the
                                     \ object to the map at the coordinates given
-                                    \ by the top bytes of R8 and R9, at (R9, R8)
+                                    \ by the top bytes of R8 and R9, at (R8, R9)
 
 .snew3
 
@@ -4968,16 +5103,17 @@ ENDIF
                                     \ We now place three rockets along the right
                                     \ edge of the launchpad, with a rocket on
                                     \ every other tile, working from front to
-                                    \ back, parallel to the x-axis and with a
-                                    \ y-coordinate of 7
+                                    \ back, into the screen and parallel to the
+                                    \ y-axis, and with each one having an
+                                    \ x-coordinate of 7
 
  MOV     R0, #OBJ_ROCKET1           \ Set R0 to the object type for the rocket
 
- STRB    R0, [R6, #&0107]           \ Add the front rocket to coordinate (1, 7)
+ STRB    R0, [R6, #&0107]           \ Add the front rocket to coordinate (7, 1)
 
- STRB    R0, [R6, #&0307]           \ Add the middle rocket to coordinate (3, 7)
+ STRB    R0, [R6, #&0307]           \ Add the middle rocket to coordinate (7, 3)
 
- STRB    R0, [R6, #&0507]           \ Add the rear rocket to coordinate (5, 7)
+ STRB    R0, [R6, #&0507]           \ Add the rear rocket to coordinate (7, 5)
 
 \ ******************************************************************************
 \
