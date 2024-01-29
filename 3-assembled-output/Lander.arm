@@ -541,14 +541,14 @@ sub_86C4:
 LoseLife:
  MOV     R0, #0
  STR     R0, [R11, #var_130]
- MOV     R0, #0x1E
+ MOV     R0, #30
  STR     R0, [R11, #var_11C]
- MOV     R8, #0x51
- ADD     R0, R11, #0x94
+ MOV     R8, #81
+ ADD     R0, R11, #var_094
  LDMIA   R0, {R0-R2}
  SUB     R1, R1, #0x500000
  BL      sub_8CBC
-lab_86EC:
+lose1:
  LDR     R0, [R11, #var_118]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
@@ -565,35 +565,35 @@ lab_86EC:
  LDR     R0, [R11, #var_11C]
  SUBS    R0, R0, #1
  STR     R0, [R11, #var_11C]
- BPL     lab_86EC
+ BPL     lose1
  LDR     R0, [R11, #remainingLives]
  SUBS    R0, R0, #1
  STR     R0, [R11, #remainingLives]
  ADD     R13, R13, #4
  BNE     PlacePlayerOnLaunchpad
 GameOver:
- MOV     R0, #0x70
+ MOV     R0, #112
  MOV     R1, #1
  SWI     OS_Byte
- MOV     R0, #0x1F
+ MOV     R0, #31
  SWI     OS_WriteC
  MOV     R0, #1
  SWI     OS_WriteC
- MOV     R0, #0x10
+ MOV     R0, #16
  SWI     OS_WriteC
  SWI     OS_WriteS
 .byte    "GAME OVER - press a "
 .byte    "key to start again"
 .byte    0
 .balign 4
- MOV     R0, #0x70
+ MOV     R0, #112
  MOV     R1, #2
  SWI     OS_Byte
- MOV     R0, #0x1F
+ MOV     R0, #31
  SWI     OS_WriteC
  MOV     R0, #1
  SWI     OS_WriteC
- MOV     R0, #0x10
+ MOV     R0, #16
  SWI     OS_WriteC
  SWI     OS_WriteS
 .byte    "GAME OVER - press a "

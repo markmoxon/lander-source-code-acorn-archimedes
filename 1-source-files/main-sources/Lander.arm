@@ -913,110 +913,132 @@ ENDIF
 \
 \       Name: LoseLife
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Main loop
+\    Summary: Display a crash animation when we lose a life and end the game if
+\             this is our last life
 \
 \ ******************************************************************************
 
 .LoseLife
 
- MOV     R0, #0                     \ 
- STR     R0, [R11, #var_130]        \ 
- MOV     R0, #&1E                   \ 
- STR     R0, [R11, #var_11C]        \ 
- MOV     R8, #&51                   \ 
- ADD     R0, R11, #&94              \ 
+ MOV     R0, #0                     \ Set var_130 = 0 ???
+ STR     R0, [R11, #var_130]
+
+ MOV     R0, #30                    \ Set var_11C = 30 ??? Loop counter for
+ STR     R0, [R11, #var_11C]        \ the "main loop" clone below
+
+ MOV     R8, #81                    \ 
+
+ ADD     R0, R11, #var_094          \ 
+
  LDMIA   R0, {R0-R2}                \ 
+
  SUB     R1, R1, #&500000           \ 
+
  BL      sub_8CBC                   \ 
 
-.lab_86EC
+.lose1
 
                                     \ This is a repeat of the main loop but with
                                     \ minor differences (e.g. there is no call
                                     \ to DrawFuelLevel)
 
- LDR     R0, [R11, #var_118]        \ 
- MOV     R0, R0, LSL #24            \ 
- MOV     R1, R0, LSL #1             \ 
+ LDR     R0, [R11, #var_118]        \ Same as in main loop
+ MOV     R0, R0, LSL #24
 
- BL      sub_93E4                   \
+ MOV     R1, R0, LSL #1             \ Same as in main loop
 
- BL      DrawExhaustAndBullets      \ 
+ BL      sub_93E4                   \ Same as in main loop
 
- BL      DrawObjects                \ 
+                                    \ BL sub_8D40 is missing from main loop
 
- BL      sub_9CFC                   \ 
+ BL      DrawExhaustAndBullets      \ Same as in main loop
 
- BL      DrawWorld                  \ 
+ BL      DrawObjects                \ Same as in main loop
+
+ BL      sub_9CFC                   \ Same as in main loop
+
+ BL      DrawWorld                  \ Same as in main loop
 
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
                                     \ the left end of the score bar
 
+                                    \ BL DrawFuelLevel is missing from main loop
+
  BL      SwitchScreenBank           \ Switch screen banks and clear the newly
                                     \ hidden screen bank to black
 
- LDR     R0, [R11, #var_118]        \ 
- ADD     R0, R0, #1                 \ 
- STR     R0, [R11, #var_118]        \ 
- LDR     R0, [R11, #var_11C]        \ 
+ LDR     R0, [R11, #var_118]        \ Add to timer?
+ ADD     R0, R0, #1
+ STR     R0, [R11, #var_118]
+
+ LDR     R0, [R11, #var_11C]        \ Loop counter for the above?
  SUBS    R0, R0, #1                 \ 
  STR     R0, [R11, #var_11C]        \ 
- BPL     lab_86EC                   \ 
+
+ BPL     lose1                      \ Loop back to keep running the main loop
+                                    \ above
 
  LDR     R0, [R11, #remainingLives] \ Decrement the number of remaining lives
- SUBS    R0, R0, #1                 \ 
+ SUBS    R0, R0, #1                 \ and set the flags accordingly
  STR     R0, [R11, #remainingLives] \ 
 
  ADD     R13, R13, #4               \ 
- BNE     PlacePlayerOnLaunchpad     \ 
+
+ BNE     PlacePlayerOnLaunchpad     \ If we still have one or more lives left,
+                                    \ jump to PlacePlayerOnLaunchpad to play the
+                                    \ next life
 
 \ ******************************************************************************
 \
 \       Name: GameOver
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: Display a Game Over message and start a new game
+\    Summary: Print a Game Over message and start a new game
 \
 \ ******************************************************************************
 
 .GameOver
 
- MOV     R0, #&70                   \ 
- MOV     R1, #1                     \ 
- SWI     OS_Byte                    \ 
- MOV     R0, #&1F                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #1                     \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&10                   \ 
- SWI     OS_WriteC                  \ 
- SWI     OS_WriteS                  \ 
+ MOV     R0, #112                   \ Set the hardware and VDU screen banks to
+ MOV     R1, #1                     \ screen bank 1
+ SWI     OS_Byte
 
+ MOV     R0, #31                    \ Print the following VDU command:
+ SWI     OS_WriteC                  \
+ MOV     R0, #1                     \   VDU 31, 1, 16
+ SWI     OS_WriteC                  \ 
+ MOV     R0, #16                    \ which moves the text cursor to column 1 on
+ SWI     OS_WriteC                  \ row 16, halfway down the screen
+
+ SWI     OS_WriteS                  \ Print the Game Over message
  EQUS    "GAME OVER - press a "
  EQUS    "key to start again"
  EQUB    0
  ALIGN
 
- MOV     R0, #&70                   \ 
- MOV     R1, #2                     \ 
- SWI     OS_Byte                    \ 
- MOV     R0, #&1F                   \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #1                     \ 
- SWI     OS_WriteC                  \ 
- MOV     R0, #&10                   \ 
- SWI     OS_WriteC                  \ 
- SWI     OS_WriteS                  \ 
+ MOV     R0, #112                   \ Set the hardware and VDU screen banks to
+ MOV     R1, #2                     \ screen bank 1
+ SWI     OS_Byte
 
+ MOV     R0, #31                    \ Print the following VDU command:
+ SWI     OS_WriteC                  \
+ MOV     R0, #1                     \   VDU 31, 1, 16
+ SWI     OS_WriteC                  \ 
+ MOV     R0, #16                    \ which moves the text cursor to column 1 on
+ SWI     OS_WriteC                  \ row 16, i.e. the same text coordinates as
+                                    \ the text we printed in screen bank 1 above
+
+ SWI     OS_WriteS                  \ Print the Game Over message
  EQUS    "GAME OVER - press a "
  EQUS    "key to start again"
  EQUB    0
  ALIGN
 
- SWI     OS_ReadC                   \ 
+ SWI     OS_ReadC                   \ Wait for a key press
 
- B       StartNewGame               \ 
+ B       StartNewGame               \ Jump to StartNewGame to start a brand new
+                                    \ game
 
 \ ******************************************************************************
 \
@@ -4856,9 +4878,9 @@ ENDIF
  BNE     snew1                      \ Loop back until we have set all bytes in
                                     \ the object map to &FF
 
-                                    \ We now update the contents of the object
-                                    \ map by adding 2048 objects, each at a
-                                    \ random coordinate
+                                    \ We now add 2048 randomly chosen 3D objects
+                                    \ to the object map, each one at a random
+                                    \ coordinate and of a random type
 
  ADD     R6, R11, #objectMap        \ Set R6 to the address of the object map
 
@@ -4869,44 +4891,72 @@ ENDIF
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- MOV     R8, R0                     \ Set R8 = R0
+ MOV     R8, R0                     \ Set R8 = R0, so R8 is a random number
+                                    \
+                                    \ We use the top byte of R8 below as the
+                                    \ y-coordinate of the 3D object
 
  MOV     R9, R0, LSL #8             \ Set R9 = R0 << 8
+                                    \
+                                    \ We use the top byte of R9 below as the
+                                    \ x-coordinate of the 3D object, so the
+                                    \ shift ensures that the top bytes of R8
+                                    \ and R9 are different
 
  STMDB   R13!, {R0}                 \ Store R0 on the stack so it doesn't get
                                     \ corrupted by the call to sub_81F4
 
- BL      sub_81F4                   \ Sets var_100 and var_104 based on R8 and
-                                    \ R9 ???
+ BL      sub_81F4                   \ Sets R0/var_100 and var_104 based on R8
+                                    \ and R9 ???
 
  MOV     R14, R0                    \ Set R14 to the value of R0 returned by the
-                                    \ call to sub_81F4
+                                    \ call to sub_81F4 ???
 
  LDMIA   R13!, {R0}                 \ Retrieve the value of R0 from the stack
                                     \ that we stored above
 
- CMP     R14, #&5500000             \ If R14 = &3500000 or &3500000, jump to
- CMPNE   R14, #&3500000             \ snew3 to skip the following
- BEQ     snew3
+ CMP     R14, #&5500000             \ If R14 = &3500000 or &5500000, jump to
+ CMPNE   R14, #&3500000             \ snew3 to skip the following, so we do not
+ BEQ     snew3                      \ place any objects on the map if R14 is one
+                                    \ of these values ???
 
- AND     R0, R0, #7                 \ Reduce R0 to the range 1 to 8
- ADD     R0, R0, #1
+ AND     R0, R0, #7                 \ Reduce R0 to the range 1 to 8, so this is
+ ADD     R0, R0, #1                 \ a random number that we use to determine
+                                    \ the type of object we're adding (so there
+                                    \ are lots of trees):
+                                    \
+                                    \   * 1 = small leafy tree
+                                    \   * 2 = tall leafy tree
+                                    \   * 3 = small leafy tree
+                                    \   * 4 = small leafy tree
+                                    \   * 5 = gazebo
+                                    \   * 6 = tall leafy tree
+                                    \   * 7 = fir tree
+                                    \   * 8 = building
+                                    \
+                                    \ See the objectTypes table for details of
+                                    \ object types
 
- AND     R9, R9, #&FF000000         \ Set R9 to the top byte of R9
+ AND     R9, R9, #&FF000000         \ Set the bottom three bytes of R9 to zero,
+                                    \ leaving just the top byte
 
                                     \ The object at coordinate (x, y) is stored
                                     \ at offset &xxyy within objectMap, and in
-                                    \ the following the 
+                                    \ the following we set this address in R14:
                                     \
                                     \   objectMap + (R8 >> 24) + (R9 >> 16)
                                     \
-                                    \ The values stored are between 1 and 8
+                                    \ R8 is shifted into the bottom byte of R14,
+                                    \ so that's the y-coordinate, and R9 is
+                                    \ shifted into the second byte of R14, so
+                                    \ that's the x-coordinate
 
  ADD     R14, R6, R8, LSR #24       \ Set R14 = R6 + (R8 >> 24) + (R9 >> 16)
  ADD     R14, R14, R9, LSR #16
 
  STRB    R0, [R14]                  \ Store R0 in the address in R14 to add the
-                                    \ object to the map
+                                    \ object to the map at the coordinates given
+                                    \ by the top bytes of R8 and R9, at (R9, R8)
 
 .snew3
 
@@ -4950,28 +5000,28 @@ ENDIF
                                     \ 30 on row 1, just before the high score
                                     \ towards the right end of the score bar
 
- MVN     R0, #0                     \ Set var_130 = -1
+ MVN     R0, #0                     \ Set var_130 = -1 ???
  STR     R0, [R11, #var_130]        \ 
 
- MOV     R0, #0                     \ Set var_13C = 0
+ MOV     R0, #0                     \ Set var_13C = 0 ???
  STR     R0, [R11, #var_13C]        \ 
 
- STR     R0, [R11, #var_144]        \ Set var_144 = 0
+ STR     R0, [R11, #var_144]        \ Set var_144 = 0 ???
 
- STR     R0, [R11, #var_154]        \ Set var_154 = 0
+ STR     R0, [R11, #var_154]        \ Set var_154 = 0 ???
 
- MOV     R0, #1                     \ Set var_158 = 1
+ MOV     R0, #1                     \ Set var_158 = 1 ???
  STR     R0, [R11, #var_158]        \ 
 
- MOV     R0, #&4000000              \ Set var_094 = &4000000
- MOV     R2, R0                     \     var_098 = &2EC0000
- ADD     R3, R11, #var_094          \     var_09C = &4000000
+ MOV     R0, #&4000000              \ Set var_094 = &4000000 ???
+ MOV     R2, R0                     \     var_098 = &2EC0000 ???
+ ADD     R3, R11, #var_094          \     var_09C = &4000000 ???
  MOV     R1, #&2EC0000
  STMIA   R3!, {R0-R2}
 
- MOV     R0, #0                     \ Set var_0A0 = 0
- MOV     R1, #0                     \     var_0A4 = 0
- MOV     R2, #0                     \     var_0A8 = 0
+ MOV     R0, #0                     \ Set var_0A0 = 0 ???
+ MOV     R1, #0                     \     var_0A4 = 0 ???
+ MOV     R2, #0                     \     var_0A8 = 0 ???
  STMIA   R3!, {R0-R2}               \ 
 
  BL      ResetMousePosition         \ Reset the mouse position to (511, 511),
@@ -5024,12 +5074,12 @@ ENDIF
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
                                     \ the left end of the score bar
 
- BL      DrawFuelLevel              \ Draw the fuel bar ???
+ BL      DrawFuelLevel              \ Draw the fuel bar
 
  BL      SwitchScreenBank           \ Switch screen banks and clear the newly
                                     \ hidden screen bank to black
 
- LDR     R14, [R11, #var_118]       \ Increment var_118
+ LDR     R14, [R11, #var_118]       \ Increment var_118 ??? (is this a timer?)
  ADD     R14, R14, #1
  STR     R14, [R11, #var_118]
 

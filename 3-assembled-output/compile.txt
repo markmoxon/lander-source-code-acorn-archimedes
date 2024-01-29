@@ -546,14 +546,14 @@ Source: "3-assembled-output/Lander.arm"
                             	   541: LoseLife:
 00:000086C8 0000A0E3        	   542:  MOV     R0, #0
 00:000086CC 30018BE5        	   543:  STR     R0, [R11, #var_130]
-00:000086D0 1E00A0E3        	   544:  MOV     R0, #0x1E
+00:000086D0 1E00A0E3        	   544:  MOV     R0, #30
 00:000086D4 1C018BE5        	   545:  STR     R0, [R11, #var_11C]
-00:000086D8 5180A0E3        	   546:  MOV     R8, #0x51
-00:000086DC 94008BE2        	   547:  ADD     R0, R11, #0x94
+00:000086D8 5180A0E3        	   546:  MOV     R8, #81
+00:000086DC 94008BE2        	   547:  ADD     R0, R11, #var_094
 00:000086E0 070090E8        	   548:  LDMIA   R0, {R0-R2}
 00:000086E4 051641E2        	   549:  SUB     R1, R1, #0x500000
 00:000086E8 730100EB        	   550:  BL      sub_8CBC
-                            	   551: lab_86EC:
+                            	   551: lose1:
 00:000086EC 18019BE5        	   552:  LDR     R0, [R11, #var_118]
 00:000086F0 000CA0E1        	   553:  MOV     R0, R0, LSL #24
 00:000086F4 8010A0E1        	   554:  MOV     R1, R0, LSL #1
@@ -570,21 +570,21 @@ Source: "3-assembled-output/Lander.arm"
 00:00008720 1C019BE5        	   565:  LDR     R0, [R11, #var_11C]
 00:00008724 010050E2        	   566:  SUBS    R0, R0, #1
 00:00008728 1C018BE5        	   567:  STR     R0, [R11, #var_11C]
-00:0000872C EEFFFF5A        	   568:  BPL     lab_86EC
+00:0000872C EEFFFF5A        	   568:  BPL     lose1
 00:00008730 34019BE5        	   569:  LDR     R0, [R11, #remainingLives]
 00:00008734 010050E2        	   570:  SUBS    R0, R0, #1
 00:00008738 34018BE5        	   571:  STR     R0, [R11, #remainingLives]
 00:0000873C 04D08DE2        	   572:  ADD     R13, R13, #4
 00:00008740 2C08001A        	   573:  BNE     PlacePlayerOnLaunchpad
                             	   574: GameOver:
-00:00008744 7000A0E3        	   575:  MOV     R0, #0x70
+00:00008744 7000A0E3        	   575:  MOV     R0, #112
 00:00008748 0110A0E3        	   576:  MOV     R1, #1
 00:0000874C 060000EF        	   577:  SWI     OS_Byte
-00:00008750 1F00A0E3        	   578:  MOV     R0, #0x1F
+00:00008750 1F00A0E3        	   578:  MOV     R0, #31
 00:00008754 000000EF        	   579:  SWI     OS_WriteC
 00:00008758 0100A0E3        	   580:  MOV     R0, #1
 00:0000875C 000000EF        	   581:  SWI     OS_WriteC
-00:00008760 1000A0E3        	   582:  MOV     R0, #0x10
+00:00008760 1000A0E3        	   582:  MOV     R0, #16
 00:00008764 000000EF        	   583:  SWI     OS_WriteC
 00:00008768 010000EF        	   584:  SWI     OS_WriteS
 00:0000876C 47414D45204F5645	   585: .byte    "GAME OVER - press a "
@@ -595,14 +595,14 @@ Source: "3-assembled-output/Lander.arm"
 00:00008790 696E
 00:00008792 00              	   587: .byte    0
                             	   588: .balign 4
-00:00008794 7000A0E3        	   589:  MOV     R0, #0x70
+00:00008794 7000A0E3        	   589:  MOV     R0, #112
 00:00008798 0210A0E3        	   590:  MOV     R1, #2
 00:0000879C 060000EF        	   591:  SWI     OS_Byte
-00:000087A0 1F00A0E3        	   592:  MOV     R0, #0x1F
+00:000087A0 1F00A0E3        	   592:  MOV     R0, #31
 00:000087A4 000000EF        	   593:  SWI     OS_WriteC
 00:000087A8 0100A0E3        	   594:  MOV     R0, #1
 00:000087AC 000000EF        	   595:  SWI     OS_WriteC
-00:000087B0 1000A0E3        	   596:  MOV     R0, #0x10
+00:000087B0 1000A0E3        	   596:  MOV     R0, #16
 00:000087B4 000000EF        	   597:  SWI     OS_WriteC
 00:000087B8 010000EF        	   598:  SWI     OS_WriteS
 00:000087BC 47414D45204F5645	   599: .byte    "GAME OVER - press a "
@@ -10260,7 +10260,6 @@ lab_8508                         A:00008508
 lab_850C                         A:0000850C
 lab_85F4                         A:000085F4
 lab_8650                         A:00008650
-lab_86EC                         A:000086EC
 lab_8800                         A:00008800
 lab_880C                         A:0000880C
 lab_88E8                         A:000088E8
@@ -10363,6 +10362,7 @@ lab_A46C                         A:0000A46C
 lab_A470                         A:0000A470
 lab_A4F4                         A:0000A4F4
 lineJump                         A:0000A480
+lose1                            A:000086EC
 memoryTestAddr                   A:0000A574
 mouseParameters                  A:0000A588
 mouseParametersAddr              A:0000A590
@@ -10607,7 +10607,7 @@ Symbols by value:
 00008654 sub_8654
 000086C4 sub_86C4
 000086C8 LoseLife
-000086EC lab_86EC
+000086EC lose1
 00008744 GameOver
 000087EC var_87EC
 000087F4 DrawExhaustAndBullets
