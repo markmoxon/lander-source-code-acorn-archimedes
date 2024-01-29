@@ -59,7 +59,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    54: .set var_120, 0x120
                             	    55: .set currentScore, 0x124
                             	    56: .set fuelLevel, 0x128
-                            	    57: .set var_12C, 0x12C
+                            	    57: .set gravity, 0x12C
                             	    58: .set var_130, 0x130
                             	    59: .set remainingLives, 0x134
                             	    60: .set highScore, 0x138
@@ -397,7 +397,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000848C C6364310        	   392:  SUBNE   R3, R3, R6, ASR #13
 00:00008490 C7464410        	   393:  SUBNE   R4, R4, R7, ASR #13
 00:00008494 C8564510        	   394:  SUBNE   R5, R5, R8, ASR #13
-00:00008498 2C919BE5        	   395:  LDR     R9, [R11, #var_12C]
+00:00008498 2C919BE5        	   395:  LDR     R9, [R11, #gravity]
 00:0000849C 094084E0        	   396:  ADD     R4, R4, R9
 00:000084A0 FF018EE8        	   397:  STMIA   R14, {R0-R8}
 00:000084A4 000051E3        	   398:  CMP     R1, #0
@@ -437,7 +437,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008524 10E18BE5        	   432:  STR     R14, [R11, #var_110]
 00:00008528 0000A0E3        	   433:  MOV     R0, #0
 00:0000852C 0F24A0E3        	   434:  MOV     R2, #0xF000000
-00:00008530 630200EB        	   435:  BL      sub_8EC4
+00:00008530 630200EB        	   435:  BL      DrawObject
 00:00008534 20A1DBE5        	   436:  LDRB    R10, [R11, #var_120]
 00:00008538 00005AE3        	   437:  CMP     R10, #0
 00:0000853C 6100001B        	   438:  BLNE    LoseLife
@@ -633,7 +633,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008818 041081E0        	   620:  ADD     R1, R1, R4
 00:0000881C 052082E0        	   621:  ADD     R2, R2, R5
 00:00008820 010617E3        	   622:  TST     R7, #0x100000
-00:00008824 2CE19B15        	   623:  LDRNE   R14, [R11, #var_12C]
+00:00008824 2CE19B15        	   623:  LDRNE   R14, [R11, #gravity]
 00:00008828 0E408410        	   624:  ADDNE   R4, R4, R14
 00:0000882C 010817E3        	   625:  TST     R7, #0x10000
 00:00008830 4100001B        	   626:  BLNE    sub_893C
@@ -688,7 +688,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000088F0 C8E59FE5        	   675:  LDR     R14, objectRockAddr
 00:000088F4 10E18BE5        	   676:  STR     R14, [R11, #var_110]
 00:000088F8 30308BE2        	   677:  ADD     R3, R11, #0x30
-00:000088FC 700100EB        	   678:  BL      sub_8EC4
+00:000088FC 700100EB        	   678:  BL      DrawObject
 00:00008900 BEFFFFEA        	   679:  B       lab_8800
                             	   680: lab_8904:
 00:00008904 87002DE9        	   681:  STMFD   R13!, {R0-R2, R7}
@@ -1077,7 +1077,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008E7C 0200002A        	  1064:  BHS     lab_8E8C
                             	  1065: lab_8E80:
 00:00008E80 30308BE2        	  1066:  ADD     R3, R11, #0x30
-00:00008E84 0E0000EB        	  1067:  BL      sub_8EC4
+00:00008E84 0E0000EB        	  1067:  BL      DrawObject
 00:00008E88 E3FFFFEA        	  1068:  B       lab_8E1C
                             	  1069: lab_8E8C:
 00:00008E8C 18E19BE5        	  1070:  LDR     R14, [R11, #var_118]
@@ -1096,7 +1096,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008EBC 8CAB0000        	  1083: .long    objectPlayer
                             	  1084: objectRockAddr:
 00:00008EC0 60A90000        	  1085: .long    objectRock
-                            	  1086: sub_8EC4:
+                            	  1086: DrawObject:
 00:00008EC4 C05F2DE9        	  1087:  STMFD   R13!, {R6-R12, R14}
 00:00008EC8 7CC39FE5        	  1088:  LDR     R12, var_924C
 00:00008ECC 00408BE2        	  1089:  ADD     R4, R11, #0
@@ -1253,10 +1253,10 @@ Source: "3-assembled-output/Lander.arm"
 00:00009110 1320A0E3        	  1240:  MOV     R2, #19
 00:00009114 010B50E3        	  1241:  CMP     R0, #1024
 00:00009118 0548A023        	  1242:  MOVHS   R4, #0x50000
-00:0000911C 2C418B25        	  1243:  STRHS   R4, [R11, #var_12C]
+00:0000911C 2C418B25        	  1243:  STRHS   R4, [R11, #gravity]
 00:00009120 5D0E50E3        	  1244:  CMP     R0, #1488
 00:00009124 0748A023        	  1245:  MOVHS   R4, #0x70000
-00:00009128 2C418B25        	  1246:  STRHS   R4, [R11, #var_12C]
+00:00009128 2C418B25        	  1246:  STRHS   R4, [R11, #gravity]
 00:0000912C 280000EF        	  1247:  SWI     OS_BinaryToDecimal
 00:00009130 1E00A0E3        	  1248:  MOV     R0, #30
 00:00009134 000000EF        	  1249:  SWI     OS_WriteC
@@ -2818,7 +2818,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A75C E4011FE5        	  2789:  LDR     R0, initialFuelLevel
 00:0000A760 28018BE5        	  2790:  STR     R0, [R11, #fuelLevel]
 00:0000A764 0308A0E3        	  2791:  MOV     R0, #0x30000
-00:0000A768 2C018BE5        	  2792:  STR     R0, [R11, #var_12C]
+00:0000A768 2C018BE5        	  2792:  STR     R0, [R11, #gravity]
 00:0000A76C 0300A0E3        	  2793:  MOV     R0, #3
 00:0000A770 34018BE5        	  2794:  STR     R0, [R11, #remainingLives]
                             	  2795: PlaceObjectsOnMap:
@@ -7995,7 +7995,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000F7D4 82970000
 00:0000F7D8 7A940000
 00:0000F7DC 91910000
-00:0000F7E0 C48E0000        	  4906: .long     sub_8EC4, 0x00008C13, 0x0000897B, 0x000086FB
+00:0000F7E0 C48E0000        	  4906: .long     0x00008EC4, 0x00008C13, 0x0000897B, 0x000086FB
 00:0000F7E4 138C0000
 00:0000F7E8 7B890000
 00:0000F7EC FB860000
@@ -10202,6 +10202,7 @@ DrawExhaustAndBullets            A:000087F4
 DrawFuelLevel                    A:000091FC
 DrawHorizontalLine               A:0000A4C8
 DrawLineSegment                  A:0000A524
+DrawObject                       A:00008EC4
 DrawObjects                      A:00008DDC
 DrawPlayer                       A:00008398
 DrawWorld                        A:0000808C
@@ -10240,6 +10241,7 @@ entr1                            A:0000A6E4
 fuelBarColour                    A:000091EC
 fuelBurnRate                     S:0000015C
 fuelLevel                        S:00000128
+gravity                          S:0000012C
 highScore                        S:00000138
 initialFuelLevel                 A:0000A580
 initialHighScore                 A:0000A57C
@@ -10423,7 +10425,6 @@ sub_8CDC                         A:00008CDC
 sub_8CFC                         A:00008CFC
 sub_8D24                         A:00008D24
 sub_8D40                         A:00008D40
-sub_8EC4                         A:00008EC4
 sub_9254                         A:00009254
 sub_928C                         A:0000928C
 sub_937C                         A:0000937C
@@ -10484,7 +10485,6 @@ var_114                          S:00000114
 var_118                          S:00000118
 var_11C                          S:0000011C
 var_120                          S:00000120
-var_12C                          S:0000012C
 var_130                          S:00000130
 var_13C                          S:0000013C
 var_140                          S:00000140
@@ -10534,8 +10534,8 @@ Symbols by value:
 00000048 var_048
 0000004C var_04C
 00000050 var_050
-00000054 var_054
 00000054 varOffset
+00000054 var_054
 00000058 var_058
 0000006C labOffset
 00000078 var_078
@@ -10561,7 +10561,7 @@ Symbols by value:
 00000120 var_120
 00000124 currentScore
 00000128 fuelLevel
-0000012C var_12C
+0000012C gravity
 00000130 var_130
 00000134 remainingLives
 00000138 highScore
@@ -10651,7 +10651,7 @@ Symbols by value:
 00008E8C lab_8E8C
 00008EBC objectPlayerAddr
 00008EC0 objectRockAddr
-00008EC4 sub_8EC4
+00008EC4 DrawObject
 00008EFC lab_8EFC
 00008F54 lab_8F54
 00008FBC lab_8FBC

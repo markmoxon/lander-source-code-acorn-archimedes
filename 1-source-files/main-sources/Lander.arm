@@ -159,7 +159,7 @@
 
  fuelLevel = &128                   \ 
 
- var_12C = &12C                     \ 
+ gravity = &12C                     \ 
 
  var_130 = &130                     \ 
 
@@ -730,7 +730,7 @@ ENDIF
  SUBNE   R3, R3, R6, ASR #13        \ 
  SUBNE   R4, R4, R7, ASR #13        \ 
  SUBNE   R5, R5, R8, ASR #13        \ 
- LDR     R9, [R11, #var_12C]        \ 
+ LDR     R9, [R11, #gravity]        \ 
  ADD     R4, R4, R9                 \ 
  STMIA   R14, {R0-R8}               \ 
  CMP     R1, #0                     \ 
@@ -774,7 +774,7 @@ ENDIF
  STR     R14, [R11, #var_110]       \ 
  MOV     R0, #0                     \ 
  MOV     R2, #&F000000              \ 
- BL      sub_8EC4                   \ 
+ BL      DrawObject                 \ 
  LDRB    R10, [R11, #var_120]       \ 
  CMP     R10, #0                    \ 
  BLNE    LoseLife                   \ 
@@ -1062,7 +1062,7 @@ ENDIF
  ADD     R1, R1, R4                 \ 
  ADD     R2, R2, R5                 \ 
  TST     R7, #&100000               \ 
- LDRNE   R14, [R11, #var_12C]       \ 
+ LDRNE   R14, [R11, #gravity]       \ 
  ADDNE   R4, R4, R14                \ 
  TST     R7, #&10000                \ 
  BLNE    sub_893C                   \ 
@@ -1119,7 +1119,7 @@ ENDIF
  LDR     R14, objectRockAddr        \ 
  STR     R14, [R11, #var_110]       \ 
  ADD     R3, R11, #&30              \ 
- BL      sub_8EC4                   \ 
+ BL      DrawObject                 \ 
  B       lab_8800                   \ 
 
 .lab_8904
@@ -1790,7 +1790,7 @@ ENDIF
 .lab_8E80
 
  ADD     R3, R11, #&30              \ 
- BL      sub_8EC4                   \ 
+ BL      DrawObject                 \ 
  B       lab_8E1C                   \ 
 
 .lab_8E8C
@@ -1836,14 +1836,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8EC4
+\       Name: DrawObject
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Draw a 3D object
 \
 \ ******************************************************************************
 
-.sub_8EC4
+.DrawObject
 
  STMFD   R13!, {R6-R12, R14}        \ 
  LDR     R12, var_924C              \ 
@@ -2025,13 +2025,13 @@ ENDIF
  MOV     R2, #19                    \ Set R2 = 19, to use as the size of the
                                     \ string buffer in the following call
 
- CMP     R0, #1024                  \ If R0 >= 1024, set var_12C = &50000 ???
+ CMP     R0, #1024                  \ If R0 >= 1024, set gravity = &50000
  MOVHS   R4, #&50000                \ 
- STRHS   R4, [R11, #var_12C]        \ 
+ STRHS   R4, [R11, #gravity]        \ 
 
- CMP     R0, #1488                  \ If R0 >= 1488, set var_12C = &70000 ???
+ CMP     R0, #1488                  \ If R0 >= 1488, set gravity = &70000
  MOVHS   R4, #&70000
- STRHS   R4, [R11, #var_12C]
+ STRHS   R4, [R11, #gravity]
 
  SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
                                     \ string and store it in the buffer at R1
@@ -4812,8 +4812,8 @@ ENDIF
  STR     R0, [R11, #fuelLevel]      \ that we start each game with, which is set
                                     \ in initialFuelLevel
 
- MOV     R0, #&30000                \ Initialise var_12C to &30000 ???
- STR     R0, [R11, #var_12C]
+ MOV     R0, #&30000                \ Initialise gravity to &30000
+ STR     R0, [R11, #gravity]
 
  MOV     R0, #3                     \ Initialise the number of lives to 3
  STR     R0, [R11, #remainingLives]
@@ -7416,7 +7416,7 @@ ENDIF
  EQUD     &0000B999, &0000B512, &0000B0C3, &0000ACA6
  EQUD     &0000A8BA, &0000A4FA, &0000A164, &00009DF5
  EQUD     &00009AAA, &00009782, &0000947A, &00009191
- EQUD     sub_8EC4, &00008C13, &0000897B, &000086FB
+ EQUD     &00008EC4, &00008C13, &0000897B, &000086FB
  EQUD     &00008492, &0000823E, &00008000, &00007DD4
  EQUD     &00007BBB, &000079B4, &000077BD, &000075D7
 

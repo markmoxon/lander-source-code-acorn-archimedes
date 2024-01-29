@@ -54,7 +54,7 @@
 .set var_120, 0x120
 .set currentScore, 0x124
 .set fuelLevel, 0x128
-.set var_12C, 0x12C
+.set gravity, 0x12C
 .set var_130, 0x130
 .set remainingLives, 0x134
 .set highScore, 0x138
@@ -392,7 +392,7 @@ lab_8424:
  SUBNE   R3, R3, R6, ASR #13
  SUBNE   R4, R4, R7, ASR #13
  SUBNE   R5, R5, R8, ASR #13
- LDR     R9, [R11, #var_12C]
+ LDR     R9, [R11, #gravity]
  ADD     R4, R4, R9
  STMIA   R14, {R0-R8}
  CMP     R1, #0
@@ -432,7 +432,7 @@ lab_850C:
  STR     R14, [R11, #var_110]
  MOV     R0, #0
  MOV     R2, #0xF000000
- BL      sub_8EC4
+ BL      DrawObject
  LDRB    R10, [R11, #var_120]
  CMP     R10, #0
  BLNE    LoseLife
@@ -620,7 +620,7 @@ lab_880C:
  ADD     R1, R1, R4
  ADD     R2, R2, R5
  TST     R7, #0x100000
- LDRNE   R14, [R11, #var_12C]
+ LDRNE   R14, [R11, #gravity]
  ADDNE   R4, R4, R14
  TST     R7, #0x10000
  BLNE    sub_893C
@@ -675,7 +675,7 @@ lab_88E8:
  LDR     R14, objectRockAddr
  STR     R14, [R11, #var_110]
  ADD     R3, R11, #0x30
- BL      sub_8EC4
+ BL      DrawObject
  B       lab_8800
 lab_8904:
  STMFD   R13!, {R0-R2, R7}
@@ -1064,7 +1064,7 @@ lab_8E38:
  BHS     lab_8E8C
 lab_8E80:
  ADD     R3, R11, #0x30
- BL      sub_8EC4
+ BL      DrawObject
  B       lab_8E1C
 lab_8E8C:
  LDR     R14, [R11, #var_118]
@@ -1083,7 +1083,7 @@ objectPlayerAddr:
 .long    objectPlayer
 objectRockAddr:
 .long    objectRock
-sub_8EC4:
+DrawObject:
  STMFD   R13!, {R6-R12, R14}
  LDR     R12, var_924C
  ADD     R4, R11, #0
@@ -1240,10 +1240,10 @@ PrintCurrentScore:
  MOV     R2, #19
  CMP     R0, #1024
  MOVHS   R4, #0x50000
- STRHS   R4, [R11, #var_12C]
+ STRHS   R4, [R11, #gravity]
  CMP     R0, #1488
  MOVHS   R4, #0x70000
- STRHS   R4, [R11, #var_12C]
+ STRHS   R4, [R11, #gravity]
  SWI     OS_BinaryToDecimal
  MOV     R0, #30
  SWI     OS_WriteC
@@ -2789,7 +2789,7 @@ StartNewGame:
  LDR     R0, initialFuelLevel
  STR     R0, [R11, #fuelLevel]
  MOV     R0, #0x30000
- STR     R0, [R11, #var_12C]
+ STR     R0, [R11, #gravity]
  MOV     R0, #3
  STR     R0, [R11, #remainingLives]
 PlaceObjectsOnMap:
@@ -4903,7 +4903,7 @@ divisionTable:
 .long     0x0000B999, 0x0000B512, 0x0000B0C3, 0x0000ACA6
 .long     0x0000A8BA, 0x0000A4FA, 0x0000A164, 0x00009DF5
 .long     0x00009AAA, 0x00009782, 0x0000947A, 0x00009191
-.long     sub_8EC4, 0x00008C13, 0x0000897B, 0x000086FB
+.long     0x00008EC4, 0x00008C13, 0x0000897B, 0x000086FB
 .long     0x00008492, 0x0000823E, 0x00008000, 0x00007DD4
 .long     0x00007BBB, 0x000079B4, 0x000077BD, 0x000075D7
 .long     0xFFFFFFFF, 0x001E0000, 0x000F0000, 0x000A0000
