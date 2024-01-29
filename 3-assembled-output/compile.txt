@@ -136,7 +136,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000080AC 48818BE5        	   131:  STR     R8, [R11, #var_148]
 00:000080B0 165E8BE2        	   132:  ADD     R5, R11, #0x160
 00:000080B4 B0001FE5        	   133:  LDR     R0, var_800C
-00:000080B8 070090E8        	   134:  LDMIA   R0, {R0-R2}
+00:000080B8 070090E8        	   134:  LDMFD   R0, {R0-R2}
 00:000080BC 040040E0        	   135:  SUB     R0, R0, R4
 00:000080C0 032042E0        	   136:  SUB     R2, R2, R3
 00:000080C4 070085E8        	   137:  STMIA   R5, {R0-R2}
@@ -329,7 +329,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008390 088C88E1        	   324:  ORR     R8, R8, R8, LSL #24
 00:00008394 1F80BDE8        	   325:  LDMFD   R13!, {R0-R4, PC}
                             	   326: DrawPlayer:
-00:00008398 00402DE9        	   327:  STMDB   R13!, {R14}
+00:00008398 00402DE9        	   327:  STMFD   R13!, {R14}
 00:0000839C 1C0000EF        	   328:  SWI     OS_Mouse
 00:000083A0 5C21CBE5        	   329:  STRB    R2, [R11, #fuelBurnRate]
 00:000083A4 28E19BE5        	   330:  LDR     R14, [R11, #fuelLevel]
@@ -414,7 +414,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000084D0 01E040E0        	   409:  SUB     R14, R0, R1
 00:000084D4 06055EE3        	   410:  CMP     R14, #0x1800000
 00:000084D8 0B00002A        	   411:  BHS     lab_850C
-00:000084DC 01002DE9        	   412:  STMDB   R13!, {R0}
+00:000084DC 01002DE9        	   412:  STMFD   R13!, {R0}
 00:000084E0 11EB8BE2        	   413:  ADD     R14, R11, #objectMap
 00:000084E4 FF9409E2        	   414:  AND     R9, R9, #0xFF000000
 00:000084E8 28EC8EE0        	   415:  ADD     R14, R14, R8, LSR #24
@@ -426,7 +426,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008500 04D08D32        	   421:  ADDLO   R13, R13, #4
 00:00008504 6F00003A        	   422:  BLO     LoseLife
                             	   423: lab_8508:
-00:00008508 0100BDE8        	   424:  LDMIA   R13!, {R0}
+00:00008508 0100BDE8        	   424:  LDMFD   R13!, {R0}
                             	   425: lab_850C:
 00:0000850C 000051E1        	   426:  CMP     R1, R0
 00:00008510 4F0000CB        	   427:  BLGT    sub_8654
@@ -511,7 +511,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008648 FF7087E3        	   506:  ORR     R7, R7, #0xFF
 00:0000864C 0C0100EB        	   507:  BL      sub_8A84
                             	   508: lab_8650:
-00:00008650 0080BDE8        	   509:  LDMIA   R13!, {PC}
+00:00008650 0080BDE8        	   509:  LDMFD   R13!, {PC}
                             	   510: sub_8654:
 00:00008654 94308BE2        	   511:  ADD     R3, R11, #0x94
 00:00008658 3F0093E8        	   512:  LDMIA   R3, {R0-R5}
@@ -746,13 +746,13 @@ Source: "3-assembled-output/Lander.arm"
 00:000089C8 018049E0        	   733:  SUB     R8, R9, R1
 00:000089CC 060558E3        	   734:  CMP     R8, #0x1800000
 00:000089D0 0EF0A021        	   735:  MOVHS   PC, R14
-00:000089D4 04002DE9        	   736:  STMDB   R13!, {R2}
+00:000089D4 04002DE9        	   736:  STMFD   R13!, {R2}
 00:000089D8 F4E08BE5        	   737:  STR     R14, [R11, #var_0F4]
 00:000089DC 11EB8BE2        	   738:  ADD     R14, R11, #objectMap
 00:000089E0 FF2402E2        	   739:  AND     R2, R2, #0xFF000000
 00:000089E4 20EC8EE0        	   740:  ADD     R14, R14, R0, LSR #24
 00:000089E8 22E88EE0        	   741:  ADD     R14, R14, R2, LSR #16
-00:000089EC 0400BDE8        	   742:  LDMIA   R13!, {R2}
+00:000089EC 0400BDE8        	   742:  LDMFD   R13!, {R2}
 00:000089F0 0080DEE5        	   743:  LDRB    R8, [R14]
 00:000089F4 FF0058E3        	   744:  CMP     R8, #0xFF
 00:000089F8 F4F09B05        	   745:  LDREQ   PC, [R11, #var_0F4]
@@ -959,14 +959,14 @@ Source: "3-assembled-output/Lander.arm"
 00:00008CD4 F9FFFF5A        	   946:  BPL     lab_8CC0
 00:00008CD8 F883BDE8        	   947:  LDMFD   R13!, {R3-R9, PC}
                             	   948: sub_8CDC:
-00:00008CDC 00402DE9        	   949:  STMDB   R13!, {R14}
+00:00008CDC 00402DE9        	   949:  STMFD   R13!, {R14}
 00:00008CE0 3280A0E3        	   950:  MOV     R8, #0x32
 00:00008CE4 3C019BE5        	   951:  LDR     R0, [R11, #var_13C]
 00:00008CE8 0010A0E3        	   952:  MOV     R1, #0
 00:00008CEC 44219BE5        	   953:  LDR     R2, [R11, #var_144]
 00:00008CF0 062442E2        	   954:  SUB     R2, R2, #0x6000000
 00:00008CF4 F0FFFFEB        	   955:  BL      sub_8CBC
-00:00008CF8 0080BDE8        	   956:  LDMIA   R13!, {PC}
+00:00008CF8 0080BDE8        	   956:  LDMFD   R13!, {PC}
                             	   957: sub_8CFC:
 00:00008CFC C0432DE9        	   958:  STMFD   R13!, {R6-R9, R14}
 00:00008D00 9680A0E3        	   959:  MOV     R8, #0x96
@@ -991,7 +991,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D40 24419BE5        	   978:  LDR     R4, [R11, #currentScore]
 00:00008D44 324E54E2        	   979:  SUBS    R4, R4, #800
 00:00008D48 0EF0A041        	   980:  MOVMI   PC, R14
-00:00008D4C 00402DE9        	   981:  STMDB   R13!, {R14}
+00:00008D4C 00402DE9        	   981:  STMFD   R13!, {R14}
 00:00008D50 3A0300EB        	   982:  BL      GetRandomNumbers
 00:00008D54 2009A0E1        	   983:  MOV     R0, R0, LSR #18
 00:00008D58 040050E1        	   984:  CMP     R0, R4
@@ -1001,7 +1001,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D68 44219BE5        	   988:  LDR     R2, [R11, #var_144]
 00:00008D6C 062442E2        	   989:  SUB     R2, R2, #0x6000000
 00:00008D70 98FFFFEB        	   990:  BL      sub_8BD8
-00:00008D74 0080BDE8        	   991:  LDMIA   R13!, {PC}
+00:00008D74 0080BDE8        	   991:  LDMFD   R13!, {PC}
                             	   992: objectTypes:
 00:00008D78 98AA0000        	   993: .long    objectPulsatingPyramid
 00:00008D7C 04AD0000        	   994: .long    objectSmallLeafyTree
@@ -1287,7 +1287,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009190 7000A0E3        	  1274:  MOV     R0, #112
 00:00009194 0110A0E3        	  1275:  MOV     R1, #1
 00:00009198 060000EF        	  1276:  SWI     OS_Byte
-00:0000919C 06009DE8        	  1277:  LDMIA   R13, {R1-R2}
+00:0000919C 06009DE8        	  1277:  LDMFD   R13, {R1-R2}
                             	  1278: prsb1:
 00:000091A0 0100D1E4        	  1279:  LDRB    R0, [R1], #1
 00:000091A4 000000EF        	  1280:  SWI     OS_WriteC
@@ -1505,7 +1505,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000094AC 00003EE3        	  1492:  TEQ     R14, #0
 00:000094B0 00406442        	  1493:  RSBMI   R4, R4, #0
 00:000094B4 4C408BE5        	  1494:  STR     R4, [R11, #var_04C]
-00:000094B8 0F009DE8        	  1495:  LDMIA   R13, {R0-R3}
+00:000094B8 0F009DE8        	  1495:  LDMFD   R13, {R0-R3}
 00:000094BC 02E021E0        	  1496:  EOR     R14, R1, R2
 00:000094C0 000031E3        	  1497:  TEQ     R1, #0
 00:000094C4 00106142        	  1498:  RSBMI   R1, R1, #0
@@ -1555,7 +1555,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000956C 44008BE5        	  1542:  STR     R0, [R11, #var_044]
 00:00009570 0EF0A0E1        	  1543:  MOV     PC, R14
                             	  1544: sub_9574:
-00:00009574 00402DE9        	  1545:  STMDB   R13!, {R14}
+00:00009574 00402DE9        	  1545:  STMFD   R13!, {R14}
 00:00009578 0030A0E3        	  1546:  MOV     R3, #0
 00:0000957C 000050E3        	  1547:  CMP     R0, #0
 00:00009580 03302342        	  1548:  EORMI   R3, R3, #3
@@ -1622,7 +1622,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000965C 6CE41FE5        	  1609:  LDR     R14, squareRootTableAddr
 00:00009660 0326C2E3        	  1610:  BIC     R2, R2, #0x300000
 00:00009664 220A9EE7        	  1611:  LDR     R0, [R14, R2, LSR #20]
-00:00009668 0080BDE8        	  1612:  LDMIA   R13!, {PC}
+00:00009668 0080BDE8        	  1612:  LDMFD   R13!, {PC}
 00:0000966C 070090E8        	  1613:  LDMIA   R0, {R0-R2}
                             	  1614: sub_9670:
 00:00009670 020172E3        	  1615:  CMN     R2, #0x80000000
@@ -1754,7 +1754,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009844 3335A0E1        	  1741:  MOV     R3, R3, LSR R5
 00:00009848 3445A0E1        	  1742:  MOV     R4, R4, LSR R5
 00:0000984C 0270A0E1        	  1743:  MOV     R7, R2
-00:00009850 20002DE9        	  1744:  STMDB   R13!, {R5}
+00:00009850 20002DE9        	  1744:  STMFD   R13!, {R5}
 00:00009854 0060A0E3        	  1745:  MOV     R6, #0
 00:00009858 80E0A0E3        	  1746:  MOV     R14, #0x80
 00:0000985C 044CA0E1        	  1747:  MOV     R4, R4, LSL #24
@@ -1779,7 +1779,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000098A0 AEE0B0E1        	  1766:  MOVS    R14, R14, LSR #1
 00:000098A4 F9FFFF3A        	  1767:  BLO     lab_9890
 00:000098A8 055BB0E1        	  1768:  MOVS    R5, R5, LSL #22
-00:000098AC 0040BDE8        	  1769:  LDMIA   R13!, {R14}
+00:000098AC 0040BDE8        	  1769:  LDMFD   R13!, {R14}
 00:000098B0 17E04EE2        	  1770:  SUB     R14, R14, #0x17
 00:000098B4 17E06EE2        	  1771:  RSB     R14, R14, #0x17
 00:000098B8 355EA0E1        	  1772:  MOV     R5, R5, LSR R14
@@ -1801,7 +1801,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000098EC 0C40A0E1        	  1788:  MOV     R4, R12
 00:000098F0 174E8BE2        	  1789:  ADD     R4, R11, #0x170
 00:000098F4 164E8BE2        	  1790:  ADD     R4, R11, #0x160
-00:000098F8 00402DE9        	  1791:  STMDB   R13!, {R14}
+00:000098F8 00402DE9        	  1791:  STMFD   R13!, {R14}
 00:000098FC 18101FE5        	  1792:  LDR     R1, var_98EC
 00:00009900 30108FE5        	  1793:  STR     R1, var_9938
 00:00009904 070090E8        	  1794:  LDMIA   R0, {R0-R2}
@@ -1809,7 +1809,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000990C 040000EB        	  1796:  BL      sub_9924
 00:00009910 30101FE5        	  1797:  LDR     R1, var_98E8
 00:00009914 1C108FE5        	  1798:  STR     R1, var_9938
-00:00009918 0080BDE8        	  1799:  LDMIA   R13!, {PC}
+00:00009918 0080BDE8        	  1799:  LDMFD   R13!, {PC}
                             	  1800: sub_991C:
 00:0000991C 070090E8        	  1801:  LDMIA   R0, {R0-R2}
 00:00009920 64308BE2        	  1802:  ADD     R3, R11, #0x64
@@ -1893,7 +1893,7 @@ Source: "3-assembled-output/Lander.arm"
                             	  1880: randomSeed2:
 00:00009A3C CF8303DA        	  1881: .long    0xDA0383CF
                             	  1882: GetRandomNumbers:
-00:00009A40 00402DE9        	  1883:  STMDB   R13!, {R14}
+00:00009A40 00402DE9        	  1883:  STMFD   R13!, {R14}
 00:00009A44 14001FE5        	  1884:  LDR     R0, randomSeed1
 00:00009A48 14101FE5        	  1885:  LDR     R1, randomSeed2
 00:00009A4C A10011E1        	  1886:  TST     R1, R1, LSR #1
@@ -1903,7 +1903,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009A5C 2E0A2EE0        	  1890:  EOR     R0, R14, R14, LSR #20
 00:00009A60 30100FE5        	  1891:  STR     R1, randomSeed1
 00:00009A64 30000FE5        	  1892:  STR     R0, randomSeed2
-00:00009A68 0080BDE8        	  1893:  LDMIA   R13!, {PC}
+00:00009A68 0080BDE8        	  1893:  LDMFD   R13!, {PC}
                             	  1894: screenAddr:
 00:00009A6C 0094FD01        	  1895: .long    0x01FD8000 + 16 * 320
                             	  1896: var_9A70:
@@ -2159,7 +2159,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009DEC 050D5433        	  2146:  CMPLO   R4, #320
 00:00009DF0 EF005533        	  2147:  CMPLO   R5, #0xEF
 00:00009DF4 C500002A        	  2148:  BHS     lab_A110
-00:00009DF8 00402DE9        	  2149:  STMDB   R13!, {R14}
+00:00009DF8 00402DE9        	  2149:  STMFD   R13!, {R14}
 00:00009DFC 98C31FE5        	  2150:  LDR     R12, screenAddr
 00:00009E00 030051E1        	  2151:  CMP     R1, R3
 00:00009E04 0500002A        	  2152:  BHS     lab_9E20
@@ -2307,7 +2307,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A004 05CD4CE2        	  2294:  SUB     R12, R12, #320
 00:0000A008 019059E2        	  2295:  SUBS    R9, R9, #1
 00:0000A00C F6FFFF1A        	  2296:  BNE     lab_9FEC
-00:0000A010 0080BDE8        	  2297:  LDMIA   R13!, {PC}
+00:0000A010 0080BDE8        	  2297:  LDMFD   R13!, {PC}
                             	  2298: lab_A014:
 00:0000A014 00A06A42        	  2299:  RSBMI   R10, R10, #0
 00:0000A018 00005EE3        	  2300:  CMP     R14, #0
@@ -2388,7 +2388,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A124 050D5223        	  2375:  CMPHS   R2, #320
 00:0000A128 050D5423        	  2376:  CMPHS   R4, #320
 00:0000A12C 0EF0A021        	  2377:  MOVHS   PC, R14
-00:0000A130 00402DE9        	  2378:  STMDB   R13!, {R14}
+00:0000A130 00402DE9        	  2378:  STMFD   R13!, {R14}
 00:0000A134 D0C61FE5        	  2379:  LDR     R12, screenAddr
 00:0000A138 030051E1        	  2380:  CMP     R1, R3
 00:0000A13C 050000CA        	  2381:  BGT     lab_A158
@@ -2519,7 +2519,7 @@ Source: "3-assembled-output/Lander.arm"
                             	  2506: lab_A300:
 00:0000A300 9CC81FE5        	  2507:  LDR     R12, screenAddr
 00:0000A304 3F0000EB        	  2508:  BL      sub_A408
-00:0000A308 0080BDE8        	  2509:  LDMIA   R13!, {PC}
+00:0000A308 0080BDE8        	  2509:  LDMFD   R13!, {PC}
                             	  2510: lab_A30C:
 00:0000A30C 00A06A42        	  2511:  RSBMI   R10, R10, #0
 00:0000A310 00005EE3        	  2512:  CMP     R14, #0
@@ -2594,7 +2594,7 @@ Source: "3-assembled-output/Lander.arm"
                             	  2581: sub_A408:
 00:0000A408 010C59E3        	  2582:  CMP     R9, #0x100
 00:0000A40C 0EF0A021        	  2583:  MOVHS   PC, R14
-00:0000A410 00402DE9        	  2584:  STMDB   R13!, {R14}
+00:0000A410 00402DE9        	  2584:  STMFD   R13!, {R14}
                             	  2585: lab_A414:
 00:0000A414 064084E0        	  2586:  ADD     R4, R4, R6
 00:0000A418 075085E0        	  2587:  ADD     R5, R5, R7
@@ -2602,7 +2602,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A420 0080BD48        	  2589:  LDMMIIA R13!, {PC}
 00:0000A424 EF005BE3        	  2590:  CMP     R11, #0xEF
 00:0000A428 1000002A        	  2591:  BHS     lab_A470
-00:0000A42C 00082DE9        	  2592:  STMDB   R13!, {R11}
+00:0000A42C 00082DE9        	  2592:  STMFD   R13!, {R11}
 00:0000A430 0BB18BE0        	  2593:  ADD     R11, R11, R11, LSL #2
 00:0000A434 0BB38CE0        	  2594:  ADD     R11, R12, R11, LSL #6
 00:0000A438 050554E3        	  2595:  CMP     R4, #0x1400000
@@ -2619,12 +2619,12 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A464 00005AE3        	  2606:  CMP     R10, #0
 00:0000A468 1600005B        	  2607:  BLPL    DrawHorizontalLine
                             	  2608: lab_A46C:
-00:0000A46C 0008BDE8        	  2609:  LDMIA   R13!, {R11}
+00:0000A46C 0008BDE8        	  2609:  LDMFD   R13!, {R11}
                             	  2610: lab_A470:
 00:0000A470 01B04BE2        	  2611:  SUB     R11, R11, #1
 00:0000A474 019059E2        	  2612:  SUBS    R9, R9, #1
 00:0000A478 E5FFFF1A        	  2613:  BNE     lab_A414
-00:0000A47C 0080BDE8        	  2614:  LDMIA   R13!, {PC}
+00:0000A47C 0080BDE8        	  2614:  LDMFD   R13!, {PC}
                             	  2615: lineJump:
 00:0000A480 68A50000        	  2616: .long    DrawLineSegment + 17 * 4
 00:0000A484 64A50000        	  2617: .long    DrawLineSegment + 16 * 4
@@ -2744,7 +2744,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A624 A8D00FE5        	  2723:  STR     R13, stackPointerOnEntry
 00:0000A628 C0D01FE5        	  2724:  LDR     R13, stackAddr
 00:0000A62C C8B01FE5        	  2725:  LDR     R11, workspaceAddr
-00:0000A630 00402DE9        	  2726:  STMDB   R13!, {R14}
+00:0000A630 00402DE9        	  2726:  STMFD   R13!, {R14}
 00:0000A634 C8001FE5        	  2727:  LDR     R0, memoryTestAddr
 00:0000A638 0010D0E5        	  2728:  LDRB    R1, [R0]
 00:0000A63C AA20A0E3        	  2729:  MOV     R2, #0xAA
@@ -2838,10 +2838,10 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A7A0 A6FCFFEB        	  2809:  BL      GetRandomNumbers
 00:0000A7A4 0080A0E1        	  2810:  MOV     R8, R0
 00:0000A7A8 0094A0E1        	  2811:  MOV     R9, R0, LSL #8
-00:0000A7AC 01002DE9        	  2812:  STMDB   R13!, {R0}
+00:0000A7AC 01002DE9        	  2812:  STMFD   R13!, {R0}
 00:0000A7B0 8FF6FFEB        	  2813:  BL      sub_81F4
 00:0000A7B4 00E0A0E1        	  2814:  MOV     R14, R0
-00:0000A7B8 0100BDE8        	  2815:  LDMIA   R13!, {R0}
+00:0000A7B8 0100BDE8        	  2815:  LDMFD   R13!, {R0}
 00:0000A7BC 55065EE3        	  2816:  CMP     R14, #0x5500000
 00:0000A7C0 35065E13        	  2817:  CMPNE   R14, #0x3500000
 00:0000A7C4 0500000A        	  2818:  BEQ     snew3
@@ -2917,7 +2917,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A8CC 0020A0E3        	  2888:  MOV     R2, #0
 00:0000A8D0 060000EF        	  2889:  SWI     OS_Byte
                             	  2890: ReturnToDesktop:
-00:0000A8D4 0040BDE8        	  2891:  LDMIA   R13!, {R14}
+00:0000A8D4 0040BDE8        	  2891:  LDMFD   R13!, {R14}
 00:0000A8D8 5CD31FE5        	  2892:  LDR     R13, stackPointerOnEntry
 00:0000A8DC 0EF0A0E1        	  2893:  MOV     PC, R14
                             	  2894: PrintHexNumber:

@@ -131,7 +131,7 @@ DrawWorld:
  STR     R8, [R11, #var_148]
  ADD     R5, R11, #0x160
  LDR     R0, var_800C
- LDMIA   R0, {R0-R2}
+ LDMFD   R0, {R0-R2}
  SUB     R0, R0, R4
  SUB     R2, R2, R3
  STMIA   R5, {R0-R2}
@@ -324,7 +324,7 @@ sub_82DC:
  ORR     R8, R8, R8, LSL #24
  LDMFD   R13!, {R0-R4, PC}
 DrawPlayer:
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  SWI     OS_Mouse
  STRB    R2, [R11, #fuelBurnRate]
  LDR     R14, [R11, #fuelLevel]
@@ -409,7 +409,7 @@ lab_8424:
  SUB     R14, R0, R1
  CMP     R14, #0x1800000
  BHS     lab_850C
- STMDB   R13!, {R0}
+ STMFD   R13!, {R0}
  ADD     R14, R11, #objectMap
  AND     R9, R9, #0xFF000000
  ADD     R14, R14, R8, LSR #24
@@ -421,7 +421,7 @@ lab_8424:
  ADDLO   R13, R13, #4
  BLO     LoseLife
 lab_8508:
- LDMIA   R13!, {R0}
+ LDMFD   R13!, {R0}
 lab_850C:
  CMP     R1, R0
  BLGT    sub_8654
@@ -506,7 +506,7 @@ lab_85F4:
  ORR     R7, R7, #0xFF
  BL      sub_8A84
 lab_8650:
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
 sub_8654:
  ADD     R3, R11, #0x94
  LDMIA   R3, {R0-R5}
@@ -733,13 +733,13 @@ sub_89C8:
  SUB     R8, R9, R1
  CMP     R8, #0x1800000
  MOVHS   PC, R14
- STMDB   R13!, {R2}
+ STMFD   R13!, {R2}
  STR     R14, [R11, #var_0F4]
  ADD     R14, R11, #objectMap
  AND     R2, R2, #0xFF000000
  ADD     R14, R14, R0, LSR #24
  ADD     R14, R14, R2, LSR #16
- LDMIA   R13!, {R2}
+ LDMFD   R13!, {R2}
  LDRB    R8, [R14]
  CMP     R8, #0xFF
  LDREQ   PC, [R11, #var_0F4]
@@ -946,14 +946,14 @@ lab_8CC0:
  BPL     lab_8CC0
  LDMFD   R13!, {R3-R9, PC}
 sub_8CDC:
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  MOV     R8, #0x32
  LDR     R0, [R11, #var_13C]
  MOV     R1, #0
  LDR     R2, [R11, #var_144]
  SUB     R2, R2, #0x6000000
  BL      sub_8CBC
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
 sub_8CFC:
  STMFD   R13!, {R6-R9, R14}
  MOV     R8, #0x96
@@ -978,7 +978,7 @@ sub_8D40:
  LDR     R4, [R11, #currentScore]
  SUBS    R4, R4, #800
  MOVMI   PC, R14
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  BL      GetRandomNumbers
  MOV     R0, R0, LSR #18
  CMP     R0, R4
@@ -988,7 +988,7 @@ sub_8D40:
  LDR     R2, [R11, #var_144]
  SUB     R2, R2, #0x6000000
  BL      sub_8BD8
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
 objectTypes:
 .long    objectPulsatingPyramid
 .long    objectSmallLeafyTree
@@ -1274,7 +1274,7 @@ PrintScoreInBothBanks:
  MOV     R0, #112
  MOV     R1, #1
  SWI     OS_Byte
- LDMIA   R13, {R1-R2}
+ LDMFD   R13, {R1-R2}
 prsb1:
  LDRB    R0, [R1], #1
  SWI     OS_WriteC
@@ -1492,7 +1492,7 @@ lab_9498:
  TEQ     R14, #0
  RSBMI   R4, R4, #0
  STR     R4, [R11, #var_04C]
- LDMIA   R13, {R0-R3}
+ LDMFD   R13, {R0-R3}
  EOR     R14, R1, R2
  TEQ     R1, #0
  RSBMI   R1, R1, #0
@@ -1542,7 +1542,7 @@ lab_9530:
  STR     R0, [R11, #var_044]
  MOV     PC, R14
 sub_9574:
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  MOV     R3, #0
  CMP     R0, #0
  EORMI   R3, R3, #3
@@ -1609,7 +1609,7 @@ lab_9648:
  LDR     R14, squareRootTableAddr
  BIC     R2, R2, #0x300000
  LDR     R0, [R14, R2, LSR #20]
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
  LDMIA   R0, {R0-R2}
 sub_9670:
  CMN     R2, #0x80000000
@@ -1741,7 +1741,7 @@ lab_9830:
  MOV     R3, R3, LSR R5
  MOV     R4, R4, LSR R5
  MOV     R7, R2
- STMDB   R13!, {R5}
+ STMFD   R13!, {R5}
  MOV     R6, #0
  MOV     R14, #0x80
  MOV     R4, R4, LSL #24
@@ -1766,7 +1766,7 @@ lab_9890:
  MOVS    R14, R14, LSR #1
  BLO     lab_9890
  MOVS    R5, R5, LSL #22
- LDMIA   R13!, {R14}
+ LDMFD   R13!, {R14}
  SUB     R14, R14, #0x17
  RSB     R14, R14, #0x17
  MOV     R5, R5, LSR R14
@@ -1788,7 +1788,7 @@ var_98EC:
  MOV     R4, R12
  ADD     R4, R11, #0x170
  ADD     R4, R11, #0x160
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  LDR     R1, var_98EC
  STR     R1, var_9938
  LDMIA   R0, {R0-R2}
@@ -1796,7 +1796,7 @@ var_98EC:
  BL      sub_9924
  LDR     R1, var_98E8
  STR     R1, var_9938
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
 sub_991C:
  LDMIA   R0, {R0-R2}
  ADD     R3, R11, #0x64
@@ -1880,7 +1880,7 @@ randomSeed1:
 randomSeed2:
 .long    0xDA0383CF
 GetRandomNumbers:
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  LDR     R0, randomSeed1
  LDR     R1, randomSeed2
  TST     R1, R1, LSR #1
@@ -1890,7 +1890,7 @@ GetRandomNumbers:
  EOR     R0, R14, R14, LSR #20
  STR     R1, randomSeed1
  STR     R0, randomSeed2
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
 screenAddr:
 .long    0x01FD8000 + 16 * 320
 var_9A70:
@@ -2146,7 +2146,7 @@ sub_9DDC:
  CMPLO   R4, #320
  CMPLO   R5, #0xEF
  BHS     lab_A110
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  LDR     R12, screenAddr
  CMP     R1, R3
  BHS     lab_9E20
@@ -2294,7 +2294,7 @@ lab_9FEC:
  SUB     R12, R12, #320
  SUBS    R9, R9, #1
  BNE     lab_9FEC
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
 lab_A014:
  RSBMI   R10, R10, #0
  CMP     R14, #0
@@ -2375,7 +2375,7 @@ lab_A110:
  CMPHS   R2, #320
  CMPHS   R4, #320
  MOVHS   PC, R14
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  LDR     R12, screenAddr
  CMP     R1, R3
  BGT     lab_A158
@@ -2506,7 +2506,7 @@ lab_A2C4:
 lab_A300:
  LDR     R12, screenAddr
  BL      sub_A408
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
 lab_A30C:
  RSBMI   R10, R10, #0
  CMP     R14, #0
@@ -2581,7 +2581,7 @@ lab_A3CC:
 sub_A408:
  CMP     R9, #0x100
  MOVHS   PC, R14
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
 lab_A414:
  ADD     R4, R4, R6
  ADD     R5, R5, R7
@@ -2589,7 +2589,7 @@ lab_A414:
  LDMMIIA R13!, {PC}
  CMP     R11, #0xEF
  BHS     lab_A470
- STMDB   R13!, {R11}
+ STMFD   R13!, {R11}
  ADD     R11, R11, R11, LSL #2
  ADD     R11, R12, R11, LSL #6
  CMP     R4, #0x1400000
@@ -2606,12 +2606,12 @@ lab_A414:
  CMP     R10, #0
  BLPL    DrawHorizontalLine
 lab_A46C:
- LDMIA   R13!, {R11}
+ LDMFD   R13!, {R11}
 lab_A470:
  SUB     R11, R11, #1
  SUBS    R9, R9, #1
  BNE     lab_A414
- LDMIA   R13!, {PC}
+ LDMFD   R13!, {PC}
 lineJump:
 .long    DrawLineSegment + 17 * 4
 .long    DrawLineSegment + 16 * 4
@@ -2723,7 +2723,7 @@ Entry:
  STR     R13, stackPointerOnEntry
  LDR     R13, stackAddr
  LDR     R11, workspaceAddr
- STMDB   R13!, {R14}
+ STMFD   R13!, {R14}
  LDR     R0, memoryTestAddr
  LDRB    R1, [R0]
  MOV     R2, #0xAA
@@ -2809,10 +2809,10 @@ snew2:
  BL      GetRandomNumbers
  MOV     R8, R0
  MOV     R9, R0, LSL #8
- STMDB   R13!, {R0}
+ STMFD   R13!, {R0}
  BL      sub_81F4
  MOV     R14, R0
- LDMIA   R13!, {R0}
+ LDMFD   R13!, {R0}
  CMP     R14, #0x5500000
  CMPNE   R14, #0x3500000
  BEQ     snew3
@@ -2888,7 +2888,7 @@ EndGame:
  MOV     R2, #0
  SWI     OS_Byte
 ReturnToDesktop:
- LDMIA   R13!, {R14}
+ LDMFD   R13!, {R14}
  LDR     R13, stackPointerOnEntry
  MOV     PC, R14
 PrintHexNumber:
