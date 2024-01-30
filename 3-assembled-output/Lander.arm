@@ -18,6 +18,8 @@
 .set OBJ_ROCKET1, 9
 .set OBJ_ROCKET2, 10
 .set OBJ_ROCKET3, 11
+.set LAUNCHPAD_ALTITUDE, 0x3500000
+.set SEA_LEVEL, 0x5500000
 .set stack, 0x000121FC
 .set workspace, stack + 4
 .set var_030, 0x30
@@ -43,8 +45,8 @@
 .set var_0F0, 0xF0
 .set var_0F4, 0xF4
 .set var_0F8, 0xF8
-.set var_100, 0x100
-.set var_104, 0x104
+.set altitude, 0x100
+.set prevAltitude, 0x104
 .set var_108, 0x108
 .set var_10C, 0x10C
 .set var_110, 0x110
@@ -156,7 +158,7 @@ lab_80DC:
  MOV     R0, #0x80000000
  STR     R0, [R11, #var_0C4]
 lab_8114:
- BL      GetLandscapeHeight
+ BL      GetLandscapeAltitude
  LDR     R14, [R11, #var_140]
  SUB     R0, R0, R14
  STR     R0, [R11, #var_174]
@@ -215,9 +217,9 @@ lab_81E0:
  MOV     R0, #0xA
  BL      sub_9CDC
  LDMFD   R13!, {R5-R9, PC}
-GetLandscapeHeight:
- LDR     R0, [R11, #var_100]
- STR     R0, [R11, #var_104]
+GetLandscapeAltitude:
+ LDR     R0, [R11, #altitude]
+ STR     R0, [R11, #prevAltitude]
  SUB     R0, R8, R9, LSL #1
  LDR     R2, sinTableAddr
  BIC     R0, R0, #0x300000
@@ -255,12 +257,12 @@ GetLandscapeHeight:
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #8
  RSB     R0, R0, #0x5000000
- CMP     R0, #0x5500000
- MOVGT   R0, #0x5500000
+ CMP     R0, #SEA_LEVEL
+ MOVGT   R0, #SEA_LEVEL
  CMP     R8, #0x8000000
  CMPLO   R9, #0x8000000
- MOVLO   R0, #0x3500000
- STR     R0, [R11, #var_100]
+ MOVLO   R0, #LAUNCHPAD_ALTITUDE
+ STR     R0, [R11, #altitude]
  MOV     PC, R14
 sub_82AC:
  STMFD   R13!, {R8-R9, R14}
@@ -271,14 +273,14 @@ sub_82AC:
  LDR     R1, [R11, #var_144]
  ADD     R9, R9, R1
  SUB     R9, R9, #0x14000000
- BL      GetLandscapeHeight
+ BL      GetLandscapeAltitude
  LDR     R14, [R11, #var_140]
  SUB     R0, R0, R14
  LDMFD   R13!, {R8-R9, PC}
 sub_82DC:
  STMFD   R13!, {R0-R4, R14}
- LDR     R3, [R11, #var_104]
- LDR     R4, [R11, #var_100]
+ LDR     R3, [R11, #prevAltitude]
+ LDR     R4, [R11, #altitude]
  SUBS    R14, R3, R4
  MOVMI   R14, #0
  AND     R2, R4, #0x10
@@ -287,12 +289,12 @@ sub_82DC:
  MOV     R1, R1, LSR #1
  ADD     R1, R1, #4
  AND     R0, R4, #4
- CMP     R4, #0x3500000
+ CMP     R4, #LAUNCHPAD_ALTITUDE
  MOVEQ   R0, #4
  MOVEQ   R1, #4
  MOVEQ   R2, #4
- CMP     R4, #0x5500000
- CMPEQ   R3, #0x5500000
+ CMP     R4, #SEA_LEVEL
+ CMPEQ   R3, #SEA_LEVEL
  MOVEQ   R1, #0
  MOVEQ   R2, #4
  MOVEQ   R0, #0
@@ -403,7 +405,7 @@ lab_8424:
  MOV     R8, R0
  MOV     R9, R2
  SUB     R9, R9, #0x5000000
- BL      GetLandscapeHeight
+ BL      GetLandscapeAltitude
  SUB     R0, R0, #0x640000
  LDR     R1, [R11, #var_098]
  SUB     R14, R0, R1
@@ -627,7 +629,7 @@ lab_880C:
  MOV     R8, R0
  MOV     R9, R2
  STMFD   R13!, {R0-R3}
- BL      GetLandscapeHeight
+ BL      GetLandscapeAltitude
  MOV     R9, R0
  LDMFD   R13!, {R0-R3}
  TST     R7, #0x200000
@@ -718,7 +720,7 @@ sub_893C:
  MOV     PC, R14
 sub_8998:
  MOV     R1, R9
- CMP     R9, #0x5500000
+ CMP     R9, #SEA_LEVEL
  BEQ     lab_8A34
  TST     R7, #0x80000
  BEQ     lab_8A58
@@ -1048,9 +1050,9 @@ lab_8E38:
  ADD     R0, PC, R0, LSL #2
  LDR     R14, [R0, #-typeOffset]
  STR     R14, [R11, #var_110]
- BL      GetLandscapeHeight
+ BL      GetLandscapeAltitude
  MOV     R1, R0
- CMP     R0, #0x5500000
+ CMP     R0, #SEA_LEVEL
  BEQ     lab_8E1C
  LDR     R14, [R11, #var_13C]
  SUB     R0, R8, R14
@@ -2810,11 +2812,11 @@ snew2:
  MOV     R8, R0
  MOV     R9, R0, LSL #8
  STMFD   R13!, {R0}
- BL      GetLandscapeHeight
+ BL      GetLandscapeAltitude
  MOV     R14, R0
  LDMFD   R13!, {R0}
- CMP     R14, #0x5500000
- CMPNE   R14, #0x3500000
+ CMP     R14, #SEA_LEVEL
+ CMPNE   R14, #LAUNCHPAD_ALTITUDE
  BEQ     snew3
  AND     R0, R0, #7
  ADD     R0, R0, #1

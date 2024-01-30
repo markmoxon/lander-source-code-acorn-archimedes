@@ -61,6 +61,10 @@
  OBJ_ROCKET2 = 10
  OBJ_ROCKET3 = 11
 
+ LAUNCHPAD_ALTITUDE = &3500000      \ Altitude of the launchpad
+
+ SEA_LEVEL = &5500000               \ Sea level
+
 \ ******************************************************************************
 \
 \ Workspace variables
@@ -129,9 +133,9 @@
 
  var_0F8 = &F8                      \ 
 
- var_100 = &100                     \ 
+ altitude = &100                    \ 
 
- var_104 = &104                     \ 
+ prevAltitude = &104                \ 
 
  var_108 = &108                     \ Contains the address of var_700
 
@@ -239,6 +243,21 @@
                                     \ The object at coordinate (x, y) is stored
                                     \ at offset &yyxx within objectMap, so the
                                     \ rocket at (7, 1) is at objectMap + &0107
+                                    \
+                                    \ As the object map stores object locations
+                                    \ in terms of tile numbers, we can think of
+                                    \ the coordinates in the object map as
+                                    \ &xx000000 and &yy000000 (as coordinates
+                                    \ for the world are 32-bit), and that's why
+                                    \ we only need to store &xx and &yy
+                                    \
+                                    \ In other words, we can think of 32-bit
+                                    \ world coordinates as being in the form
+                                    \ &xx.xxxxxx, where the integer part is the
+                                    \ tile number, and the fractional part is
+                                    \ the coordinate within that tile (and in
+                                    \ the case of the object map, the fractional
+                                    \ part is zero)
                                     \
                                     \ The object map just places objects on the
                                     \ landscape and doesn't record height (so it
@@ -430,7 +449,7 @@ ENDIF
 
 .lab_8114
 
- BL      GetLandscapeHeight         \ 
+ BL      GetLandscapeAltitude       \ 
  LDR     R14, [R11, #var_140]       \ 
  SUB     R0, R0, R14                \ 
  STR     R0, [R11, #var_174]        \ 
@@ -498,58 +517,54 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: GetLandscapeHeight
+\       Name: GetLandscapeAltitude
 \       Type: Subroutine
 \   Category: Landscape
-\    Summary: Calculate the height of the landscape for a given coordinate
+\    Summary: Calculate the altitude of the landscape for a given coordinate
 \
 \ ------------------------------------------------------------------------------
 \
-\ This must be the landscape generator as setting it to return a constant value
-\ flattens the landscape! So it's GetLandscapeHeight or something like that
-\ (though the height seems reversed).
+\ This routine calculates the altitude of the landscape at a given coordinate.
 \
-\ Setting it to return &3500000 changes everything to grey launchpad
-\ Setting it to return &5500000 changes everything to blue sea
+\ The altitude is inverse, with lower values indicating higher altitudes.
 \
-\ Sets R0 = &5000000 - [
-\              (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
-\            + (sin(5x + 11y) + sin(10x + 7y)) / 256
-\           ]
+\ The launchpad is at LAUNCHPAD_ALTITUDE, while the sea is at SEA_LEVEL.
 \
-\ Capped to a maximum value of &5500000
+\ The altitude at a coordinate x, y is calculated as follows:
 \
-\ Set to &3500000 if x and y are both < &8000000
-\ So this means objectMap coordinates of < &8 (just taking top bit)
-\ So this bit flattens the launchpad
+\ &5000000 - (   2*sin(x - 2y)  + 2*sin(4x + 3y)  + 2*sin(3y - 5x)
+\              + 2*sin(3x + 3y) +   sin(5x + 11y) +   sin(10x + 7y)
+\            ) / 256
 \
-\ On returning R0 to PlaceObjectsOnMap it is compared with &5500000 and &3500000
-\ and the object is not placed if it matches either.
+\ The altitude is capped to a maximum value of SEA_LEVEL, and the altitude on
+\ the launchpad is set to LAUNCHPAD_ALTITUDE. The launchpad is defined as (x, y)
+\ where 0 <= x < &8000000 and 0 <= y < &8000000, so that's tiles 0 to 7 along
+\ each axis (with the origin being at the front-left corner of the launchpad).
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
-\   R8                              Object map x-coordinate (in top byte)
+\   R8                              Object map x-coordinate (32-bit)
 \
-\   R9                              Object map y-coordinate (in top byte)
+\   R9                              Object map y-coordinate (32-bit)
 \
 \ ------------------------------------------------------------------------------
 \
 \ Returns:
 \
-\   R0                              ??? Gets compared to &3500000 or &5500000 in
-\                                   PlaceObjectsOnMap
+\   R0                              The altitude of the landscape at these
+\                                   coordinates (32-bit)
 \
 \ ******************************************************************************
 
-.GetLandscapeHeight
+.GetLandscapeAltitude
 
- LDR     R0, [R11, #var_100]        \ Set var_104 = var_100
- STR     R0, [R11, #var_104]
+ LDR     R0, [R11, #altitude]       \ Set prevAltitude = altitude, so we store
+ STR     R0, [R11, #prevAltitude]   \ the altitude from the previous calculation
 
-                                    \ In the following, we call the coordinates
-                                    \ in R8 and R9: x and y
+                                    \ In the following commentary, we will refer
+                                    \ to the coordinates in R8 and R9 as x and y
 
  SUB     R0, R8, R9, LSL #1         \ Set R0 = R8 - R9 << 1
                                     \        = x - 2y
@@ -704,15 +719,26 @@ ENDIF
                                     \      (sin(5x + 11y) + sin(10x + 7y)) / 256
 
  RSB     R0, R0, #&5000000          \ R0 = &5000000 - R0
+                                    \
+                                    \    = &5000000 -
+                                    \      (2*sin(x - 2y) + 2*sin(4x + 3y)
+                                    \                     + 2*sin(3y - 5x)
+                                    \                     + 2*sin(3x + 3y)
+                                    \                     + sin(5x + 11y)
+                                    \                     + sin(10x + 7y)) / 256
+                                    \
+                                    \ which is the result that we want
 
- CMP     R0, #&5500000              \ If R0 > &5500000, set R0 = &5500000
- MOVGT   R0, #&5500000
+ CMP     R0, #SEA_LEVEL             \ If R0 > SEA_LEVEL, set R0 = SEA_LEVEL so
+ MOVGT   R0, #SEA_LEVEL             \ we don't create landscapes lower then sea
+                                    \ level
 
- CMP     R8, #&8000000              \ If R8 and R9 are both < &8000000, set
- CMPLO   R9, #&8000000              \ R0 = &3500000
- MOVLO   R0, #&3500000
+ CMP     R8, #&8000000              \ If R8 and R9 are both < &8000000, then
+ CMPLO   R9, #&8000000              \ this coordinate is on the launchpad, so
+ MOVLO   R0, #LAUNCHPAD_ALTITUDE    \ set R0 = LAUNCHPAD_ALTITUDE
 
- STR     R0, [R11, #var_100]        \ Set var_100 = R0
+ STR     R0, [R11, #altitude]       \ Set altitude = R0, so we return the result
+                                    \ in R0 and set the altitude variable
 
  MOV     PC, R14                    \ Return from the subroutine
 
@@ -735,7 +761,7 @@ ENDIF
  LDR     R1, [R11, #var_144]        \ 
  ADD     R9, R9, R1                 \ 
  SUB     R9, R9, #&14000000         \ 
- BL      GetLandscapeHeight         \ 
+ BL      GetLandscapeAltitude       \ 
  LDR     R14, [R11, #var_140]       \ 
  SUB     R0, R0, R14                \ 
  LDMFD   R13!, {R8-R9, PC}          \ 
@@ -752,8 +778,8 @@ ENDIF
 .sub_82DC
 
  STMFD   R13!, {R0-R4, R14}         \ 
- LDR     R3, [R11, #var_104]        \ 
- LDR     R4, [R11, #var_100]        \ 
+ LDR     R3, [R11, #prevAltitude]   \ 
+ LDR     R4, [R11, #altitude]       \ 
  SUBS    R14, R3, R4                \ 
  MOVMI   R14, #0                    \ 
  AND     R2, R4, #&10               \ 
@@ -762,12 +788,12 @@ ENDIF
  MOV     R1, R1, LSR #1             \ 
  ADD     R1, R1, #4                 \ 
  AND     R0, R4, #4                 \ 
- CMP     R4, #&3500000              \ 
+ CMP     R4, #LAUNCHPAD_ALTITUDE    \ 
  MOVEQ   R0, #4                     \ 
  MOVEQ   R1, #4                     \ 
  MOVEQ   R2, #4                     \ 
- CMP     R4, #&5500000              \ 
- CMPEQ   R3, #&5500000              \ 
+ CMP     R4, #SEA_LEVEL             \ 
+ CMPEQ   R3, #SEA_LEVEL             \ 
  MOVEQ   R1, #0                     \ 
  MOVEQ   R2, #4                     \ 
  MOVEQ   R0, #0                     \ 
@@ -922,7 +948,7 @@ ENDIF
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
  SUB     R9, R9, #&5000000          \ 
- BL      GetLandscapeHeight         \ 
+ BL      GetLandscapeAltitude       \ 
  SUB     R0, R0, #&640000           \ 
  LDR     R1, [R11, #var_098]        \ 
  SUB     R14, R0, R1                \ 
@@ -1272,7 +1298,7 @@ ENDIF
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
  STMFD   R13!, {R0-R3}              \ 
- BL      GetLandscapeHeight         \ 
+ BL      GetLandscapeAltitude       \ 
  MOV     R9, R0                     \ 
  LDMFD   R13!, {R0-R3}              \ 
  TST     R7, #&200000               \ 
@@ -1389,7 +1415,7 @@ ENDIF
 .sub_8998
 
  MOV     R1, R9                     \ 
- CMP     R9, #&5500000              \ 
+ CMP     R9, #SEA_LEVEL             \ 
  BEQ     lab_8A34                   \ 
  TST     R7, #&80000                \ 
  BEQ     lab_8A58                   \ 
@@ -1975,9 +2001,9 @@ ENDIF
  LDR     R14, [R0, #-typeOffset]    \ Fetch from objectTypes table
 
  STR     R14, [R11, #var_110]       \ 
- BL      GetLandscapeHeight         \ 
+ BL      GetLandscapeAltitude       \ 
  MOV     R1, R0                     \ 
- CMP     R0, #&5500000              \ 
+ CMP     R0, #SEA_LEVEL             \ 
  BEQ     lab_8E1C                   \ 
  LDR     R14, [R11, #var_13C]       \ 
  SUB     R0, R8, R14                \ 
@@ -5047,7 +5073,8 @@ ENDIF
 \       Name: PlaceObjectsOnMap
 \       Type: Subroutine
 \   Category: Main loop
-\    Summary: Randomly place a number of objects on the map
+\    Summary: Randomly place a number of objects on the map, avoiding the sea
+\             and the launchpad
 \
 \ ******************************************************************************
 
@@ -5107,21 +5134,21 @@ ENDIF
 
  STMFD   R13!, {R0}                 \ Store R0 on the stack so it doesn't get
                                     \ corrupted by the following call to
-                                    \ GetLandscapeHeight
+                                    \ GetLandscapeAltitude
 
- BL      GetLandscapeHeight         \ Set R0 to the height of the landscape at
+ BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (R8, R9)
 
- MOV     R14, R0                    \ Set R14 to the landscape height returned
+ MOV     R14, R0                    \ Set R14 to the landscape altitude returned
                                     \ in R0
 
  LDMFD   R13!, {R0}                 \ Retrieve the value of R0 from the stack
                                     \ that we stored above
 
- CMP     R14, #&5500000             \ If R14 = &3500000 or &5500000, jump to
- CMPNE   R14, #&3500000             \ snew3 to skip the following, so we do not
- BEQ     snew3                      \ place any objects on the map if R14 is one
-                                    \ of these values ???
+ CMP     R14, #SEA_LEVEL            \ If R14 = LAUNCHPAD_ALTITUDE or SEA_LEVEL,
+ CMPNE   R14, #LAUNCHPAD_ALTITUDE   \ jump to snew3 to skip the following, so we
+ BEQ     snew3                      \ do not place any objects on the sea or the
+                                    \ launchpad
 
  AND     R0, R0, #7                 \ Reduce R0 to the range 1 to 8, so this is
  ADD     R0, R0, #1                 \ a random number that we use to determine
@@ -5144,7 +5171,9 @@ ENDIF
                                     \ leaving just the top byte
 
                                     \ The object at coordinate (x, y) is stored
-                                    \ at offset &yyxx within objectMap, and in
+                                    \ at offset &yyxx within objectMap, where
+                                    \ &xx is the top byte of a full coordinate
+                                    \ &xxxxxxxx and in
                                     \ the following we set this address in R14:
                                     \
                                     \   objectMap + (R8 >> 24) + (R9 >> 16)
