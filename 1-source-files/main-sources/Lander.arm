@@ -505,15 +505,23 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
+\ This must be the landscape generator as setting it to return a constant value
+\ flattens the landscape! So it's GetLandscapeHeight or something like that
+\ (though the height seems reversed).
+\
+\ Setting it to return &3500000 changes everything to grey launchpad
+\ Setting it to return &5500000 changes everything to blue sea
+\
 \ Sets R0 = &5000000 - [
 \              (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
 \            + (sin(5x + 11y) + sin(10x + 7y)) / 256
 \           ]
 \
-\ Capped to a maximum value of &5000000 (so if the sum of sines is negative, it
-\ is effectively zeroed)
+\ Capped to a maximum value of &5500000
 \
 \ Set to &3500000 if x and y are both < &8000000
+\ So this means objectMap coordinates of < &8 (just taking top bit)
+\ So this bit flattens the launchpad
 \
 \ On returning R0 to PlaceObjectsOnMap it is compared with &5500000 and &3500000
 \ and the object is not placed if it matches either.
