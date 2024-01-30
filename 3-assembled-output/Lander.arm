@@ -156,7 +156,7 @@ lab_80DC:
  MOV     R0, #0x80000000
  STR     R0, [R11, #var_0C4]
 lab_8114:
- BL      sub_81F4
+ BL      GetLandscapeHeight
  LDR     R14, [R11, #var_140]
  SUB     R0, R0, R14
  STR     R0, [R11, #var_174]
@@ -215,7 +215,7 @@ lab_81E0:
  MOV     R0, #0xA
  BL      sub_9CDC
  LDMFD   R13!, {R5-R9, PC}
-sub_81F4:
+GetLandscapeHeight:
  LDR     R0, [R11, #var_100]
  STR     R0, [R11, #var_104]
  SUB     R0, R8, R9, LSL #1
@@ -271,7 +271,7 @@ sub_82AC:
  LDR     R1, [R11, #var_144]
  ADD     R9, R9, R1
  SUB     R9, R9, #0x14000000
- BL      sub_81F4
+ BL      GetLandscapeHeight
  LDR     R14, [R11, #var_140]
  SUB     R0, R0, R14
  LDMFD   R13!, {R8-R9, PC}
@@ -403,7 +403,7 @@ lab_8424:
  MOV     R8, R0
  MOV     R9, R2
  SUB     R9, R9, #0x5000000
- BL      sub_81F4
+ BL      GetLandscapeHeight
  SUB     R0, R0, #0x640000
  LDR     R1, [R11, #var_098]
  SUB     R14, R0, R1
@@ -627,7 +627,7 @@ lab_880C:
  MOV     R8, R0
  MOV     R9, R2
  STMFD   R13!, {R0-R3}
- BL      sub_81F4
+ BL      GetLandscapeHeight
  MOV     R9, R0
  LDMFD   R13!, {R0-R3}
  TST     R7, #0x200000
@@ -1048,7 +1048,7 @@ lab_8E38:
  ADD     R0, PC, R0, LSL #2
  LDR     R14, [R0, #-typeOffset]
  STR     R14, [R11, #var_110]
- BL      sub_81F4
+ BL      GetLandscapeHeight
  MOV     R1, R0
  CMP     R0, #0x5500000
  BEQ     lab_8E1C
@@ -2810,7 +2810,7 @@ snew2:
  MOV     R8, R0
  MOV     R9, R0, LSL #8
  STMFD   R13!, {R0}
- BL      sub_81F4
+ BL      GetLandscapeHeight
  MOV     R14, R0
  LDMFD   R13!, {R0}
  CMP     R14, #0x5500000

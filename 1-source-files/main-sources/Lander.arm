@@ -430,7 +430,7 @@ ENDIF
 
 .lab_8114
 
- BL      sub_81F4                   \ 
+ BL      GetLandscapeHeight         \ 
  LDR     R14, [R11, #var_140]       \ 
  SUB     R0, R0, R14                \ 
  STR     R0, [R11, #var_174]        \ 
@@ -498,10 +498,10 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_81F4
+\       Name: GetLandscapeHeight
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Landscape
+\    Summary: Calculate the height of the landscape for a given coordinate
 \
 \ ------------------------------------------------------------------------------
 \
@@ -543,7 +543,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.sub_81F4
+.GetLandscapeHeight
 
  LDR     R0, [R11, #var_100]        \ Set var_104 = var_100
  STR     R0, [R11, #var_104]
@@ -564,8 +564,10 @@ ENDIF
                                     \ a multiple of 4, i.e. on a word boundary,
                                     \ so the following lookup works)
 
- LDR     R0, [R2, R0, LSR #20]      \ Set R0 =   (2^31 - 1)
-                                    \          * SIN(2 * PI * ((R0 >> 20) / 1024))
+ LDR     R0, [R2, R0, LSR #20]      \ Set
+                                    \
+                                    \   R0 =   (2^31 - 1)
+                                    \        * SIN(2 * PI * ((R0 >> 20) / 1024))
                                     \
                                     \ So R0 = sin(R0)
                                     \       = sin(x - 2y)
@@ -622,7 +624,8 @@ ENDIF
                                     \      = sin(3y - 5x)
 
  ADD     R0, R0, R1, ASR #7         \ R0 = R0 + R1 >> 7
-                                    \    = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x)) / 128
+                                    \    = (sin(x - 2y) + sin(4x + 3y)
+                                    \                   + sin(3y - 5x)) / 128
 
  ADD     R1, R9, R8, LSL #1         \ R1 = R9 + R8 << 1
                                     \    = y + 2x
@@ -639,7 +642,8 @@ ENDIF
 
                                     \ So the above gives us:
                                     \
-                                    \   R0 = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x)) / 128
+                                    \   R0 = (sin(x - 2y) + sin(4x + 3y)
+                                    \                     + sin(3y - 5x)) / 128
                                     \   R1 = 3x + 3y
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set:
@@ -648,7 +652,9 @@ ENDIF
                                     \      = sin(3x + 3y)
 
  ADD     R0, R0, R1, ASR #7         \ R0 = R0 + R1 >> 7
-                                    \    = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+                                    \    = (sin(x - 2y) + sin(4x + 3y)
+                                    \                   + sin(3y - 5x)
+                                    \                   + sin(3x + 3y)) / 128
 
  ADD     R1, R3, R9, LSL #3         \ R1 = R3 + R9 << 3
                                     \    = 5x + 3y + 8y
@@ -656,7 +662,9 @@ ENDIF
 
                                     \ So the above gives us:
                                     \
-                                    \   R0 = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+                                    \   R0 = (sin(x - 2y) + sin(4x + 3y)
+                                    \                     + sin(3y - 5x)
+                                    \                     + sin(3x + 3y)) / 128
                                     \   R1 = 5x + 11y
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set:
@@ -665,7 +673,9 @@ ENDIF
                                     \      = sin(5x + 11y)
 
  ADD     R0, R0, R1, ASR #8         \ R0 = R0 + R1 >> 8
-                                    \    = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
+                                    \    = (sin(x - 2y) + sin(4x + 3y)
+                                    \                   + sin(3y - 5x)
+                                    \                   + sin(3x + 3y)) / 128
                                     \      + sin(5x + 11y) / 256
 
  ADD     R1, R9, R3, LSL #1         \ R1 = R9 + R3 << 1
@@ -675,8 +685,10 @@ ENDIF
 
                                     \ So the above gives us:
                                     \
-                                    \   R0 = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
-                                    \      + sin(5x + 11y) / 256
+                                    \   R0 = (sin(x - 2y) + sin(4x + 3y)
+                                    \                     + sin(3y - 5x)
+                                    \                     + sin(3x + 3y)) / 128
+                                    \        + sin(5x + 11y) / 256
                                     \   R1 = 10x + 7y
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set:
@@ -685,8 +697,11 @@ ENDIF
                                     \      = sin(10x + 7y)
 
  ADD     R0, R0, R1, ASR #8         \ R0 = R0 + R1 >> 8
-                                    \    = (sin(x - 2y) + sin(4x + 3y) + sin(3y - 5x) + sin(3x + 3y)) / 128
-                                    \      + (sin(5x + 11y) + sin(10x + 7y)) / 256
+                                    \    = (sin(x - 2y) + sin(4x + 3y)
+                                    \                   + sin(3y - 5x)
+                                    \                   + sin(3x + 3y)) / 128
+                                    \      +
+                                    \      (sin(5x + 11y) + sin(10x + 7y)) / 256
 
  RSB     R0, R0, #&5000000          \ R0 = &5000000 - R0
 
@@ -720,7 +735,7 @@ ENDIF
  LDR     R1, [R11, #var_144]        \ 
  ADD     R9, R9, R1                 \ 
  SUB     R9, R9, #&14000000         \ 
- BL      sub_81F4                   \ 
+ BL      GetLandscapeHeight         \ 
  LDR     R14, [R11, #var_140]       \ 
  SUB     R0, R0, R14                \ 
  LDMFD   R13!, {R8-R9, PC}          \ 
@@ -907,7 +922,7 @@ ENDIF
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
  SUB     R9, R9, #&5000000          \ 
- BL      sub_81F4                   \ 
+ BL      GetLandscapeHeight         \ 
  SUB     R0, R0, #&640000           \ 
  LDR     R1, [R11, #var_098]        \ 
  SUB     R14, R0, R1                \ 
@@ -1257,7 +1272,7 @@ ENDIF
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
  STMFD   R13!, {R0-R3}              \ 
- BL      sub_81F4                   \ 
+ BL      GetLandscapeHeight         \ 
  MOV     R9, R0                     \ 
  LDMFD   R13!, {R0-R3}              \ 
  TST     R7, #&200000               \ 
@@ -1960,7 +1975,7 @@ ENDIF
  LDR     R14, [R0, #-typeOffset]    \ Fetch from objectTypes table
 
  STR     R14, [R11, #var_110]       \ 
- BL      sub_81F4                   \ 
+ BL      GetLandscapeHeight         \ 
  MOV     R1, R0                     \ 
  CMP     R0, #&5500000              \ 
  BEQ     lab_8E1C                   \ 
@@ -5091,13 +5106,14 @@ ENDIF
                                     \ and R9 are different
 
  STMFD   R13!, {R0}                 \ Store R0 on the stack so it doesn't get
-                                    \ corrupted by the call to sub_81F4
+                                    \ corrupted by the following call to
+                                    \ GetLandscapeHeight
 
- BL      sub_81F4                   \ Sets R0/var_100 and var_104 based on R8
-                                    \ and R9 ???
+ BL      GetLandscapeHeight         \ Set R0 to the height of the landscape at
+                                    \ coordinates (R8, R9)
 
- MOV     R14, R0                    \ Set R14 to the value of R0 returned by the
-                                    \ call to sub_81F4 ???
+ MOV     R14, R0                    \ Set R14 to the landscape height returned
+                                    \ in R0
 
  LDMFD   R13!, {R0}                 \ Retrieve the value of R0 from the stack
                                     \ that we stored above
