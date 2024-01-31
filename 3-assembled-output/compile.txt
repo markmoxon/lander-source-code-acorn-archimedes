@@ -115,7 +115,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008080 74FD0200        	   110: .long    0x0002FD74
 00:00008084 480E0300        	   111: .long    0x00030E48
 00:00008088 1C1F0300        	   112: .long    0x00031F1C
-                            	   113: DrawWorld:
+                            	   113: DrawLandscape:
 00:0000808C E0432DE9        	   114:  STMFD   R13!, {R5-R9, R14}
 00:00008090 44319BE5        	   115:  LDR     R3, [R11, #var_144]
 00:00008094 FF9403E2        	   116:  AND     R9, R3, #0xFF000000
@@ -158,14 +158,14 @@ Source: "3-assembled-output/Lander.arm"
 00:00008120 74018BE5        	   153:  STR     R0, [R11, #var_174]
 00:00008124 170E8BE2        	   154:  ADD     R0, R11, #0x170
 00:00008128 860500EB        	   155:  BL      sub_9748
-00:0000812C 0F00002A        	   156:  BHS     lab_8170
+00:0000812C 0F00002A        	   156:  BHS     DrawGraphicsBuffers
 00:00008130 0300A7E8        	   157:  STMIA   R7!, {R0-R1}
 00:00008134 000056E3        	   158:  CMP     R6, #0
-00:00008138 0C00000A        	   159:  BEQ     lab_8170
+00:00008138 0C00000A        	   159:  BEQ     DrawGraphicsBuffers
 00:0000813C 0C00B6E8        	   160:  LDMIA   R6!, {R2-R3}
 00:00008140 020152E3        	   161:  CMP     R2, #0x80000000
 00:00008144 0060A003        	   162:  MOVEQ   R6, #0
-00:00008148 0800000A        	   163:  BEQ     lab_8170
+00:00008148 0800000A        	   163:  BEQ     DrawGraphicsBuffers
 00:0000814C C0012DE9        	   164:  STMFD   R13!, {R6-R8}
 00:00008150 C4E08BE2        	   165:  ADD     R14, R11, #0xC4
 00:00008154 F0009EE8        	   166:  LDMIA   R14, {R4-R7}
@@ -176,7 +176,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008168 160700EB        	   171:  BL      DrawQuadrilateral
                             	   172: lab_816C:
 00:0000816C C001BDE8        	   173:  LDMFD   R13!, {R6-R8}
-                            	   174: lab_8170:
+                            	   174: DrawGraphicsBuffers:
 00:00008170 01A05AE2        	   175:  SUBS    R10, R10, #1
 00:00008174 70019B15        	   176:  LDRNE   R0, [R11, #var_170]
 00:00008178 01048012        	   177:  ADDNE   R0, R0, #0x1000000
@@ -319,7 +319,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000838C 088888E1        	   314:  ORR     R8, R8, R8, LSL #16
 00:00008390 088C88E1        	   315:  ORR     R8, R8, R8, LSL #24
 00:00008394 1F80BDE8        	   316:  LDMFD   R13!, {R0-R4, PC}
-                            	   317: DrawPlayer:
+                            	   317: MoveAndDrawPlayer:
 00:00008398 00402DE9        	   318:  STMFD   R13!, {R14}
 00:0000839C 1C0000EF        	   319:  SWI     OS_Mouse
 00:000083A0 5C21CBE5        	   320:  STRB    R2, [R11, #fuelBurnRate]
@@ -549,10 +549,10 @@ Source: "3-assembled-output/Lander.arm"
 00:000086F0 000CA0E1        	   544:  MOV     R0, R0, LSL #24
 00:000086F4 8010A0E1        	   545:  MOV     R1, R0, LSL #1
 00:000086F8 390300EB        	   546:  BL      sub_93E4
-00:000086FC 3C0000EB        	   547:  BL      DrawExhaustAndBullets
+00:000086FC 3C0000EB        	   547:  BL      MoveAndDrawParticles
 00:00008700 B50100EB        	   548:  BL      DrawObjects
-00:00008704 7C0500EB        	   549:  BL      sub_9CFC
-00:00008708 5FFEFFEB        	   550:  BL      DrawWorld
+00:00008704 7C0500EB        	   549:  BL      AddTerminatorsToBuffers
+00:00008708 5FFEFFEB        	   550:  BL      DrawLandscape
 00:0000870C 7D0200EB        	   551:  BL      PrintCurrentScore
 00:00008710 890500EB        	   552:  BL      SwitchScreenBank
 00:00008714 18019BE5        	   553:  LDR     R0, [R11, #var_118]
@@ -609,7 +609,7 @@ Source: "3-assembled-output/Lander.arm"
                             	   596: var_87EC:
 00:000087EC 5C800000        	   597: .long    graphicsBuffers
 00:000087F0 2C800000        	   598: .long    var_802C
-                            	   599: DrawExhaustAndBullets:
+                            	   599: MoveAndDrawParticles:
 00:000087F4 00542DE9        	   600:  STMFD   R13!, {R10, R12, R14}
 00:000087F8 07AC8BE2        	   601:  ADD     R10, R11, #0x700
 00:000087FC 18C01FE5        	   602:  LDR     R12, var_87EC
@@ -687,11 +687,11 @@ Source: "3-assembled-output/Lander.arm"
 00:0000890C 0E1049E0        	   674:  SUB     R1, R9, R14
 00:00008910 0280A0E1        	   675:  MOV     R8, R2
 00:00008914 550300EB        	   676:  BL      sub_9670
-00:00008918 B504003B        	   677:  BLLO    sub_9BF4
+00:00008918 B504003B        	   677:  BLLO    DrawParticleIntoBuffer2
 00:0000891C 8700BDE8        	   678:  LDMFD   R13!, {R0-R2, R7}
 00:00008920 0280A0E1        	   679:  MOV     R8, R2
 00:00008924 510300EB        	   680:  BL      sub_9670
-00:00008928 A204003B        	   681:  BLLO    sub_9BB8
+00:00008928 A204003B        	   681:  BLLO    DrawParticleIntoBuffer1
 00:0000892C FF009AE8        	   682:  LDMIA   R10, {R0-R7}
 00:00008930 000057E3        	   683:  CMP     R7, #0
 00:00008934 B4FFFF1A        	   684:  BNE     lab_880C
@@ -1182,7 +1182,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009024 0C0096E8        	  1169:  LDMIA   R6, {R2-R3}
 00:00009028 07728AE0        	  1170:  ADD     R7, R10, R7, LSL #4
 00:0000902C 300097E8        	  1171:  LDMIA   R7, {R4-R5}
-00:00009030 FC0200EB        	  1172:  BL      sub_9C28
+00:00009030 FC0200EB        	  1172:  BL      DrawTriangleIntoBuffer1
 00:00009034 080ABDE8        	  1173:  LDMFD   R13!, {R3, R9, R11}
                             	  1174: lab_9038:
 00:00009038 000053E3        	  1175:  CMP     R3, #0
@@ -1231,7 +1231,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000090E4 0C0095E8        	  1218:  LDMIA   R5, {R2-R3}
 00:000090E8 06628AE0        	  1219:  ADD     R6, R10, R6, LSL #4
 00:000090EC 300096E8        	  1220:  LDMIA   R6, {R4-R5}
-00:000090F0 D80200EB        	  1221:  BL      sub_9C58
+00:000090F0 D80200EB        	  1221:  BL      DrawTriangleIntoBuffer2
                             	  1222: lab_90F4:
 00:000090F4 001BBDE8        	  1223:  LDMFD   R13!, {R8-R9, R11-R12}
 00:000090F8 109089E2        	  1224:  ADD     R9, R9, #0x10
@@ -1920,7 +1920,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009ABC FFFFFFFF        	  1907: .long    0xFFFFFFFF
                             	  1908: var_9AC0:
 00:00009AC0 709A0000        	  1909: .long    var_9A70
-                            	  1910: Draw1x1PixelDotFromBuffer:
+                            	  1910: Draw1x1ParticleFromBuffer:
 00:00009AC4 041099E4        	  1911:  LDR     R1, [R9], #4
 00:00009AC8 210AA0E1        	  1912:  MOV     R0, R1, LSR #20
 00:00009ACC 2176A0E1        	  1913:  MOV     R7, R1, LSR #12
@@ -1930,7 +1930,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009ADC 013383E0        	  1917:  ADD     R3, R3, R1, LSL #6
 00:00009AE0 0070C3E5        	  1918:  STRB    R7, [R3]
 00:00009AE4 800000EA        	  1919:  B       DrawNextFromGraphicsBuffer
-                            	  1920: Draw2x1PixelDashFromBuffer:
+                            	  1920: Draw2x1ParticleFromBuffer:
 00:00009AE8 041099E4        	  1921:  LDR     R1, [R9], #4
 00:00009AEC 210AA0E1        	  1922:  MOV     R0, R1, LSR #20
 00:00009AF0 2176A0E1        	  1923:  MOV     R7, R1, LSR #12
@@ -1941,7 +1941,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009B04 0070C3E5        	  1928:  STRB    R7, [R3]
 00:00009B08 0170C3E5        	  1929:  STRB    R7, [R3, #1]
 00:00009B0C 760000EA        	  1930:  B       DrawNextFromGraphicsBuffer
-                            	  1931: Draw2x2PixelDotFromBuffer:
+                            	  1931: Draw2x2ParticleFromBuffer:
 00:00009B10 041099E4        	  1932:  LDR     R1, [R9], #4
 00:00009B14 210AA0E1        	  1933:  MOV     R0, R1, LSR #20
 00:00009B18 2176A0E1        	  1934:  MOV     R7, R1, LSR #12
@@ -1954,7 +1954,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009B34 4071C3E5        	  1941:  STRB    R7, [R3, #320]
 00:00009B38 4171C3E5        	  1942:  STRB    R7, [R3, #320+1]
 00:00009B3C 6A0000EA        	  1943:  B       DrawNextFromGraphicsBuffer
-                            	  1944: Draw3x2PixelDashFromBuffer:
+                            	  1944: Draw3x2ParticleFromBuffer:
 00:00009B40 041099E4        	  1945:  LDR     R1, [R9], #4
 00:00009B44 210AA0E1        	  1946:  MOV     R0, R1, LSR #20
 00:00009B48 2176A0E1        	  1947:  MOV     R7, R1, LSR #12
@@ -1969,7 +1969,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009B6C 4071C3E5        	  1956:  STRB    R7, [R3, #320]
 00:00009B70 4171C3E5        	  1957:  STRB    R7, [R3, #320+1]
 00:00009B74 5C0000EA        	  1958:  B       DrawNextFromGraphicsBuffer
-                            	  1959: Draw3x1PixelDashFromBuffer:
+                            	  1959: Draw3x1ParticleFromBuffer:
 00:00009B78 041099E4        	  1960:  LDR     R1, [R9], #4
 00:00009B7C 210AA0E1        	  1961:  MOV     R0, R1, LSR #20
 00:00009B80 2176A0E1        	  1962:  MOV     R7, R1, LSR #12
@@ -1987,7 +1987,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009BAC 8A0000EB        	  1974:  BL      DrawTriangle
 00:00009BB0 0012BDE8        	  1975:  LDMFD   R13!, {R9, R12}
 00:00009BB4 4C0000EA        	  1976:  B       DrawNextFromGraphicsBuffer
-                            	  1977: sub_9BB8:
+                            	  1977: DrawParticleIntoBuffer1:
 00:00009BB8 00422DE9        	  1978:  STMFD   R13!, {R9, R14}
 00:00009BBC 05E368E2        	  1979:  RSB     R14, R8, #0x14000000
 00:00009BC0 01E48EE2        	  1980:  ADD     R14, R14, #0x1000000
@@ -2003,7 +2003,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009BE8 041089E4        	  1990:  STR     R1, [R9], #4
 00:00009BEC 2E9B8CE7        	  1991:  STR     R9, [R12, R14, LSR #22]
 00:00009BF0 0082BDE8        	  1992:  LDMFD   R13!, {R9, PC}
-                            	  1993: sub_9BF4:
+                            	  1993: DrawParticleIntoBuffer2:
 00:00009BF4 00422DE9        	  1994:  STMFD   R13!, {R9, R14}
 00:00009BF8 05E368E2        	  1995:  RSB     R14, R8, #0x14000000
 00:00009BFC 03E5CEE3        	  1996:  BIC     R14, R14, #0xC00000
@@ -2017,7 +2017,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009C1C 041089E4        	  2004:  STR     R1, [R9], #4
 00:00009C20 2E9B8CE7        	  2005:  STR     R9, [R12, R14, LSR #22]
 00:00009C24 0082BDE8        	  2006:  LDMFD   R13!, {R9, PC}
-                            	  2007: sub_9C28:
+                            	  2007: DrawTriangleIntoBuffer1:
 00:00009C28 00422DE9        	  2008:  STMFD   R13!, {R9, R14}
 00:00009C2C 08E09BE5        	  2009:  LDR     R14, [R11, #8]
 00:00009C30 05E36EE2        	  2010:  RSB     R14, R14, #0x14000000
@@ -2030,7 +2030,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009C4C 3F01A9E8        	  2017:  STMIA   R9!, {R0-R5, R8}
 00:00009C50 2E9B8CE7        	  2018:  STR     R9, [R12, R14, LSR #22]
 00:00009C54 0082BDE8        	  2019:  LDMFD   R13!, {R9, PC}
-                            	  2020: sub_9C58:
+                            	  2020: DrawTriangleIntoBuffer2:
 00:00009C58 00422DE9        	  2021:  STMFD   R13!, {R9, R14}
 00:00009C5C 08E09BE5        	  2022:  LDR     R14, [R11, #8]
 00:00009C60 05E36EE2        	  2023:  RSB     R14, R14, #0x14000000
@@ -2045,26 +2045,26 @@ Source: "3-assembled-output/Lander.arm"
 00:00009C84 2E9B8CE7        	  2032:  STR     R9, [R12, R14, LSR #22]
 00:00009C88 0082BDE8        	  2033:  LDMFD   R13!, {R9, PC}
                             	  2034: bufferJump:
-00:00009C8C 409B0000        	  2035: .long    Draw3x2PixelDashFromBuffer
-00:00009C90 409B0000        	  2036: .long    Draw3x2PixelDashFromBuffer
-00:00009C94 409B0000        	  2037: .long    Draw3x2PixelDashFromBuffer
-00:00009C98 409B0000        	  2038: .long    Draw3x2PixelDashFromBuffer
-00:00009C9C 409B0000        	  2039: .long    Draw3x2PixelDashFromBuffer
-00:00009CA0 409B0000        	  2040: .long    Draw3x2PixelDashFromBuffer
-00:00009CA4 109B0000        	  2041: .long    Draw2x2PixelDotFromBuffer
-00:00009CA8 E89A0000        	  2042: .long    Draw2x1PixelDashFromBuffer
-00:00009CAC C49A0000        	  2043: .long    Draw1x1PixelDotFromBuffer
-00:00009CB0 789B0000        	  2044: .long    Draw3x1PixelDashFromBuffer
-00:00009CB4 789B0000        	  2045: .long    Draw3x1PixelDashFromBuffer
-00:00009CB8 789B0000        	  2046: .long    Draw3x1PixelDashFromBuffer
-00:00009CBC 789B0000        	  2047: .long    Draw3x1PixelDashFromBuffer
-00:00009CC0 789B0000        	  2048: .long    Draw3x1PixelDashFromBuffer
-00:00009CC4 789B0000        	  2049: .long    Draw3x1PixelDashFromBuffer
-00:00009CC8 E89A0000        	  2050: .long    Draw2x1PixelDashFromBuffer
-00:00009CCC E89A0000        	  2051: .long    Draw2x1PixelDashFromBuffer
-00:00009CD0 C49A0000        	  2052: .long    Draw1x1PixelDotFromBuffer
+00:00009C8C 409B0000        	  2035: .long    Draw3x2ParticleFromBuffer
+00:00009C90 409B0000        	  2036: .long    Draw3x2ParticleFromBuffer
+00:00009C94 409B0000        	  2037: .long    Draw3x2ParticleFromBuffer
+00:00009C98 409B0000        	  2038: .long    Draw3x2ParticleFromBuffer
+00:00009C9C 409B0000        	  2039: .long    Draw3x2ParticleFromBuffer
+00:00009CA0 409B0000        	  2040: .long    Draw3x2ParticleFromBuffer
+00:00009CA4 109B0000        	  2041: .long    Draw2x2ParticleFromBuffer
+00:00009CA8 E89A0000        	  2042: .long    Draw2x1ParticleFromBuffer
+00:00009CAC C49A0000        	  2043: .long    Draw1x1ParticleFromBuffer
+00:00009CB0 789B0000        	  2044: .long    Draw3x1ParticleFromBuffer
+00:00009CB4 789B0000        	  2045: .long    Draw3x1ParticleFromBuffer
+00:00009CB8 789B0000        	  2046: .long    Draw3x1ParticleFromBuffer
+00:00009CBC 789B0000        	  2047: .long    Draw3x1ParticleFromBuffer
+00:00009CC0 789B0000        	  2048: .long    Draw3x1ParticleFromBuffer
+00:00009CC4 789B0000        	  2049: .long    Draw3x1ParticleFromBuffer
+00:00009CC8 E89A0000        	  2050: .long    Draw2x1ParticleFromBuffer
+00:00009CCC E89A0000        	  2051: .long    Draw2x1ParticleFromBuffer
+00:00009CD0 C49A0000        	  2052: .long    Draw1x1ParticleFromBuffer
 00:00009CD4 A49B0000        	  2053: .long    DrawTriangleFromBuffer
-00:00009CD8 F89C0000        	  2054: .long    FinishGraphicsBuffer
+00:00009CD8 F89C0000        	  2054: .long    TerminateGraphicsBuffer
                             	  2055: DrawGraphicsBuffer:
 00:00009CDC C05F2DE9        	  2056:  STMFD   R13!, {R6-R12, R14}
 00:00009CE0 9C1A1FE5        	  2057:  LDR     R1, graphicsBuffersAddr
@@ -2075,9 +2075,9 @@ Source: "3-assembled-output/Lander.arm"
                             	  2062: .set labOffset, ($ + 8) - bufferJump
 00:00009CF0 00018FE0        	  2063:  ADD     R0, PC, R0, LSL #2
 00:00009CF4 6CF010E5        	  2064:  LDR     PC, [R0, #-labOffset]
-                            	  2065: FinishGraphicsBuffer:
+                            	  2065: TerminateGraphicsBuffer:
 00:00009CF8 C09FBDE8        	  2066:  LDMFD   R13!, {R6-R12, PC}
-                            	  2067: sub_9CFC:
+                            	  2067: AddTerminatorsToBuffers:
 00:00009CFC 00502DE9        	  2068:  STMFD   R13!, {R12, R14}
 00:00009D00 BCCA1FE5        	  2069:  LDR     R12, graphicsBuffersAddr
 00:00009D04 BCEA1FE5        	  2070:  LDR     R14, var_9250
@@ -2879,16 +2879,16 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A85C 060000EF        	  2850:  SWI     OS_Byte
 00:0000A860 1B0032E3        	  2851:  TEQ     R2, #0x1B
 00:0000A864 1000000A        	  2852:  BEQ     EndGame
-00:0000A868 CAF6FFEB        	  2853:  BL      DrawPlayer
+00:0000A868 CAF6FFEB        	  2853:  BL      MoveAndDrawPlayer
 00:0000A86C 18019BE5        	  2854:  LDR     R0, [R11, #var_118]
 00:0000A870 000CA0E1        	  2855:  MOV     R0, R0, LSL #24
 00:0000A874 8010A0E1        	  2856:  MOV     R1, R0, LSL #1
 00:0000A878 D9FAFFEB        	  2857:  BL      sub_93E4
 00:0000A87C 2FF9FFEB        	  2858:  BL      sub_8D40
-00:0000A880 DBF7FFEB        	  2859:  BL      DrawExhaustAndBullets
+00:0000A880 DBF7FFEB        	  2859:  BL      MoveAndDrawParticles
 00:0000A884 54F9FFEB        	  2860:  BL      DrawObjects
-00:0000A888 1BFDFFEB        	  2861:  BL      sub_9CFC
-00:0000A88C FEF5FFEB        	  2862:  BL      DrawWorld
+00:0000A888 1BFDFFEB        	  2861:  BL      AddTerminatorsToBuffers
+00:0000A88C FEF5FFEB        	  2862:  BL      DrawLandscape
 00:0000A890 1CFAFFEB        	  2863:  BL      PrintCurrentScore
 00:0000A894 58FAFFEB        	  2864:  BL      DrawFuelLevel
 00:0000A898 27FDFFEB        	  2865:  BL      SwitchScreenBank
@@ -10187,36 +10187,41 @@ Source: "3-assembled-output/Lander.arm"
 
 Symbols by name:
 AbortWithMemoryError             A:0000A5A4
+AddTerminatorsToBuffers          A:00009CFC
 CODE                             S:00008000
 DecryptGameBinary                A:00011A10
-Draw1x1PixelDotFromBuffer        A:00009AC4
-Draw2x1PixelDashFromBuffer       A:00009AE8
-Draw2x2PixelDotFromBuffer        A:00009B10
-Draw3x1PixelDashFromBuffer       A:00009B78
-Draw3x2PixelDashFromBuffer       A:00009B40
-DrawExhaustAndBullets            A:000087F4
+Draw1x1ParticleFromBuffer        A:00009AC4
+Draw2x1ParticleFromBuffer        A:00009AE8
+Draw2x2ParticleFromBuffer        A:00009B10
+Draw3x1ParticleFromBuffer        A:00009B78
+Draw3x2ParticleFromBuffer        A:00009B40
 DrawFuelLevel                    A:000091FC
 DrawGraphicsBuffer               A:00009CDC
+DrawGraphicsBuffers              A:00008170
 DrawHorizontalLine               A:0000A4C8
+DrawLandscape                    A:0000808C
 DrawLineSegment                  A:0000A524
 DrawNextFromGraphicsBuffer       A:00009CEC
 DrawObject                       A:00008EC4
 DrawObjects                      A:00008DDC
-DrawPlayer                       A:00008398
+DrawParticleIntoBuffer1          A:00009BB8
+DrawParticleIntoBuffer2          A:00009BF4
 DrawQuadrilateral                A:00009DC8
 DrawTriangle                     A:00009DDC
 DrawTriangleFromBuffer           A:00009BA4
-DrawWorld                        A:0000808C
+DrawTriangleIntoBuffer1          A:00009C28
+DrawTriangleIntoBuffer2          A:00009C58
 EndGame                          A:0000A8AC
 Entry                            A:0000A614
 FillTriangle                     A:0000A408
-FinishGraphicsBuffer             A:00009CF8
 GameOver                         A:00008744
 GetLandscapeAltitude             A:000081F4
 GetRandomNumbers                 A:00009A40
 LAUNCHPAD_ALTITUDE               S:03500000
 LoseLife                         A:000086C8
 MainLoop                         A:0000A850
+MoveAndDrawParticles             A:000087F4
+MoveAndDrawPlayer                A:00008398
 OBJ_ROCKET                       S:00000009
 OS_BinaryToDecimal               S:00000028
 OS_Byte                          S:00000006
@@ -10236,6 +10241,7 @@ ReturnToDesktop                  A:0000A8D4
 SEA_LEVEL                        S:05500000
 StartNewGame                     A:0000A734
 SwitchScreenBank                 A:00009D3C
+TerminateGraphicsBuffer          A:00009CF8
 altitude                         S:00000100
 arctanTable                      A:0000C810
 arctanTableAddr                  A:000091F4
@@ -10261,7 +10267,6 @@ labOffset                        S:0000006C
 lab_80DC                         A:000080DC
 lab_8114                         A:00008114
 lab_816C                         A:0000816C
-lab_8170                         A:00008170
 lab_81E0                         A:000081E0
 lab_8400                         A:00008400
 lab_8408                         A:00008408
@@ -10446,11 +10451,6 @@ sub_9748                         A:00009748
 sub_991C                         A:0000991C
 sub_9924                         A:00009924
 sub_9948                         A:00009948
-sub_9BB8                         A:00009BB8
-sub_9BF4                         A:00009BF4
-sub_9C28                         A:00009C28
-sub_9C58                         A:00009C58
-sub_9CFC                         A:00009CFC
 typeOffset                       S:000000CC
 varOffset                        S:00000054
 var_030                          S:00000030
@@ -10527,8 +10527,8 @@ Symbols by value:
 00000048 var_048
 0000004C var_04C
 00000050 var_050
-00000054 varOffset
 00000054 var_054
+00000054 varOffset
 00000058 var_058
 0000006C labOffset
 00000078 var_078
@@ -10572,23 +10572,23 @@ Symbols by value:
 00000200 stringBuffer
 00000700 var_700
 00004400 objectMap
-00008000 CODE
 00008000 var_8000
+00008000 CODE
 0000800C var_800C
 00008010 var_8010
 00008028 var_8028
 0000802C var_802C
 0000805C graphicsBuffers
-0000808C DrawWorld
+0000808C DrawLandscape
 000080DC lab_80DC
 00008114 lab_8114
 0000816C lab_816C
-00008170 lab_8170
+00008170 DrawGraphicsBuffers
 000081E0 lab_81E0
 000081F4 GetLandscapeAltitude
 000082AC sub_82AC
 000082DC sub_82DC
-00008398 DrawPlayer
+00008398 MoveAndDrawPlayer
 00008400 lab_8400
 00008408 lab_8408
 0000841C lab_841C
@@ -10603,7 +10603,7 @@ Symbols by value:
 000086EC lose1
 00008744 GameOver
 000087EC var_87EC
-000087F4 DrawExhaustAndBullets
+000087F4 MoveAndDrawParticles
 00008800 lab_8800
 0000880C lab_880C
 000088E8 lab_88E8
@@ -10709,21 +10709,21 @@ Symbols by value:
 00009A6C screenAddr
 00009A70 var_9A70
 00009AC0 var_9AC0
-00009AC4 Draw1x1PixelDotFromBuffer
-00009AE8 Draw2x1PixelDashFromBuffer
-00009B10 Draw2x2PixelDotFromBuffer
-00009B40 Draw3x2PixelDashFromBuffer
-00009B78 Draw3x1PixelDashFromBuffer
+00009AC4 Draw1x1ParticleFromBuffer
+00009AE8 Draw2x1ParticleFromBuffer
+00009B10 Draw2x2ParticleFromBuffer
+00009B40 Draw3x2ParticleFromBuffer
+00009B78 Draw3x1ParticleFromBuffer
 00009BA4 DrawTriangleFromBuffer
-00009BB8 sub_9BB8
-00009BF4 sub_9BF4
-00009C28 sub_9C28
-00009C58 sub_9C58
+00009BB8 DrawParticleIntoBuffer1
+00009BF4 DrawParticleIntoBuffer2
+00009C28 DrawTriangleIntoBuffer1
+00009C58 DrawTriangleIntoBuffer2
 00009C8C bufferJump
 00009CDC DrawGraphicsBuffer
 00009CEC DrawNextFromGraphicsBuffer
-00009CF8 FinishGraphicsBuffer
-00009CFC sub_9CFC
+00009CF8 TerminateGraphicsBuffer
+00009CFC AddTerminatorsToBuffers
 00009D10 lab_9D10
 00009D2C screenBank2Addr
 00009D30 screenBank1Addr

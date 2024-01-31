@@ -110,7 +110,7 @@ graphicsBuffers:
 .long    0x0002FD74
 .long    0x00030E48
 .long    0x00031F1C
-DrawWorld:
+DrawLandscape:
  STMFD   R13!, {R5-R9, R14}
  LDR     R3, [R11, #var_144]
  AND     R9, R3, #0xFF000000
@@ -153,14 +153,14 @@ lab_8114:
  STR     R0, [R11, #var_174]
  ADD     R0, R11, #0x170
  BL      sub_9748
- BHS     lab_8170
+ BHS     DrawGraphicsBuffers
  STMIA   R7!, {R0-R1}
  CMP     R6, #0
- BEQ     lab_8170
+ BEQ     DrawGraphicsBuffers
  LDMIA   R6!, {R2-R3}
  CMP     R2, #0x80000000
  MOVEQ   R6, #0
- BEQ     lab_8170
+ BEQ     DrawGraphicsBuffers
  STMFD   R13!, {R6-R8}
  ADD     R14, R11, #0xC4
  LDMIA   R14, {R4-R7}
@@ -171,7 +171,7 @@ lab_8114:
  BL      DrawQuadrilateral
 lab_816C:
  LDMFD   R13!, {R6-R8}
-lab_8170:
+DrawGraphicsBuffers:
  SUBS    R10, R10, #1
  LDRNE   R0, [R11, #var_170]
  ADDNE   R0, R0, #0x1000000
@@ -314,7 +314,7 @@ sub_82DC:
  ORR     R8, R8, R8, LSL #16
  ORR     R8, R8, R8, LSL #24
  LDMFD   R13!, {R0-R4, PC}
-DrawPlayer:
+MoveAndDrawPlayer:
  STMFD   R13!, {R14}
  SWI     OS_Mouse
  STRB    R2, [R11, #fuelBurnRate]
@@ -544,10 +544,10 @@ lose1:
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
  BL      sub_93E4
- BL      DrawExhaustAndBullets
+ BL      MoveAndDrawParticles
  BL      DrawObjects
- BL      sub_9CFC
- BL      DrawWorld
+ BL      AddTerminatorsToBuffers
+ BL      DrawLandscape
  BL      PrintCurrentScore
  BL      SwitchScreenBank
  LDR     R0, [R11, #var_118]
@@ -596,7 +596,7 @@ GameOver:
 var_87EC:
 .long    graphicsBuffers
 .long    var_802C
-DrawExhaustAndBullets:
+MoveAndDrawParticles:
  STMFD   R13!, {R10, R12, R14}
  ADD     R10, R11, #0x700
  LDR     R12, var_87EC
@@ -674,11 +674,11 @@ lab_8904:
  SUB     R1, R9, R14
  MOV     R8, R2
  BL      sub_9670
- BLLO    sub_9BF4
+ BLLO    DrawParticleIntoBuffer2
  LDMFD   R13!, {R0-R2, R7}
  MOV     R8, R2
  BL      sub_9670
- BLLO    sub_9BB8
+ BLLO    DrawParticleIntoBuffer1
  LDMIA   R10, {R0-R7}
  CMP     R7, #0
  BNE     lab_880C
@@ -1169,7 +1169,7 @@ lab_8FBC:
  LDMIA   R6, {R2-R3}
  ADD     R7, R10, R7, LSL #4
  LDMIA   R7, {R4-R5}
- BL      sub_9C28
+ BL      DrawTriangleIntoBuffer1
  LDMFD   R13!, {R3, R9, R11}
 lab_9038:
  CMP     R3, #0
@@ -1218,7 +1218,7 @@ lab_9038:
  LDMIA   R5, {R2-R3}
  ADD     R6, R10, R6, LSL #4
  LDMIA   R6, {R4-R5}
- BL      sub_9C58
+ BL      DrawTriangleIntoBuffer2
 lab_90F4:
  LDMFD   R13!, {R8-R9, R11-R12}
  ADD     R9, R9, #0x10
@@ -1907,7 +1907,7 @@ var_9A70:
 .long    0xFFFFFFFF
 var_9AC0:
 .long    var_9A70
-Draw1x1PixelDotFromBuffer:
+Draw1x1ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1917,7 +1917,7 @@ Draw1x1PixelDotFromBuffer:
  ADD     R3, R3, R1, LSL #6
  STRB    R7, [R3]
  B       DrawNextFromGraphicsBuffer
-Draw2x1PixelDashFromBuffer:
+Draw2x1ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1928,7 +1928,7 @@ Draw2x1PixelDashFromBuffer:
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
  B       DrawNextFromGraphicsBuffer
-Draw2x2PixelDotFromBuffer:
+Draw2x2ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1941,7 +1941,7 @@ Draw2x2PixelDotFromBuffer:
  STRB    R7, [R3, #320]
  STRB    R7, [R3, #320+1]
  B       DrawNextFromGraphicsBuffer
-Draw3x2PixelDashFromBuffer:
+Draw3x2ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1956,7 +1956,7 @@ Draw3x2PixelDashFromBuffer:
  STRB    R7, [R3, #320]
  STRB    R7, [R3, #320+1]
  B       DrawNextFromGraphicsBuffer
-Draw3x1PixelDashFromBuffer:
+Draw3x1ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1974,7 +1974,7 @@ DrawTriangleFromBuffer:
  BL      DrawTriangle
  LDMFD   R13!, {R9, R12}
  B       DrawNextFromGraphicsBuffer
-sub_9BB8:
+DrawParticleIntoBuffer1:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
  ADD     R14, R14, #0x1000000
@@ -1990,7 +1990,7 @@ sub_9BB8:
  STR     R1, [R9], #4
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-sub_9BF4:
+DrawParticleIntoBuffer2:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
  BIC     R14, R14, #0xC00000
@@ -2004,7 +2004,7 @@ sub_9BF4:
  STR     R1, [R9], #4
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-sub_9C28:
+DrawTriangleIntoBuffer1:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #8]
  RSB     R14, R14, #0x14000000
@@ -2017,7 +2017,7 @@ sub_9C28:
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-sub_9C58:
+DrawTriangleIntoBuffer2:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #8]
  RSB     R14, R14, #0x14000000
@@ -2032,26 +2032,26 @@ sub_9C58:
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
 bufferJump:
-.long    Draw3x2PixelDashFromBuffer
-.long    Draw3x2PixelDashFromBuffer
-.long    Draw3x2PixelDashFromBuffer
-.long    Draw3x2PixelDashFromBuffer
-.long    Draw3x2PixelDashFromBuffer
-.long    Draw3x2PixelDashFromBuffer
-.long    Draw2x2PixelDotFromBuffer
-.long    Draw2x1PixelDashFromBuffer
-.long    Draw1x1PixelDotFromBuffer
-.long    Draw3x1PixelDashFromBuffer
-.long    Draw3x1PixelDashFromBuffer
-.long    Draw3x1PixelDashFromBuffer
-.long    Draw3x1PixelDashFromBuffer
-.long    Draw3x1PixelDashFromBuffer
-.long    Draw3x1PixelDashFromBuffer
-.long    Draw2x1PixelDashFromBuffer
-.long    Draw2x1PixelDashFromBuffer
-.long    Draw1x1PixelDotFromBuffer
+.long    Draw3x2ParticleFromBuffer
+.long    Draw3x2ParticleFromBuffer
+.long    Draw3x2ParticleFromBuffer
+.long    Draw3x2ParticleFromBuffer
+.long    Draw3x2ParticleFromBuffer
+.long    Draw3x2ParticleFromBuffer
+.long    Draw2x2ParticleFromBuffer
+.long    Draw2x1ParticleFromBuffer
+.long    Draw1x1ParticleFromBuffer
+.long    Draw3x1ParticleFromBuffer
+.long    Draw3x1ParticleFromBuffer
+.long    Draw3x1ParticleFromBuffer
+.long    Draw3x1ParticleFromBuffer
+.long    Draw3x1ParticleFromBuffer
+.long    Draw3x1ParticleFromBuffer
+.long    Draw2x1ParticleFromBuffer
+.long    Draw2x1ParticleFromBuffer
+.long    Draw1x1ParticleFromBuffer
 .long    DrawTriangleFromBuffer
-.long    FinishGraphicsBuffer
+.long    TerminateGraphicsBuffer
 DrawGraphicsBuffer:
  STMFD   R13!, {R6-R12, R14}
  LDR     R1, graphicsBuffersAddr
@@ -2062,9 +2062,9 @@ DrawNextFromGraphicsBuffer:
 .set labOffset, ($ + 8) - bufferJump
  ADD     R0, PC, R0, LSL #2
  LDR     PC, [R0, #-labOffset]
-FinishGraphicsBuffer:
+TerminateGraphicsBuffer:
  LDMFD   R13!, {R6-R12, PC}
-sub_9CFC:
+AddTerminatorsToBuffers:
  STMFD   R13!, {R12, R14}
  LDR     R12, graphicsBuffersAddr
  LDR     R14, var_9250
@@ -2850,16 +2850,16 @@ MainLoop:
  SWI     OS_Byte
  TEQ     R2, #0x1B
  BEQ     EndGame
- BL      DrawPlayer
+ BL      MoveAndDrawPlayer
  LDR     R0, [R11, #var_118]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
  BL      sub_93E4
  BL      sub_8D40
- BL      DrawExhaustAndBullets
+ BL      MoveAndDrawParticles
  BL      DrawObjects
- BL      sub_9CFC
- BL      DrawWorld
+ BL      AddTerminatorsToBuffers
+ BL      DrawLandscape
  BL      PrintCurrentScore
  BL      DrawFuelLevel
  BL      SwitchScreenBank

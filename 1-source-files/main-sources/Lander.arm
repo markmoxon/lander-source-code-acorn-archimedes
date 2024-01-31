@@ -396,14 +396,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawWorld
+\       Name: DrawLandscape
 \       Type: Subroutine
-\   Category: ???
+\   Category: Landscape
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.DrawWorld
+.DrawLandscape
 
  STMFD   R13!, {R5-R9, R14}         \ 
  LDR     R3, [R11, #var_144]        \ 
@@ -451,14 +451,14 @@ ENDIF
  STR     R0, [R11, #var_174]        \ 
  ADD     R0, R11, #&170             \ 
  BL      sub_9748                   \ 
- BHS     lab_8170                   \ 
+ BHS     DrawGraphicsBuffers        \ 
  STMIA   R7!, {R0-R1}               \ 
  CMP     R6, #0                     \ 
- BEQ     lab_8170                   \ 
+ BEQ     DrawGraphicsBuffers        \ 
  LDMIA   R6!, {R2-R3}               \ 
  CMP     R2, #&80000000             \ 
  MOVEQ   R6, #0                     \ 
- BEQ     lab_8170                   \ 
+ BEQ     DrawGraphicsBuffers        \ 
  STMFD   R13!, {R6-R8}              \ 
  ADD     R14, R11, #&C4             \ 
  LDMIA   R14, {R4-R7}               \ 
@@ -472,7 +472,16 @@ ENDIF
 
  LDMFD   R13!, {R6-R8}              \ 
 
-.lab_8170
+\ ******************************************************************************
+\
+\       Name: DrawGraphicsBuffers
+\       Type: Subroutine
+\   Category: Graphics buffers
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.DrawGraphicsBuffers
 
  SUBS    R10, R10, #1               \ 
  LDRNE   R0, [R11, #var_170]        \ 
@@ -821,14 +830,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawPlayer
+\       Name: MoveAndDrawPlayer
 \       Type: Subroutine
 \   Category: ???
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.DrawPlayer
+.MoveAndDrawPlayer
 
  STMFD   R13!, {R14}                \ 
 
@@ -1153,13 +1162,13 @@ ENDIF
 
                                     \ BL sub_8D40 is missing from main loop
 
- BL      DrawExhaustAndBullets      \ Same as in main loop
+ BL      MoveAndDrawParticles       \ Same as in main loop
 
  BL      DrawObjects                \ Same as in main loop
 
- BL      sub_9CFC                   \ Same as in main loop
+ BL      AddTerminatorsToBuffers    \ Same as in main loop
 
- BL      DrawWorld                  \ Same as in main loop
+ BL      DrawLandscape              \ Same as in main loop
 
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
                                     \ the left end of the score bar
@@ -1258,14 +1267,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawExhaustAndBullets
+\       Name: MoveAndDrawParticles
 \       Type: Subroutine
-\   Category: ???
+\   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.DrawExhaustAndBullets
+.MoveAndDrawParticles
 
  STMFD   R13!, {R10, R12, R14}      \ 
  ADD     R10, R11, #&700            \ 
@@ -1352,11 +1361,11 @@ ENDIF
  SUB     R1, R9, R14                \ 
  MOV     R8, R2                     \ 
  BL      sub_9670                   \ 
- BLLO    sub_9BF4                   \ 
+ BLLO    DrawParticleIntoBuffer2    \ 
  LDMFD   R13!, {R0-R2, R7}          \ 
  MOV     R8, R2                     \ 
  BL      sub_9670                   \ 
- BLLO    sub_9BB8                   \ 
+ BLLO    DrawParticleIntoBuffer1    \ 
  LDMIA   R10, {R0-R7}               \ 
  CMP     R7, #0                     \ 
  BNE     lab_880C                   \ 
@@ -2168,7 +2177,7 @@ ENDIF
  LDMIA   R6, {R2-R3}                \ 
  ADD     R7, R10, R7, LSL #4        \ 
  LDMIA   R7, {R4-R5}                \ 
- BL      sub_9C28                   \ 
+ BL      DrawTriangleIntoBuffer1    \ 
  LDMFD   R13!, {R3, R9, R11}        \ 
 
 .lab_9038
@@ -2219,7 +2228,7 @@ ENDIF
  LDMIA   R5, {R2-R3}                \ 
  ADD     R6, R10, R6, LSL #4        \ 
  LDMIA   R6, {R4-R5}                \ 
- BL      sub_9C58                   \ 
+ BL      DrawTriangleIntoBuffer2    \ 
 
 .lab_90F4
 
@@ -2233,7 +2242,7 @@ ENDIF
 \
 \       Name: PrintCurrentScore
 \       Type: Subroutine
-\   Category: Text
+\   Category: Score bar
 \    Summary: Print the current score at the left end of the score bar
 \
 \ ******************************************************************************
@@ -2294,7 +2303,7 @@ ENDIF
 \
 \       Name: PrintScoreInBothBanks
 \       Type: Subroutine
-\   Category: Text
+\   Category: Score bar
 \    Summary: Print a number at a specified text column in the score bar
 \
 \ ------------------------------------------------------------------------------
@@ -2398,7 +2407,7 @@ ENDIF
 \
 \       Name: fuelBarColour
 \       Type: Variable
-\   Category: Drawing the screen
+\   Category: Score bar
 \    Summary: A pixel word for the colour of the fuel bar
 \
 \ ******************************************************************************
@@ -2450,7 +2459,7 @@ ENDIF
 \
 \       Name: DrawFuelLevel
 \       Type: Subroutine
-\   Category: Drawing the screen
+\   Category: Score bar
 \    Summary: Draw the bar at the top of the screen showing the current fuel
 \             level
 \
@@ -3463,10 +3472,11 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: Draw1x1PixelDotFromBuffer
+\       Name: Draw1x1ParticleFromBuffer
 \       Type: Subroutine
-\   Category: Drawing dots
-\    Summary: Process the "draw 1x1-pixel dot" command from the graphics buffer
+\   Category: Particles
+\    Summary: Process the "draw 1x1-pixel specified" command from the graphics
+\             buffer
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3479,8 +3489,8 @@ ENDIF
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
 \         (0-319)    (0-255)                  (0-255)  
 \
-\ This command draws a 1x1-pixel dot at the given coordinates in the specified
-\ colour.
+\ This command draws a 1x1-pixel particle at the given coordinates in the
+\ specified colour.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3503,7 +3513,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.Draw1x1PixelDotFromBuffer
+.Draw1x1ParticleFromBuffer
 
  LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
                                     \ buffer into R1, incrementing R9 to point
@@ -3532,18 +3542,19 @@ ENDIF
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3]                   \ Draw a 1x1-pixel dot at the coordinates in
-                                    \ the colour specified in R7
+ STRB    R7, [R3]                   \ Draw a 1x1-pixel particle in the colour
+                                    \ specified in R7
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
                                     \ buffer
 
 \ ******************************************************************************
 \
-\       Name: Draw2x1PixelDashFromBuffer
+\       Name: Draw2x1ParticleFromBuffer
 \       Type: Subroutine
-\   Category: Drawing dots
-\    Summary: Process the "draw 2x1-pixel dash" command from the graphics buffer
+\   Category: Particles
+\    Summary: Process the "draw 2x1-pixel particle" command from the graphics
+\             buffer
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3556,8 +3567,9 @@ ENDIF
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
 \         (0-319)    (0-255)                  (0-255)  
 \
-\ This command draws a 2x1-pixel dash at the given coordinates in the specified
-\ colour, with the coordinates specifying the left end of the dash.
+\ This command draws a 2x1-pixel particle at the given coordinates in the
+\ specified colour, with the coordinates specifying the left end of the
+\ particle.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3580,7 +3592,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.Draw2x1PixelDashFromBuffer
+.Draw2x1ParticleFromBuffer
 
  LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
                                     \ buffer into R1, incrementing R9 to point
@@ -3609,18 +3621,19 @@ ENDIF
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3]                   \ Draw a 2x1-pixel dash at the coordinates in
- STRB    R7, [R3, #1]               \ in the colour specified in R7
+ STRB    R7, [R3]                   \ Draw a 2x1-pixel particle in the colour
+ STRB    R7, [R3, #1]               \ specified in R7
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
                                     \ buffer
 
 \ ******************************************************************************
 \
-\       Name: Draw2x2PixelDotFromBuffer
+\       Name: Draw2x2ParticleFromBuffer
 \       Type: Subroutine
-\   Category: Drawing dots
-\    Summary: Process the "draw 2x2-pixel dot" command from the graphics buffer
+\   Category: Particles
+\    Summary: Process the "draw 2x2-pixel particle" command from the graphics
+\             buffer
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3633,8 +3646,9 @@ ENDIF
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
 \         (0-319)    (0-255)                  (0-255)  
 \
-\ This command draws a 2x2-pixel dot at the given coordinates in the specified
-\ colour, with the coordinates specifying the top-left corner of the dot.
+\ This command draws a 2x2-pixel particle at the given coordinates in the
+\ specified colour, with the coordinates specifying the top-left corner of the
+\ particle.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3657,7 +3671,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.Draw2x2PixelDotFromBuffer
+.Draw2x2ParticleFromBuffer
 
  LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
                                     \ buffer into R1, incrementing R9 to point
@@ -3686,8 +3700,8 @@ ENDIF
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3]                   \ Draw a 2x2-pixel dot at the coordinates in
- STRB    R7, [R3, #1]               \ the colour specified in R7
+ STRB    R7, [R3]                   \ Draw a 2x2-pixel particle in the colour
+ STRB    R7, [R3, #1]               \ specified in R7
  STRB    R7, [R3, #320]
  STRB    R7, [R3, #320+1]
 
@@ -3696,10 +3710,11 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: Draw3x2PixelDashFromBuffer
+\       Name: Draw3x2ParticleFromBuffer
 \       Type: Subroutine
-\   Category: Drawing dots
-\    Summary: Process the "draw 3x2-pixel dash" command from the graphics buffer
+\   Category: Particles
+\    Summary: Process the "draw 3x2-pixel particle" command from the graphics
+\             buffer
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3712,9 +3727,9 @@ ENDIF
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
 \         (0-319)    (0-255)                  (0-255)  
 \
-\ This command draws a 3x2-pixel dash at the given coordinates in the specified
-\ colour, with the coordinates specifying the pixel in the bottom-middle of the
-\ dash.
+\ This command draws a 3x2-pixel particle at the given coordinates in the
+\ specified colour, with the coordinates specifying the pixel in the
+\ bottom-middle of the particle.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3737,7 +3752,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.Draw3x2PixelDashFromBuffer
+.Draw3x2ParticleFromBuffer
 
  LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
                                     \ buffer into R1, incrementing R9 to point
@@ -3766,8 +3781,8 @@ ENDIF
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3, #-1]              \ Draw a 3x2-pixel dash at the coordinates
- STRB    R7, [R3]                   \ in the colour specified in R7
+ STRB    R7, [R3, #-1]              \ Draw a 3x2-pixel particle in the colour
+ STRB    R7, [R3]                   \ specified in R7
  STRB    R7, [R3, #1]
  STRB    R7, [R3, #320-1]
  STRB    R7, [R3, #320]
@@ -3778,10 +3793,11 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: Draw3x1PixelDashFromBuffer
+\       Name: Draw3x1ParticleFromBuffer
 \       Type: Subroutine
-\   Category: Drawing dots
-\    Summary: Process the "draw 3x1-pixel dash" command from the graphics buffer
+\   Category: Particles
+\    Summary: Process the "draw 3x1-pixel particle" command from the graphics
+\             buffer
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3794,8 +3810,9 @@ ENDIF
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
 \         (0-319)    (0-255)                  (0-255)  
 \
-\ This command draws a 3x1-pixel dash at the given coordinates in the specified
-\ colour, with the coordinates specifying the pixel in the middle of the dash.
+\ This command draws a 3x1-pixel particle at the given coordinates in the
+\ specified colour, with the coordinates specifying the pixel in the middle of
+\ the particle.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3818,7 +3835,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.Draw3x1PixelDashFromBuffer
+.Draw3x1ParticleFromBuffer
 
  LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
                                     \ buffer into R1, incrementing R9 to point
@@ -3847,8 +3864,8 @@ ENDIF
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3, #-1]              \ Draw a 3x1-pixel dash at the coordinates
- STRB    R7, [R3]                   \ in the colour specified in R7
+ STRB    R7, [R3, #-1]              \ Draw a 3x1-pixel particle in the colour
+ STRB    R7, [R3]                   \ specified in R7
  STRB    R7, [R3, #1]
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
@@ -3908,14 +3925,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9BB8
+\       Name: DrawParticleIntoBuffer1
 \       Type: Subroutine
-\   Category: ???
+\   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_9BB8
+.DrawParticleIntoBuffer1
 
  STMFD   R13!, {R9, R14}            \ 
  RSB     R14, R8, #&14000000        \ 
@@ -3935,14 +3952,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9BF4
+\       Name: DrawParticleIntoBuffer2
 \       Type: Subroutine
-\   Category: ???
+\   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_9BF4
+.DrawParticleIntoBuffer2
 
  STMFD   R13!, {R9, R14}            \ 
  RSB     R14, R8, #&14000000        \ 
@@ -3960,14 +3977,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9C28
+\       Name: DrawTriangleIntoBuffer1
 \       Type: Subroutine
-\   Category: ???
+\   Category: Drawing triangles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_9C28
+.DrawTriangleIntoBuffer1
 
  STMFD   R13!, {R9, R14}            \ 
  LDR     R14, [R11, #8]             \ 
@@ -3984,14 +4001,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9C58
+\       Name: DrawTriangleIntoBuffer2
 \       Type: Subroutine
-\   Category: ???
+\   Category: Drawing triangles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_9C58
+.DrawTriangleIntoBuffer2
 
  STMFD   R13!, {R9, R14}            \ 
  LDR     R14, [R11, #8]             \ 
@@ -4011,39 +4028,42 @@ ENDIF
 \
 \       Name: bufferJump
 \       Type: Variable
-\   Category: Drawing dots
+\   Category: Graphics buffers
 \    Summary: The jump table for drawing commands in the graphics buffers
 \
 \ ******************************************************************************
 
 .bufferJump
 
- EQUD    Draw3x2PixelDashFromBuffer
- EQUD    Draw3x2PixelDashFromBuffer
- EQUD    Draw3x2PixelDashFromBuffer
- EQUD    Draw3x2PixelDashFromBuffer
- EQUD    Draw3x2PixelDashFromBuffer
- EQUD    Draw3x2PixelDashFromBuffer
- EQUD    Draw2x2PixelDotFromBuffer
- EQUD    Draw2x1PixelDashFromBuffer
- EQUD    Draw1x1PixelDotFromBuffer
- EQUD    Draw3x1PixelDashFromBuffer
- EQUD    Draw3x1PixelDashFromBuffer
- EQUD    Draw3x1PixelDashFromBuffer
- EQUD    Draw3x1PixelDashFromBuffer
- EQUD    Draw3x1PixelDashFromBuffer
- EQUD    Draw3x1PixelDashFromBuffer
- EQUD    Draw2x1PixelDashFromBuffer
- EQUD    Draw2x1PixelDashFromBuffer
- EQUD    Draw1x1PixelDotFromBuffer
+ EQUD    Draw3x2ParticleFromBuffer
+ EQUD    Draw3x2ParticleFromBuffer
+ EQUD    Draw3x2ParticleFromBuffer
+ EQUD    Draw3x2ParticleFromBuffer
+ EQUD    Draw3x2ParticleFromBuffer
+ EQUD    Draw3x2ParticleFromBuffer
+ EQUD    Draw2x2ParticleFromBuffer
+ EQUD    Draw2x1ParticleFromBuffer
+ EQUD    Draw1x1ParticleFromBuffer
+
+ EQUD    Draw3x1ParticleFromBuffer
+ EQUD    Draw3x1ParticleFromBuffer
+ EQUD    Draw3x1ParticleFromBuffer
+ EQUD    Draw3x1ParticleFromBuffer
+ EQUD    Draw3x1ParticleFromBuffer
+ EQUD    Draw3x1ParticleFromBuffer
+ EQUD    Draw2x1ParticleFromBuffer
+ EQUD    Draw2x1ParticleFromBuffer
+ EQUD    Draw1x1ParticleFromBuffer
+
  EQUD    DrawTriangleFromBuffer
- EQUD    FinishGraphicsBuffer
+
+ EQUD    TerminateGraphicsBuffer
 
 \ ******************************************************************************
 \
 \       Name: DrawGraphicsBuffer
 \       Type: Subroutine
-\   Category: Drawing dots
+\   Category: Graphics buffers
 \    Summary: Draw the contents of the specified graphics buffer
 \
 \ ------------------------------------------------------------------------------
@@ -4060,7 +4080,7 @@ ENDIF
 \ the buffers are flushed in depth order, farthest first. This requires a great
 \ deal of memory, but is virtually free as far as time considerations go."
 \
-\ This routine implements a buffer being "flushed".
+\ This routine implements a buffer being "flushed". i.e. drawn onto the screen.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4076,8 +4096,8 @@ ENDIF
 \   DrawNextFromGraphicsBuffer      Process the next command from the graphics
 \                                   buffer
 \
-\   FinishGraphicsBuffer            Return from the DrawGraphicsBuffer routine
-\                                   to stop drawing from the graphics buffer
+\   TerminateGraphicsBuffer         Terminate drawing from the graphics buffer
+\                                   by returning from the subroutine
 \
 \ ******************************************************************************
 
@@ -4109,21 +4129,21 @@ ENDIF
  ADD     R0, PC, R0, LSL #2         \ Jump to the address in entry R0 in the
  LDR     PC, [R0, #-labOffset]      \ bufferJump table
 
-.FinishGraphicsBuffer
+.TerminateGraphicsBuffer
 
  LDMFD   R13!, {R6-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: sub_9CFC
+\       Name: AddTerminatorsToBuffers
 \       Type: Subroutine
-\   Category: ???
+\   Category: Graphics buffers
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_9CFC
+.AddTerminatorsToBuffers
 
  STMFD   R13!, {R12, R14}           \ 
  LDR     R12, graphicsBuffersAddr   \ 
@@ -5726,7 +5746,7 @@ ENDIF
                                     \ EndGame to acknowledge the escape
                                     \ condition and quit the game
 
- BL      DrawPlayer                 \ Draw the player's ship ???
+ BL      MoveAndDrawPlayer          \ Move and draw the player's ship ???
 
  LDR     R0, [R11, #var_118]        \ Set R0 = var_118 << 24 ???
  MOV     R0, R0, LSL #24
@@ -5739,14 +5759,17 @@ ENDIF
  BL      sub_8D40                   \ Commenting this out does nothing obvious
                                     \ ???
 
- BL      DrawExhaustAndBullets      \ Draw the engine exhaust and bullets ???
+ BL      MoveAndDrawParticles       \ Move and draw all the particles, such as
+                                    \ the engine exhaust and bullets ???
 
  BL      DrawObjects                \ Draw all the objects, such as trees and
                                     \ buildings ???
 
- BL      sub_9CFC                   \ Commenting this out crashes game ???
+ BL      AddTerminatorsToBuffers    \ Add termninators to the graphics buffers
+                                    \ ???
 
- BL      DrawWorld                  \ Draw everything ???
+ BL      DrawLandscape              \ Draw the landscape and the contents of the
+                                    \ graphics buffers
 
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
                                     \ the left end of the score bar
@@ -5823,7 +5846,7 @@ ENDIF
 \
 \       Name: PrintHexNumber
 \       Type: Subroutine
-\   Category: Text
+\   Category: Unused
 \    Summary: Print an 8-digit hexadecimal number on the second character row of
 \             the screen
 \
@@ -5885,7 +5908,7 @@ ENDIF
 \
 \       Name: PrintHexDigit
 \       Type: Subroutine
-\   Category: Text
+\   Category: Unused
 \    Summary: Print a single digit hexadecimal number
 \
 \ ------------------------------------------------------------------------------
