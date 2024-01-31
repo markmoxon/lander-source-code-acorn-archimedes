@@ -48,18 +48,8 @@
 
  OS_BinaryToDecimal = &28           \ 
 
- OBJ_PYRAMID = 0                    \ Object types, add 12 for destroyed version
- OBJ_SMALL_TREE_1 = 1
- OBJ_TALL_TREE_1 = 2
- OBJ_SMALL_TREE_2 = 3
- OBJ_SMALL_TREE_3 = 4
- OBJ_GAZEBO = 5
- OBJ_TALL_TREE_2 = 6
- OBJ_FIR_TREE = 7
- OBJ_BUILDING = 8
- OBJ_ROCKET1 = 9
- OBJ_ROCKET2 = 10
- OBJ_ROCKET3 = 11
+ OBJ_ROCKET = 9                     \ The object type of the three rockets
+                                    \ along the edge of the launchpad
 
  LAUNCHPAD_ALTITUDE = &3500000      \ Altitude of the launchpad
 
@@ -133,15 +123,18 @@
 
  var_0F8 = &F8                      \ 
 
- altitude = &100                    \ 
+ altitude = &100                    \ The altitude of the landscape at the
+                                    \ most recently calculated coordinate
 
- prevAltitude = &104                \ 
+ prevAltitude = &104                \ The altitude of the landscape at the
+                                    \ previously calculated coordinate
 
  var_108 = &108                     \ Contains the address of var_700
 
  var_10C = &10C                     \ 
 
- var_110 = &110                     \ 
+ objectType = &110                  \ The type of the object currently being
+                                    \ displayed
 
  var_114 = &114                     \ 
 
@@ -161,9 +154,10 @@
                                     \ bullet, and goes up by 20 for each object
                                     \ we destroy
 
- fuelLevel = &128                   \ 
+ fuelLevel = &128                   \ The player's fuel level
 
- gravity = &12C                     \ 
+ gravity = &12C                     \ The current setting of gravity (which
+                                    \ changes on higher levels)
 
  var_130 = &130                     \ 
 
@@ -194,7 +188,8 @@
 
  var_158 = &158                     \ 
 
- fuelBurnRate = &15C                \ 
+ fuelBurnRate = &15C                \ The current fuel burn rate (bit 0 is
+                                    \ ignored)
 
  var_168 = &168                     \ 
 
@@ -470,7 +465,7 @@ ENDIF
  CMP     R4, #&80000000             \ 
  BEQ     lab_816C                   \ 
  BL      sub_82DC                   \ 
- BL      sub_9DC8                   \ 
+ BL      DrawQuadrilateral          \ 
 
 .lab_816C
 
@@ -486,7 +481,7 @@ ENDIF
  BNE     lab_8114                   \ 
  LDRB    R0, [R11, #var_0E4]        \ 
  SUBS    R0, R0, #2                 \ 
- BLPL    sub_9CDC                   \ 
+ BLPL    DrawDotDashTriangle        \ 
  LDRB    R0, [R11, #var_0E4]        \ 
  ADDS    R0, R0, #1                 \ 
  CMP     R0, #&B                    \ 
@@ -510,9 +505,9 @@ ENDIF
 .lab_81E0
 
  MOV     R0, #9                     \ 
- BL      sub_9CDC                   \ 
+ BL      DrawDotDashTriangle        \ 
  MOV     R0, #&A                    \ 
- BL      sub_9CDC                   \ 
+ BL      DrawDotDashTriangle        \ 
  LDMFD   R13!, {R5-R9, PC}          \ 
 
 \ ******************************************************************************
@@ -525,12 +520,10 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ This routine calculates the altitude of the landscape at a given coordinate.
+\ The altitude is inverse, with lower values indicating higher altitudes. The
+\ launchpad is at LAUNCHPAD_ALTITUDE, while the sea is at SEA_LEVEL.
 \
-\ The altitude is inverse, with lower values indicating higher altitudes.
-\
-\ The launchpad is at LAUNCHPAD_ALTITUDE, while the sea is at SEA_LEVEL.
-\
-\ The altitude at a coordinate x, y is calculated as follows:
+\ The altitude at landscape coordinate (x, y) is calculated as follows:
 \
 \ &5000000 - (   2*sin(x - 2y)  + 2*sin(4x + 3y)  + 2*sin(3y - 5x)
 \              + 2*sin(3x + 3y) +   sin(5x + 11y) +   sin(10x + 7y)
@@ -978,7 +971,7 @@ ENDIF
  MOVMI   R1, #0                     \ 
  ADD     R3, R11, #&30              \ 
  LDR     R14, objectPlayerAddr      \ 
- STR     R14, [R11, #var_110]       \ 
+ STR     R14, [R11, #objectType]    \ 
  MOV     R0, #0                     \ 
  MOV     R2, #&F000000              \ 
  BL      DrawObject                 \ 
@@ -1346,7 +1339,7 @@ ENDIF
  LDMFD   R13!, {R0-R2}              \ 
  BLO     sub_86C4                   \ 
  LDR     R14, objectRockAddr        \ 
- STR     R14, [R11, #var_110]       \ 
+ STR     R14, [R11, #objectType]    \ 
  ADD     R3, R11, #&30              \ 
  BL      DrawObject                 \ 
  B       lab_8800                   \ 
@@ -2000,7 +1993,7 @@ ENDIF
  ADD     R0, PC, R0, LSL #2         \ 
  LDR     R14, [R0, #-typeOffset]    \ Fetch from objectTypes table
 
- STR     R14, [R11, #var_110]       \ 
+ STR     R14, [R11, #objectType]    \ 
  BL      GetLandscapeAltitude       \ 
  MOV     R1, R0                     \ 
  CMP     R0, #SEA_LEVEL             \ 
@@ -2107,7 +2100,7 @@ ENDIF
  STMNEIA R4!, {R0-R2}               \ 
  LDMNEIA R3!, {R0-R2}               \ 
  STMNEIA R4!, {R0-R2}               \ 
- LDR     R0, [R11, #var_110]        \ 
+ LDR     R0, [R11, #objectType]     \ 
  LDR     R8, [R0]                   \ 
  ADD     R9, R0, #&10               \ 
  ADD     R10, R11, #&600            \ 
@@ -2138,7 +2131,7 @@ ENDIF
  STRHSB  R14, [R11, #var_120]       \ 
  SUBS    R8, R8, #1                 \ 
  BNE     lab_8F54                   \ 
- LDR     R1, [R11, #var_110]        \ 
+ LDR     R1, [R11, #objectType]     \ 
  LDR     R0, [R1, #8]               \ 
  ADD     R9, R1, R0                 \ 
  LDR     R8, [R1, #4]               \ 
@@ -3469,14 +3462,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9AC4
+\       Name: Draw1x1PixelDot
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing dots
+\    Summary: Draw a 1x1-pixel dot
 \
 \ ******************************************************************************
 
-.sub_9AC4
+.Draw1x1PixelDot
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3485,19 +3478,21 @@ ENDIF
  ADD     R3, R12, R0                \ 
  ADD     R1, R1, R1, LSL #2         \ 
  ADD     R3, R3, R1, LSL #6         \ 
- STRB    R7, [R3]                   \ 1-pixel dot?
+
+ STRB    R7, [R3]                   \ Draw a 1-pixel dot
+
  B       lab_9CEC                   \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_9AE8
+\       Name: Draw2x1PixelDash
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing dots
+\    Summary: Draw a 2x1-pixel dash
 \
 \ ******************************************************************************
 
-.sub_9AE8
+.Draw2x1PixelDash
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3506,20 +3501,20 @@ ENDIF
  ADD     R3, R12, R0                \ 
  ADD     R1, R1, R1, LSL #2         \ 
  ADD     R3, R3, R1, LSL #6         \ 
- STRB    R7, [R3]                   \ 2-pixel dash?
+ STRB    R7, [R3]                   \ Draw a 2-pixel dash
  STRB    R7, [R3, #1]               \ 
  B       lab_9CEC                   \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_9B10
+\       Name: Draw2x2PixelDot
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing dots
+\    Summary: Draw a 2x2-pixel dot
 \
 \ ******************************************************************************
 
-.sub_9B10
+.Draw2x2PixelDot
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3530,20 +3525,20 @@ ENDIF
  ADD     R3, R3, R1, LSL #6         \ 
  STRB    R7, [R3]                   \ 
  STRB    R7, [R3, #1]               \ 
- STRB    R7, [R3, #320]             \ This moves down one pixel line - is R3 in
- STRB    R7, [R3, #320+1]           \ screen memory, and this is a 2x2 dot, and
- B       lab_9CEC                   \ all these are pixel or dot/dash routines?
+ STRB    R7, [R3, #320]             \ Draw a 2x2-pixel dot
+ STRB    R7, [R3, #320+1]           \ 
+ B       lab_9CEC                   \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_9B40
+\       Name: Draw3x2PixelDash
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing dots
+\    Summary: Draw a 3x2-pixel dash
 \
 \ ******************************************************************************
 
-.sub_9B40
+.Draw3x2PixelDash
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3552,7 +3547,7 @@ ENDIF
  ADD     R3, R12, R0                \ 
  ADD     R1, R1, R1, LSL #2         \ 
  ADD     R3, R3, R1, LSL #6         \ 
- STRB    R7, [R3, #-1]              \ 2x3 dot?
+ STRB    R7, [R3, #-1]              \ Draw a 3-pixel double-height dash
  STRB    R7, [R3]                   \ 
  STRB    R7, [R3, #1]               \ 
  STRB    R7, [R3, #320-1]           \ 
@@ -3562,14 +3557,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9B78
+\       Name: Draw3x1PixelDash
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing dots
+\    Summary: Draw a 3x1-pixel dash
 \
 \ ******************************************************************************
 
-.sub_9B78
+.Draw3x1PixelDash
 
  LDR     R1, [R9], #4               \ 
  MOV     R0, R1, LSR #20            \ 
@@ -3578,25 +3573,25 @@ ENDIF
  ADD     R3, R12, R0                \ 
  ADD     R1, R1, R1, LSL #2         \ 
  ADD     R3, R3, R1, LSL #6         \ 
- STRB    R7, [R3, #-1]              \ 3-pixel dash?
+ STRB    R7, [R3, #-1]              \ Draw a 3-pixel dash
  STRB    R7, [R3]                   \ 
  STRB    R7, [R3, #1]               \ 
  B       lab_9CEC                   \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_9BA4
+\       Name: DrawTriangleViaJump
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing triangles
+\    Summary: Draw a triangle via the jump table at dotJump
 \
 \ ******************************************************************************
 
-.sub_9BA4
+.DrawTriangleViaJump
 
  LDMIA   R9!, {R0-R5, R8}           \ 
  STMFD   R13!, {R9, R12}            \ 
- BL      sub_9DDC                   \ sub_9DDC draws horizontal lines
+ BL      DrawTriangle               \ 
  LDMFD   R13!, {R9, R12}            \ 
  B       lab_9CEC                   \ 
 
@@ -3703,77 +3698,87 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_9C8C
+\       Name: dotJump
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing dots
+\    Summary: Jump table for drawing dots, dashes and triangles using the
+\             relevant entry point in DrawDotDashTriangle
+\
+\ ******************************************************************************
+
+.dotJump
+
+ EQUD    Draw3x2PixelDash
+ EQUD    Draw3x2PixelDash
+ EQUD    Draw3x2PixelDash
+ EQUD    Draw3x2PixelDash
+ EQUD    Draw3x2PixelDash
+ EQUD    Draw3x2PixelDash
+ EQUD    Draw2x2PixelDot
+ EQUD    Draw2x1PixelDash
+ EQUD    Draw1x1PixelDot
+ EQUD    Draw3x1PixelDash
+ EQUD    Draw3x1PixelDash
+ EQUD    Draw3x1PixelDash
+ EQUD    Draw3x1PixelDash
+ EQUD    Draw3x1PixelDash
+ EQUD    Draw3x1PixelDash
+ EQUD    Draw2x1PixelDash
+ EQUD    Draw2x1PixelDash
+ EQUD    Draw1x1PixelDot
+ EQUD    DrawTriangleViaJump
+ EQUD    DrawNothing
+
+\ ******************************************************************************
+\
+\       Name: DrawDotDashTriangle
+\       Type: Subroutine
+\   Category: Drawing dots
+\    Summary: Draw a dot, dash or triangle
 \
 \ ------------------------------------------------------------------------------
 \
-\ The subs in this table seem to draw pixels or dots - is this the cloud
-\ drawing jump table? sub_9BA4 calls sub_9DDC which draws lines, and sub_9CF8
-\ just returns, with all the others drawing pixels, dots or dashes.
+\ Arguments:
+\
+\   R0                              Entry number from var_805C ???
 \
 \ ******************************************************************************
 
-.var_9C8C
-
- EQUD    sub_9B40
- EQUD    sub_9B40
- EQUD    sub_9B40
- EQUD    sub_9B40
- EQUD    sub_9B40
- EQUD    sub_9B40
- EQUD    sub_9B10
- EQUD    sub_9AE8
- EQUD    sub_9AC4
- EQUD    sub_9B78
- EQUD    sub_9B78
- EQUD    sub_9B78
- EQUD    sub_9B78
- EQUD    sub_9B78
- EQUD    sub_9B78
- EQUD    sub_9AE8
- EQUD    sub_9AE8
- EQUD    sub_9AC4
- EQUD    sub_9BA4
- EQUD    sub_9CF8
-
-\ ******************************************************************************
-\
-\       Name: sub_9CDC
-\       Type: Subroutine
-\   Category: ???
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.sub_9CDC
+.DrawDotDashTriangle
 
  STMFD   R13!, {R6-R12, R14}        \ 
- LDR     R1, var_924C               \ 
- LDR     R9, [R1, R0, LSL #2]       \ 
- LDR     R12, screenAddr            \ 
 
+ LDR     R1, var_924C               \ Set R1 = var_805C (as var_924C contains
+                                    \ var_805C)
+
+ LDR     R9, [R1, R0, LSL #2]       \ Set R9 to the R0-th entry from var_805C
+                                    \ table
+
+ LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
+                                    \ we are drawing in, pointing just below
+                                    \ the two lines of text at the top of the
+                                    \ screen
 .lab_9CEC
 
- LDR     R0, [R9], #4               \ 
+ LDR     R0, [R9], #4               \ Fetch R0 from the address in var_805C
+                                    \ table and increment R9 to the next address
 
- labOffset = ($ + 8) - var_9C8C     \ &6C
+ labOffset = ($ + 8) - dotJump      \ Set labOffset to the offset back to the
+                                    \ dotJump table from the next instruction
 
- ADD     R0, PC, R0, LSL #2         \ 
- LDR     PC, [R0, #-labOffset]      \ Fetch from var_9C8C table
+ ADD     R0, PC, R0, LSL #2         \ Jump to the address in entry R0 in the
+ LDR     PC, [R0, #-labOffset]      \ dotJump table
 
 \ ******************************************************************************
 \
-\       Name: sub_9CF8
+\       Name: DrawNothing
 \       Type: Subroutine
 \   Category: ???
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_9CF8
+.DrawNothing
 
  LDMFD   R13!, {R6-R12, PC}         \ 
 
@@ -3968,44 +3973,31 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9DC8
+\       Name: DrawQuadrilateral
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing triangles
+\    Summary: Draw a quadrilateral (i.e. two triangles)
 \
 \ ******************************************************************************
 
-.sub_9DC8
+.DrawQuadrilateral
 
  STMFD   R13!, {R2-R7, R9-R12, R14} \ 
- BL      sub_9DDC                   \ 
+ BL      DrawTriangle               \ 
  LDMFD   R13!, {R0-R5}              \ 
- BL      sub_9DDC                   \ 
+ BL      DrawTriangle               \ 
  LDMFD   R13!, {R9-R12, PC}         \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_9DDC
+\       Name: DrawTriangle
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
-\
-\ ------------------------------------------------------------------------------
-\
-\ Apart from the fuel bar, DrawHorizontalLine is only called by sub_A408 and
-\ sub_9DDC
-\
-\ sub_A408 is only ever called from sub_9DDC
-\
-\ So is sub_9DDC the only line-drawing routine in the game? So is this for
-\ drawing triangles, as that's the primitive?
-\
-\ The subs in the var_9C8C table seem to draw pixels or dots rather than lines,
-\ and only one of them calls sub_9DDC, so they might be for drawing clouds?
+\   Category: Drawing triangles
+\    Summary: Draw a triangle
 \
 \ ******************************************************************************
 
-.sub_9DDC
+.DrawTriangle
 
  CMP     R0, #320                   \ 
  CMPLO   R1, #&EF                   \ 
@@ -4015,7 +4007,12 @@ ENDIF
  CMPLO   R5, #&EF                   \ 
  BHS     lab_A110                   \ 
  STMFD   R13!, {R14}                \ 
- LDR     R12, screenAddr            \ 
+
+ LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
+                                    \ we are drawing in, pointing just below
+                                    \ the two lines of text at the top of the
+                                    \ screen
+
  CMP     R1, R3                     \ 
  BHS     lab_9E20                   \ 
  MOV     R6, R0                     \ 
@@ -4290,7 +4287,12 @@ ENDIF
  CMPHS   R4, #320                   \ 
  MOVHS   PC, R14                    \ 
  STMFD   R13!, {R14}                \ 
- LDR     R12, screenAddr            \ 
+
+ LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
+                                    \ we are drawing in, pointing just below
+                                    \ the two lines of text at the top of the
+                                    \ screen
+
  CMP     R1, R3                     \ 
  BGT     lab_A158                   \ 
  MOV     R6, R0                     \ 
@@ -4395,7 +4397,7 @@ ENDIF
  MOVGT   R14, R6                    \ 
  MOVGT   R6, R7                     \ 
  MOVGT   R7, R14                    \ 
- BL      sub_A408                   \ 
+ BL      FillTriangle               \ 
  LDMFD   R13!, {R0-R1}              \ 
  SUBS    R9, R3, R1                 \ 
  LDMEQIA R13!, {PC}                 \ 
@@ -4444,8 +4446,12 @@ ENDIF
 
 .lab_A300
 
- LDR     R12, screenAddr            \ 
- BL      sub_A408                   \ 
+ LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
+                                    \ we are drawing in, pointing just below
+                                    \ the two lines of text at the top of the
+                                    \ screen
+
+ BL      FillTriangle               \ 
  LDMFD   R13!, {PC}                 \ 
 
 .lab_A30C
@@ -4537,14 +4543,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_A408
+\       Name: FillTriangle
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing triangles
+\    Summary: Fill a triangle
 \
 \ ******************************************************************************
 
-.sub_A408
+.FillTriangle
 
  CMP     R9, #&100                  \ 
  MOVHS   PC, R14                    \ 
@@ -4638,36 +4644,124 @@ ENDIF
 
 .DrawHorizontalLine
 
- CMP     R10, #18                   \ 
+ CMP     R10, #18                   \ If R10 < 18 then set the flags so the next
+                                    \ set of instructions are run (so for lines
+                                    \ of length 17 pixels and fewer, we jump to
+                                    \ the relevant routine in the lineJump to
+                                    \ draw the line
 
- varOffset = ($ + 8) - lineJump     \ &54
+ varOffset = ($ + 8) - lineJump     \ Set labOffset to the offset back to the
+                                    \ lineJump table from the next instruction
 
- ADDLO   R0, PC, R10, LSL #2        \ 
- LDRLO   PC, [R0, #-varOffset]      \ Fetch from lineJump table
+ ADDLO   R0, PC, R10, LSL #2        \ If R10 < 18, jump to the address in entry
+ LDRLO   PC, [R0, #-varOffset]      \ R10 in the lineJump table, which will draw
+                                    \ a horizontal line R10 pixels long and
+                                    \ return from the subroutine using a tail
+                                    \ call
 
- ADD     R10, R11, R10              \ 
- BIC     R0, R10, #3                \ 
- TST     R11, #3                    \ 
- STRNEB  R8, [R11], #1              \ 
- TSTNE   R11, #3                    \ 
- STRNEB  R8, [R11], #1              \ 
- TSTNE   R11, #3                    \ 
- STRNEB  R8, [R11], #1              \ 
+                                    \ If we get here then we need to draw a line
+                                    \ of 18 pixels or more
 
-.lab_A4F4
+ ADD     R10, R11, R10              \ Set R10 to the screen address of the right
+                                    \ end of the line (i.e. the address of the
+                                    \ left end in R11 plus the width in R10)
 
- STR     R8, [R11], #4              \ 
- CMP     R11, R0                    \ 
- STRLO   R8, [R11], #4              \ 
- CMPLO   R11, R0                    \ 
- BLO     lab_A4F4                   \ 
- CMP     R11, R10                   \ 
- STRLOB  R8, [R11], #1              \ 
- CMPLO   R11, R10                   \ 
- STRLOB  R8, [R11], #1              \ 
- CMPLO   R11, R10                   \ 
- STRLOB  R8, [R11], #1              \ 
- MOV     PC, R14                    \ 
+ BIC     R0, R10, #3                \ Set R0 to the screen address with bits 0
+                                    \ and 1 cleared, so R0 points to the word in
+                                    \ screen memory that contains the right end
+                                    \ of the line (the "right cap")
+
+                                    \ So by this point R11 points to the word in
+                                    \ screen memory that contains the left cap
+                                    \ of the line (which is the word containing
+                                    \ the left end of the line), and R0 points
+                                    \ to the right cap
+                                    \
+                                    \ The caps can contain 1, 2, 3 or 4 pixels,
+                                    \ as each 32-bit word contains four one-byte
+                                    \ pixels
+                                    \
+                                    \ If a cap contains four pixels, then bits 0
+                                    \ and 1 of the cap address will be zero, so
+                                    \ in the following we draw the line as
+                                    \ follows:
+                                    \
+                                    \   * If the left cap contains 1, 2 or 3
+                                    \     pixels, draw those pixels
+                                    \
+                                    \   * Draw the portion of the line between
+                                    \     the left and right caps, drawing it
+                                    \     one word (four pixels) at a time
+                                    \
+                                    \   * If the right cap contains 1, 2 or 3
+                                    \     pixels, draw those pixels
+                                    \
+                                    \ We start with the left cap at screen
+                                    \ address R11
+
+ TST     R11, #3                    \ If R11 is not a multiple of 4 then one or
+ STRNEB  R8, [R11], #1              \ both of bits 0 and 1 will be non-zero, so
+                                    \ set the pixel at R11 to the colour in R8
+                                    \ and increment R11
+                                    \
+                                    \ So this draws the pixel at the end of the
+                                    \ line, and it increments R11 so R11 now
+                                    \ points to the next pixel along
+
+ TSTNE   R11, #3                    \ If R11 is still not a multiple of 4 then
+ STRNEB  R8, [R11], #1              \ bits 0 and 1 will still be non-zero, so
+                                    \ set the pixel at R11 to the colour in R8
+                                    \ and increment R11
+                                    \
+                                    \ So this draws the second pixel in the line
+                                    \ if drawing the first one didn't take us to
+                                    \ a word boundary, and it increments R11 so
+                                    \ R11 now points to the next pixel along
+
+ TSTNE   R11, #3                    \ If R11 is still not a multiple of 4 then
+ STRNEB  R8, [R11], #1              \ bits 0 and 1 will still be non-zero, so
+                                    \ set the pixel at R11 to the colour in R8
+                                    \ and increment R11
+                                    \
+                                    \ So this draws the third pixel in the line
+                                    \ if drawing the first two didn't take us to
+                                    \ a word boundary, and it increments R11 so
+                                    \ R11 now points to the next pixel along
+
+                                    \ By this point R11 will definitely be on a
+                                    \ word boundary and we have successfully
+                                    \ drawn the left cap of the line, so now we
+                                    \ draw the centre portion of the line, all
+                                    \ the way to the right cap
+                                    \
+                                    \ We do this in a loop that is unrolled once
+                                    \ to speed things up a little but
+
+.hlin1
+
+ STR     R8, [R11], #4              \ Draw a full word (four pixels) in the
+                                    \ colour in R8 at screen address R11 and
+                                    \ increment R11 by 4 to move on to the next
+                                    \ word
+
+ CMP     R11, R0                    \ If R11 < R0 then we have not yet reached
+ STRLO   R8, [R11], #4              \ the right cap, so draw another word in
+                                    \ memory and increment R11 again
+
+ CMPLO   R11, R0                    \ If R11 < R0 then we have still not reached
+ BLO     hlin1                      \ the right cap, so loop back to hlin1 to
+                                    \ keep drawing the centre portion of the
+                                    \ line until we do reach the right cap
+
+ CMP     R11, R10                   \ If R11 < R10 then we have not yet reached
+ STRLOB  R8, [R11], #1              \ the end of the line, so we draw up to
+ CMPLO   R11, R10                   \ three pixels in the final word of the line
+ STRLOB  R8, [R11], #1              \ by simply drawing each pixel, incrementing
+ CMPLO   R11, R10                   \ R11 and then re-checking whether R11 has
+ STRLOB  R8, [R11], #1              \ reached R10 (and drawing the next pixel if
+                                    \ it hasn't)
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -5204,7 +5298,7 @@ ENDIF
                                     \ y-axis, and with each one having an
                                     \ x-coordinate of 7
 
- MOV     R0, #OBJ_ROCKET1           \ Set R0 to the object type for the rocket
+ MOV     R0, #OBJ_ROCKET            \ Set R0 to the object type for the rocket
 
  STRB    R0, [R6, #&0107]           \ Add the front rocket to coordinate (7, 1)
 

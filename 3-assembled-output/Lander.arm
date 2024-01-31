@@ -6,18 +6,7 @@
 .set OS_Word, 0x07
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
-.set OBJ_PYRAMID, 0
-.set OBJ_SMALL_TREE_1, 1
-.set OBJ_TALL_TREE_1, 2
-.set OBJ_SMALL_TREE_2, 3
-.set OBJ_SMALL_TREE_3, 4
-.set OBJ_GAZEBO, 5
-.set OBJ_TALL_TREE_2, 6
-.set OBJ_FIR_TREE, 7
-.set OBJ_BUILDING, 8
-.set OBJ_ROCKET1, 9
-.set OBJ_ROCKET2, 10
-.set OBJ_ROCKET3, 11
+.set OBJ_ROCKET, 9
 .set LAUNCHPAD_ALTITUDE, 0x3500000
 .set SEA_LEVEL, 0x5500000
 .set stack, 0x000121FC
@@ -49,7 +38,7 @@
 .set prevAltitude, 0x104
 .set var_108, 0x108
 .set var_10C, 0x10C
-.set var_110, 0x110
+.set objectType, 0x110
 .set var_114, 0x114
 .set var_118, 0x118
 .set var_11C, 0x11C
@@ -179,7 +168,7 @@ lab_8114:
  CMP     R4, #0x80000000
  BEQ     lab_816C
  BL      sub_82DC
- BL      sub_9DC8
+ BL      DrawQuadrilateral
 lab_816C:
  LDMFD   R13!, {R6-R8}
 lab_8170:
@@ -191,7 +180,7 @@ lab_8170:
  BNE     lab_8114
  LDRB    R0, [R11, #var_0E4]
  SUBS    R0, R0, #2
- BLPL    sub_9CDC
+ BLPL    DrawDotDashTriangle
  LDRB    R0, [R11, #var_0E4]
  ADDS    R0, R0, #1
  CMP     R0, #0xB
@@ -213,9 +202,9 @@ lab_8170:
  B       lab_80DC
 lab_81E0:
  MOV     R0, #9
- BL      sub_9CDC
+ BL      DrawDotDashTriangle
  MOV     R0, #0xA
- BL      sub_9CDC
+ BL      DrawDotDashTriangle
  LDMFD   R13!, {R5-R9, PC}
 GetLandscapeAltitude:
  LDR     R0, [R11, #altitude]
@@ -431,7 +420,7 @@ lab_850C:
  MOVMI   R1, #0
  ADD     R3, R11, #0x30
  LDR     R14, objectPlayerAddr
- STR     R14, [R11, #var_110]
+ STR     R14, [R11, #objectType]
  MOV     R0, #0
  MOV     R2, #0xF000000
  BL      DrawObject
@@ -675,7 +664,7 @@ lab_88E8:
  LDMFD   R13!, {R0-R2}
  BLO     sub_86C4
  LDR     R14, objectRockAddr
- STR     R14, [R11, #var_110]
+ STR     R14, [R11, #objectType]
  ADD     R3, R11, #0x30
  BL      DrawObject
  B       lab_8800
@@ -1049,7 +1038,7 @@ lab_8E38:
 .set typeOffset, ($ + 8) - objectTypes
  ADD     R0, PC, R0, LSL #2
  LDR     R14, [R0, #-typeOffset]
- STR     R14, [R11, #var_110]
+ STR     R14, [R11, #objectType]
  BL      GetLandscapeAltitude
  MOV     R1, R0
  CMP     R0, #SEA_LEVEL
@@ -1117,7 +1106,7 @@ lab_8EFC:
  STMNEIA R4!, {R0-R2}
  LDMNEIA R3!, {R0-R2}
  STMNEIA R4!, {R0-R2}
- LDR     R0, [R11, #var_110]
+ LDR     R0, [R11, #objectType]
  LDR     R8, [R0]
  ADD     R9, R0, #0x10
  ADD     R10, R11, #0x600
@@ -1146,7 +1135,7 @@ lab_8F54:
  STRHSB  R14, [R11, #var_120]
  SUBS    R8, R8, #1
  BNE     lab_8F54
- LDR     R1, [R11, #var_110]
+ LDR     R1, [R11, #objectType]
  LDR     R0, [R1, #8]
  ADD     R9, R1, R0
  LDR     R8, [R1, #4]
@@ -1918,7 +1907,7 @@ var_9A70:
 .long    0xFFFFFFFF
 var_9AC0:
 .long    var_9A70
-sub_9AC4:
+Draw1x1PixelDot:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1928,7 +1917,7 @@ sub_9AC4:
  ADD     R3, R3, R1, LSL #6
  STRB    R7, [R3]
  B       lab_9CEC
-sub_9AE8:
+Draw2x1PixelDash:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1939,7 +1928,7 @@ sub_9AE8:
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
  B       lab_9CEC
-sub_9B10:
+Draw2x2PixelDot:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1952,7 +1941,7 @@ sub_9B10:
  STRB    R7, [R3, #320]
  STRB    R7, [R3, #320+1]
  B       lab_9CEC
-sub_9B40:
+Draw3x2PixelDash:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1967,7 +1956,7 @@ sub_9B40:
  STRB    R7, [R3, #320]
  STRB    R7, [R3, #320+1]
  B       lab_9CEC
-sub_9B78:
+Draw3x1PixelDash:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1979,10 +1968,10 @@ sub_9B78:
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
  B       lab_9CEC
-sub_9BA4:
+DrawTriangleViaJump:
  LDMIA   R9!, {R0-R5, R8}
  STMFD   R13!, {R9, R12}
- BL      sub_9DDC
+ BL      DrawTriangle
  LDMFD   R13!, {R9, R12}
  B       lab_9CEC
 sub_9BB8:
@@ -2042,38 +2031,38 @@ sub_9C58:
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-var_9C8C:
-.long    sub_9B40
-.long    sub_9B40
-.long    sub_9B40
-.long    sub_9B40
-.long    sub_9B40
-.long    sub_9B40
-.long    sub_9B10
-.long    sub_9AE8
-.long    sub_9AC4
-.long    sub_9B78
-.long    sub_9B78
-.long    sub_9B78
-.long    sub_9B78
-.long    sub_9B78
-.long    sub_9B78
-.long    sub_9AE8
-.long    sub_9AE8
-.long    sub_9AC4
-.long    sub_9BA4
-.long    sub_9CF8
-sub_9CDC:
+dotJump:
+.long    Draw3x2PixelDash
+.long    Draw3x2PixelDash
+.long    Draw3x2PixelDash
+.long    Draw3x2PixelDash
+.long    Draw3x2PixelDash
+.long    Draw3x2PixelDash
+.long    Draw2x2PixelDot
+.long    Draw2x1PixelDash
+.long    Draw1x1PixelDot
+.long    Draw3x1PixelDash
+.long    Draw3x1PixelDash
+.long    Draw3x1PixelDash
+.long    Draw3x1PixelDash
+.long    Draw3x1PixelDash
+.long    Draw3x1PixelDash
+.long    Draw2x1PixelDash
+.long    Draw2x1PixelDash
+.long    Draw1x1PixelDot
+.long    DrawTriangleViaJump
+.long    DrawNothing
+DrawDotDashTriangle:
  STMFD   R13!, {R6-R12, R14}
  LDR     R1, var_924C
  LDR     R9, [R1, R0, LSL #2]
  LDR     R12, screenAddr
 lab_9CEC:
  LDR     R0, [R9], #4
-.set labOffset, ($ + 8) - var_9C8C
+.set labOffset, ($ + 8) - dotJump
  ADD     R0, PC, R0, LSL #2
  LDR     PC, [R0, #-labOffset]
-sub_9CF8:
+DrawNothing:
  LDMFD   R13!, {R6-R12, PC}
 sub_9CFC:
  STMFD   R13!, {R12, R14}
@@ -2134,13 +2123,13 @@ bank1:
  CMP     R12, R11
  BNE     bank1
  LDMFD   R13!, {R9, R11-R12, PC}
-sub_9DC8:
+DrawQuadrilateral:
  STMFD   R13!, {R2-R7, R9-R12, R14}
- BL      sub_9DDC
+ BL      DrawTriangle
  LDMFD   R13!, {R0-R5}
- BL      sub_9DDC
+ BL      DrawTriangle
  LDMFD   R13!, {R9-R12, PC}
-sub_9DDC:
+DrawTriangle:
  CMP     R0, #320
  CMPLO   R1, #0xEF
  CMPLO   R2, #320
@@ -2465,7 +2454,7 @@ lab_A244:
  MOVGT   R14, R6
  MOVGT   R6, R7
  MOVGT   R7, R14
- BL      sub_A408
+ BL      FillTriangle
  LDMFD   R13!, {R0-R1}
  SUBS    R9, R3, R1
  LDMEQIA R13!, {PC}
@@ -2507,7 +2496,7 @@ lab_A2C4:
  ORRNE   R5, R5, #0x8000
 lab_A300:
  LDR     R12, screenAddr
- BL      sub_A408
+ BL      FillTriangle
  LDMFD   R13!, {PC}
 lab_A30C:
  RSBMI   R10, R10, #0
@@ -2580,7 +2569,7 @@ lab_A3CC:
  MOVGT   R4, R5
  MOVGT   R5, R14
  B       lab_A300
-sub_A408:
+FillTriangle:
  CMP     R9, #0x100
  MOVHS   PC, R14
  STMFD   R13!, {R14}
@@ -2646,12 +2635,12 @@ DrawHorizontalLine:
  STRNEB  R8, [R11], #1
  TSTNE   R11, #3
  STRNEB  R8, [R11], #1
-lab_A4F4:
+hlin1:
  STR     R8, [R11], #4
  CMP     R11, R0
  STRLO   R8, [R11], #4
  CMPLO   R11, R0
- BLO     lab_A4F4
+ BLO     hlin1
  CMP     R11, R10
  STRLOB  R8, [R11], #1
  CMPLO   R11, R10
@@ -2827,7 +2816,7 @@ snew2:
 snew3:
  SUBS    R5, R5, #1
  BPL     snew2
- MOV     R0, #OBJ_ROCKET1
+ MOV     R0, #OBJ_ROCKET
  STRB    R0, [R6, #0x0107]
  STRB    R0, [R6, #0x0307]
  STRB    R0, [R6, #0x0507]
