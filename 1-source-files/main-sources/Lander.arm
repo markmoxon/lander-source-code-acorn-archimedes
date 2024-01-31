@@ -2521,7 +2521,7 @@ ENDIF
                                     \ to the right in the colour in R8, so
                                     \ that's the bottom pixel row of the bar
 
- LDMFD   R13!, {R10-R12, PC}        \ Retrieve the registers that we used from
+ LDMFD   R13!, {R10-R12, PC}        \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
 \ ******************************************************************************
@@ -3738,15 +3738,33 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
+\ This routine is only ever called from DrawWorld, with R0 = 9, 10 or var_0E4-2.
+\ In DrawWorld var_0E4 starts at 0 and goes down by 2 then back up by 1, so this
+\ routine gets called with a decreasing value of R0, so we work backwards
+\ through the entries in the var_805C table.
+\
+\ Are these the buckets from Braben's Micro User interview?
+\
+\ "However, since objects only need to be approxi mately in order, and it is
+\ known that the values are in a certain range, a tech nique known as bin
+\ sorting is used.
+\
+\ "This involves having a buffer for each of a range of depth values, and when
+\ an object's position is calculated it is put into the relevant buffer. Finally
+\ the buffers are flushed in depth order, farthest first. This requires a great
+\ deal of memory, but is virtually free as far as time considerations go."
+\
 \ Arguments:
 \
-\   R0                              Entry number from var_805C ???
+\   R0                              Entry number from var_805C table, which is
+\                                   where we fetch the dotJump offset ???
 \
 \ ******************************************************************************
 
 .DrawDotDashTriangle
 
- STMFD   R13!, {R6-R12, R14}        \ 
+ STMFD   R13!, {R6-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
  LDR     R1, var_924C               \ Set R1 = var_805C (as var_924C contains
                                     \ var_805C)
@@ -3769,18 +3787,22 @@ ENDIF
  ADD     R0, PC, R0, LSL #2         \ Jump to the address in entry R0 in the
  LDR     PC, [R0, #-labOffset]      \ dotJump table
 
+                                    \ Fall through into DrawNothing to return
+                                    \ from the subroutine
+
 \ ******************************************************************************
 \
 \       Name: DrawNothing
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing dots
+\    Summary: Return from the DrawDotDashTriangle routine
 \
 \ ******************************************************************************
 
 .DrawNothing
 
- LDMFD   R13!, {R6-R12, PC}         \ 
+ LDMFD   R13!, {R6-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3968,7 +3990,7 @@ ENDIF
                                     \ cleared to black, leaving just the two
                                     \ lines of text at the top
 
- LDMFD   R13!, {R9, R11-R12, PC}    \ Retrieve the registers that we used from
+ LDMFD   R13!, {R9, R11-R12, PC}    \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
 \ ******************************************************************************
@@ -5528,7 +5550,7 @@ ENDIF
  MOV     R0, #&D                    \ to the start of the next line, ready to
  SWI     OS_WriteC                  \ print further numbers if required
 
- LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we used from
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
 \ ******************************************************************************
