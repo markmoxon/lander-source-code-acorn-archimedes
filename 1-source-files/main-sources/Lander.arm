@@ -371,27 +371,28 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_805C
+\       Name: graphicsBuffers
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Graphics buffers
+\    Summary: The 12 graphics buffers that store graphics commands according to
+\             distance
 \
 \ ******************************************************************************
 
-.var_805C
+.graphicsBuffers
 
- EQUD    &00026600
- EQUD    &000276D4
- EQUD    &000287A8
- EQUD    &0002987C
- EQUD    &0002A950
- EQUD    &0002BA24
- EQUD    &0002CAF8
- EQUD    &0002DBCC
- EQUD    &0002ECA0
- EQUD    &0002FD74
- EQUD    &00030E48
- EQUD    &00031F1C
+ EQUD    &00026600                  \ Address of graphics buffer 0
+ EQUD    &000276D4                  \ Address of graphics buffer 1
+ EQUD    &000287A8                  \ Address of graphics buffer 2
+ EQUD    &0002987C                  \ Address of graphics buffer 3
+ EQUD    &0002A950                  \ Address of graphics buffer 4
+ EQUD    &0002BA24                  \ Address of graphics buffer 5
+ EQUD    &0002CAF8                  \ Address of graphics buffer 6
+ EQUD    &0002DBCC                  \ Address of graphics buffer 7
+ EQUD    &0002ECA0                  \ Address of graphics buffer 8
+ EQUD    &0002FD74                  \ Address of graphics buffer 9
+ EQUD    &00030E48                  \ Address of graphics buffer 10
+ EQUD    &00031F1C                  \ Address of graphics buffer 11
 
 \ ******************************************************************************
 \
@@ -481,7 +482,7 @@ ENDIF
  BNE     lab_8114                   \ 
  LDRB    R0, [R11, #var_0E4]        \ 
  SUBS    R0, R0, #2                 \ 
- BLPL    DrawDotDashTriangle        \ 
+ BLPL    DrawGraphicsBuffer         \ 
  LDRB    R0, [R11, #var_0E4]        \ 
  ADDS    R0, R0, #1                 \ 
  CMP     R0, #&B                    \ 
@@ -505,9 +506,9 @@ ENDIF
 .lab_81E0
 
  MOV     R0, #9                     \ 
- BL      DrawDotDashTriangle        \ 
+ BL      DrawGraphicsBuffer         \ 
  MOV     R0, #&A                    \ 
- BL      DrawDotDashTriangle        \ 
+ BL      DrawGraphicsBuffer         \ 
  LDMFD   R13!, {R5-R9, PC}          \ 
 
 \ ******************************************************************************
@@ -1251,7 +1252,7 @@ ENDIF
 
 .var_87EC
 
- EQUD    var_805C
+ EQUD    graphicsBuffers
 
  EQUD    var_802C
 
@@ -2068,7 +2069,7 @@ ENDIF
 .DrawObject
 
  STMFD   R13!, {R6-R12, R14}        \ 
- LDR     R12, var_924C              \ 
+ LDR     R12, graphicsBuffersAddr   \ 
  ADD     R4, R11, #0                \ 
  STMIA   R4, {R0-R2}                \ 
  MOVS    R4, R0                     \ 
@@ -2526,22 +2527,22 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_924C
+\       Name: graphicsBuffersAddr
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Graphics buffers
+\    Summary: The address of the table of graphics buffer addresses
 \
 \ ******************************************************************************
 
-.var_924C
+.graphicsBuffersAddr
 
- EQUD    var_805C
+ EQUD    graphicsBuffers
 
 \ ******************************************************************************
 \
 \       Name: var_9250
 \       Type: Variable
-\   Category: ???
+\   Category: Graphics buffers
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -3462,138 +3463,448 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: Draw1x1PixelDot
+\       Name: Draw1x1PixelDotFromBuffer
 \       Type: Subroutine
 \   Category: Drawing dots
-\    Summary: Draw a 1x1-pixel dot
+\    Summary: Process the "draw 1x1-pixel dot" command from the graphics buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ The 32-bit parameter word for this command is composed as follows:
+\
+\          #20-31     #12-19    #8-11            #0-7
+\    019876543210   98765432     1098        76543210
+\               ^          ^        ^               ^
+\               |          |        |               |
+\   Pixel x-coord     Colour   Unused   Pixel y-coord
+\         (0-319)    (0-255)                  (0-255)  
+\
+\ This command draws a 1x1-pixel dot at the given coordinates in the specified
+\ colour.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R9                              The address of the parameter word in the
+\                                   graphics buffer
+\
+\   R12                             The address of the screen bank we are
+\                                   drawing in, pointing just below the two
+\                                   lines of text at the top of the screen,
+\                                   as set in screenAddr
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R9                              Updated to point to the next word in the
+\                                   graphics buffer
 \
 \ ******************************************************************************
 
-.Draw1x1PixelDot
+.Draw1x1PixelDotFromBuffer
 
- LDR     R1, [R9], #4               \ 
- MOV     R0, R1, LSR #20            \ 
- MOV     R7, R1, LSR #12            \ 
- AND     R1, R1, #&FF               \ 
- ADD     R3, R12, R0                \ 
- ADD     R1, R1, R1, LSL #2         \ 
- ADD     R3, R3, R1, LSL #6         \ 
+ LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
+                                    \ buffer into R1, incrementing R9 to point
+                                    \ to the next command in the buffer
 
- STRB    R7, [R3]                   \ Draw a 1-pixel dot
+ MOV     R0, R1, LSR #20            \ Set R0 to bits #20-31 of the parameter
+                                    \ word, to extract the pixel x-coordinate
 
- B       lab_9CEC                   \ 
+ MOV     R7, R1, LSR #12            \ Set R7 to bits #12-31 of the parameter
+                                    \ word to extract the colour number, which
+                                    \ we poke into memory as a byte containing
+                                    \ bits #12-19
+
+ AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
+                                    \ to extract the pixel y-coordinate
+
+ ADD     R3, R12, R0                \ Set R3 = R12 + R0
+                                    \        = screenAddr + x-coordinate
+
+ ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+ ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+                                    \        = R3 + 320 * R1
+                                    \        = screenAddr + x-coordinate
+                                    \          + 320 * y-coordinate
+                                    \
+                                    \ So R3 contains the screen address of the
+                                    \ coordinate in screen memory
+
+ STRB    R7, [R3]                   \ Draw a 1x1-pixel dot at the coordinates in
+                                    \ the colour specified in R7
+
+ B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
+                                    \ buffer
 
 \ ******************************************************************************
 \
-\       Name: Draw2x1PixelDash
+\       Name: Draw2x1PixelDashFromBuffer
 \       Type: Subroutine
 \   Category: Drawing dots
-\    Summary: Draw a 2x1-pixel dash
+\    Summary: Process the "draw 2x1-pixel dash" command from the graphics buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ The 32-bit parameter word for this command is composed as follows:
+\
+\          #20-31     #12-19    #8-11            #0-7
+\    019876543210   98765432     1098        76543210
+\               ^          ^        ^               ^
+\               |          |        |               |
+\   Pixel x-coord     Colour   Unused   Pixel y-coord
+\         (0-319)    (0-255)                  (0-255)  
+\
+\ This command draws a 2x1-pixel dash at the given coordinates in the specified
+\ colour, with the coordinates specifying the left end of the dash.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R9                              The address of the parameter word in the
+\                                   graphics buffer
+\
+\   R12                             The address of the screen bank we are
+\                                   drawing in, pointing just below the two
+\                                   lines of text at the top of the screen,
+\                                   as set in screenAddr
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R9                              Updated to point to the next word in the
+\                                   graphics buffer
 \
 \ ******************************************************************************
 
-.Draw2x1PixelDash
+.Draw2x1PixelDashFromBuffer
 
- LDR     R1, [R9], #4               \ 
- MOV     R0, R1, LSR #20            \ 
- MOV     R7, R1, LSR #12            \ 
- AND     R1, R1, #&FF               \ 
- ADD     R3, R12, R0                \ 
- ADD     R1, R1, R1, LSL #2         \ 
- ADD     R3, R3, R1, LSL #6         \ 
- STRB    R7, [R3]                   \ Draw a 2-pixel dash
- STRB    R7, [R3, #1]               \ 
- B       lab_9CEC                   \ 
+ LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
+                                    \ buffer into R1, incrementing R9 to point
+                                    \ to the next command in the buffer
+
+ MOV     R0, R1, LSR #20            \ Set R0 to bits #20-31 of the parameter
+                                    \ word, to extract the pixel x-coordinate
+
+ MOV     R7, R1, LSR #12            \ Set R7 to bits #12-31 of the parameter
+                                    \ word to extract the colour number, which
+                                    \ we poke into memory as a byte containing
+                                    \ bits #12-19
+
+ AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
+                                    \ to extract the pixel y-coordinate
+
+ ADD     R3, R12, R0                \ Set R3 = R12 + R0
+                                    \        = screenAddr + x-coordinate
+
+ ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+ ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+                                    \        = R3 + 320 * R1
+                                    \        = screenAddr + x-coordinate
+                                    \          + 320 * y-coordinate
+                                    \
+                                    \ So R3 contains the screen address of the
+                                    \ coordinate in screen memory
+
+ STRB    R7, [R3]                   \ Draw a 2x1-pixel dash at the coordinates in
+ STRB    R7, [R3, #1]               \ in the colour specified in R7
+
+ B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
+                                    \ buffer
 
 \ ******************************************************************************
 \
-\       Name: Draw2x2PixelDot
+\       Name: Draw2x2PixelDotFromBuffer
 \       Type: Subroutine
 \   Category: Drawing dots
-\    Summary: Draw a 2x2-pixel dot
+\    Summary: Process the "draw 2x2-pixel dot" command from the graphics buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ The 32-bit parameter word for this command is composed as follows:
+\
+\          #20-31     #12-19    #8-11            #0-7
+\    019876543210   98765432     1098        76543210
+\               ^          ^        ^               ^
+\               |          |        |               |
+\   Pixel x-coord     Colour   Unused   Pixel y-coord
+\         (0-319)    (0-255)                  (0-255)  
+\
+\ This command draws a 2x2-pixel dot at the given coordinates in the specified
+\ colour, with the coordinates specifying the top-left corner of the dot.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R9                              The address of the parameter word in the
+\                                   graphics buffer
+\
+\   R12                             The address of the screen bank we are
+\                                   drawing in, pointing just below the two
+\                                   lines of text at the top of the screen,
+\                                   as set in screenAddr
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R9                              Updated to point to the next word in the
+\                                   graphics buffer
 \
 \ ******************************************************************************
 
-.Draw2x2PixelDot
+.Draw2x2PixelDotFromBuffer
 
- LDR     R1, [R9], #4               \ 
- MOV     R0, R1, LSR #20            \ 
- MOV     R7, R1, LSR #12            \ 
- AND     R1, R1, #&FF               \ 
- ADD     R3, R12, R0                \ 
- ADD     R1, R1, R1, LSL #2         \ 
- ADD     R3, R3, R1, LSL #6         \ 
- STRB    R7, [R3]                   \ 
- STRB    R7, [R3, #1]               \ 
- STRB    R7, [R3, #320]             \ Draw a 2x2-pixel dot
- STRB    R7, [R3, #320+1]           \ 
- B       lab_9CEC                   \ 
+ LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
+                                    \ buffer into R1, incrementing R9 to point
+                                    \ to the next command in the buffer
+
+ MOV     R0, R1, LSR #20            \ Set R0 to bits #20-31 of the parameter
+                                    \ word, to extract the pixel x-coordinate
+
+ MOV     R7, R1, LSR #12            \ Set R7 to bits #12-31 of the parameter
+                                    \ word to extract the colour number, which
+                                    \ we poke into memory as a byte containing
+                                    \ bits #12-19
+
+ AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
+                                    \ to extract the pixel y-coordinate
+
+ ADD     R3, R12, R0                \ Set R3 = R12 + R0
+                                    \        = screenAddr + x-coordinate
+
+ ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+ ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+                                    \        = R3 + 320 * R1
+                                    \        = screenAddr + x-coordinate
+                                    \          + 320 * y-coordinate
+                                    \
+                                    \ So R3 contains the screen address of the
+                                    \ coordinate in screen memory
+
+ STRB    R7, [R3]                   \ Draw a 2x2-pixel dot at the coordinates in
+ STRB    R7, [R3, #1]               \ the colour specified in R7
+ STRB    R7, [R3, #320]
+ STRB    R7, [R3, #320+1]
+
+ B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
+                                    \ buffer
 
 \ ******************************************************************************
 \
-\       Name: Draw3x2PixelDash
+\       Name: Draw3x2PixelDashFromBuffer
 \       Type: Subroutine
 \   Category: Drawing dots
-\    Summary: Draw a 3x2-pixel dash
+\    Summary: Process the "draw 3x2-pixel dash" command from the graphics buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ The 32-bit parameter word for this command is composed as follows:
+\
+\          #20-31     #12-19    #8-11            #0-7
+\    019876543210   98765432     1098        76543210
+\               ^          ^        ^               ^
+\               |          |        |               |
+\   Pixel x-coord     Colour   Unused   Pixel y-coord
+\         (0-319)    (0-255)                  (0-255)  
+\
+\ This command draws a 3x2-pixel dash at the given coordinates in the specified
+\ colour, with the coordinates specifying the pixel in the bottom-middle of the
+\ dash.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R9                              The address of the parameter word in the
+\                                   graphics buffer
+\
+\   R12                             The address of the screen bank we are
+\                                   drawing in, pointing just below the two
+\                                   lines of text at the top of the screen,
+\                                   as set in screenAddr
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R9                              Updated to point to the next word in the
+\                                   graphics buffer
 \
 \ ******************************************************************************
 
-.Draw3x2PixelDash
+.Draw3x2PixelDashFromBuffer
 
- LDR     R1, [R9], #4               \ 
- MOV     R0, R1, LSR #20            \ 
- MOV     R7, R1, LSR #12            \ 
- AND     R1, R1, #&FF               \ 
- ADD     R3, R12, R0                \ 
- ADD     R1, R1, R1, LSL #2         \ 
- ADD     R3, R3, R1, LSL #6         \ 
- STRB    R7, [R3, #-1]              \ Draw a 3-pixel double-height dash
- STRB    R7, [R3]                   \ 
- STRB    R7, [R3, #1]               \ 
- STRB    R7, [R3, #320-1]           \ 
- STRB    R7, [R3, #320]             \ 
- STRB    R7, [R3, #320+1]           \ 
- B       lab_9CEC                   \ 
+ LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
+                                    \ buffer into R1, incrementing R9 to point
+                                    \ to the next command in the buffer
+
+ MOV     R0, R1, LSR #20            \ Set R0 to bits #20-31 of the parameter
+                                    \ word, to extract the pixel x-coordinate
+
+ MOV     R7, R1, LSR #12            \ Set R7 to bits #12-31 of the parameter
+                                    \ word to extract the colour number, which
+                                    \ we poke into memory as a byte containing
+                                    \ bits #12-19
+
+ AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
+                                    \ to extract the pixel y-coordinate
+
+ ADD     R3, R12, R0                \ Set R3 = R12 + R0
+                                    \        = screenAddr + x-coordinate
+
+ ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+ ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+                                    \        = R3 + 320 * R1
+                                    \        = screenAddr + x-coordinate
+                                    \          + 320 * y-coordinate
+                                    \
+                                    \ So R3 contains the screen address of the
+                                    \ coordinate in screen memory
+
+ STRB    R7, [R3, #-1]              \ Draw a 3x2-pixel dash at the coordinates
+ STRB    R7, [R3]                   \ in the colour specified in R7
+ STRB    R7, [R3, #1]
+ STRB    R7, [R3, #320-1]
+ STRB    R7, [R3, #320]
+ STRB    R7, [R3, #320+1]
+
+ B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
+                                    \ buffer
 
 \ ******************************************************************************
 \
-\       Name: Draw3x1PixelDash
+\       Name: Draw3x1PixelDashFromBuffer
 \       Type: Subroutine
 \   Category: Drawing dots
-\    Summary: Draw a 3x1-pixel dash
+\    Summary: Process the "draw 3x1-pixel dash" command from the graphics buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ The 32-bit parameter word for this command is composed as follows:
+\
+\          #20-31     #12-19    #8-11            #0-7
+\    019876543210   98765432     1098        76543210
+\               ^          ^        ^               ^
+\               |          |        |               |
+\   Pixel x-coord     Colour   Unused   Pixel y-coord
+\         (0-319)    (0-255)                  (0-255)  
+\
+\ This command draws a 3x1-pixel dash at the given coordinates in the specified
+\ colour, with the coordinates specifying the pixel in the middle of the dash.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R9                              The address of the parameter word in the
+\                                   graphics buffer
+\
+\   R12                             The address of the screen bank we are
+\                                   drawing in, pointing just below the two
+\                                   lines of text at the top of the screen,
+\                                   as set in screenAddr
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R9                              Updated to point to the next word in the
+\                                   graphics buffer
 \
 \ ******************************************************************************
 
-.Draw3x1PixelDash
+.Draw3x1PixelDashFromBuffer
 
- LDR     R1, [R9], #4               \ 
- MOV     R0, R1, LSR #20            \ 
- MOV     R7, R1, LSR #12            \ 
- AND     R1, R1, #&FF               \ 
- ADD     R3, R12, R0                \ 
- ADD     R1, R1, R1, LSL #2         \ 
- ADD     R3, R3, R1, LSL #6         \ 
- STRB    R7, [R3, #-1]              \ Draw a 3-pixel dash
- STRB    R7, [R3]                   \ 
- STRB    R7, [R3, #1]               \ 
- B       lab_9CEC                   \ 
+ LDR     R1, [R9], #4               \ Fetch the parameter word from the graphics
+                                    \ buffer into R1, incrementing R9 to point
+                                    \ to the next command in the buffer
+
+ MOV     R0, R1, LSR #20            \ Set R0 to bits #20-31 of the parameter
+                                    \ word, to extract the pixel x-coordinate
+
+ MOV     R7, R1, LSR #12            \ Set R7 to bits #12-31 of the parameter
+                                    \ word to extract the colour number, which
+                                    \ we poke into memory as a byte containing
+                                    \ bits #12-19
+
+ AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
+                                    \ to extract the pixel y-coordinate
+
+ ADD     R3, R12, R0                \ Set R3 = R12 + R0
+                                    \        = screenAddr + x-coordinate
+
+ ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+ ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+                                    \        = R3 + 320 * R1
+                                    \        = screenAddr + x-coordinate
+                                    \          + 320 * y-coordinate
+                                    \
+                                    \ So R3 contains the screen address of the
+                                    \ coordinate in screen memory
+
+ STRB    R7, [R3, #-1]              \ Draw a 3x1-pixel dash at the coordinates
+ STRB    R7, [R3]                   \ in the colour specified in R7
+ STRB    R7, [R3, #1]
+
+ B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
+                                    \ buffer
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangleViaJump
+\       Name: DrawTriangleFromBuffer
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: Draw a triangle via the jump table at dotJump
+\    Summary: Process the "draw triangle" command from the graphics buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ The seven parameter words for this command are the arguments for the
+\ DrawTriangle routine in register order.
+\
+\ This command draws a triangle of the specified size, position and colour.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R9                              The address of the seven parameter words in
+\                                   the graphics buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R9                              Updated to point to the next word in the
+\                                   graphics buffer
+\
+\   R12                             R12 is preserved
 \
 \ ******************************************************************************
 
-.DrawTriangleViaJump
+.DrawTriangleFromBuffer
 
- LDMIA   R9!, {R0-R5, R8}           \ 
- STMFD   R13!, {R9, R12}            \ 
- BL      DrawTriangle               \ 
- LDMFD   R13!, {R9, R12}            \ 
- B       lab_9CEC                   \ 
+ LDMIA   R9!, {R0-R5, R8}           \ Fetch the seven parameter words from the
+                                    \ graphics buffer into R0 to R5 and R8,
+                                    \ incrementing R9 to point to the next
+                                    \ command in the buffer
+
+ STMFD   R13!, {R9, R12}            \ Store R9 and R12 on the stack so they
+                                    \ don't get corrupted by the following call
+                                    \ to DrawTriangle
+
+ BL      DrawTriangle               \ Draw a triangle at the coordinates
+                                    \ specified in R0 to R5 and R8
+
+ LDMFD   R13!, {R9, R12}            \ Retrieve the values of R9 and R12 from the
+                                    \ stack that we stored above
+
+ B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
+                                    \ buffer
 
 \ ******************************************************************************
 \
@@ -3698,108 +4009,107 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: dotJump
+\       Name: bufferJump
 \       Type: Variable
 \   Category: Drawing dots
-\    Summary: Jump table for drawing dots, dashes and triangles using the
-\             relevant entry point in DrawDotDashTriangle
+\    Summary: The jump table for drawing commands in the graphics buffers
 \
 \ ******************************************************************************
 
-.dotJump
+.bufferJump
 
- EQUD    Draw3x2PixelDash
- EQUD    Draw3x2PixelDash
- EQUD    Draw3x2PixelDash
- EQUD    Draw3x2PixelDash
- EQUD    Draw3x2PixelDash
- EQUD    Draw3x2PixelDash
- EQUD    Draw2x2PixelDot
- EQUD    Draw2x1PixelDash
- EQUD    Draw1x1PixelDot
- EQUD    Draw3x1PixelDash
- EQUD    Draw3x1PixelDash
- EQUD    Draw3x1PixelDash
- EQUD    Draw3x1PixelDash
- EQUD    Draw3x1PixelDash
- EQUD    Draw3x1PixelDash
- EQUD    Draw2x1PixelDash
- EQUD    Draw2x1PixelDash
- EQUD    Draw1x1PixelDot
- EQUD    DrawTriangleViaJump
- EQUD    DrawNothing
+ EQUD    Draw3x2PixelDashFromBuffer
+ EQUD    Draw3x2PixelDashFromBuffer
+ EQUD    Draw3x2PixelDashFromBuffer
+ EQUD    Draw3x2PixelDashFromBuffer
+ EQUD    Draw3x2PixelDashFromBuffer
+ EQUD    Draw3x2PixelDashFromBuffer
+ EQUD    Draw2x2PixelDotFromBuffer
+ EQUD    Draw2x1PixelDashFromBuffer
+ EQUD    Draw1x1PixelDotFromBuffer
+ EQUD    Draw3x1PixelDashFromBuffer
+ EQUD    Draw3x1PixelDashFromBuffer
+ EQUD    Draw3x1PixelDashFromBuffer
+ EQUD    Draw3x1PixelDashFromBuffer
+ EQUD    Draw3x1PixelDashFromBuffer
+ EQUD    Draw3x1PixelDashFromBuffer
+ EQUD    Draw2x1PixelDashFromBuffer
+ EQUD    Draw2x1PixelDashFromBuffer
+ EQUD    Draw1x1PixelDotFromBuffer
+ EQUD    DrawTriangleFromBuffer
+ EQUD    FinishGraphicsBuffer
 
 \ ******************************************************************************
 \
-\       Name: DrawDotDashTriangle
+\       Name: DrawGraphicsBuffer
 \       Type: Subroutine
 \   Category: Drawing dots
-\    Summary: Draw a dot, dash or triangle
+\    Summary: Draw the contents of the specified graphics buffer
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine is only ever called from DrawWorld, with R0 = 9, 10 or var_0E4-2.
-\ In DrawWorld var_0E4 starts at 0 and goes down by 2 then back up by 1, so this
-\ routine gets called with a decreasing value of R0, so we work backwards
-\ through the entries in the var_805C table.
+\ This routine draws the contents of a specified graphics buffer. There are 12
+\ buffers that are used to layer the game's graphics correctly according to an
+\ object's distance. This system was described by David Braben in November 1987
+\ issue of the Micro User:
 \
-\ Are these the buckets from Braben's Micro User interview?
-\
-\ "However, since objects only need to be approxi mately in order, and it is
-\ known that the values are in a certain range, a tech nique known as bin
-\ sorting is used.
-\
-\ "This involves having a buffer for each of a range of depth values, and when
+\ "Since objects only need to be approximately in order, and it is known that
+\ the values are in a certain range, a technique known as bin sorting is used.
+\ This involves having a buffer for each of a range of depth values, and when
 \ an object's position is calculated it is put into the relevant buffer. Finally
 \ the buffers are flushed in depth order, farthest first. This requires a great
 \ deal of memory, but is virtually free as far as time considerations go."
 \
+\ This routine implements a buffer being "flushed".
+\
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
-\   R0                              Entry number from var_805C table, which is
-\                                   where we fetch the dotJump offset ???
+\   R0                              The number of the graphics buffer to draw
+\                                   (0 to 11)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   DrawNextFromGraphicsBuffer      Process the next command from the graphics
+\                                   buffer
+\
+\   FinishGraphicsBuffer            Return from the DrawGraphicsBuffer routine
+\                                   to stop drawing from the graphics buffer
 \
 \ ******************************************************************************
 
-.DrawDotDashTriangle
+.DrawGraphicsBuffer
 
  STMFD   R13!, {R6-R12, R14}        \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- LDR     R1, var_924C               \ Set R1 = var_805C (as var_924C contains
-                                    \ var_805C)
+ LDR     R1, graphicsBuffersAddr    \ Set R1 to the address of the table that
+                                    \ contains the addresses of the graphics
+                                    \ buffers
 
- LDR     R9, [R1, R0, LSL #2]       \ Set R9 to the R0-th entry from var_805C
-                                    \ table
+ LDR     R9, [R1, R0, LSL #2]       \ Set R9 to the R0-th entry from the
+                                    \ graphicsBuffers table
 
  LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
                                     \ we are drawing in, pointing just below
                                     \ the two lines of text at the top of the
                                     \ screen
-.lab_9CEC
+.DrawNextFromGraphicsBuffer
 
- LDR     R0, [R9], #4               \ Fetch R0 from the address in var_805C
+ LDR     R0, [R9], #4               \ Fetch R0 from the address in graphicsBuffers
                                     \ table and increment R9 to the next address
 
- labOffset = ($ + 8) - dotJump      \ Set labOffset to the offset back to the
-                                    \ dotJump table from the next instruction
+ labOffset = ($ + 8) - bufferJump   \ Set labOffset to the offset back to the
+                                    \ bufferJump table from the next
+                                    \ instruction
 
  ADD     R0, PC, R0, LSL #2         \ Jump to the address in entry R0 in the
- LDR     PC, [R0, #-labOffset]      \ dotJump table
+ LDR     PC, [R0, #-labOffset]      \ bufferJump table
 
-                                    \ Fall through into DrawNothing to return
-                                    \ from the subroutine
-
-\ ******************************************************************************
-\
-\       Name: DrawNothing
-\       Type: Subroutine
-\   Category: Drawing dots
-\    Summary: Return from the DrawDotDashTriangle routine
-\
-\ ******************************************************************************
-
-.DrawNothing
+.FinishGraphicsBuffer
 
  LDMFD   R13!, {R6-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -3816,7 +4126,7 @@ ENDIF
 .sub_9CFC
 
  STMFD   R13!, {R12, R14}           \ 
- LDR     R12, var_924C              \ 
+ LDR     R12, graphicsBuffersAddr   \ 
  LDR     R14, var_9250              \ 
  MOV     R0, #&B                    \ 
  MOV     R1, #&13                   \ 
@@ -4016,6 +4326,24 @@ ENDIF
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a triangle
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              ???
+\
+\   R1                              ???
+\
+\   R2                              ???
+\
+\   R3                              ???
+\
+\   R4                              ???
+\
+\   R5                              ???
+\
+\   R8                              ???
 \
 \ ******************************************************************************
 

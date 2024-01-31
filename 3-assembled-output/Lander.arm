@@ -97,7 +97,7 @@ var_802C:
 .long    0x0002FD74
 .long    0x00030E48
 .long    0x00031F1C
-var_805C:
+graphicsBuffers:
 .long    0x00026600
 .long    0x000276D4
 .long    0x000287A8
@@ -180,7 +180,7 @@ lab_8170:
  BNE     lab_8114
  LDRB    R0, [R11, #var_0E4]
  SUBS    R0, R0, #2
- BLPL    DrawDotDashTriangle
+ BLPL    DrawGraphicsBuffer
  LDRB    R0, [R11, #var_0E4]
  ADDS    R0, R0, #1
  CMP     R0, #0xB
@@ -202,9 +202,9 @@ lab_8170:
  B       lab_80DC
 lab_81E0:
  MOV     R0, #9
- BL      DrawDotDashTriangle
+ BL      DrawGraphicsBuffer
  MOV     R0, #0xA
- BL      DrawDotDashTriangle
+ BL      DrawGraphicsBuffer
  LDMFD   R13!, {R5-R9, PC}
 GetLandscapeAltitude:
  LDR     R0, [R11, #altitude]
@@ -594,7 +594,7 @@ GameOver:
  SWI     OS_ReadC
  B       StartNewGame
 var_87EC:
-.long    var_805C
+.long    graphicsBuffers
 .long    var_802C
 DrawExhaustAndBullets:
  STMFD   R13!, {R10, R12, R14}
@@ -1076,7 +1076,7 @@ objectRockAddr:
 .long    objectRock
 DrawObject:
  STMFD   R13!, {R6-R12, R14}
- LDR     R12, var_924C
+ LDR     R12, graphicsBuffersAddr
  ADD     R4, R11, #0
  STMIA   R4, {R0-R2}
  MOVS    R4, R0
@@ -1316,8 +1316,8 @@ DrawFuelLevel:
  MOV     R10, R1, LSR #4
  BL      DrawHorizontalLine
  LDMFD   R13!, {R10-R12, PC}
-var_924C:
-.long    var_805C
+graphicsBuffersAddr:
+.long    graphicsBuffers
 var_9250:
 .long    var_802C
 sub_9254:
@@ -1907,7 +1907,7 @@ var_9A70:
 .long    0xFFFFFFFF
 var_9AC0:
 .long    var_9A70
-Draw1x1PixelDot:
+Draw1x1PixelDotFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1916,8 +1916,8 @@ Draw1x1PixelDot:
  ADD     R1, R1, R1, LSL #2
  ADD     R3, R3, R1, LSL #6
  STRB    R7, [R3]
- B       lab_9CEC
-Draw2x1PixelDash:
+ B       DrawNextFromGraphicsBuffer
+Draw2x1PixelDashFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1927,8 +1927,8 @@ Draw2x1PixelDash:
  ADD     R3, R3, R1, LSL #6
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
- B       lab_9CEC
-Draw2x2PixelDot:
+ B       DrawNextFromGraphicsBuffer
+Draw2x2PixelDotFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1940,8 +1940,8 @@ Draw2x2PixelDot:
  STRB    R7, [R3, #1]
  STRB    R7, [R3, #320]
  STRB    R7, [R3, #320+1]
- B       lab_9CEC
-Draw3x2PixelDash:
+ B       DrawNextFromGraphicsBuffer
+Draw3x2PixelDashFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1955,8 +1955,8 @@ Draw3x2PixelDash:
  STRB    R7, [R3, #320-1]
  STRB    R7, [R3, #320]
  STRB    R7, [R3, #320+1]
- B       lab_9CEC
-Draw3x1PixelDash:
+ B       DrawNextFromGraphicsBuffer
+Draw3x1PixelDashFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
@@ -1967,13 +1967,13 @@ Draw3x1PixelDash:
  STRB    R7, [R3, #-1]
  STRB    R7, [R3]
  STRB    R7, [R3, #1]
- B       lab_9CEC
-DrawTriangleViaJump:
+ B       DrawNextFromGraphicsBuffer
+DrawTriangleFromBuffer:
  LDMIA   R9!, {R0-R5, R8}
  STMFD   R13!, {R9, R12}
  BL      DrawTriangle
  LDMFD   R13!, {R9, R12}
- B       lab_9CEC
+ B       DrawNextFromGraphicsBuffer
 sub_9BB8:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
@@ -2031,42 +2031,42 @@ sub_9C58:
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-dotJump:
-.long    Draw3x2PixelDash
-.long    Draw3x2PixelDash
-.long    Draw3x2PixelDash
-.long    Draw3x2PixelDash
-.long    Draw3x2PixelDash
-.long    Draw3x2PixelDash
-.long    Draw2x2PixelDot
-.long    Draw2x1PixelDash
-.long    Draw1x1PixelDot
-.long    Draw3x1PixelDash
-.long    Draw3x1PixelDash
-.long    Draw3x1PixelDash
-.long    Draw3x1PixelDash
-.long    Draw3x1PixelDash
-.long    Draw3x1PixelDash
-.long    Draw2x1PixelDash
-.long    Draw2x1PixelDash
-.long    Draw1x1PixelDot
-.long    DrawTriangleViaJump
-.long    DrawNothing
-DrawDotDashTriangle:
+bufferJump:
+.long    Draw3x2PixelDashFromBuffer
+.long    Draw3x2PixelDashFromBuffer
+.long    Draw3x2PixelDashFromBuffer
+.long    Draw3x2PixelDashFromBuffer
+.long    Draw3x2PixelDashFromBuffer
+.long    Draw3x2PixelDashFromBuffer
+.long    Draw2x2PixelDotFromBuffer
+.long    Draw2x1PixelDashFromBuffer
+.long    Draw1x1PixelDotFromBuffer
+.long    Draw3x1PixelDashFromBuffer
+.long    Draw3x1PixelDashFromBuffer
+.long    Draw3x1PixelDashFromBuffer
+.long    Draw3x1PixelDashFromBuffer
+.long    Draw3x1PixelDashFromBuffer
+.long    Draw3x1PixelDashFromBuffer
+.long    Draw2x1PixelDashFromBuffer
+.long    Draw2x1PixelDashFromBuffer
+.long    Draw1x1PixelDotFromBuffer
+.long    DrawTriangleFromBuffer
+.long    FinishGraphicsBuffer
+DrawGraphicsBuffer:
  STMFD   R13!, {R6-R12, R14}
- LDR     R1, var_924C
+ LDR     R1, graphicsBuffersAddr
  LDR     R9, [R1, R0, LSL #2]
  LDR     R12, screenAddr
-lab_9CEC:
+DrawNextFromGraphicsBuffer:
  LDR     R0, [R9], #4
-.set labOffset, ($ + 8) - dotJump
+.set labOffset, ($ + 8) - bufferJump
  ADD     R0, PC, R0, LSL #2
  LDR     PC, [R0, #-labOffset]
-DrawNothing:
+FinishGraphicsBuffer:
  LDMFD   R13!, {R6-R12, PC}
 sub_9CFC:
  STMFD   R13!, {R12, R14}
- LDR     R12, var_924C
+ LDR     R12, graphicsBuffersAddr
  LDR     R14, var_9250
  MOV     R0, #0xB
  MOV     R1, #0x13
