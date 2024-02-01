@@ -45,7 +45,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    40: .set var_10C, 0x10C
                             	    41: .set objectData, 0x110
                             	    42: .set var_114, 0x114
-                            	    43: .set var_118, 0x118
+                            	    43: .set mainLoopCount, 0x118
                             	    44: .set var_11C, 0x11C
                             	    45: .set var_120, 0x120
                             	    46: .set currentScore, 0x124
@@ -54,10 +54,10 @@ Source: "3-assembled-output/Lander.arm"
                             	    49: .set var_130, 0x130
                             	    50: .set remainingLives, 0x134
                             	    51: .set highScore, 0x138
-                            	    52: .set xLandscape, 0x13C
-                            	    53: .set yLandscape, 0x140
-                            	    54: .set zLandscape, 0x144
-                            	    55: .set xCorner, 0x148
+                            	    52: .set xCamera, 0x13C
+                            	    53: .set yCamera, 0x140
+                            	    54: .set zCamera, 0x144
+                            	    55: .set xLandscape, 0x148
                             	    56: .set var_150, 0x150
                             	    57: .set var_154, 0x154
                             	    58: .set var_158, 0x158
@@ -117,14 +117,14 @@ Source: "3-assembled-output/Lander.arm"
 00:00008088 1C1F0300        	   112: .long    0x00031F1C
                             	   113: DrawLandscape:
 00:0000808C E0432DE9        	   114:  STMFD   R13!, {R5-R9, R14}
-00:00008090 44319BE5        	   115:  LDR     R3, [R11, #zLandscape]
+00:00008090 44319BE5        	   115:  LDR     R3, [R11, #zCamera]
 00:00008094 FF9403E2        	   116:  AND     R9, R3, #0xFF000000
 00:00008098 093043E0        	   117:  SUB     R3, R3, R9
 00:0000809C 50918BE5        	   118:  STR     R9, [R11, #var_150]
-00:000080A0 3C419BE5        	   119:  LDR     R4, [R11, #xLandscape]
+00:000080A0 3C419BE5        	   119:  LDR     R4, [R11, #xCamera]
 00:000080A4 FF8404E2        	   120:  AND     R8, R4, #0xFF000000
 00:000080A8 084044E0        	   121:  SUB     R4, R4, R8
-00:000080AC 48818BE5        	   122:  STR     R8, [R11, #xCorner]
+00:000080AC 48818BE5        	   122:  STR     R8, [R11, #xLandscape]
 00:000080B0 165E8BE2        	   123:  ADD     R5, R11, #0x160
 00:000080B4 B0001FE5        	   124:  LDR     R0, var_800C
 00:000080B8 070090E8        	   125:  LDMFD   R0, {R0-R2}
@@ -147,13 +147,13 @@ Source: "3-assembled-output/Lander.arm"
 00:000080F8 070090E8        	   142:  LDMIA   R0, {R0-R2}
 00:000080FC 174E8BE2        	   143:  ADD     R4, R11, #0x170
 00:00008100 070084E8        	   144:  STMIA   R4, {R0-R2}
-00:00008104 48819BE5        	   145:  LDR     R8, [R11, #xCorner]
+00:00008104 48819BE5        	   145:  LDR     R8, [R11, #xLandscape]
 00:00008108 168548E2        	   146:  SUB     R8, R8, #0x5800000
 00:0000810C 0201A0E3        	   147:  MOV     R0, #0x80000000
 00:00008110 C4008BE5        	   148:  STR     R0, [R11, #var_0C4]
                             	   149: lab_8114:
 00:00008114 360000EB        	   150:  BL      GetLandscapeAltitude
-00:00008118 40E19BE5        	   151:  LDR     R14, [R11, #yLandscape]
+00:00008118 40E19BE5        	   151:  LDR     R14, [R11, #yCamera]
 00:0000811C 0E0040E0        	   152:  SUB     R0, R0, R14
 00:00008120 74018BE5        	   153:  STR     R0, [R11, #var_174]
 00:00008124 170E8BE2        	   154:  ADD     R0, R11, #0x170
@@ -261,14 +261,14 @@ Source: "3-assembled-output/Lander.arm"
                             	   256: sub_82AC:
 00:000082AC 00432DE9        	   257:  STMFD   R13!, {R8-R9, R14}
 00:000082B0 008090E5        	   258:  LDR     R8, [R0]
-00:000082B4 3C119BE5        	   259:  LDR     R1, [R11, #xLandscape]
+00:000082B4 3C119BE5        	   259:  LDR     R1, [R11, #xCamera]
 00:000082B8 018088E0        	   260:  ADD     R8, R8, R1
 00:000082BC 089090E5        	   261:  LDR     R9, [R0, #8]
-00:000082C0 44119BE5        	   262:  LDR     R1, [R11, #zLandscape]
+00:000082C0 44119BE5        	   262:  LDR     R1, [R11, #zCamera]
 00:000082C4 019089E0        	   263:  ADD     R9, R9, R1
 00:000082C8 059349E2        	   264:  SUB     R9, R9, #0x14000000
 00:000082CC C8FFFFEB        	   265:  BL      GetLandscapeAltitude
-00:000082D0 40E19BE5        	   266:  LDR     R14, [R11, #yLandscape]
+00:000082D0 40E19BE5        	   266:  LDR     R14, [R11, #yCamera]
 00:000082D4 0E0040E0        	   267:  SUB     R0, R0, R14
 00:000082D8 0083BDE8        	   268:  LDMFD   R13!, {R8-R9, PC}
                             	   269: sub_82DC:
@@ -545,7 +545,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000086E4 051641E2        	   540:  SUB     R1, R1, #0x500000
 00:000086E8 730100EB        	   541:  BL      sub_8CBC
                             	   542: lose1:
-00:000086EC 18019BE5        	   543:  LDR     R0, [R11, #var_118]
+00:000086EC 18019BE5        	   543:  LDR     R0, [R11, #mainLoopCount]
 00:000086F0 000CA0E1        	   544:  MOV     R0, R0, LSL #24
 00:000086F4 8010A0E1        	   545:  MOV     R1, R0, LSL #1
 00:000086F8 390300EB        	   546:  BL      sub_93E4
@@ -555,9 +555,9 @@ Source: "3-assembled-output/Lander.arm"
 00:00008708 5FFEFFEB        	   550:  BL      DrawLandscape
 00:0000870C 7D0200EB        	   551:  BL      PrintCurrentScore
 00:00008710 890500EB        	   552:  BL      SwitchScreenBank
-00:00008714 18019BE5        	   553:  LDR     R0, [R11, #var_118]
+00:00008714 18019BE5        	   553:  LDR     R0, [R11, #mainLoopCount]
 00:00008718 010080E2        	   554:  ADD     R0, R0, #1
-00:0000871C 18018BE5        	   555:  STR     R0, [R11, #var_118]
+00:0000871C 18018BE5        	   555:  STR     R0, [R11, #mainLoopCount]
 00:00008720 1C019BE5        	   556:  LDR     R0, [R11, #var_11C]
 00:00008724 010050E2        	   557:  SUBS    R0, R0, #1
 00:00008728 1C018BE5        	   558:  STR     R0, [R11, #var_11C]
@@ -639,12 +639,12 @@ Source: "3-assembled-output/Lander.arm"
 00:00008854 090051E1        	   626:  CMP     R1, R9
 00:00008858 4E0000CB        	   627:  BLGT    sub_8998
 00:0000885C FF00AAE8        	   628:  STMIA   R10!, {R0-R7}
-00:00008860 3C819BE5        	   629:  LDR     R8, [R11, #xLandscape]
+00:00008860 3C819BE5        	   629:  LDR     R8, [R11, #xCamera]
 00:00008864 080040E0        	   630:  SUB     R0, R0, R8
-00:00008868 44819BE5        	   631:  LDR     R8, [R11, #zLandscape]
+00:00008868 44819BE5        	   631:  LDR     R8, [R11, #zCamera]
 00:0000886C 082042E0        	   632:  SUB     R2, R2, R8
 00:00008870 052382E2        	   633:  ADD     R2, R2, #0x14000000
-00:00008874 40819BE5        	   634:  LDR     R8, [R11, #yLandscape]
+00:00008874 40819BE5        	   634:  LDR     R8, [R11, #yCamera]
 00:00008878 081041E0        	   635:  SUB     R1, R1, R8
 00:0000887C 050352E3        	   636:  CMP     R2, #0x14000000
 00:00008880 DEFFFF2A        	   637:  BHS     lab_8800
@@ -667,7 +667,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000088C4 010450E3        	   654:  CMP     R0, #0x1000000
 00:000088C8 01045233        	   655:  CMPLO   R2, #0x1000000
 00:000088CC 0500002A        	   656:  BHS     lab_88E8
-00:000088D0 40019BE5        	   657:  LDR     R0, [R11, #yLandscape]
+00:000088D0 40019BE5        	   657:  LDR     R0, [R11, #yCamera]
 00:000088D4 001081E0        	   658:  ADD     R1, R1, R0
 00:000088D8 98009BE5        	   659:  LDR     R0, [R11, #var_098]
 00:000088DC 001051E0        	   660:  SUBS    R1, R1, R0
@@ -683,7 +683,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008900 BEFFFFEA        	   670:  B       lab_8800
                             	   671: lab_8904:
 00:00008904 87002DE9        	   672:  STMFD   R13!, {R0-R2, R7}
-00:00008908 40E19BE5        	   673:  LDR     R14, [R11, #yLandscape]
+00:00008908 40E19BE5        	   673:  LDR     R14, [R11, #yCamera]
 00:0000890C 0E1049E0        	   674:  SUB     R1, R9, R14
 00:00008910 0280A0E1        	   675:  MOV     R8, R2
 00:00008914 550300EB        	   676:  BL      sub_9670
@@ -952,18 +952,18 @@ Source: "3-assembled-output/Lander.arm"
                             	   939: sub_8CDC:
 00:00008CDC 00402DE9        	   940:  STMFD   R13!, {R14}
 00:00008CE0 3280A0E3        	   941:  MOV     R8, #0x32
-00:00008CE4 3C019BE5        	   942:  LDR     R0, [R11, #xLandscape]
+00:00008CE4 3C019BE5        	   942:  LDR     R0, [R11, #xCamera]
 00:00008CE8 0010A0E3        	   943:  MOV     R1, #0
-00:00008CEC 44219BE5        	   944:  LDR     R2, [R11, #zLandscape]
+00:00008CEC 44219BE5        	   944:  LDR     R2, [R11, #zCamera]
 00:00008CF0 062442E2        	   945:  SUB     R2, R2, #0x6000000
 00:00008CF4 F0FFFFEB        	   946:  BL      sub_8CBC
 00:00008CF8 0080BDE8        	   947:  LDMFD   R13!, {PC}
                             	   948: sub_8CFC:
 00:00008CFC C0432DE9        	   949:  STMFD   R13!, {R6-R9, R14}
 00:00008D00 9680A0E3        	   950:  MOV     R8, #0x96
-00:00008D04 3C019BE5        	   951:  LDR     R0, [R11, #xLandscape]
+00:00008D04 3C019BE5        	   951:  LDR     R0, [R11, #xCamera]
 00:00008D08 0010A0E3        	   952:  MOV     R1, #0
-00:00008D0C 44219BE5        	   953:  LDR     R2, [R11, #zLandscape]
+00:00008D0C 44219BE5        	   953:  LDR     R2, [R11, #zCamera]
 00:00008D10 062442E2        	   954:  SUB     R2, R2, #0x6000000
                             	   955: lab_8D14:
 00:00008D14 C9FFFFEB        	   956:  BL      sub_8C40
@@ -972,9 +972,9 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D20 C083BDE8        	   959:  LDMFD   R13!, {R6-R9, PC}
                             	   960: sub_8D24:
 00:00008D24 C0432DE9        	   961:  STMFD   R13!, {R6-R9, R14}
-00:00008D28 3C019BE5        	   962:  LDR     R0, [R11, #xLandscape]
+00:00008D28 3C019BE5        	   962:  LDR     R0, [R11, #xCamera]
 00:00008D2C 0112E0E3        	   963:  MVN     R1, #0x10000000
-00:00008D30 44219BE5        	   964:  LDR     R2, [R11, #zLandscape]
+00:00008D30 44219BE5        	   964:  LDR     R2, [R11, #zCamera]
 00:00008D34 062442E2        	   965:  SUB     R2, R2, #0x6000000
 00:00008D38 A6FFFFEB        	   966:  BL      sub_8BD8
 00:00008D3C C083BDE8        	   967:  LDMFD   R13!, {R6-R9, PC}
@@ -987,9 +987,9 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D54 2009A0E1        	   974:  MOV     R0, R0, LSR #18
 00:00008D58 040050E1        	   975:  CMP     R0, R4
 00:00008D5C 0080BD28        	   976:  LDMHSIA R13!, {PC}
-00:00008D60 3C019BE5        	   977:  LDR     R0, [R11, #xLandscape]
+00:00008D60 3C019BE5        	   977:  LDR     R0, [R11, #xCamera]
 00:00008D64 0212E0E3        	   978:  MVN     R1, #0x20000000
-00:00008D68 44219BE5        	   979:  LDR     R2, [R11, #zLandscape]
+00:00008D68 44219BE5        	   979:  LDR     R2, [R11, #zCamera]
 00:00008D6C 062442E2        	   980:  SUB     R2, R2, #0x6000000
 00:00008D70 98FFFFEB        	   981:  BL      sub_8BD8
 00:00008D74 0080BDE8        	   982:  LDMFD   R13!, {PC}
@@ -1021,16 +1021,16 @@ Source: "3-assembled-output/Lander.arm"
 00:00008DD8 84AF0000        	  1008: .long    objectSmokingRemainsLeft
                             	  1009: DrawObjects:
 00:00008DDC E05F2DE9        	  1010:  STMFD   R13!, {R5-R12, R14}
-00:00008DE0 3C019BE5        	  1011:  LDR     R0, [R11, #xLandscape]
+00:00008DE0 3C019BE5        	  1011:  LDR     R0, [R11, #xCamera]
 00:00008DE4 FF8400E2        	  1012:  AND     R8, R0, #0xFF000000
-00:00008DE8 44119BE5        	  1013:  LDR     R1, [R11, #zLandscape]
+00:00008DE8 44119BE5        	  1013:  LDR     R1, [R11, #zCamera]
 00:00008DEC FF9401E2        	  1014:  AND     R9, R1, #0xFF000000
 00:00008DF0 168548E2        	  1015:  SUB     R8, R8, #0x5800000
-00:00008DF4 48818BE5        	  1016:  STR     R8, [R11, #xCorner]
+00:00008DF4 48818BE5        	  1016:  STR     R8, [R11, #xLandscape]
 00:00008DF8 0B70A0E3        	  1017:  MOV     R7, #11
                             	  1018: dobs1:
 00:00008DFC 0D60A0E3        	  1019:  MOV     R6, #13
-00:00008E00 48819BE5        	  1020:  LDR     R8, [R11, #xCorner]
+00:00008E00 48819BE5        	  1020:  LDR     R8, [R11, #xLandscape]
                             	  1021: dobs2:
 00:00008E04 11EB8BE2        	  1022:  ADD     R14, R11, #objectMap
 00:00008E08 28EC8EE0        	  1023:  ADD     R14, R14, R8, LSR #24
@@ -1056,12 +1056,12 @@ Source: "3-assembled-output/Lander.arm"
 00:00008E4C 0010A0E1        	  1043:  MOV     R1, R0
 00:00008E50 550650E3        	  1044:  CMP     R0, #SEA_LEVEL
 00:00008E54 F0FFFF0A        	  1045:  BEQ     dobs3
-00:00008E58 3CE19BE5        	  1046:  LDR     R14, [R11, #xLandscape]
+00:00008E58 3CE19BE5        	  1046:  LDR     R14, [R11, #xCamera]
 00:00008E5C 0E0048E0        	  1047:  SUB     R0, R8, R14
-00:00008E60 44E19BE5        	  1048:  LDR     R14, [R11, #zLandscape]
+00:00008E60 44E19BE5        	  1048:  LDR     R14, [R11, #zCamera]
 00:00008E64 0E2049E0        	  1049:  SUB     R2, R9, R14
 00:00008E68 052382E2        	  1050:  ADD     R2, R2, #0x14000000
-00:00008E6C 40E19BE5        	  1051:  LDR     R14, [R11, #yLandscape]
+00:00008E6C 40E19BE5        	  1051:  LDR     R14, [R11, #yCamera]
 00:00008E70 0E1041E0        	  1052:  SUB     R1, R1, R14
 00:00008E74 F4E0DBE5        	  1053:  LDRB    R14, [R11, #objectType]
 00:00008E78 0C005EE3        	  1054:  CMP     R14, #12
@@ -1071,11 +1071,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00008E84 0E0000EB        	  1058:  BL      DrawObject
 00:00008E88 E3FFFFEA        	  1059:  B       dobs3
                             	  1060: dobs6:
-00:00008E8C 18E19BE5        	  1061:  LDR     R14, [R11, #var_118]
+00:00008E8C 18E19BE5        	  1061:  LDR     R14, [R11, #mainLoopCount]
 00:00008E90 03001EE3        	  1062:  TST     R14, #3
 00:00008E94 F9FFFF1A        	  1063:  BNE     dobs5
 00:00008E98 FF022DE9        	  1064:  STMFD   R13!, {R0-R7, R9}
-00:00008E9C 40E19BE5        	  1065:  LDR     R14, [R11, #yLandscape]
+00:00008E9C 40E19BE5        	  1065:  LDR     R14, [R11, #yCamera]
 00:00008EA0 0E1081E0        	  1066:  ADD     R1, R1, R14
 00:00008EA4 0800A0E1        	  1067:  MOV     R0, R8
 00:00008EA8 0920A0E1        	  1068:  MOV     R2, R9
@@ -2857,8 +2857,8 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A808 0000E0E3        	  2828:  MVN     R0, #0
 00:0000A80C 30018BE5        	  2829:  STR     R0, [R11, #var_130]
 00:0000A810 0000A0E3        	  2830:  MOV     R0, #0
-00:0000A814 3C018BE5        	  2831:  STR     R0, [R11, #xLandscape]
-00:0000A818 44018BE5        	  2832:  STR     R0, [R11, #zLandscape]
+00:0000A814 3C018BE5        	  2831:  STR     R0, [R11, #xCamera]
+00:0000A818 44018BE5        	  2832:  STR     R0, [R11, #zCamera]
 00:0000A81C 54018BE5        	  2833:  STR     R0, [R11, #var_154]
 00:0000A820 0100A0E3        	  2834:  MOV     R0, #1
 00:0000A824 58018BE5        	  2835:  STR     R0, [R11, #var_158]
@@ -2880,7 +2880,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A860 1B0032E3        	  2851:  TEQ     R2, #0x1B
 00:0000A864 1000000A        	  2852:  BEQ     EndGame
 00:0000A868 CAF6FFEB        	  2853:  BL      MoveAndDrawPlayer
-00:0000A86C 18019BE5        	  2854:  LDR     R0, [R11, #var_118]
+00:0000A86C 18019BE5        	  2854:  LDR     R0, [R11, #mainLoopCount]
 00:0000A870 000CA0E1        	  2855:  MOV     R0, R0, LSL #24
 00:0000A874 8010A0E1        	  2856:  MOV     R1, R0, LSL #1
 00:0000A878 D9FAFFEB        	  2857:  BL      sub_93E4
@@ -2892,9 +2892,9 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A890 1CFAFFEB        	  2863:  BL      PrintCurrentScore
 00:0000A894 58FAFFEB        	  2864:  BL      DrawFuelLevel
 00:0000A898 27FDFFEB        	  2865:  BL      SwitchScreenBank
-00:0000A89C 18E19BE5        	  2866:  LDR     R14, [R11, #var_118]
+00:0000A89C 18E19BE5        	  2866:  LDR     R14, [R11, #mainLoopCount]
 00:0000A8A0 01E08EE2        	  2867:  ADD     R14, R14, #1
-00:0000A8A4 18E18BE5        	  2868:  STR     R14, [R11, #var_118]
+00:0000A8A4 18E18BE5        	  2868:  STR     R14, [R11, #mainLoopCount]
 00:0000A8A8 E8FFFFEA        	  2869:  B       MainLoop
                             	  2870: EndGame:
 00:0000A8AC 7E00A0E3        	  2871:  MOV     R0, #126
@@ -10377,6 +10377,7 @@ lab_A46C                         A:0000A46C
 lab_A470                         A:0000A470
 lineJump                         A:0000A480
 lose1                            A:000086EC
+mainLoopCount                    S:00000118
 memoryTestAddr                   A:0000A574
 mouseParameters                  A:0000A588
 mouseParametersAddr              A:0000A590
@@ -10478,7 +10479,6 @@ var_0F8                          S:000000F8
 var_108                          S:00000108
 var_10C                          S:0000010C
 var_114                          S:00000114
-var_118                          S:00000118
 var_11C                          S:0000011C
 var_120                          S:00000120
 var_130                          S:00000130
@@ -10504,10 +10504,10 @@ var_9A70                         A:00009A70
 var_9AC0                         A:00009AC0
 workspace                        S:00012200
 workspaceAddr                    A:0000A56C
-xCorner                          S:00000148
-xLandscape                       S:0000013C
-yLandscape                       S:00000140
-zLandscape                       S:00000144
+xCamera                          S:0000013C
+xLandscape                       S:00000148
+yCamera                          S:00000140
+zCamera                          S:00000144
 
 Symbols by value:
 00000000 OS_WriteC
@@ -10549,7 +10549,7 @@ Symbols by value:
 0000010C var_10C
 00000110 objectData
 00000114 var_114
-00000118 var_118
+00000118 mainLoopCount
 0000011C var_11C
 00000120 var_120
 00000124 currentScore
@@ -10558,10 +10558,10 @@ Symbols by value:
 00000130 var_130
 00000134 remainingLives
 00000138 highScore
-0000013C xLandscape
-00000140 yLandscape
-00000144 zLandscape
-00000148 xCorner
+0000013C xCamera
+00000140 yCamera
+00000144 zCamera
+00000148 xLandscape
 00000150 var_150
 00000154 var_154
 00000158 var_158

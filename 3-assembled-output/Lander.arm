@@ -40,7 +40,7 @@
 .set var_10C, 0x10C
 .set objectData, 0x110
 .set var_114, 0x114
-.set var_118, 0x118
+.set mainLoopCount, 0x118
 .set var_11C, 0x11C
 .set var_120, 0x120
 .set currentScore, 0x124
@@ -49,10 +49,10 @@
 .set var_130, 0x130
 .set remainingLives, 0x134
 .set highScore, 0x138
-.set xLandscape, 0x13C
-.set yLandscape, 0x140
-.set zLandscape, 0x144
-.set xCorner, 0x148
+.set xCamera, 0x13C
+.set yCamera, 0x140
+.set zCamera, 0x144
+.set xLandscape, 0x148
 .set var_150, 0x150
 .set var_154, 0x154
 .set var_158, 0x158
@@ -112,14 +112,14 @@ graphicsBuffers:
 .long    0x00031F1C
 DrawLandscape:
  STMFD   R13!, {R5-R9, R14}
- LDR     R3, [R11, #zLandscape]
+ LDR     R3, [R11, #zCamera]
  AND     R9, R3, #0xFF000000
  SUB     R3, R3, R9
  STR     R9, [R11, #var_150]
- LDR     R4, [R11, #xLandscape]
+ LDR     R4, [R11, #xCamera]
  AND     R8, R4, #0xFF000000
  SUB     R4, R4, R8
- STR     R8, [R11, #xCorner]
+ STR     R8, [R11, #xLandscape]
  ADD     R5, R11, #0x160
  LDR     R0, var_800C
  LDMFD   R0, {R0-R2}
@@ -142,13 +142,13 @@ lab_80DC:
  LDMIA   R0, {R0-R2}
  ADD     R4, R11, #0x170
  STMIA   R4, {R0-R2}
- LDR     R8, [R11, #xCorner]
+ LDR     R8, [R11, #xLandscape]
  SUB     R8, R8, #0x5800000
  MOV     R0, #0x80000000
  STR     R0, [R11, #var_0C4]
 lab_8114:
  BL      GetLandscapeAltitude
- LDR     R14, [R11, #yLandscape]
+ LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
  STR     R0, [R11, #var_174]
  ADD     R0, R11, #0x170
@@ -256,14 +256,14 @@ GetLandscapeAltitude:
 sub_82AC:
  STMFD   R13!, {R8-R9, R14}
  LDR     R8, [R0]
- LDR     R1, [R11, #xLandscape]
+ LDR     R1, [R11, #xCamera]
  ADD     R8, R8, R1
  LDR     R9, [R0, #8]
- LDR     R1, [R11, #zLandscape]
+ LDR     R1, [R11, #zCamera]
  ADD     R9, R9, R1
  SUB     R9, R9, #0x14000000
  BL      GetLandscapeAltitude
- LDR     R14, [R11, #yLandscape]
+ LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
  LDMFD   R13!, {R8-R9, PC}
 sub_82DC:
@@ -540,7 +540,7 @@ LoseLife:
  SUB     R1, R1, #0x500000
  BL      sub_8CBC
 lose1:
- LDR     R0, [R11, #var_118]
+ LDR     R0, [R11, #mainLoopCount]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
  BL      sub_93E4
@@ -550,9 +550,9 @@ lose1:
  BL      DrawLandscape
  BL      PrintCurrentScore
  BL      SwitchScreenBank
- LDR     R0, [R11, #var_118]
+ LDR     R0, [R11, #mainLoopCount]
  ADD     R0, R0, #1
- STR     R0, [R11, #var_118]
+ STR     R0, [R11, #mainLoopCount]
  LDR     R0, [R11, #var_11C]
  SUBS    R0, R0, #1
  STR     R0, [R11, #var_11C]
@@ -626,12 +626,12 @@ lab_880C:
  CMP     R1, R9
  BLGT    sub_8998
  STMIA   R10!, {R0-R7}
- LDR     R8, [R11, #xLandscape]
+ LDR     R8, [R11, #xCamera]
  SUB     R0, R0, R8
- LDR     R8, [R11, #zLandscape]
+ LDR     R8, [R11, #zCamera]
  SUB     R2, R2, R8
  ADD     R2, R2, #0x14000000
- LDR     R8, [R11, #yLandscape]
+ LDR     R8, [R11, #yCamera]
  SUB     R1, R1, R8
  CMP     R2, #0x14000000
  BHS     lab_8800
@@ -654,7 +654,7 @@ lab_880C:
  CMP     R0, #0x1000000
  CMPLO   R2, #0x1000000
  BHS     lab_88E8
- LDR     R0, [R11, #yLandscape]
+ LDR     R0, [R11, #yCamera]
  ADD     R1, R1, R0
  LDR     R0, [R11, #var_098]
  SUBS    R1, R1, R0
@@ -670,7 +670,7 @@ lab_88E8:
  B       lab_8800
 lab_8904:
  STMFD   R13!, {R0-R2, R7}
- LDR     R14, [R11, #yLandscape]
+ LDR     R14, [R11, #yCamera]
  SUB     R1, R9, R14
  MOV     R8, R2
  BL      sub_9670
@@ -939,18 +939,18 @@ lab_8CC0:
 sub_8CDC:
  STMFD   R13!, {R14}
  MOV     R8, #0x32
- LDR     R0, [R11, #xLandscape]
+ LDR     R0, [R11, #xCamera]
  MOV     R1, #0
- LDR     R2, [R11, #zLandscape]
+ LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #0x6000000
  BL      sub_8CBC
  LDMFD   R13!, {PC}
 sub_8CFC:
  STMFD   R13!, {R6-R9, R14}
  MOV     R8, #0x96
- LDR     R0, [R11, #xLandscape]
+ LDR     R0, [R11, #xCamera]
  MOV     R1, #0
- LDR     R2, [R11, #zLandscape]
+ LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #0x6000000
 lab_8D14:
  BL      sub_8C40
@@ -959,9 +959,9 @@ lab_8D14:
  LDMFD   R13!, {R6-R9, PC}
 sub_8D24:
  STMFD   R13!, {R6-R9, R14}
- LDR     R0, [R11, #xLandscape]
+ LDR     R0, [R11, #xCamera]
  MVN     R1, #0x10000000
- LDR     R2, [R11, #zLandscape]
+ LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #0x6000000
  BL      sub_8BD8
  LDMFD   R13!, {R6-R9, PC}
@@ -974,9 +974,9 @@ sub_8D40:
  MOV     R0, R0, LSR #18
  CMP     R0, R4
  LDMHSIA R13!, {PC}
- LDR     R0, [R11, #xLandscape]
+ LDR     R0, [R11, #xCamera]
  MVN     R1, #0x20000000
- LDR     R2, [R11, #zLandscape]
+ LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #0x6000000
  BL      sub_8BD8
  LDMFD   R13!, {PC}
@@ -1008,16 +1008,16 @@ objectTypes:
 .long    objectSmokingRemainsLeft
 DrawObjects:
  STMFD   R13!, {R5-R12, R14}
- LDR     R0, [R11, #xLandscape]
+ LDR     R0, [R11, #xCamera]
  AND     R8, R0, #0xFF000000
- LDR     R1, [R11, #zLandscape]
+ LDR     R1, [R11, #zCamera]
  AND     R9, R1, #0xFF000000
  SUB     R8, R8, #0x5800000
- STR     R8, [R11, #xCorner]
+ STR     R8, [R11, #xLandscape]
  MOV     R7, #11
 dobs1:
  MOV     R6, #13
- LDR     R8, [R11, #xCorner]
+ LDR     R8, [R11, #xLandscape]
 dobs2:
  ADD     R14, R11, #objectMap
  ADD     R14, R14, R8, LSR #24
@@ -1043,12 +1043,12 @@ dobs4:
  MOV     R1, R0
  CMP     R0, #SEA_LEVEL
  BEQ     dobs3
- LDR     R14, [R11, #xLandscape]
+ LDR     R14, [R11, #xCamera]
  SUB     R0, R8, R14
- LDR     R14, [R11, #zLandscape]
+ LDR     R14, [R11, #zCamera]
  SUB     R2, R9, R14
  ADD     R2, R2, #0x14000000
- LDR     R14, [R11, #yLandscape]
+ LDR     R14, [R11, #yCamera]
  SUB     R1, R1, R14
  LDRB    R14, [R11, #objectType]
  CMP     R14, #12
@@ -1058,11 +1058,11 @@ dobs5:
  BL      DrawObject
  B       dobs3
 dobs6:
- LDR     R14, [R11, #var_118]
+ LDR     R14, [R11, #mainLoopCount]
  TST     R14, #3
  BNE     dobs5
  STMFD   R13!, {R0-R7, R9}
- LDR     R14, [R11, #yLandscape]
+ LDR     R14, [R11, #yCamera]
  ADD     R1, R1, R14
  MOV     R0, R8
  MOV     R2, R9
@@ -2828,8 +2828,8 @@ PlacePlayerOnLaunchpad:
  MVN     R0, #0
  STR     R0, [R11, #var_130]
  MOV     R0, #0
- STR     R0, [R11, #xLandscape]
- STR     R0, [R11, #zLandscape]
+ STR     R0, [R11, #xCamera]
+ STR     R0, [R11, #zCamera]
  STR     R0, [R11, #var_154]
  MOV     R0, #1
  STR     R0, [R11, #var_158]
@@ -2851,7 +2851,7 @@ MainLoop:
  TEQ     R2, #0x1B
  BEQ     EndGame
  BL      MoveAndDrawPlayer
- LDR     R0, [R11, #var_118]
+ LDR     R0, [R11, #mainLoopCount]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
  BL      sub_93E4
@@ -2863,9 +2863,9 @@ MainLoop:
  BL      PrintCurrentScore
  BL      DrawFuelLevel
  BL      SwitchScreenBank
- LDR     R14, [R11, #var_118]
+ LDR     R14, [R11, #mainLoopCount]
  ADD     R14, R14, #1
- STR     R14, [R11, #var_118]
+ STR     R14, [R11, #mainLoopCount]
  B       MainLoop
 EndGame:
  MOV     R0, #126

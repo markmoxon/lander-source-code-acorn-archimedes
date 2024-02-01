@@ -140,7 +140,7 @@
 
  var_114 = &114                     \ 
 
- var_118 = &118                     \ Something to do with smoke clouds ???
+ mainLoopCount = &118               \ The main loop counter
 
  var_11C = &11C                     \ 
 
@@ -176,20 +176,17 @@
                                     \ It is initialised to initialHighScore when
                                     \ the game is loaded
 
- xLandscape = &13C                  \ The 3D x-coordinate of the front-middle
-                                    \ point of the landscape that's shown
-                                    \ on-screen
+ xCamera = &13C                     \ The 3D x-coordinate of the camera (this is
+                                    \ always zero)
 
- yLandscape = &140                  \ This value is always zero, and represents
-                                    \ the 3D y-coordinate of the front-middle
-                                    \ point of the landscape that's shown
-                                    \ on-screen
+ yCamera = &140                     \ The 3D y-coordinate of the camera (this is
+                                    \ always zero)
 
- zLandscape = &144                  \ The 3D z-coordinate of the front-middle
-                                    \ point of the landscape that's shown
-                                    \ on-screen
+ zCamera = &144                     \ The 3D z-coordinate of the camera (this is
+                                    \ always zero)
 
- xCorner = &148                     \ 
+ xLandscape = &148                  \ The 3D x-coordinate of the front-left
+                                    \ corner of the on-screen landscape
 
  var_150 = &150                     \ 
 
@@ -427,14 +424,14 @@ ENDIF
 .DrawLandscape
 
  STMFD   R13!, {R5-R9, R14}         \ 
- LDR     R3, [R11, #zLandscape]     \ 
+ LDR     R3, [R11, #zCamera]        \ 
  AND     R9, R3, #&FF000000         \ 
  SUB     R3, R3, R9                 \ 
  STR     R9, [R11, #var_150]        \ 
- LDR     R4, [R11, #xLandscape]     \ 
+ LDR     R4, [R11, #xCamera]        \ 
  AND     R8, R4, #&FF000000         \ 
  SUB     R4, R4, R8                 \ 
- STR     R8, [R11, #xCorner]        \ 
+ STR     R8, [R11, #xLandscape]     \ 
  ADD     R5, R11, #&160             \ 
  LDR     R0, var_800C               \ 
  LDMFD   R0, {R0-R2}                \ 
@@ -459,7 +456,7 @@ ENDIF
  LDMIA   R0, {R0-R2}                \ 
  ADD     R4, R11, #&170             \ 
  STMIA   R4, {R0-R2}                \ 
- LDR     R8, [R11, #xCorner]        \ 
+ LDR     R8, [R11, #xLandscape]     \ 
  SUB     R8, R8, #&5800000          \ 
  MOV     R0, #&80000000             \ 
  STR     R0, [R11, #var_0C4]        \ 
@@ -467,7 +464,7 @@ ENDIF
 .lab_8114
 
  BL      GetLandscapeAltitude       \ 
- LDR     R14, [R11, #yLandscape]    \ 
+ LDR     R14, [R11, #yCamera]       \ 
  SUB     R0, R0, R14                \ 
  STR     R0, [R11, #var_174]        \ 
  ADD     R0, R11, #&170             \ 
@@ -787,14 +784,14 @@ ENDIF
 
  STMFD   R13!, {R8-R9, R14}         \ 
  LDR     R8, [R0]                   \ 
- LDR     R1, [R11, #xLandscape]     \ 
+ LDR     R1, [R11, #xCamera]        \ 
  ADD     R8, R8, R1                 \ 
  LDR     R9, [R0, #8]               \ 
- LDR     R1, [R11, #zLandscape]     \ 
+ LDR     R1, [R11, #zCamera]        \ 
  ADD     R9, R9, R1                 \ 
  SUB     R9, R9, #&14000000         \ 
  BL      GetLandscapeAltitude       \ 
- LDR     R14, [R11, #yLandscape]    \ 
+ LDR     R14, [R11, #yCamera]       \ 
  SUB     R0, R0, R14                \ 
  LDMFD   R13!, {R8-R9, PC}          \ 
 
@@ -1182,7 +1179,7 @@ ENDIF
                                     \ minor differences (e.g. there is no call
                                     \ to DrawFuelLevel)
 
- LDR     R0, [R11, #var_118]        \ Same as in main loop
+ LDR     R0, [R11, #mainLoopCount]  \ Same as in main loop
  MOV     R0, R0, LSL #24
 
  MOV     R1, R0, LSL #1             \ Same as in main loop
@@ -1207,13 +1204,13 @@ ENDIF
  BL      SwitchScreenBank           \ Switch screen banks and clear the newly
                                     \ hidden screen bank to black
 
- LDR     R0, [R11, #var_118]        \ Add to timer?
+ LDR     R0, [R11, #mainLoopCount]  \ Increment the main loop counter
  ADD     R0, R0, #1
- STR     R0, [R11, #var_118]
+ STR     R0, [R11, #mainLoopCount]
 
- LDR     R0, [R11, #var_11C]        \ Loop counter for the above?
- SUBS    R0, R0, #1                 \ 
- STR     R0, [R11, #var_11C]        \ 
+ LDR     R0, [R11, #var_11C]        \ Decrement the loop counter for the above
+ SUBS    R0, R0, #1                 \ ???
+ STR     R0, [R11, #var_11C]
 
  BPL     lose1                      \ Loop back to keep running the main loop
                                     \ above
@@ -1338,12 +1335,12 @@ ENDIF
  CMP     R1, R9                     \ 
  BLGT    sub_8998                   \ 
  STMIA   R10!, {R0-R7}              \ 
- LDR     R8, [R11, #xLandscape]     \ 
+ LDR     R8, [R11, #xCamera]        \ 
  SUB     R0, R0, R8                 \ 
- LDR     R8, [R11, #zLandscape]     \ 
+ LDR     R8, [R11, #zCamera]        \ 
  SUB     R2, R2, R8                 \ 
  ADD     R2, R2, #&14000000         \ 
- LDR     R8, [R11, #yLandscape]     \ 
+ LDR     R8, [R11, #yCamera]        \ 
  SUB     R1, R1, R8                 \ 
  CMP     R2, #&14000000             \ 
  BHS     lab_8800                   \ 
@@ -1366,7 +1363,7 @@ ENDIF
  CMP     R0, #&1000000              \ 
  CMPLO   R2, #&1000000              \ 
  BHS     lab_88E8                   \ 
- LDR     R0, [R11, #yLandscape]     \ 
+ LDR     R0, [R11, #yCamera]        \ 
  ADD     R1, R1, R0                 \ 
  LDR     R0, [R11, #var_098]        \ 
  SUBS    R1, R1, R0                 \ 
@@ -1386,7 +1383,7 @@ ENDIF
 .lab_8904
 
  STMFD   R13!, {R0-R2, R7}          \ 
- LDR     R14, [R11, #yLandscape]    \ 
+ LDR     R14, [R11, #yCamera]       \ 
  SUB     R1, R9, R14                \ 
  MOV     R8, R2                     \ 
  BL      sub_9670                   \ 
@@ -1841,9 +1838,9 @@ ENDIF
 
  STMFD   R13!, {R14}                \ 
  MOV     R8, #&32                   \ 
- LDR     R0, [R11, #xLandscape]     \ 
+ LDR     R0, [R11, #xCamera]        \ 
  MOV     R1, #0                     \ 
- LDR     R2, [R11, #zLandscape]     \ 
+ LDR     R2, [R11, #zCamera]        \ 
  SUB     R2, R2, #&6000000          \ 
  BL      sub_8CBC                   \ 
  LDMFD   R13!, {PC}                 \ 
@@ -1861,9 +1858,9 @@ ENDIF
 
  STMFD   R13!, {R6-R9, R14}         \ 
  MOV     R8, #&96                   \ 
- LDR     R0, [R11, #xLandscape]     \ 
+ LDR     R0, [R11, #xCamera]        \ 
  MOV     R1, #0                     \ 
- LDR     R2, [R11, #zLandscape]     \ 
+ LDR     R2, [R11, #zCamera]        \ 
  SUB     R2, R2, #&6000000          \ 
 
 .lab_8D14
@@ -1885,9 +1882,9 @@ ENDIF
 .sub_8D24
 
  STMFD   R13!, {R6-R9, R14}         \ 
- LDR     R0, [R11, #xLandscape]     \ 
+ LDR     R0, [R11, #xCamera]        \ 
  MVN     R1, #&10000000             \ 
- LDR     R2, [R11, #zLandscape]     \ 
+ LDR     R2, [R11, #zCamera]        \ 
  SUB     R2, R2, #&6000000          \ 
  BL      sub_8BD8                   \ 
  LDMFD   R13!, {R6-R9, PC}          \ 
@@ -1920,9 +1917,9 @@ ENDIF
  MOV     R0, R0, LSR #18            \ 
  CMP     R0, R4                     \ 
  LDMHSIA R13!, {PC}                 \ 
- LDR     R0, [R11, #xLandscape]     \ 
+ LDR     R0, [R11, #xCamera]        \ 
  MVN     R1, #&20000000             \ 
- LDR     R2, [R11, #zLandscape]     \ 
+ LDR     R2, [R11, #zCamera]        \ 
  SUB     R2, R2, #&6000000          \ 
  BL      sub_8BD8                   \ 
  LDMFD   R13!, {PC}                 \ 
@@ -2009,33 +2006,35 @@ ENDIF
                                     \ distant objects always appear behind
                                     \ closer objects
 
- LDR     R0, [R11, #xLandscape]     \ Set R0 to the x-coordinate of the
-                                    \ front-middle point of the landscape
+ LDR     R0, [R11, #xCamera]        \ Set R0 to the x-coordinate of the camera,
+                                    \ i.e. the point from which we are looking
+                                    \ at the game
 
  AND     R8, R0, #&FF000000         \ Zero the bottom three bytes of R0 and
                                     \ store in R8, so R8 contains the coordinate
-                                    \ of the tile containing xLandscape
+                                    \ of the tile containing xCamera, i.e. the
+                                    \ tile directly below our viewpoint
 
- LDR     R1, [R11, #zLandscape]     \ Set R1 to the z-coordinate of the
-                                    \ front-middle point of the landscape
+ LDR     R1, [R11, #zCamera]        \ Set R1 to the z-coordinate of the camera
 
  AND     R9, R1, #&FF000000         \ Zero the bottom three bytes of R1 and
                                     \ store in R9, so R9 contains the coordinate
-                                    \ of the tile containing zLandscape
+                                    \ of the tile containing zCamera, i.e. the
+                                    \ tile directly below our viewpoint
 
- SUB     R8, R8, #&5800000          \ Set xCorner = R8 - &5800000
- STR     R8, [R11, #xCorner]        \
+ SUB     R8, R8, #&5800000          \ Set xLandscape = R8 - &5800000
+ STR     R8, [R11, #xLandscape]     \
                                     \ Each tile is &1000000 coordinates wide,
                                     \ and the visible landscape is 12 tiles wide
                                     \
-                                    \ We already rounded xLandscape down to the
+                                    \ We already rounded xCamera down to the
                                     \ nearest tile, so this subtracts exactly
-                                    \ 5.5 tiles' width from xLandscape and
-                                    \ stores the result in xCorner ???
+                                    \ 5.5 tiles' width from xCamera and
+                                    \ stores the result in xLandscape ???
                                     \
                                     \ As we only take the top byte of the
                                     \ x-coordinate when reading the object map,
-                                    \ this moves usto the front-left corner of
+                                    \ this moves us to the front-left corner of
                                     \ the on-screen landscape, so we can now
                                     \ work along the x-axis in the object map
                                     \ from left to right in the following loop
@@ -2060,7 +2059,9 @@ ENDIF
                                     \ x-axis (i.e. from left to right on the
                                     \ screen)
 
- LDR     R8, [R11, #xCorner]        \ Set R8 = xCorner
+ LDR     R8, [R11, #xLandscape]     \ Set R8 = xLandscape, so R8 contains the
+                                    \ x-coordinate of the leftmost tile of the
+                                    \ visible landscape
 
                                     \ We now have the coordinates of the far
                                     \ left tile in (R8, R9), so we can start to
@@ -2131,7 +2132,9 @@ ENDIF
                                     \ coordinates (R8, R9), which is where we
                                     \ are drawing our object
 
- MOV     R1, R0                     \ Make a copy of the altitude in R1
+ MOV     R1, R0                     \ Make a copy of the altitude in R1, so R1
+                                    \ contains the y-coordinate of the object as
+                                    \ it sits on the landscape
 
  CMP     R0, #SEA_LEVEL             \ If the object is on the sea, jump back to
  BEQ     dobs3                      \ dobs3 to move on to the next object, as
@@ -2141,26 +2144,27 @@ ENDIF
                                     \ also performed when populating the object
                                     \ map)
 
- LDR     R14, [R11, #xLandscape]    \ Set R0 = R8 - xLandscape
- SUB     R0, R8, R14                \        = x - xLandscape
+ LDR     R14, [R11, #xCamera]       \ Set R0 = R8 - xCamera
+ SUB     R0, R8, R14                \        = x - xCamera
                                     \
                                     \ So R0 contains the x-coordinate of the
-                                    \ object relative to the front-centre point
-                                    \ of the landscape
+                                    \ object relative to the camera
 
- LDR     R14, [R11, #zLandscape]    \ Set R2 = R9 - zLandscape
+ LDR     R14, [R11, #zCamera]       \ Set R2 = R9 - zCamera
  SUB     R2, R9, R14                \
                                     \ So R2 contains the z-coordinate of the
-                                    \ object relative to the front-centre point
-                                    \ of the landscape
+                                    \ object relative to camera
 
  ADD     R2, R2, #&14000000         \ Move the coordinate back by 14 tiles, so
                                     \ (R0, R2) contains the coordinate of the
                                     \ object relative to the back-centre point
                                     \ of the landscape
 
- LDR     R14, [R11, #yLandscape]    \ yLandscape is always zero, so this has no
- SUB     R1, R1, R14                \ effect
+ LDR     R14, [R11, #yCamera]       \ Set R1 = R1 - yCamera
+ SUB     R1, R1, R14                \        = y - yCamera
+                                    \
+                                    \ So R1 contains the x-coordinate of the
+                                    \ object relative to the camera
 
  LDRB    R14, [R11, #objectType]    \ If the object type is 12 or more, then it
  CMP     R14, #12                   \ represents a destroyed object, so jump to
@@ -2180,21 +2184,27 @@ ENDIF
                                     \ If we get here then this is a destroyed
                                     \ object
 
- LDR     R14, [R11, #var_118]       \ If var_118 <> 3, jump to dobs5 to draw the
- TST     R14, #3                    \ object ???
- BNE     dobs5
+ LDR     R14, [R11, #mainLoopCount] \ If either bit 0 or 1 of mainLoopCount are
+ TST     R14, #3                    \ set, jump to dobs5 to draw the object and
+ BNE     dobs5                      \ skip the following
+
+                                    \ We only get here on one out of every four
+                                    \ iterations around the main loop
 
  STMFD   R13!, {R0-R7, R9}          \ Otherwise store the registers that we want
                                     \ to use on the stack so they can be
                                     \ preserved
 
- LDR     R14, [R11, #yLandscape]    \ Add yLandscape to the altitude in R1 (this
- ADD     R1, R1, R14                \ will have no effect as yLandscape is
-                                    \ always zero)
+ LDR     R14, [R11, #yCamera]       \ Set R1 = R1 + yCamera
+ ADD     R1, R1, R14                \         = y + yCamera
+                                    \
+                                    \ This reverts R1 to the height of the
+                                    \ landscape at the object
 
  MOV     R0, R8                     \ Set (R0, R1, R2) to (x, y - &C00000, z)
- MOV     R2, R9
- SUB     R1, R1, #&C00000
+ MOV     R2, R9                     \
+ SUB     R1, R1, #&C00000           \ So this is a coordinate towards the
+                                    \ bottom of the object ???
 
  BL      sub_8B0C                   \ Call sub_8B0C to draw the smoke particles
                                     \ rising from the destroyed object ???
@@ -5865,10 +5875,10 @@ ENDIF
  MVN     R0, #0                     \ Set var_130 = -1 ???
  STR     R0, [R11, #var_130]        \ 
 
- MOV     R0, #0                     \ Set xLandscape = 0 ???
- STR     R0, [R11, #xLandscape]     \ 
+ MOV     R0, #0                     \ Set xCamera = 0 ???
+ STR     R0, [R11, #xCamera]
 
- STR     R0, [R11, #zLandscape]     \ Set zLandscape = 0 ???
+ STR     R0, [R11, #zCamera]        \ Set zCamera = 0 ???
 
  STR     R0, [R11, #var_154]        \ Set var_154 = 0 ???
 
@@ -5913,10 +5923,10 @@ ENDIF
 
  BL      MoveAndDrawPlayer          \ Move and draw the player's ship ???
 
- LDR     R0, [R11, #var_118]        \ Set R0 = var_118 << 24 ???
+ LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24 ???
  MOV     R0, R0, LSL #24
 
- MOV     R1, R0, LSL #1             \ Set R1 = var_118 << 25 ???
+ MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25 ???
 
  BL      sub_93E4                   \ Commenting this out does nothing obvious
                                     \ ???
@@ -5944,9 +5954,9 @@ ENDIF
  BL      SwitchScreenBank           \ Switch screen banks and clear the newly
                                     \ hidden screen bank to black
 
- LDR     R14, [R11, #var_118]       \ Increment var_118 ??? (is this a timer?)
+ LDR     R14, [R11, #mainLoopCount] \ Increment the main loop counter
  ADD     R14, R14, #1
- STR     R14, [R11, #var_118]
+ STR     R14, [R11, #mainLoopCount]
 
  B       MainLoop                   \ Loop back to repeat the main loop
 
