@@ -11,6 +11,7 @@
 .set SEA_LEVEL, 0x5500000
 .set stack, 0x000121FC
 .set workspace, stack + 4
+.set var_000, 0x00
 .set var_030, 0x30
 .set var_034, 0x34
 .set var_038, 0x38
@@ -1077,7 +1078,7 @@ objectRockAddr:
 DrawObject:
  STMFD   R13!, {R6-R12, R14}
  LDR     R12, graphicsBuffersAddr
- ADD     R4, R11, #0
+ ADD     R4, R11, #var_000
  STMIA   R4, {R0-R2}
  MOVS    R4, R0
  MVNMI   R4, R4

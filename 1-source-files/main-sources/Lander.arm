@@ -78,6 +78,8 @@
                                     \ where #offset is one of the following
                                     \ variables
 
+ var_000 = &00                      \ 
+
  var_030 = &30                      \ 
 
  var_034 = &34                      \ 
@@ -2191,9 +2193,8 @@ ENDIF
                                     \ We only get here on one out of every four
                                     \ iterations around the main loop
 
- STMFD   R13!, {R0-R7, R9}          \ Otherwise store the registers that we want
-                                    \ to use on the stack so they can be
-                                    \ preserved
+ STMFD   R13!, {R0-R7, R9}          \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
  LDR     R14, [R11, #yCamera]       \ Set R1 = R1 + yCamera
  ADD     R1, R1, R14                \         = y + yCamera
@@ -2247,30 +2248,52 @@ ENDIF
 \   Category: 3D objects
 \    Summary: Draw a 3D object
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    (x, y, z) of object
+\
+\   R3                              ??? address of var_030
+\
 \ ******************************************************************************
 
 .DrawObject
 
- STMFD   R13!, {R6-R12, R14}        \ 
- LDR     R12, graphicsBuffersAddr   \ 
- ADD     R4, R11, #0                \ 
- STMIA   R4, {R0-R2}                \ 
- MOVS    R4, R0                     \ 
- MVNMI   R4, R4                     \ 
- MOVS    R5, R1                     \ 
- MVNMI   R5, R5                     \ 
- ORR     R4, R4, R5                 \ 
- ORR     R4, R4, R2                 \ 
- ORRS    R4, R4, #1                 \ 
- MOVPL   R4, R4, LSL #1             \ 
- MOV     R5, #0                     \ 
- STRB    R5, [R11, #var_120]        \ 
+ STMFD   R13!, {R6-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R12, graphicsBuffersAddr   \ Set R12 to the address of the table that
+                                    \ contains the addresses of the graphics
+                                    \ buffers
+
+ ADD     R4, R11, #var_000          \ Set R4 = var_000 ???
+
+ STMIA   R4, {R0-R2}                \ Store (R0, R1, R2) in the first three
+                                    \ words of var_000
+
+ MOVS    R4, R0                     \ Set R4 = |R0|
+ MVNMI   R4, R4                     \        = |x|
+
+ MOVS    R5, R1                     \ Set R5 = |R1|
+ MVNMI   R5, R5                     \        = |y|
+
+ ORR     R4, R4, R5                 \ Set R4 = |R0| or |R1| or R2
+ ORR     R4, R4, R2                 \        = |x| or |y| or z
+ ORRS    R4, R4, #1                 \
+                                    \ Rounded up to the nearest odd number
+
+ MOVPL   R4, R4, LSL #1             \ If R4 >= 0, set R4 = R4 << 1
+
+ MOV     R5, #0                     \ Set var_120 = 0
+ STRB    R5, [R11, #var_120]
 
 .lab_8EFC
 
  MOVS    R4, R4, LSL #1             \ 
  ADDPL   R5, R5, #1                 \ 
  BPL     lab_8EFC                   \ 
+
  MOV     R0, R0, LSL R5             \ 
  MOV     R1, R1, LSL R5             \ 
  MOV     R2, R2, LSL R5             \ 
@@ -2410,7 +2433,9 @@ ENDIF
  ADD     R9, R9, #&10               \ 
  SUBS    R8, R8, #1                 \ 
  BNE     lab_8FBC                   \ 
- LDMFD   R13!, {R6-R12, PC}         \ 
+
+ LDMFD   R13!, {R6-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
