@@ -37,13 +37,13 @@ Source: "3-assembled-output/Lander.arm"
                             	    32: .set var_0C4, 0xC4
                             	    33: .set var_0E4, 0xE4
                             	    34: .set var_0F0, 0xF0
-                            	    35: .set var_0F4, 0xF4
+                            	    35: .set objectType, 0xF4
                             	    36: .set var_0F8, 0xF8
                             	    37: .set altitude, 0x100
                             	    38: .set prevAltitude, 0x104
                             	    39: .set var_108, 0x108
                             	    40: .set var_10C, 0x10C
-                            	    41: .set objectType, 0x110
+                            	    41: .set objectData, 0x110
                             	    42: .set var_114, 0x114
                             	    43: .set var_118, 0x118
                             	    44: .set var_11C, 0x11C
@@ -55,9 +55,9 @@ Source: "3-assembled-output/Lander.arm"
                             	    50: .set remainingLives, 0x134
                             	    51: .set highScore, 0x138
                             	    52: .set xLandscape, 0x13C
-                            	    53: .set var_140, 0x140
+                            	    53: .set yLandscape, 0x140
                             	    54: .set zLandscape, 0x144
-                            	    55: .set var_148, 0x148
+                            	    55: .set xCorner, 0x148
                             	    56: .set var_150, 0x150
                             	    57: .set var_154, 0x154
                             	    58: .set var_158, 0x158
@@ -124,7 +124,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000080A0 3C419BE5        	   119:  LDR     R4, [R11, #xLandscape]
 00:000080A4 FF8404E2        	   120:  AND     R8, R4, #0xFF000000
 00:000080A8 084044E0        	   121:  SUB     R4, R4, R8
-00:000080AC 48818BE5        	   122:  STR     R8, [R11, #var_148]
+00:000080AC 48818BE5        	   122:  STR     R8, [R11, #xCorner]
 00:000080B0 165E8BE2        	   123:  ADD     R5, R11, #0x160
 00:000080B4 B0001FE5        	   124:  LDR     R0, var_800C
 00:000080B8 070090E8        	   125:  LDMFD   R0, {R0-R2}
@@ -147,13 +147,13 @@ Source: "3-assembled-output/Lander.arm"
 00:000080F8 070090E8        	   142:  LDMIA   R0, {R0-R2}
 00:000080FC 174E8BE2        	   143:  ADD     R4, R11, #0x170
 00:00008100 070084E8        	   144:  STMIA   R4, {R0-R2}
-00:00008104 48819BE5        	   145:  LDR     R8, [R11, #var_148]
+00:00008104 48819BE5        	   145:  LDR     R8, [R11, #xCorner]
 00:00008108 168548E2        	   146:  SUB     R8, R8, #0x5800000
 00:0000810C 0201A0E3        	   147:  MOV     R0, #0x80000000
 00:00008110 C4008BE5        	   148:  STR     R0, [R11, #var_0C4]
                             	   149: lab_8114:
 00:00008114 360000EB        	   150:  BL      GetLandscapeAltitude
-00:00008118 40E19BE5        	   151:  LDR     R14, [R11, #var_140]
+00:00008118 40E19BE5        	   151:  LDR     R14, [R11, #yLandscape]
 00:0000811C 0E0040E0        	   152:  SUB     R0, R0, R14
 00:00008120 74018BE5        	   153:  STR     R0, [R11, #var_174]
 00:00008124 170E8BE2        	   154:  ADD     R0, R11, #0x170
@@ -268,7 +268,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000082C4 019089E0        	   263:  ADD     R9, R9, R1
 00:000082C8 059349E2        	   264:  SUB     R9, R9, #0x14000000
 00:000082CC C8FFFFEB        	   265:  BL      GetLandscapeAltitude
-00:000082D0 40E19BE5        	   266:  LDR     R14, [R11, #var_140]
+00:000082D0 40E19BE5        	   266:  LDR     R14, [R11, #yLandscape]
 00:000082D4 0E0040E0        	   267:  SUB     R0, R0, R14
 00:000082D8 0083BDE8        	   268:  LDMFD   R13!, {R8-R9, PC}
                             	   269: sub_82DC:
@@ -425,7 +425,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008518 0010A043        	   420:  MOVMI   R1, #0
 00:0000851C 30308BE2        	   421:  ADD     R3, R11, #0x30
 00:00008520 94E99FE5        	   422:  LDR     R14, objectPlayerAddr
-00:00008524 10E18BE5        	   423:  STR     R14, [R11, #objectType]
+00:00008524 10E18BE5        	   423:  STR     R14, [R11, #objectData]
 00:00008528 0000A0E3        	   424:  MOV     R0, #0
 00:0000852C 0F24A0E3        	   425:  MOV     R2, #0xF000000
 00:00008530 630200EB        	   426:  BL      DrawObject
@@ -644,7 +644,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008868 44819BE5        	   631:  LDR     R8, [R11, #zLandscape]
 00:0000886C 082042E0        	   632:  SUB     R2, R2, R8
 00:00008870 052382E2        	   633:  ADD     R2, R2, #0x14000000
-00:00008874 40819BE5        	   634:  LDR     R8, [R11, #var_140]
+00:00008874 40819BE5        	   634:  LDR     R8, [R11, #yLandscape]
 00:00008878 081041E0        	   635:  SUB     R1, R1, R8
 00:0000887C 050352E3        	   636:  CMP     R2, #0x14000000
 00:00008880 DEFFFF2A        	   637:  BHS     lab_8800
@@ -667,7 +667,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000088C4 010450E3        	   654:  CMP     R0, #0x1000000
 00:000088C8 01045233        	   655:  CMPLO   R2, #0x1000000
 00:000088CC 0500002A        	   656:  BHS     lab_88E8
-00:000088D0 40019BE5        	   657:  LDR     R0, [R11, #var_140]
+00:000088D0 40019BE5        	   657:  LDR     R0, [R11, #yLandscape]
 00:000088D4 001081E0        	   658:  ADD     R1, R1, R0
 00:000088D8 98009BE5        	   659:  LDR     R0, [R11, #var_098]
 00:000088DC 001051E0        	   660:  SUBS    R1, R1, R0
@@ -677,13 +677,13 @@ Source: "3-assembled-output/Lander.arm"
 00:000088E8 0700BDE8        	   664:  LDMFD   R13!, {R0-R2}
 00:000088EC 74FFFF3A        	   665:  BLO     sub_86C4
 00:000088F0 C8E59FE5        	   666:  LDR     R14, objectRockAddr
-00:000088F4 10E18BE5        	   667:  STR     R14, [R11, #objectType]
+00:000088F4 10E18BE5        	   667:  STR     R14, [R11, #objectData]
 00:000088F8 30308BE2        	   668:  ADD     R3, R11, #0x30
 00:000088FC 700100EB        	   669:  BL      DrawObject
 00:00008900 BEFFFFEA        	   670:  B       lab_8800
                             	   671: lab_8904:
 00:00008904 87002DE9        	   672:  STMFD   R13!, {R0-R2, R7}
-00:00008908 40E19BE5        	   673:  LDR     R14, [R11, #var_140]
+00:00008908 40E19BE5        	   673:  LDR     R14, [R11, #yLandscape]
 00:0000890C 0E1049E0        	   674:  SUB     R1, R9, R14
 00:00008910 0280A0E1        	   675:  MOV     R8, R2
 00:00008914 550300EB        	   676:  BL      sub_9670
@@ -738,7 +738,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000089CC 060558E3        	   725:  CMP     R8, #0x1800000
 00:000089D0 0EF0A021        	   726:  MOVHS   PC, R14
 00:000089D4 04002DE9        	   727:  STMFD   R13!, {R2}
-00:000089D8 F4E08BE5        	   728:  STR     R14, [R11, #var_0F4]
+00:000089D8 F4E08BE5        	   728:  STR     R14, [R11, #objectType]
 00:000089DC 11EB8BE2        	   729:  ADD     R14, R11, #objectMap
 00:000089E0 FF2402E2        	   730:  AND     R2, R2, #0xFF000000
 00:000089E4 20EC8EE0        	   731:  ADD     R14, R14, R0, LSR #24
@@ -746,7 +746,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000089EC 0400BDE8        	   733:  LDMFD   R13!, {R2}
 00:000089F0 0080DEE5        	   734:  LDRB    R8, [R14]
 00:000089F4 FF0058E3        	   735:  CMP     R8, #0xFF
-00:000089F8 F4F09B05        	   736:  LDREQ   PC, [R11, #var_0F4]
+00:000089F8 F4F09B05        	   736:  LDREQ   PC, [R11, #objectType]
 00:000089FC 0C0058E3        	   737:  CMP     R8, #0xC
 00:00008A00 0800002A        	   738:  BHS     lab_8A28
 00:00008A04 0C8088E2        	   739:  ADD     R8, R8, #0xC
@@ -1026,11 +1026,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00008DE8 44119BE5        	  1013:  LDR     R1, [R11, #zLandscape]
 00:00008DEC FF9401E2        	  1014:  AND     R9, R1, #0xFF000000
 00:00008DF0 168548E2        	  1015:  SUB     R8, R8, #0x5800000
-00:00008DF4 48818BE5        	  1016:  STR     R8, [R11, #var_148]
+00:00008DF4 48818BE5        	  1016:  STR     R8, [R11, #xCorner]
 00:00008DF8 0B70A0E3        	  1017:  MOV     R7, #11
                             	  1018: dobs1:
 00:00008DFC 0D60A0E3        	  1019:  MOV     R6, #13
-00:00008E00 48819BE5        	  1020:  LDR     R8, [R11, #var_148]
+00:00008E00 48819BE5        	  1020:  LDR     R8, [R11, #xCorner]
                             	  1021: dobs2:
 00:00008E04 11EB8BE2        	  1022:  ADD     R14, R11, #objectMap
 00:00008E08 28EC8EE0        	  1023:  ADD     R14, R14, R8, LSR #24
@@ -1047,11 +1047,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00008E30 F1FFFF1A        	  1034:  BNE     dobs1
 00:00008E34 E09FBDE8        	  1035:  LDMFD   R13!, {R5-R12, PC}
                             	  1036: dobs4:
-00:00008E38 F400CBE5        	  1037:  STRB    R0, [R11, #var_0F4]
-                            	  1038: .set typeOffset, ($ + 8) - objectTypes
+00:00008E38 F400CBE5        	  1037:  STRB    R0, [R11, #objectType]
+                            	  1038: .set typeOffset, $ + 8 - objectTypes
 00:00008E3C 00018FE0        	  1039:  ADD     R0, PC, R0, LSL #2
 00:00008E40 CCE010E5        	  1040:  LDR     R14, [R0, #-typeOffset]
-00:00008E44 10E18BE5        	  1041:  STR     R14, [R11, #objectType]
+00:00008E44 10E18BE5        	  1041:  STR     R14, [R11, #objectData]
 00:00008E48 E9FCFFEB        	  1042:  BL      GetLandscapeAltitude
 00:00008E4C 0010A0E1        	  1043:  MOV     R1, R0
 00:00008E50 550650E3        	  1044:  CMP     R0, #SEA_LEVEL
@@ -1061,10 +1061,10 @@ Source: "3-assembled-output/Lander.arm"
 00:00008E60 44E19BE5        	  1048:  LDR     R14, [R11, #zLandscape]
 00:00008E64 0E2049E0        	  1049:  SUB     R2, R9, R14
 00:00008E68 052382E2        	  1050:  ADD     R2, R2, #0x14000000
-00:00008E6C 40E19BE5        	  1051:  LDR     R14, [R11, #var_140]
+00:00008E6C 40E19BE5        	  1051:  LDR     R14, [R11, #yLandscape]
 00:00008E70 0E1041E0        	  1052:  SUB     R1, R1, R14
-00:00008E74 F4E0DBE5        	  1053:  LDRB    R14, [R11, #var_0F4]
-00:00008E78 0C005EE3        	  1054:  CMP     R14, #0xC
+00:00008E74 F4E0DBE5        	  1053:  LDRB    R14, [R11, #objectType]
+00:00008E78 0C005EE3        	  1054:  CMP     R14, #12
 00:00008E7C 0200002A        	  1055:  BHS     dobs6
                             	  1056: dobs5:
 00:00008E80 30308BE2        	  1057:  ADD     R3, R11, #var_030
@@ -1075,7 +1075,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008E90 03001EE3        	  1062:  TST     R14, #3
 00:00008E94 F9FFFF1A        	  1063:  BNE     dobs5
 00:00008E98 FF022DE9        	  1064:  STMFD   R13!, {R0-R7, R9}
-00:00008E9C 40E19BE5        	  1065:  LDR     R14, [R11, #var_140]
+00:00008E9C 40E19BE5        	  1065:  LDR     R14, [R11, #yLandscape]
 00:00008EA0 0E1081E0        	  1066:  ADD     R1, R1, R14
 00:00008EA4 0800A0E1        	  1067:  MOV     R0, R8
 00:00008EA8 0920A0E1        	  1068:  MOV     R2, R9
@@ -1119,7 +1119,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008F30 0700A418        	  1106:  STMNEIA R4!, {R0-R2}
 00:00008F34 0700B318        	  1107:  LDMNEIA R3!, {R0-R2}
 00:00008F38 0700A418        	  1108:  STMNEIA R4!, {R0-R2}
-00:00008F3C 10019BE5        	  1109:  LDR     R0, [R11, #objectType]
+00:00008F3C 10019BE5        	  1109:  LDR     R0, [R11, #objectData]
 00:00008F40 008090E5        	  1110:  LDR     R8, [R0]
 00:00008F44 109080E2        	  1111:  ADD     R9, R0, #0x10
 00:00008F48 06AC8BE2        	  1112:  ADD     R10, R11, #0x600
@@ -1148,7 +1148,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008FA0 20E1CB25        	  1135:  STRHSB  R14, [R11, #var_120]
 00:00008FA4 018058E2        	  1136:  SUBS    R8, R8, #1
 00:00008FA8 E9FFFF1A        	  1137:  BNE     lab_8F54
-00:00008FAC 10119BE5        	  1138:  LDR     R1, [R11, #objectType]
+00:00008FAC 10119BE5        	  1138:  LDR     R1, [R11, #objectData]
 00:00008FB0 080091E5        	  1139:  LDR     R0, [R1, #8]
 00:00008FB4 009081E0        	  1140:  ADD     R9, R1, R0
 00:00008FB8 048091E5        	  1141:  LDR     R8, [R1, #4]
@@ -2072,7 +2072,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009CE8 84C21FE5        	  2059:  LDR     R12, screenAddr
                             	  2060: DrawNextFromGraphicsBuffer:
 00:00009CEC 040099E4        	  2061:  LDR     R0, [R9], #4
-                            	  2062: .set labOffset, ($ + 8) - bufferJump
+                            	  2062: .set labOffset, $ + 8 - bufferJump
 00:00009CF0 00018FE0        	  2063:  ADD     R0, PC, R0, LSL #2
 00:00009CF4 6CF010E5        	  2064:  LDR     PC, [R0, #-labOffset]
                             	  2065: TerminateGraphicsBuffer:
@@ -2637,7 +2637,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A4C4 24A50000        	  2624: .long    DrawLineSegment
                             	  2625: DrawHorizontalLine:
 00:0000A4C8 12005AE3        	  2626:  CMP     R10, #18
-                            	  2627: .set varOffset, ($ + 8) - lineJump
+                            	  2627: .set varOffset, $ + 8 - lineJump
 00:0000A4CC 0A018F30        	  2628:  ADDLO   R0, PC, R10, LSL #2
 00:0000A4D0 54F01035        	  2629:  LDRLO   PC, [R0, #-varOffset]
 00:0000A4D4 0AA08BE0        	  2630:  ADD     R10, R11, R10
@@ -10381,6 +10381,7 @@ memoryTestAddr                   A:0000A574
 mouseParameters                  A:0000A588
 mouseParametersAddr              A:0000A590
 objectBuilding                   A:0000B29C
+objectData                       S:00000110
 objectFirTree                    A:0000B08C
 objectGazebo                     A:0000B110
 objectMap                        S:00004400
@@ -10396,7 +10397,7 @@ objectSmokingGazebo              A:0000B5BC
 objectSmokingRemainsLeft         A:0000AF84
 objectSmokingRemainsRight        A:0000B008
 objectTallLeafyTree              A:0000AE24
-objectType                       S:00000110
+objectType                       S:000000F4
 objectTypes                      A:00008D78
 prevAltitude                     S:00000104
 prsb1                            A:000091A0
@@ -10473,7 +10474,6 @@ var_0A8                          S:000000A8
 var_0C4                          S:000000C4
 var_0E4                          S:000000E4
 var_0F0                          S:000000F0
-var_0F4                          S:000000F4
 var_0F8                          S:000000F8
 var_108                          S:00000108
 var_10C                          S:0000010C
@@ -10482,8 +10482,6 @@ var_118                          S:00000118
 var_11C                          S:0000011C
 var_120                          S:00000120
 var_130                          S:00000130
-var_140                          S:00000140
-var_148                          S:00000148
 var_150                          S:00000150
 var_154                          S:00000154
 var_158                          S:00000158
@@ -10506,7 +10504,9 @@ var_9A70                         A:00009A70
 var_9AC0                         A:00009AC0
 workspace                        S:00012200
 workspaceAddr                    A:0000A56C
+xCorner                          S:00000148
 xLandscape                       S:0000013C
+yLandscape                       S:00000140
 zLandscape                       S:00000144
 
 Symbols by value:
@@ -10527,8 +10527,8 @@ Symbols by value:
 00000048 var_048
 0000004C var_04C
 00000050 var_050
-00000054 varOffset
 00000054 var_054
+00000054 varOffset
 00000058 var_058
 0000006C labOffset
 00000078 var_078
@@ -10541,13 +10541,13 @@ Symbols by value:
 000000CC typeOffset
 000000E4 var_0E4
 000000F0 var_0F0
-000000F4 var_0F4
+000000F4 objectType
 000000F8 var_0F8
 00000100 altitude
 00000104 prevAltitude
 00000108 var_108
 0000010C var_10C
-00000110 objectType
+00000110 objectData
 00000114 var_114
 00000118 var_118
 0000011C var_11C
@@ -10559,9 +10559,9 @@ Symbols by value:
 00000134 remainingLives
 00000138 highScore
 0000013C xLandscape
-00000140 var_140
+00000140 yLandscape
 00000144 zLandscape
-00000148 var_148
+00000148 xCorner
 00000150 var_150
 00000154 var_154
 00000158 var_158

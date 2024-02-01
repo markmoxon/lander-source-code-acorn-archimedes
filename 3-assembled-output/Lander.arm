@@ -32,13 +32,13 @@
 .set var_0C4, 0xC4
 .set var_0E4, 0xE4
 .set var_0F0, 0xF0
-.set var_0F4, 0xF4
+.set objectType, 0xF4
 .set var_0F8, 0xF8
 .set altitude, 0x100
 .set prevAltitude, 0x104
 .set var_108, 0x108
 .set var_10C, 0x10C
-.set objectType, 0x110
+.set objectData, 0x110
 .set var_114, 0x114
 .set var_118, 0x118
 .set var_11C, 0x11C
@@ -50,9 +50,9 @@
 .set remainingLives, 0x134
 .set highScore, 0x138
 .set xLandscape, 0x13C
-.set var_140, 0x140
+.set yLandscape, 0x140
 .set zLandscape, 0x144
-.set var_148, 0x148
+.set xCorner, 0x148
 .set var_150, 0x150
 .set var_154, 0x154
 .set var_158, 0x158
@@ -119,7 +119,7 @@ DrawLandscape:
  LDR     R4, [R11, #xLandscape]
  AND     R8, R4, #0xFF000000
  SUB     R4, R4, R8
- STR     R8, [R11, #var_148]
+ STR     R8, [R11, #xCorner]
  ADD     R5, R11, #0x160
  LDR     R0, var_800C
  LDMFD   R0, {R0-R2}
@@ -142,13 +142,13 @@ lab_80DC:
  LDMIA   R0, {R0-R2}
  ADD     R4, R11, #0x170
  STMIA   R4, {R0-R2}
- LDR     R8, [R11, #var_148]
+ LDR     R8, [R11, #xCorner]
  SUB     R8, R8, #0x5800000
  MOV     R0, #0x80000000
  STR     R0, [R11, #var_0C4]
 lab_8114:
  BL      GetLandscapeAltitude
- LDR     R14, [R11, #var_140]
+ LDR     R14, [R11, #yLandscape]
  SUB     R0, R0, R14
  STR     R0, [R11, #var_174]
  ADD     R0, R11, #0x170
@@ -263,7 +263,7 @@ sub_82AC:
  ADD     R9, R9, R1
  SUB     R9, R9, #0x14000000
  BL      GetLandscapeAltitude
- LDR     R14, [R11, #var_140]
+ LDR     R14, [R11, #yLandscape]
  SUB     R0, R0, R14
  LDMFD   R13!, {R8-R9, PC}
 sub_82DC:
@@ -420,7 +420,7 @@ lab_850C:
  MOVMI   R1, #0
  ADD     R3, R11, #0x30
  LDR     R14, objectPlayerAddr
- STR     R14, [R11, #objectType]
+ STR     R14, [R11, #objectData]
  MOV     R0, #0
  MOV     R2, #0xF000000
  BL      DrawObject
@@ -631,7 +631,7 @@ lab_880C:
  LDR     R8, [R11, #zLandscape]
  SUB     R2, R2, R8
  ADD     R2, R2, #0x14000000
- LDR     R8, [R11, #var_140]
+ LDR     R8, [R11, #yLandscape]
  SUB     R1, R1, R8
  CMP     R2, #0x14000000
  BHS     lab_8800
@@ -654,7 +654,7 @@ lab_880C:
  CMP     R0, #0x1000000
  CMPLO   R2, #0x1000000
  BHS     lab_88E8
- LDR     R0, [R11, #var_140]
+ LDR     R0, [R11, #yLandscape]
  ADD     R1, R1, R0
  LDR     R0, [R11, #var_098]
  SUBS    R1, R1, R0
@@ -664,13 +664,13 @@ lab_88E8:
  LDMFD   R13!, {R0-R2}
  BLO     sub_86C4
  LDR     R14, objectRockAddr
- STR     R14, [R11, #objectType]
+ STR     R14, [R11, #objectData]
  ADD     R3, R11, #0x30
  BL      DrawObject
  B       lab_8800
 lab_8904:
  STMFD   R13!, {R0-R2, R7}
- LDR     R14, [R11, #var_140]
+ LDR     R14, [R11, #yLandscape]
  SUB     R1, R9, R14
  MOV     R8, R2
  BL      sub_9670
@@ -725,7 +725,7 @@ sub_89C8:
  CMP     R8, #0x1800000
  MOVHS   PC, R14
  STMFD   R13!, {R2}
- STR     R14, [R11, #var_0F4]
+ STR     R14, [R11, #objectType]
  ADD     R14, R11, #objectMap
  AND     R2, R2, #0xFF000000
  ADD     R14, R14, R0, LSR #24
@@ -733,7 +733,7 @@ sub_89C8:
  LDMFD   R13!, {R2}
  LDRB    R8, [R14]
  CMP     R8, #0xFF
- LDREQ   PC, [R11, #var_0F4]
+ LDREQ   PC, [R11, #objectType]
  CMP     R8, #0xC
  BHS     lab_8A28
  ADD     R8, R8, #0xC
@@ -1013,11 +1013,11 @@ DrawObjects:
  LDR     R1, [R11, #zLandscape]
  AND     R9, R1, #0xFF000000
  SUB     R8, R8, #0x5800000
- STR     R8, [R11, #var_148]
+ STR     R8, [R11, #xCorner]
  MOV     R7, #11
 dobs1:
  MOV     R6, #13
- LDR     R8, [R11, #var_148]
+ LDR     R8, [R11, #xCorner]
 dobs2:
  ADD     R14, R11, #objectMap
  ADD     R14, R14, R8, LSR #24
@@ -1034,11 +1034,11 @@ dobs3:
  BNE     dobs1
  LDMFD   R13!, {R5-R12, PC}
 dobs4:
- STRB    R0, [R11, #var_0F4]
-.set typeOffset, ($ + 8) - objectTypes
+ STRB    R0, [R11, #objectType]
+.set typeOffset, $ + 8 - objectTypes
  ADD     R0, PC, R0, LSL #2
  LDR     R14, [R0, #-typeOffset]
- STR     R14, [R11, #objectType]
+ STR     R14, [R11, #objectData]
  BL      GetLandscapeAltitude
  MOV     R1, R0
  CMP     R0, #SEA_LEVEL
@@ -1048,10 +1048,10 @@ dobs4:
  LDR     R14, [R11, #zLandscape]
  SUB     R2, R9, R14
  ADD     R2, R2, #0x14000000
- LDR     R14, [R11, #var_140]
+ LDR     R14, [R11, #yLandscape]
  SUB     R1, R1, R14
- LDRB    R14, [R11, #var_0F4]
- CMP     R14, #0xC
+ LDRB    R14, [R11, #objectType]
+ CMP     R14, #12
  BHS     dobs6
 dobs5:
  ADD     R3, R11, #var_030
@@ -1062,7 +1062,7 @@ dobs6:
  TST     R14, #3
  BNE     dobs5
  STMFD   R13!, {R0-R7, R9}
- LDR     R14, [R11, #var_140]
+ LDR     R14, [R11, #yLandscape]
  ADD     R1, R1, R14
  MOV     R0, R8
  MOV     R2, R9
@@ -1106,7 +1106,7 @@ lab_8EFC:
  STMNEIA R4!, {R0-R2}
  LDMNEIA R3!, {R0-R2}
  STMNEIA R4!, {R0-R2}
- LDR     R0, [R11, #objectType]
+ LDR     R0, [R11, #objectData]
  LDR     R8, [R0]
  ADD     R9, R0, #0x10
  ADD     R10, R11, #0x600
@@ -1135,7 +1135,7 @@ lab_8F54:
  STRHSB  R14, [R11, #var_120]
  SUBS    R8, R8, #1
  BNE     lab_8F54
- LDR     R1, [R11, #objectType]
+ LDR     R1, [R11, #objectData]
  LDR     R0, [R1, #8]
  ADD     R9, R1, R0
  LDR     R8, [R1, #4]
@@ -2059,7 +2059,7 @@ DrawGraphicsBuffer:
  LDR     R12, screenAddr
 DrawNextFromGraphicsBuffer:
  LDR     R0, [R9], #4
-.set labOffset, ($ + 8) - bufferJump
+.set labOffset, $ + 8 - bufferJump
  ADD     R0, PC, R0, LSL #2
  LDR     PC, [R0, #-labOffset]
 TerminateGraphicsBuffer:
@@ -2624,7 +2624,7 @@ lineJump:
 .long    DrawLineSegment
 DrawHorizontalLine:
  CMP     R10, #18
-.set varOffset, ($ + 8) - lineJump
+.set varOffset, $ + 8 - lineJump
  ADDLO   R0, PC, R10, LSL #2
  LDRLO   PC, [R0, #-varOffset]
  ADD     R10, R11, R10

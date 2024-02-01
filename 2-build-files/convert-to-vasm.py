@@ -39,6 +39,9 @@ for line in bbc_basic_file:
     # Hexadecimal & -> 0x
     line = re.sub(r"&", "0x", line)
 
+    # P% -> $
+    line = re.sub(r"P%", "$", line)
+
     # EQUD -> .long
     line = re.sub(r"^ ?EQUD ", ".long ", line)
 

@@ -76,6 +76,7 @@
                                     \   [R11, #offset]
                                     \
                                     \ where #offset is one of the following
+                                    \ variables
 
  var_030 = &30                      \ 
 
@@ -119,7 +120,8 @@
 
  var_0F0 = &F0                      \ 
 
- var_0F4 = &F4                      \ 
+ objectType = &F4                   \ The type of the object that is being
+                                    \ displayed
 
  var_0F8 = &F8                      \ 
 
@@ -129,16 +131,16 @@
  prevAltitude = &104                \ The altitude of the landscape at the
                                     \ previously calculated coordinate
 
- var_108 = &108                     \ Contains the address of var_700
+ var_108 = &108                     \ Contains the address of var_700 ???
 
  var_10C = &10C                     \ 
 
- objectType = &110                  \ The type of the object currently being
-                                    \ displayed
+ objectData = &110                  \ The address of the data block for the
+                                    \ object that is being displayed
 
  var_114 = &114                     \ 
 
- var_118 = &118                     \ 
+ var_118 = &118                     \ Something to do with smoke clouds ???
 
  var_11C = &11C                     \ 
 
@@ -174,15 +176,20 @@
                                     \ It is initialised to initialHighScore when
                                     \ the game is loaded
 
- xLandscape = &13C                  \ The x-coordinate of the front-left corner
-                                    \ of the landscape that's shown on-screen
+ xLandscape = &13C                  \ The 3D x-coordinate of the front-middle
+                                    \ point of the landscape that's shown
+                                    \ on-screen
 
- var_140 = &140                     \ 
+ yLandscape = &140                  \ This value is always zero, and represents
+                                    \ the 3D y-coordinate of the front-middle
+                                    \ point of the landscape that's shown
+                                    \ on-screen
 
- zLandscape = &144                  \ The z-coordinate of the front-left corner
-                                    \ of the landscape that's shown on-screen
+ zLandscape = &144                  \ The 3D z-coordinate of the front-middle
+                                    \ point of the landscape that's shown
+                                    \ on-screen
 
- var_148 = &148                     \ 
+ xCorner = &148                     \ 
 
  var_150 = &150                     \ 
 
@@ -427,7 +434,7 @@ ENDIF
  LDR     R4, [R11, #xLandscape]     \ 
  AND     R8, R4, #&FF000000         \ 
  SUB     R4, R4, R8                 \ 
- STR     R8, [R11, #var_148]        \ 
+ STR     R8, [R11, #xCorner]        \ 
  ADD     R5, R11, #&160             \ 
  LDR     R0, var_800C               \ 
  LDMFD   R0, {R0-R2}                \ 
@@ -452,7 +459,7 @@ ENDIF
  LDMIA   R0, {R0-R2}                \ 
  ADD     R4, R11, #&170             \ 
  STMIA   R4, {R0-R2}                \ 
- LDR     R8, [R11, #var_148]        \ 
+ LDR     R8, [R11, #xCorner]        \ 
  SUB     R8, R8, #&5800000          \ 
  MOV     R0, #&80000000             \ 
  STR     R0, [R11, #var_0C4]        \ 
@@ -460,7 +467,7 @@ ENDIF
 .lab_8114
 
  BL      GetLandscapeAltitude       \ 
- LDR     R14, [R11, #var_140]       \ 
+ LDR     R14, [R11, #yLandscape]    \ 
  SUB     R0, R0, R14                \ 
  STR     R0, [R11, #var_174]        \ 
  ADD     R0, R11, #&170             \ 
@@ -787,7 +794,7 @@ ENDIF
  ADD     R9, R9, R1                 \ 
  SUB     R9, R9, #&14000000         \ 
  BL      GetLandscapeAltitude       \ 
- LDR     R14, [R11, #var_140]       \ 
+ LDR     R14, [R11, #yLandscape]    \ 
  SUB     R0, R0, R14                \ 
  LDMFD   R13!, {R8-R9, PC}          \ 
 
@@ -1003,7 +1010,7 @@ ENDIF
  MOVMI   R1, #0                     \ 
  ADD     R3, R11, #&30              \ 
  LDR     R14, objectPlayerAddr      \ 
- STR     R14, [R11, #objectType]    \ 
+ STR     R14, [R11, #objectData]    \ 
  MOV     R0, #0                     \ 
  MOV     R2, #&F000000              \ 
  BL      DrawObject                 \ 
@@ -1336,7 +1343,7 @@ ENDIF
  LDR     R8, [R11, #zLandscape]     \ 
  SUB     R2, R2, R8                 \ 
  ADD     R2, R2, #&14000000         \ 
- LDR     R8, [R11, #var_140]        \ 
+ LDR     R8, [R11, #yLandscape]     \ 
  SUB     R1, R1, R8                 \ 
  CMP     R2, #&14000000             \ 
  BHS     lab_8800                   \ 
@@ -1359,7 +1366,7 @@ ENDIF
  CMP     R0, #&1000000              \ 
  CMPLO   R2, #&1000000              \ 
  BHS     lab_88E8                   \ 
- LDR     R0, [R11, #var_140]        \ 
+ LDR     R0, [R11, #yLandscape]     \ 
  ADD     R1, R1, R0                 \ 
  LDR     R0, [R11, #var_098]        \ 
  SUBS    R1, R1, R0                 \ 
@@ -1371,7 +1378,7 @@ ENDIF
  LDMFD   R13!, {R0-R2}              \ 
  BLO     sub_86C4                   \ 
  LDR     R14, objectRockAddr        \ 
- STR     R14, [R11, #objectType]    \ 
+ STR     R14, [R11, #objectData]    \ 
  ADD     R3, R11, #&30              \ 
  BL      DrawObject                 \ 
  B       lab_8800                   \ 
@@ -1379,7 +1386,7 @@ ENDIF
 .lab_8904
 
  STMFD   R13!, {R0-R2, R7}          \ 
- LDR     R14, [R11, #var_140]       \ 
+ LDR     R14, [R11, #yLandscape]    \ 
  SUB     R1, R9, R14                \ 
  MOV     R8, R2                     \ 
  BL      sub_9670                   \ 
@@ -1467,7 +1474,7 @@ ENDIF
  CMP     R8, #&1800000              \ 
  MOVHS   PC, R14                    \ 
  STMFD   R13!, {R2}                 \ 
- STR     R14, [R11, #var_0F4]       \ 
+ STR     R14, [R11, #objectType]    \ 
  ADD     R14, R11, #objectMap       \ 
  AND     R2, R2, #&FF000000         \ 
  ADD     R14, R14, R0, LSR #24      \ 
@@ -1475,7 +1482,7 @@ ENDIF
  LDMFD   R13!, {R2}                 \ 
  LDRB    R8, [R14]                  \ 
  CMP     R8, #&FF                   \ 
- LDREQ   PC, [R11, #var_0F4]        \ 
+ LDREQ   PC, [R11, #objectType]     \ 
  CMP     R8, #&C                    \ 
  BHS     lab_8A28                   \ 
  ADD     R8, R8, #&C                \ 
@@ -1624,6 +1631,10 @@ ENDIF
 \       Type: Subroutine
 \   Category: ???
 \    Summary: ???
+\
+\ ------------------------------------------------------------------------------
+\
+\ This is called for destroyed objects - it displays the smoke particles?
 \
 \ ******************************************************************************
 
@@ -1928,7 +1939,7 @@ ENDIF
 \ Each object in the object map has a type from 0 to 24. Types 0 to 11 are for
 \ intact objects, while adding 12 to get types 12 to 23 gives the object type
 \ when that object has been destroyed. Destroyed objects are shown with clouds
-\ of smoke rising up from the detritus.
+\ of smoke particles rising up from the detritus.
 \
 \ Objects 0, 12 and 24 do not appear to be used anywhere. There are two
 \ additional objects - the player's ship and the rock - which are defined in
@@ -1999,21 +2010,35 @@ ENDIF
                                     \ closer objects
 
  LDR     R0, [R11, #xLandscape]     \ Set R0 to the x-coordinate of the
-                                    \ front-left corner of the landscape
+                                    \ front-middle point of the landscape
 
  AND     R8, R0, #&FF000000         \ Zero the bottom three bytes of R0 and
                                     \ store in R8, so R8 contains the coordinate
                                     \ of the tile containing xLandscape
 
  LDR     R1, [R11, #zLandscape]     \ Set R1 to the z-coordinate of the
-                                    \ front-left corner of the landscape
+                                    \ front-middle point of the landscape
 
  AND     R9, R1, #&FF000000         \ Zero the bottom three bytes of R1 and
                                     \ store in R9, so R9 contains the coordinate
                                     \ of the tile containing zLandscape
 
- SUB     R8, R8, #&5800000          \ Set var_148 = R8 - &5.8
- STR     R8, [R11, #var_148]
+ SUB     R8, R8, #&5800000          \ Set xCorner = R8 - &5800000
+ STR     R8, [R11, #xCorner]        \
+                                    \ Each tile is &1000000 coordinates wide,
+                                    \ and the visible landscape is 12 tiles wide
+                                    \
+                                    \ We already rounded xLandscape down to the
+                                    \ nearest tile, so this subtracts exactly
+                                    \ 5.5 tiles' width from xLandscape and
+                                    \ stores the result in xCorner ???
+                                    \
+                                    \ As we only take the top byte of the
+                                    \ x-coordinate when reading the object map,
+                                    \ this moves usto the front-left corner of
+                                    \ the on-screen landscape, so we can now
+                                    \ work along the x-axis in the object map
+                                    \ from left to right in the following loop
 
                                     \ We are now ready to loop through the
                                     \ object map, so we set up the loop counters
@@ -2035,7 +2060,7 @@ ENDIF
                                     \ x-axis (i.e. from left to right on the
                                     \ screen)
 
- LDR     R8, [R11, #var_148]        \ Set R8 = var_148
+ LDR     R8, [R11, #xCorner]        \ Set R8 = xCorner
 
                                     \ We now have the coordinates of the far
                                     \ left tile in (R8, R9), so we can start to
@@ -2086,54 +2111,98 @@ ENDIF
 
 .dobs4
 
- STRB    R0, [R11, #var_0F4]        \ 
+                                    \ If we get here then there is an object at
+                                    \ (R8, R9) of type R0
 
- typeOffset = ($ + 8) - objectTypes \ &CC
+ STRB    R0, [R11, #objectType]     \ Store the object type in objectType
 
- ADD     R0, PC, R0, LSL #2         \ 
- LDR     R14, [R0, #-typeOffset]    \ Fetch from objectTypes table
+ typeOffset = P% + 8 - objectTypes  \ Set typeOffset to the offset back to the
+                                    \ objectTypes table from the next
+                                    \ instruction
 
- STR     R14, [R11, #objectType]    \ 
- BL      GetLandscapeAltitude       \ 
- MOV     R1, R0                     \ 
- CMP     R0, #SEA_LEVEL             \ 
- BEQ     dobs3                      \ 
+ ADD     R0, PC, R0, LSL #2         \ Set R14 to the address in entry R0 in the
+ LDR     R14, [R0, #-typeOffset]    \ objectTypes table, which is the address of
+                                    \ the data block for this object type
 
- LDR     R14, [R11, #xLandscape]    \ 
- SUB     R0, R8, R14                \ 
- LDR     R14, [R11, #zLandscape]    \ 
- SUB     R2, R9, R14                \ 
- ADD     R2, R2, #&14000000         \ 
- LDR     R14, [R11, #var_140]       \ 
- SUB     R1, R1, R14                \ 
- LDRB    R14, [R11, #var_0F4]       \ 
- CMP     R14, #&C                   \ 
- BHS     dobs6                      \ 
+ STR     R14, [R11, #objectData]    \ Store the address of the data block in
+                                    \ objectData
+
+ BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
+                                    \ coordinates (R8, R9), which is where we
+                                    \ are drawing our object
+
+ MOV     R1, R0                     \ Make a copy of the altitude in R1
+
+ CMP     R0, #SEA_LEVEL             \ If the object is on the sea, jump back to
+ BEQ     dobs3                      \ dobs3 to move on to the next object, as
+                                    \ there are no objects on the sea (though
+                                    \ there shouldn't be any objects in the sea
+                                    \ in the object map anyway, as this check is
+                                    \ also performed when populating the object
+                                    \ map)
+
+ LDR     R14, [R11, #xLandscape]    \ Set R0 = R8 - xLandscape
+ SUB     R0, R8, R14                \        = x - xLandscape
+                                    \
+                                    \ So R0 contains the x-coordinate of the
+                                    \ object relative to the front-centre point
+                                    \ of the landscape
+
+ LDR     R14, [R11, #zLandscape]    \ Set R2 = R9 - zLandscape
+ SUB     R2, R9, R14                \
+                                    \ So R2 contains the z-coordinate of the
+                                    \ object relative to the front-centre point
+                                    \ of the landscape
+
+ ADD     R2, R2, #&14000000         \ Move the coordinate back by 14 tiles, so
+                                    \ (R0, R2) contains the coordinate of the
+                                    \ object relative to the back-centre point
+                                    \ of the landscape
+
+ LDR     R14, [R11, #yLandscape]    \ yLandscape is always zero, so this has no
+ SUB     R1, R1, R14                \ effect
+
+ LDRB    R14, [R11, #objectType]    \ If the object type is 12 or more, then it
+ CMP     R14, #12                   \ represents a destroyed object, so jump to
+ BHS     dobs6                      \ dobs6
 
 .dobs5
 
- ADD     R3, R11, #var_030          \ 
- BL      DrawObject                 \ 
- B       dobs3                      \ 
+ ADD     R3, R11, #var_030          \ Set R3 to the address of var_030 ???
+
+ BL      DrawObject                 \ Draw the object
+
+ B       dobs3                      \ Jump back to dobs3 to move on to the next
+                                    \ object
 
 .dobs6
 
- LDR     R14, [R11, #var_118]       \ 
- TST     R14, #3                    \ 
- BNE     dobs5                      \ 
+                                    \ If we get here then this is a destroyed
+                                    \ object
 
- STMFD   R13!, {R0-R7, R9}          \ 
+ LDR     R14, [R11, #var_118]       \ If var_118 <> 3, jump to dobs5 to draw the
+ TST     R14, #3                    \ object ???
+ BNE     dobs5
 
- LDR     R14, [R11, #var_140]       \ 
- ADD     R1, R1, R14                \ 
- MOV     R0, R8                     \ 
- MOV     R2, R9                     \ 
- SUB     R1, R1, #&C00000           \ 
- BL      sub_8B0C                   \ 
+ STMFD   R13!, {R0-R7, R9}          \ Otherwise store the registers that we want
+                                    \ to use on the stack so they can be
+                                    \ preserved
 
- LDMFD   R13!, {R0-R7, R9}          \ 
+ LDR     R14, [R11, #yLandscape]    \ Add yLandscape to the altitude in R1 (this
+ ADD     R1, R1, R14                \ will have no effect as yLandscape is
+                                    \ always zero)
 
- B       dobs5                      \ 
+ MOV     R0, R8                     \ Set (R0, R1, R2) to (x, y - &C00000, z)
+ MOV     R2, R9
+ SUB     R1, R1, #&C00000
+
+ BL      sub_8B0C                   \ Call sub_8B0C to draw the smoke particles
+                                    \ rising from the destroyed object ???
+
+ LDMFD   R13!, {R0-R7, R9}          \ Retrieve the registers that we stored on
+                                    \ the stack
+
+ B       dobs5                      \ Jump to dobs5 to draw the object
 
 \ ******************************************************************************
 \
@@ -2205,7 +2274,7 @@ ENDIF
  STMNEIA R4!, {R0-R2}               \ 
  LDMNEIA R3!, {R0-R2}               \ 
  STMNEIA R4!, {R0-R2}               \ 
- LDR     R0, [R11, #objectType]     \ 
+ LDR     R0, [R11, #objectData]     \ 
  LDR     R8, [R0]                   \ 
  ADD     R9, R0, #&10               \ 
  ADD     R10, R11, #&600            \ 
@@ -2236,7 +2305,7 @@ ENDIF
  STRHSB  R14, [R11, #var_120]       \ 
  SUBS    R8, R8, #1                 \ 
  BNE     lab_8F54                   \ 
- LDR     R1, [R11, #objectType]     \ 
+ LDR     R1, [R11, #objectData]     \ 
  LDR     R0, [R1, #8]               \ 
  ADD     R9, R1, R0                 \ 
  LDR     R8, [R1, #4]               \ 
@@ -4217,9 +4286,8 @@ ENDIF
  LDR     R0, [R9], #4               \ Fetch R0 from the address in graphicsBuffers
                                     \ table and increment R9 to the next address
 
- labOffset = ($ + 8) - bufferJump   \ Set labOffset to the offset back to the
-                                    \ bufferJump table from the next
-                                    \ instruction
+ labOffset = P% + 8 - bufferJump    \ Set labOffset to the offset back to the
+                                    \ bufferJump table from the next instruction
 
  ADD     R0, PC, R0, LSL #2         \ Jump to the address in entry R0 in the
  LDR     PC, [R0, #-labOffset]      \ bufferJump table
@@ -5115,7 +5183,7 @@ ENDIF
                                     \ the relevant routine in the lineJump to
                                     \ draw the line
 
- varOffset = ($ + 8) - lineJump     \ Set labOffset to the offset back to the
+ varOffset = P% + 8 - lineJump      \ Set labOffset to the offset back to the
                                     \ lineJump table from the next instruction
 
  ADDLO   R0, PC, R10, LSL #2        \ If R10 < 18, jump to the address in entry
