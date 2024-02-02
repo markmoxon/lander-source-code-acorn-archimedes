@@ -2292,7 +2292,7 @@ ENDIF
 
                                     \ We now scale up the coordinate (x, y, z)
                                     \ in (R0, R1, R2) as high as it can go while
-                                    \ still staying within 32-bit words
+                                    \ still staying within 32-bit coordinates
 
  MOVS    R4, R0                     \ Set R4 = |R0|
  MVNMI   R4, R4                     \        = |x|
@@ -2422,7 +2422,7 @@ ENDIF
                                     \ previous ???projection, i.e. y-coordinate?
 
  CMP     R14, R1                    \ If previous y-coordinate >= this y-coord
- MVNHS   R14, #0                    \ then set var_120 = 0
+ MVNHS   R14, #0                    \ then set var_120 = &FF
  STRHSB  R14, [R11, #var_120]
 
  SUBS    R8, R8, #1                 \ Decrement the loop counter, which keeps
