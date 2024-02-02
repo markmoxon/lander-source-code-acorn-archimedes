@@ -1138,7 +1138,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008F58 54008BE2        	  1125:  ADD     R0, R11, #var_054
 00:00008F5C 64108BE2        	  1126:  ADD     R1, R11, #var_064
 00:00008F60 1C0080E8        	  1127:  STMIA   R0, {R2-R4}
-00:00008F64 BA0000EB        	  1128:  BL      sub_9254
+00:00008F64 BA0000EB        	  1128:  BL      MultiplyVectorByMatrix
 00:00008F68 00008BE2        	  1129:  ADD     R0, R11, #var_000
 00:00008F6C 6A0200EB        	  1130:  BL      sub_991C
 00:00008F70 74008BE2        	  1131:  ADD     R0, R11, #var_074
@@ -1164,7 +1164,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008FBC 0900A0E1        	  1151:  MOV     R0, R9
 00:00008FC0 0C9089E2        	  1152:  ADD     R9, R9, #12
 00:00008FC4 54108BE2        	  1153:  ADD     R1, R11, #var_054
-00:00008FC8 A10000EB        	  1154:  BL      sub_9254
+00:00008FC8 A10000EB        	  1154:  BL      MultiplyVectorByMatrix
 00:00008FCC 58109BE5        	  1155:  LDR     R1, [R11, #var_058]
 00:00008FD0 14E1DBE5        	  1156:  LDRB    R14, [R11, #var_114]
 00:00008FD4 01001EE3        	  1157:  TST     R14, #0x1
@@ -1172,7 +1172,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008FDC 0010E003        	  1159:  MVNEQ   R1, #0
 00:00008FE0 84208B12        	  1160:  ADDNE   R2, R11, #var_084
 00:00008FE4 54008B12        	  1161:  ADDNE   R0, R11, #var_054
-00:00008FE8 A700001B        	  1162:  BLNE    sub_928C
+00:00008FE8 A700001B        	  1162:  BLNE    GetDotProduct
 00:00008FEC 001B2DE9        	  1163:  STMFD   R13!, {R8-R9, R11-R12}
 00:00008FF0 000051E3        	  1164:  CMP     R1, #0
 00:00008FF4 0F00005A        	  1165:  BPL     dobj4
@@ -1341,22 +1341,22 @@ Source: "3-assembled-output/Lander.arm"
 00:0000924C 5C800000        	  1328: .long    graphicsBuffers
                             	  1329: var_9250:
 00:00009250 2C800000        	  1330: .long    var_802C
-                            	  1331: sub_9254:
+                            	  1331: MultiplyVectorByMatrix:
 00:00009254 1421DBE5        	  1332:  LDRB    R2, [R11, #var_114]
-00:00009258 010012E3        	  1333:  TST     R2, #1
+00:00009258 010012E3        	  1333:  TST     R2, #0x1
 00:0000925C 1C009008        	  1334:  LDMEQIA R0, {R2-R4}
 00:00009260 1C008108        	  1335:  STMEQIA R1, {R2-R4}
 00:00009264 0EF0A001        	  1336:  MOVEQ   PC, R14
 00:00009268 C0402DE9        	  1337:  STMFD   R13!, {R6-R7, R14}
 00:0000926C 30208BE2        	  1338:  ADD     R2, R11, #var_030
-00:00009270 050000EB        	  1339:  BL      sub_928C
+00:00009270 050000EB        	  1339:  BL      GetDotProduct
 00:00009274 003081E5        	  1340:  STR     R3, [R1]
-00:00009278 030000EB        	  1341:  BL      sub_928C
+00:00009278 030000EB        	  1341:  BL      GetDotProduct
 00:0000927C 043081E5        	  1342:  STR     R3, [R1, #4]
-00:00009280 010000EB        	  1343:  BL      sub_928C
+00:00009280 010000EB        	  1343:  BL      GetDotProduct
 00:00009284 083081E5        	  1344:  STR     R3, [R1, #8]
 00:00009288 C080BDE8        	  1345:  LDMFD   R13!, {R6-R7, PC}
-                            	  1346: sub_928C:
+                            	  1346: GetDotProduct:
 00:0000928C 044092E4        	  1347:  LDR     R4, [R2], #4
 00:00009290 005090E5        	  1348:  LDR     R5, [R0]
 00:00009294 057024E0        	  1349:  EOR     R7, R4, R5
@@ -1367,11 +1367,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000092A8 00506542        	  1354:  RSBMI   R5, R5, #0
 00:000092AC 8550A0E1        	  1355:  MOV     R5, R5, LSL #1
 00:000092B0 FE4404E2        	  1356:  AND     R4, R4, #0xFE000000
-00:000092B4 014484E3        	  1357:  ORR     R4, R4, #0x1000000
+00:000092B4 014484E3        	  1357:  ORR     R4, R4, #0x01000000
 00:000092B8 0030A0E3        	  1358:  MOV     R3, #0
                             	  1359: lab_92BC:
 00:000092BC A550A0E1        	  1360:  MOV     R5, R5, LSR #1
-00:000092C0 05308320        	  1361:  ADDHS   R3, R3, R5
+00:000092C0 05308320        	  1361:  ADDCS   R3, R3, R5
 00:000092C4 8440B0E1        	  1362:  MOVS    R4, R4, LSL #1
 00:000092C8 FBFFFF1A        	  1363:  BNE     lab_92BC
 00:000092CC A330A0E1        	  1364:  MOV     R3, R3, LSR #1
@@ -1387,7 +1387,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000092F4 00506542        	  1374:  RSBMI   R5, R5, #0
 00:000092F8 8550A0E1        	  1375:  MOV     R5, R5, LSL #1
 00:000092FC FE4404E2        	  1376:  AND     R4, R4, #0xFE000000
-00:00009300 014484E3        	  1377:  ORR     R4, R4, #0x1000000
+00:00009300 014484E3        	  1377:  ORR     R4, R4, #0x01000000
 00:00009304 0060A0E3        	  1378:  MOV     R6, #0
                             	  1379: lab_9308:
 00:00009308 A550A0E1        	  1380:  MOV     R5, R5, LSR #1
@@ -1408,7 +1408,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009344 00506542        	  1395:  RSBMI   R5, R5, #0
 00:00009348 8550A0E1        	  1396:  MOV     R5, R5, LSL #1
 00:0000934C FE4404E2        	  1397:  AND     R4, R4, #0xFE000000
-00:00009350 014484E3        	  1398:  ORR     R4, R4, #0x1000000
+00:00009350 014484E3        	  1398:  ORR     R4, R4, #0x01000000
 00:00009354 0060A0E3        	  1399:  MOV     R6, #0
                             	  1400: lab_9358:
 00:00009358 A550A0E1        	  1401:  MOV     R5, R5, LSR #1
@@ -10247,6 +10247,7 @@ EndGame                          A:0000A8AC
 Entry                            A:0000A614
 FillTriangle                     A:0000A408
 GameOver                         A:00008744
+GetDotProduct                    A:0000928C
 GetLandscapeAltitude             A:000081F4
 GetRandomNumbers                 A:00009A40
 LAUNCHPAD_ALTITUDE               S:03500000
@@ -10254,6 +10255,7 @@ LoseLife                         A:000086C8
 MainLoop                         A:0000A850
 MoveAndDrawParticles             A:000087F4
 MoveAndDrawPlayer                A:00008398
+MultiplyVectorByMatrix           A:00009254
 OBJ_ROCKET                       S:00000009
 OS_BinaryToDecimal               S:00000028
 OS_Byte                          S:00000006
@@ -10502,8 +10504,6 @@ sub_8CDC                         A:00008CDC
 sub_8CFC                         A:00008CFC
 sub_8D24                         A:00008D24
 sub_8D40                         A:00008D40
-sub_9254                         A:00009254
-sub_928C                         A:0000928C
 sub_937C                         A:0000937C
 sub_93B4                         A:000093B4
 sub_93E4                         A:000093E4
@@ -10574,8 +10574,8 @@ yCamera                          S:00000140
 zCamera                          S:00000144
 
 Symbols by value:
-00000000 var_000
 00000000 OS_WriteC
+00000000 var_000
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10592,8 +10592,8 @@ Symbols by value:
 00000048 var_048
 0000004C var_04C
 00000050 var_050
-00000054 varOffset
 00000054 var_054
+00000054 varOffset
 00000058 var_058
 00000064 var_064
 0000006C labOffset
@@ -10734,8 +10734,8 @@ Symbols by value:
 000091FC DrawFuelLevel
 0000924C graphicsBuffersAddr
 00009250 var_9250
-00009254 sub_9254
-0000928C sub_928C
+00009254 MultiplyVectorByMatrix
+0000928C GetDotProduct
 000092BC lab_92BC
 00009308 lab_9308
 00009358 lab_9358
