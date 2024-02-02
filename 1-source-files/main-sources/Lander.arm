@@ -2300,8 +2300,8 @@ ENDIF
  MOVS    R5, R1                     \ Set R5 = |R1|
  MVNMI   R5, R5                     \        = |y|
 
- ORR     R4, R4, R5                 \ Set R4 = |R0| or |R1| or R2
- ORR     R4, R4, R2                 \        = |x| or |y| or z
+ ORR     R4, R4, R5                 \ Set R4 = |R0| OR |R1| OR R2
+ ORR     R4, R4, R2                 \        = |x| OR |y| OR z
  ORRS    R4, R4, #1                 \
                                     \ And round it up to the nearest odd number
                                     \
@@ -2347,11 +2347,11 @@ ENDIF
  ADD     R4, R11, #var_030          \ If R3 does not point to var_030 variable,
  CMP     R3, R4                     \ copy nine words from the variable that R3
  LDMNEIA R3!, {R0-R2}               \ does point to, and put them into var_030
- STMNEIA R4!, {R0-R2}               \ 
- LDMNEIA R3!, {R0-R2}               \ 
- STMNEIA R4!, {R0-R2}               \ 
- LDMNEIA R3!, {R0-R2}               \ 
- STMNEIA R4!, {R0-R2}               \ 
+ STMNEIA R4!, {R0-R2}
+ LDMNEIA R3!, {R0-R2}
+ STMNEIA R4!, {R0-R2}
+ LDMNEIA R3!, {R0-R2}
+ STMNEIA R4!, {R0-R2}
 
  LDR     R0, [R11, #objectData]     \ Set R0 to the address of the data block
                                     \ for the object that is being drawn
@@ -2470,7 +2470,7 @@ ENDIF
  LDR     R1, [R11, #var_058]        \ Set R1 to var_058
 
  LDRB    R14, [R11, #var_114]       \ If bit 0 of var_114 is zero, set
- TST     R14, #1                    \ R1 and R3 = 0
+ TST     R14, #%00000001            \ R1 and R3 = 0
  MVNEQ   R3, #0
  MVNEQ   R1, #0
 
@@ -2486,7 +2486,7 @@ ENDIF
  BPL     dobj4                      \ the following
 
  LDRB    R14, [R11, #var_114]       \ If bit 1 of var_114 is zero, jump to dobj4
- TST     R14, #2                    \ to skip the following
+ TST     R14, #%00000010            \ to skip the following
  BEQ     dobj4
 
  STMFD   R13!, {R3, R9, R11}        \ Store the registers that we want to use on
@@ -2518,7 +2518,7 @@ ENDIF
 .dobj4
 
  CMP     R3, #0                     \ If bit 31 of R3 is not set, jump to dobj5
- BPL     dobj5                      \ to ckip the following
+ BPL     dobj5                      \ to skip the following
 
  LDMIA   R9, {R4-R7}                \ Set R4, R5, R6, R7 to the fourth, fifth,
                                     \ sixth and seventh words of face data
@@ -2533,49 +2533,55 @@ ENDIF
  MOV     R1, R1, LSR #28            \        = (&80000000 - var_058) >> 28
 
  CMP     R0, #0                     \ If R0 is negative, increment R1
- ADDMI   R1, R1, #1                 \ 
+ ADDMI   R1, R1, #1
 
  SUBS    R1, R1, #5                 \ Set R1 = R1 - 5
 
  MOVMI   R1, #0                     \ If R1 < 0, set R1 = 0
 
- MOV     R8, #&F                    \ 
- AND     R0, R8, R7, LSR #8         \ 
- AND     R2, R8, R7, LSR #4         \ 
- AND     R7, R7, R8                 \ 
- ADD     R0, R0, R1                 \ 
+ MOV     R8, #%00001111             \ Set R0 = bits 8-11 of R7
+ AND     R0, R8, R7, LSR #8
 
- CMP     R0, #&10                   \ 
- MOVHS   R0, #&F                    \ 
+ AND     R2, R8, R7, LSR #4         \ Set R2 = bits 4-7 of R7
 
- ADD     R2, R2, R1                 \ 
- CMP     R2, #&10                   \ 
- MOVHS   R2, #&F                    \ 
+ AND     R7, R7, R8                 \ Set R7 = bits 0-3 of R7
 
- ADD     R7, R7, R1                 \ 
- CMP     R7, #&10                   \ 
- MOVHS   R7, #&F                    \ 
+ ADD     R0, R0, R1                 \ Set R0 = R0 + R1
 
- ORR     R8, R2, R7                 \ 
- AND     R8, R8, #3                 \ 
- ORR     R8, R8, R0                 \ 
- AND     R8, R8, #7                 \ 
+ CMP     R0, #%00010000             \ If R0 >= %00010000, set R1 = %00001111
+ MOVHS   R0, #%00001111
 
- TST     R0, #8                     \ 
- ORRNE   R8, R8, #&10               \ 
+ ADD     R2, R2, R1                 \ Set R2 = R2 + R1
 
- AND     R2, R2, #&C                \ 
- ORR     R8, R8, R2, LSL #3         \ 
+ CMP     R2, #%00010000             \ If R2 >= %00010000, set R2 = %00001111
+ MOVHS   R2, #%00001111
 
- TST     R7, #4                     \ 
- ORRNE   R8, R8, #8                 \ 
+ ADD     R7, R7, R1                 \ Set R7 = R7 + R1
 
- TST     R7, #8                     \ 
- ORRNE   R8, R8, #&80               \ 
+ CMP     R7, #%00010000             \ If R7 >= %00010000, set R7 = %00001111
+ MOVHS   R7, #%00001111
 
- ORR     R8, R8, R8, LSL #8         \ 
- ORR     R8, R8, R8, LSL #16        \ 
- ORR     R8, R8, R8, LSL #24        \ 
+ ORR     R8, R2, R7                 \ R8 = bottom three bits of:
+ AND     R8, R8, #%00000011         \      (bottom two bits of R2 OR R7) OR R0
+ ORR     R8, R8, R0
+ AND     R8, R8, #%00000111
+
+ TST     R0, #%00001000             \ If bit 3 of R0 is set, set bit 4 of R8
+ ORRNE   R8, R8, #%00010000         \ 
+
+ AND     R2, R2, #%00001100         \ Clear all bits of R2 except bits 2-3
+
+ ORR     R8, R8, R2, LSL #3         \ Stick them into bits 5-6 of R8
+
+ TST     R7, #%00000100             \ If bit 2 of R7 is set, set bit 3 of R8
+ ORRNE   R8, R8, #%00001000
+
+ TST     R7, #%00001000             \ If bit 3 of R7 is set, set bit 7 of R8
+ ORRNE   R8, R8, #%10000000
+
+ ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
+ ORR     R8, R8, R8, LSL #16        \ other three bytes in the word (so is this
+ ORR     R8, R8, R8, LSL #24        \ a colour byte) ???
 
  ADD     R4, R10, R4, LSL #4        \ Set (R0, R1) to the two words at offset
  LDMIA   R4, {R0-R1}                \ R4 * 16 from the table at R10 (var_600)
@@ -2587,7 +2593,8 @@ ENDIF
  LDMIA   R6, {R4-R5}                \ R6 * 16 from the table at R10 (var_600)
 
  BL      DrawTriangleIntoBuffer2    \ Draw triangle, so presumably the above are
-                                    \ three 2D coordinates ???
+                                    \ three 2D coordinates, with R8 the colour
+                                    \ ???
 
 .dobj5
 

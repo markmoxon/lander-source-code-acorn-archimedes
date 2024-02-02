@@ -36,11 +36,17 @@ for line in bbc_basic_file:
     # SKIP -> .skip
     line = re.sub(r"^ ?SKIP ", ".skip ", line)
 
-    # Hexadecimal & -> 0x
-    line = re.sub(r"&", "0x", line)
-
     # P% -> $
     line = re.sub(r"P%", "$", line)
+
+    # Binary % -> 0x
+    binary_string = re.search(r"%([0-1]+)", line)
+    if binary_string:
+        hex_string = hex(int(binary_string.group(1), 2))
+        line = re.sub(r"%([0-1]+)", hex_string, line)
+
+    # Hexadecimal & -> 0x
+    line = re.sub(r"&", "0x", line)
 
     # EQUD -> .long
     line = re.sub(r"^ ?EQUD ", ".long ", line)
