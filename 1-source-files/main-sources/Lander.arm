@@ -6288,28 +6288,26 @@ ENDIF
 
 .objectRock
 
- EQUD    &00000006
- EQUD    &00000008
- EQUD    &00000058
- EQUD    &00000003
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00A00000
- EQUD    &00A00000
- EQUD    &00A00000
- EQUD    &00000000
- EQUD    &FF600000
- EQUD    &00A00000
- EQUD    &00000000
- EQUD    &00A00000
- EQUD    &FF600000
- EQUD    &00000000
- EQUD    &FF600000
- EQUD    &FF600000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &FF600000
+ EQUD    6                          \ Number of vertices
+
+ EQUD    8                          \ Number of faces
+
+ EQUD    objectRockFaces - objectRock
+
+ EQUD    %00000011                  \ Flags
+
+.objectRockVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &00000000, &00000000, &00A00000        \ Vertex 0
+ EQUD    &00A00000, &00A00000, &00000000        \ Vertex 1
+ EQUD    &FF600000, &00A00000, &00000000        \ Vertex 2
+ EQUD    &00A00000, &FF600000, &00000000        \ Vertex 3
+ EQUD    &FF600000, &FF600000, &00000000        \ Vertex 4
+ EQUD    &00000000, &00000000, &FF600000        \ Vertex 5
+
+.objectRockFaces
+
  EQUD    &00000000
  EQUD    &54DA5200
  EQUD    &54DA5200
@@ -6378,25 +6376,25 @@ ENDIF
 
 .objectPulsatingPyramid
 
- EQUD    &00000005
- EQUD    &00000006
- EQUD    &0000004C
- EQUD    &00000001
- EQUD    &00000000
- EQUD    &01000000
- EQUD    &00000000
- EQUD    &00C00000
- EQUD    &FF800000
- EQUD    &00C00000
- EQUD    &FF400000
- EQUD    &FF800000
- EQUD    &00C00000
- EQUD    &00C00000
- EQUD    &FF800000
- EQUD    &FF400000
- EQUD    &FF400000
- EQUD    &FF800000
- EQUD    &FF400000
+ EQUD    5                          \ Number of vertices
+
+ EQUD    6                          \ Number of faces
+
+ EQUD    objectPulsatingPyramidFaces - objectPulsatingPyramid
+
+ EQUD    %00000001                  \ Flags
+
+.objectPulsatingPyramidVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &00000000, &01000000, &00000000        \ Vertex 0
+ EQUD    &00C00000, &FF800000, &00C00000        \ Vertex 1
+ EQUD    &FF400000, &FF800000, &00C00000        \ Vertex 2
+ EQUD    &00C00000, &FF800000, &FF400000        \ Vertex 3
+ EQUD    &FF400000, &FF800000, &FF400000        \ Vertex 4
+
+.objectPulsatingPyramidFaces
+
  EQUD    &00000000
  EQUD    &35AA66D2
  EQUD    &6B54CDA5
@@ -6451,37 +6449,30 @@ ENDIF
 
 .objectPlayer
 
- EQUD    &00000009
- EQUD    &00000009
- EQUD    &0000007C
- EQUD    &00000003
- EQUD    &01000000
- EQUD    &00500000
- EQUD    &00800000
- EQUD    &01000000
- EQUD    &00500000
- EQUD    &FF800000
- EQUD    &00000000
- EQUD    &000A0000
- EQUD    &FECCCCCD
- EQUD    &FF19999A
- EQUD    &00500000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &000A0000
- EQUD    &01333333
- EQUD    &FFE66667
- EQUD    &FF880000
- EQUD    &00000000
- EQUD    &00555555
- EQUD    &00500000
- EQUD    &00400000
- EQUD    &00555555
- EQUD    &00500000
- EQUD    &FFC00000
- EQUD    &FFCCCCCD
- EQUD    &00500000
- EQUD    &00000000
+ EQUD    9                          \ Number of vertices
+
+ EQUD    9                          \ Number of faces
+
+ EQUD    objectPlayerFaces - objectPlayer
+
+ EQUD    %00000011                  \ Flags
+
+.objectPlayerVertices
+
+    \      xVertex,   yVertex,   zVertex
+
+ EQUD    &01000000, &00500000, &00800000        \ Vertex 0
+ EQUD    &01000000, &00500000, &FF800000        \ Vertex 1
+ EQUD    &00000000, &000A0000, &FECCCCCD        \ Vertex 2
+ EQUD    &FF19999A, &00500000, &00000000        \ Vertex 3
+ EQUD    &00000000, &000A0000, &01333333        \ Vertex 4
+ EQUD    &FFE66667, &FF880000, &00000000        \ Vertex 5
+ EQUD    &00555555, &00500000, &00400000        \ Vertex 6
+ EQUD    &00555555, &00500000, &FFC00000        \ Vertex 7
+ EQUD    &FFCCCCCD, &00500000, &00000000        \ Vertex 8
+
+.objectPlayerFaces
+
  EQUD    &457C441A
  EQUD    &9E2A1F4C
  EQUD    &00000000
@@ -6557,43 +6548,31 @@ ENDIF
 
 .objectSmallLeafyTree
 
- EQUD    &0000000B
- EQUD    &00000005
- EQUD    &00000094
- EQUD    &00000002
- EQUD    &00300000
- EQUD    &FE800000
- EQUD    &00300000
- EQUD    &FFD9999A
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00266666
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &FEF33334
- EQUD    &FF400000
- EQUD    &00800000
- EQUD    &FF400000
- EQUD    &FF800000
- EQUD    &FF400000
- EQUD    &FECCCCCD
- EQUD    &FFD55556
- EQUD    &FF800000
- EQUD    &FEA66667
- EQUD    &00400000
- EQUD    &00800000
- EQUD    &FE59999A
- EQUD    &002AAAAA
- EQUD    &00C00000
- EQUD    &FEA66667
- EQUD    &FFC00000
- EQUD    &FFA00000
- EQUD    &FECCCCCD
- EQUD    &00999999
- EQUD    &00C00000
- EQUD    &FF400000
- EQUD    &00C00000
+ EQUD    11                         \ Number of vertices
+
+ EQUD    5                          \ Number of faces
+
+ EQUD    objectSmallLeafyTreeFaces - objectSmallLeafyTree
+
+ EQUD    %00000010                  \ Flags
+
+.objectSmallLeafyTreeVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &00300000, &FE800000, &00300000        \ Vertex 0
+ EQUD    &FFD9999A, &00000000, &00000000        \ Vertex 1
+ EQUD    &00266666, &00000000, &00000000        \ Vertex 2
+ EQUD    &00000000, &FEF33334, &FF400000        \ Vertex 3
+ EQUD    &00800000, &FF400000, &FF800000        \ Vertex 4
+ EQUD    &FF400000, &FECCCCCD, &FFD55556        \ Vertex 5
+ EQUD    &FF800000, &FEA66667, &00400000        \ Vertex 6
+ EQUD    &00800000, &FE59999A, &002AAAAA        \ Vertex 7
+ EQUD    &00C00000, &FEA66667, &FFC00000        \ Vertex 8
+ EQUD    &FFA00000, &FECCCCCD, &00999999        \ Vertex 9
+ EQUD    &00C00000, &FF400000, &00C00000        \ Vertex 10
+
+.objectSmallLeafyTreeFaces
+
  EQUD    &14A01873
  EQUD    &AF8F9F93
  EQUD    &56A0681E
@@ -6641,52 +6620,34 @@ ENDIF
 
 .objectTallLeafyTree
 
- EQUD    &0000000E
- EQUD    &00000006
- EQUD    &000000B8
- EQUD    &00000002
- EQUD    &0036DB6D
- EQUD    &FD733334
- EQUD    &00300000
- EQUD    &FFD00000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00300000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &FE0CCCCD
- EQUD    &FF400000
- EQUD    &00800000
- EQUD    &FE59999A
- EQUD    &FF800000
- EQUD    &FF533334
- EQUD    &FE333334
- EQUD    &FFC92493
- EQUD    &FF400000
- EQUD    &FEA66667
- EQUD    &00600000
- EQUD    &00000000
- EQUD    &FF19999A
- EQUD    &FF666667
- EQUD    &FF800000
- EQUD    &FF400000
- EQUD    &FFA00000
- EQUD    &FFA00000
- EQUD    &FE800000
- EQUD    &00999999
- EQUD    &00C00000
- EQUD    &FECCCCCD
- EQUD    &00C00000
- EQUD    &FFB33334
- EQUD    &FF19999A
- EQUD    &00E66666
- EQUD    &00800000
- EQUD    &FF400000
- EQUD    &00C00000
- EQUD    &00300000
- EQUD    &FE59999A
- EQUD    &00300000
+ EQUD    14                         \ Number of vertices
+
+ EQUD    6                          \ Number of faces
+
+ EQUD    objectTallLeafyTreeFaces - objectTallLeafyTree
+
+ EQUD    %00000010                  \ Flags
+
+.objectTallLeafyTreeVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &0036DB6D, &FD733334, &00300000        \ Vertex 0
+ EQUD    &FFD00000, &00000000, &00000000        \ Vertex 1
+ EQUD    &00300000, &00000000, &00000000        \ Vertex 2
+ EQUD    &00000000, &FE0CCCCD, &FF400000        \ Vertex 3
+ EQUD    &00800000, &FE59999A, &FF800000        \ Vertex 4
+ EQUD    &FF533334, &FE333334, &FFC92493        \ Vertex 5
+ EQUD    &FF400000, &FEA66667, &00600000        \ Vertex 6
+ EQUD    &00000000, &FF19999A, &FF666667        \ Vertex 7
+ EQUD    &FF800000, &FF400000, &FFA00000        \ Vertex 8
+ EQUD    &FFA00000, &FE800000, &00999999        \ Vertex 9
+ EQUD    &00C00000, &FECCCCCD, &00C00000        \ Vertex 10
+ EQUD    &FFB33334, &FF19999A, &00E66666        \ Vertex 11
+ EQUD    &00800000, &FF400000, &00C00000        \ Vertex 12
+ EQUD    &00300000, &FE59999A, &00300000        \ Vertex 13
+
+.objectTallLeafyTreeFaces
+
  EQUD    &FD3D01DD
  EQUD    &D2CB371E
  EQUD    &6F20024E
@@ -6741,25 +6702,25 @@ ENDIF
 
 .objectSmokingRemainsLeft
 
- EQUD    &00000005
- EQUD    &00000002
- EQUD    &0000004C
- EQUD    &00000000
- EQUD    &FFD9999A
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00266666
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &002B3333
- EQUD    &FFC00000
- EQUD    &00000000
- EQUD    &00300000
- EQUD    &FF800000
- EQUD    &00000000
- EQUD    &FFD55556
- EQUD    &FECCCCCD
- EQUD    &00000000
+ EQUD    5                          \ Number of vertices
+
+ EQUD    2                          \ Number of faces
+
+ EQUD    objectSmokingRemainsLeftFaces - objectSmokingRemainsLeft
+
+ EQUD    %00000000                  \ Flags
+
+.objectSmokingRemainsLeftVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &FFD9999A, &00000000, &00000000        \ Vertex 0
+ EQUD    &00266666, &00000000, &00000000        \ Vertex 1
+ EQUD    &002B3333, &FFC00000, &00000000        \ Vertex 2
+ EQUD    &00300000, &FF800000, &00000000        \ Vertex 3
+ EQUD    &FFD55556, &FECCCCCD, &00000000        \ Vertex 4
+
+.objectSmokingRemainsLeftFaces
+
  EQUD    &00000000
  EQUD    &00000000
  EQUD    &00000000
@@ -6786,25 +6747,25 @@ ENDIF
 
 .objectSmokingRemainsRight
 
- EQUD    &00000005
- EQUD    &00000002
- EQUD    &0000004C
- EQUD    &00000000
- EQUD    &002AAAAA
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &FFD55556
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &FFD4CCCD
- EQUD    &FFD00000
- EQUD    &00000000
- EQUD    &FFD00000
- EQUD    &FFA00000
- EQUD    &00000000
- EQUD    &002AAAAA
- EQUD    &FEA66667
- EQUD    &00000000
+ EQUD    5                          \ Number of vertices
+
+ EQUD    2                          \ Number of faces
+
+ EQUD    objectSmokingRemainsRightFaces - objectSmokingRemainsRight
+
+ EQUD    %00000000                  \ Flags
+
+.objectSmokingRemainsRightVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &002AAAAA, &00000000, &00000000        \ Vertex 0
+ EQUD    &FFD55556, &00000000, &00000000        \ Vertex 1
+ EQUD    &FFD4CCCD, &FFD00000, &00000000        \ Vertex 2
+ EQUD    &FFD00000, &FFA00000, &00000000        \ Vertex 3
+ EQUD    &002AAAAA, &FEA66667, &00000000        \ Vertex 4
+
+.objectSmokingRemainsRightFaces
+
  EQUD    &00000000
  EQUD    &00000000
  EQUD    &00000000
@@ -6831,25 +6792,25 @@ ENDIF
 
 .objectFirTree
 
- EQUD    &00000005
- EQUD    &00000002
- EQUD    &0000004C
- EQUD    &00000002
- EQUD    &FFA00000
- EQUD    &FFC92493
- EQUD    &FFC92493
- EQUD    &00600000
- EQUD    &FFC92493
- EQUD    &FFC92493
- EQUD    &00000000
- EQUD    &FE333334
- EQUD    &0036DB6D
- EQUD    &00266666
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &FFD9999A
- EQUD    &00000000
- EQUD    &00000000
+ EQUD    5                          \ Number of vertices
+
+ EQUD    2                          \ Number of faces
+
+ EQUD    objectFirTreeFaces - objectFirTree
+
+ EQUD    %00000010                  \ Flags
+
+.objectFirTreeVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &FFA00000, &FFC92493, &FFC92493        \ Vertex 0
+ EQUD    &00600000, &FFC92493, &FFC92493        \ Vertex 1
+ EQUD    &00000000, &FE333334, &0036DB6D        \ Vertex 2
+ EQUD    &00266666, &00000000, &00000000        \ Vertex 3
+ EQUD    &FFD9999A, &00000000, &00000000        \ Vertex 4
+
+.objectFirTreeFaces
+
  EQUD    &00000000
  EQUD    &00000000
  EQUD    &00000000
@@ -6876,49 +6837,33 @@ ENDIF
 
 .objectGazebo
 
- EQUD    &0000000D
- EQUD    &00000008
- EQUD    &000000AC
- EQUD    &00000002
- EQUD    &00000000
- EQUD    &FF000000
- EQUD    &00000000
- EQUD    &FF800000
- EQUD    &FF400000
- EQUD    &00800000
- EQUD    &FF800000
- EQUD    &FF400000
- EQUD    &FF800000
- EQUD    &00800000
- EQUD    &FF400000
- EQUD    &FF800000
- EQUD    &00800000
- EQUD    &FF400000
- EQUD    &00800000
- EQUD    &FF800000
- EQUD    &00000000
- EQUD    &00800000
- EQUD    &FF800000
- EQUD    &00000000
- EQUD    &FF800000
- EQUD    &00800000
- EQUD    &00000000
- EQUD    &FF800000
- EQUD    &00800000
- EQUD    &00000000
- EQUD    &00800000
- EQUD    &FF99999A
- EQUD    &FF400000
- EQUD    &00800000
- EQUD    &FF99999A
- EQUD    &FF400000
- EQUD    &FF800000
- EQUD    &00666666
- EQUD    &FF400000
- EQUD    &FF800000
- EQUD    &00666666
- EQUD    &FF400000
- EQUD    &00800000
+ EQUD    13                         \ Number of vertices
+
+ EQUD    8                          \ Number of faces
+
+ EQUD    objectGazeboFaces - objectGazebo
+
+ EQUD    %00000010                  \ Flags
+
+.objectGazeboVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &00000000, &FF000000, &00000000        \ Vertex 0
+ EQUD    &FF800000, &FF400000, &00800000        \ Vertex 1
+ EQUD    &FF800000, &FF400000, &FF800000        \ Vertex 2
+ EQUD    &00800000, &FF400000, &FF800000        \ Vertex 3
+ EQUD    &00800000, &FF400000, &00800000        \ Vertex 4
+ EQUD    &FF800000, &00000000, &00800000        \ Vertex 5
+ EQUD    &FF800000, &00000000, &FF800000        \ Vertex 6
+ EQUD    &00800000, &00000000, &FF800000        \ Vertex 7
+ EQUD    &00800000, &00000000, &00800000        \ Vertex 8
+ EQUD    &FF99999A, &FF400000, &00800000        \ Vertex 9
+ EQUD    &FF99999A, &FF400000, &FF800000        \ Vertex 10
+ EQUD    &00666666, &FF400000, &FF800000        \ Vertex 11
+ EQUD    &00666666, &FF400000, &00800000        \ Vertex 12
+
+.objectGazeboFaces
+
  EQUD    &00000000
  EQUD    &00000000
  EQUD    &78000000
@@ -6987,58 +6932,36 @@ ENDIF
 
 .objectBuilding
 
- EQUD    &00000010
- EQUD    &0000000C
- EQUD    &000000D0
- EQUD    &00000000
- EQUD    &FF19999A
- EQUD    &FF266667
- EQUD    &00000000
- EQUD    &FF400000
- EQUD    &FF266667
- EQUD    &00000000
- EQUD    &00C00000
- EQUD    &FF266667
- EQUD    &00000000
- EQUD    &00E66666
- EQUD    &FF266667
- EQUD    &00000000
- EQUD    &FF19999A
- EQUD    &FF8CCCCD
- EQUD    &00A66666
- EQUD    &FF19999A
- EQUD    &FF8CCCCD
- EQUD    &FF59999A
- EQUD    &00E66666
- EQUD    &FF8CCCCD
- EQUD    &00A66666
- EQUD    &00E66666
- EQUD    &FF8CCCCD
- EQUD    &FF59999A
- EQUD    &FF400000
- EQUD    &FF666667
- EQUD    &00800000
- EQUD    &FF400000
- EQUD    &FF666667
- EQUD    &FF800000
- EQUD    &00C00000
- EQUD    &FF666667
- EQUD    &00800000
- EQUD    &00C00000
- EQUD    &FF666667
- EQUD    &FF800000
- EQUD    &FF400000
- EQUD    &00000000
- EQUD    &00800000
- EQUD    &FF400000
- EQUD    &00000000
- EQUD    &FF800000
- EQUD    &00C00000
- EQUD    &00000000
- EQUD    &00800000
- EQUD    &00C00000
- EQUD    &00000000
- EQUD    &FF800000
+ EQUD    16                         \ Number of vertices
+
+ EQUD    12                         \ Number of faces
+
+ EQUD    objectBuildingFaces - objectBuilding
+
+ EQUD    %00000000                  \ Flags
+
+.objectBuildingVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &FF19999A, &FF266667, &00000000        \ Vertex 0
+ EQUD    &FF400000, &FF266667, &00000000        \ Vertex 1
+ EQUD    &00C00000, &FF266667, &00000000        \ Vertex 2
+ EQUD    &00E66666, &FF266667, &00000000        \ Vertex 3
+ EQUD    &FF19999A, &FF8CCCCD, &00A66666        \ Vertex 4
+ EQUD    &FF19999A, &FF8CCCCD, &FF59999A        \ Vertex 5
+ EQUD    &00E66666, &FF8CCCCD, &00A66666        \ Vertex 6
+ EQUD    &00E66666, &FF8CCCCD, &FF59999A        \ Vertex 7
+ EQUD    &FF400000, &FF666667, &00800000        \ Vertex 8
+ EQUD    &FF400000, &FF666667, &FF800000        \ Vertex 9
+ EQUD    &00C00000, &FF666667, &00800000        \ Vertex 10
+ EQUD    &00C00000, &FF666667, &FF800000        \ Vertex 11
+ EQUD    &FF400000, &00000000, &00800000        \ Vertex 12
+ EQUD    &FF400000, &00000000, &FF800000        \ Vertex 13
+ EQUD    &00C00000, &00000000, &00800000        \ Vertex 14
+ EQUD    &00C00000, &00000000, &FF800000        \ Vertex 15
+
+.objectBuildingFaces
+
  EQUD    &00000000
  EQUD    &99CD0E6D
  EQUD    &3EE445CC
@@ -7135,28 +7058,26 @@ ENDIF
 
 .objectSmokingBuilding
 
- EQUD    &00000006
- EQUD    &00000006
- EQUD    &00000058
- EQUD    &00000000
- EQUD    &FF400000
- EQUD    &00000001
- EQUD    &00800000
- EQUD    &FF400000
- EQUD    &00000001
- EQUD    &FF800000
- EQUD    &00C00000
- EQUD    &00000001
- EQUD    &00800000
- EQUD    &00C00000
- EQUD    &00000001
- EQUD    &FF800000
- EQUD    &FF400000
- EQUD    &FF99999A
- EQUD    &00800000
- EQUD    &00C00000
- EQUD    &FFB33334
- EQUD    &FF800000
+ EQUD    6                          \ Number of vertices
+
+ EQUD    6                          \ Number of faces
+
+ EQUD    objectSmokingBuildingFaces - objectSmokingBuilding
+
+ EQUD    %00000000                  \ Flags
+
+.objectSmokingBuildingVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &FF400000, &00000001, &00800000        \ Vertex 0
+ EQUD    &FF400000, &00000001, &FF800000        \ Vertex 1
+ EQUD    &00C00000, &00000001, &00800000        \ Vertex 2
+ EQUD    &00C00000, &00000001, &FF800000        \ Vertex 3
+ EQUD    &FF400000, &FF99999A, &00800000        \ Vertex 4
+ EQUD    &00C00000, &FFB33334, &FF800000        \ Vertex 5
+
+.objectSmokingBuildingFaces
+
  EQUD    &00000000
  EQUD    &78000000
  EQUD    &00000000
@@ -7211,28 +7132,26 @@ ENDIF
 
 .objectSmokingGazebo
 
- EQUD    &00000006
- EQUD    &00000004
- EQUD    &00000058
- EQUD    &00000002
- EQUD    &00000000
- EQUD    &FF8CCCCD
- EQUD    &FFF00000
- EQUD    &00199999
- EQUD    &FF8CCCCD
- EQUD    &FFF00000
- EQUD    &00800000
- EQUD    &00000000
- EQUD    &00800000
- EQUD    &FF800000
- EQUD    &00000000
- EQUD    &00800000
- EQUD    &00800000
- EQUD    &00000000
- EQUD    &FF800000
- EQUD    &FF800000
- EQUD    &00000000
- EQUD    &FF800000
+ EQUD    6                          \ Number of vertices
+
+ EQUD    4                          \ Number of faces
+
+ EQUD    objectSmokingGazeboFaces - objectSmokingGazebo
+
+ EQUD    %00000010                  \ Flags
+
+.objectSmokingGazeboVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &00000000, &FF8CCCCD, &FFF00000        \ Vertex 0
+ EQUD    &00199999, &FF8CCCCD, &FFF00000        \ Vertex 1
+ EQUD    &00800000, &00000000, &00800000        \ Vertex 2
+ EQUD    &FF800000, &00000000, &00800000        \ Vertex 3
+ EQUD    &00800000, &00000000, &FF800000        \ Vertex 4
+ EQUD    &FF800000, &00000000, &FF800000        \ Vertex 5
+
+.objectSmokingGazeboFaces
+
  EQUD    &00000000
  EQUD    &A24BB5BE
  EQUD    &4AF6A1AD
@@ -7273,49 +7192,33 @@ ENDIF
 
 .objectRocket
 
- EQUD    &0000000D
- EQUD    &00000008
- EQUD    &000000AC
- EQUD    &00000002
- EQUD    &00000000
- EQUD    &FE400000
- EQUD    &00000000
- EQUD    &FFC80000
- EQUD    &FFD745D2
- EQUD    &00380000
- EQUD    &FFC80000
- EQUD    &FFD745D2
- EQUD    &FFC80000
- EQUD    &00380000
- EQUD    &FFD745D2
- EQUD    &00380000
- EQUD    &00380000
- EQUD    &FFD745D2
- EQUD    &FFC80000
- EQUD    &FF900000
- EQUD    &00000000
- EQUD    &00700000
- EQUD    &FF900000
- EQUD    &00000000
- EQUD    &FF900000
- EQUD    &00700000
- EQUD    &00000000
- EQUD    &00700000
- EQUD    &00700000
- EQUD    &00000000
- EQUD    &FF900000
- EQUD    &FFE40000
- EQUD    &FF071C72
- EQUD    &001C0000
- EQUD    &FFE40000
- EQUD    &FF071C72
- EQUD    &FFE40000
- EQUD    &001C0000
- EQUD    &FF071C72
- EQUD    &001C0000
- EQUD    &001C0000
- EQUD    &FF071C72
- EQUD    &FFE40000
+ EQUD    13                         \ Number of vertices
+
+ EQUD    8                          \ Number of faces
+
+ EQUD    objectRocketFaces - objectRocket
+
+ EQUD    %00000010                  \ Flags
+
+.objectRocketVertices
+
+    \      xVertex,   yVertex,   zVertex
+ EQUD    &00000000, &FE400000, &00000000        \ Vertex 0
+ EQUD    &FFC80000, &FFD745D2, &00380000        \ Vertex 1
+ EQUD    &FFC80000, &FFD745D2, &FFC80000        \ Vertex 2
+ EQUD    &00380000, &FFD745D2, &00380000        \ Vertex 3
+ EQUD    &00380000, &FFD745D2, &FFC80000        \ Vertex 4
+ EQUD    &FF900000, &00000000, &00700000        \ Vertex 5
+ EQUD    &FF900000, &00000000, &FF900000        \ Vertex 6
+ EQUD    &00700000, &00000000, &00700000        \ Vertex 7
+ EQUD    &00700000, &00000000, &FF900000        \ Vertex 8
+ EQUD    &FFE40000, &FF071C72, &001C0000        \ Vertex 9
+ EQUD    &FFE40000, &FF071C72, &FFE40000        \ Vertex 10
+ EQUD    &001C0000, &FF071C72, &001C0000        \ Vertex 11
+ EQUD    &001C0000, &FF071C72, &FFE40000        \ Vertex 12
+
+.objectRocketFaces
+
  EQUD    &00000000
  EQUD    &00000000
  EQUD    &00000000

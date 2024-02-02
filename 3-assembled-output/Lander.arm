@@ -2923,28 +2923,18 @@ PrintHexDigit:
  SWI     OS_WriteC
  MOV     PC, R14
 objectRock:
-.long    0x00000006
-.long    0x00000008
-.long    0x00000058
-.long    0x00000003
-.long    0x00000000
-.long    0x00000000
-.long    0x00A00000
-.long    0x00A00000
-.long    0x00A00000
-.long    0x00000000
-.long    0xFF600000
-.long    0x00A00000
-.long    0x00000000
-.long    0x00A00000
-.long    0xFF600000
-.long    0x00000000
-.long    0xFF600000
-.long    0xFF600000
-.long    0x00000000
-.long    0x00000000
-.long    0x00000000
-.long    0xFF600000
+.long    6
+.long    8
+.long    objectRockFaces - objectRock
+.long    0x3
+objectRockVertices:
+.long    0x00000000, 0x00000000, 0x00A00000
+.long    0x00A00000, 0x00A00000, 0x00000000
+.long    0xFF600000, 0x00A00000, 0x00000000
+.long    0x00A00000, 0xFF600000, 0x00000000
+.long    0xFF600000, 0xFF600000, 0x00000000
+.long    0x00000000, 0x00000000, 0xFF600000
+objectRockFaces:
 .long    0x00000000
 .long    0x54DA5200
 .long    0x54DA5200
@@ -3002,25 +2992,17 @@ objectRock:
 .long    0x00000004
 .long    0x00000444
 objectPulsatingPyramid:
-.long    0x00000005
-.long    0x00000006
-.long    0x0000004C
-.long    0x00000001
-.long    0x00000000
-.long    0x01000000
-.long    0x00000000
-.long    0x00C00000
-.long    0xFF800000
-.long    0x00C00000
-.long    0xFF400000
-.long    0xFF800000
-.long    0x00C00000
-.long    0x00C00000
-.long    0xFF800000
-.long    0xFF400000
-.long    0xFF400000
-.long    0xFF800000
-.long    0xFF400000
+.long    5
+.long    6
+.long    objectPulsatingPyramidFaces - objectPulsatingPyramid
+.long    0x1
+objectPulsatingPyramidVertices:
+.long    0x00000000, 0x01000000, 0x00000000
+.long    0x00C00000, 0xFF800000, 0x00C00000
+.long    0xFF400000, 0xFF800000, 0x00C00000
+.long    0x00C00000, 0xFF800000, 0xFF400000
+.long    0xFF400000, 0xFF800000, 0xFF400000
+objectPulsatingPyramidFaces:
 .long    0x00000000
 .long    0x35AA66D2
 .long    0x6B54CDA5
@@ -3064,37 +3046,21 @@ objectPulsatingPyramid:
 .long    0x00000004
 .long    0x00000008
 objectPlayer:
-.long    0x00000009
-.long    0x00000009
-.long    0x0000007C
-.long    0x00000003
-.long    0x01000000
-.long    0x00500000
-.long    0x00800000
-.long    0x01000000
-.long    0x00500000
-.long    0xFF800000
-.long    0x00000000
-.long    0x000A0000
-.long    0xFECCCCCD
-.long    0xFF19999A
-.long    0x00500000
-.long    0x00000000
-.long    0x00000000
-.long    0x000A0000
-.long    0x01333333
-.long    0xFFE66667
-.long    0xFF880000
-.long    0x00000000
-.long    0x00555555
-.long    0x00500000
-.long    0x00400000
-.long    0x00555555
-.long    0x00500000
-.long    0xFFC00000
-.long    0xFFCCCCCD
-.long    0x00500000
-.long    0x00000000
+.long    9
+.long    9
+.long    objectPlayerFaces - objectPlayer
+.long    0x3
+objectPlayerVertices:
+.long    0x01000000, 0x00500000, 0x00800000
+.long    0x01000000, 0x00500000, 0xFF800000
+.long    0x00000000, 0x000A0000, 0xFECCCCCD
+.long    0xFF19999A, 0x00500000, 0x00000000
+.long    0x00000000, 0x000A0000, 0x01333333
+.long    0xFFE66667, 0xFF880000, 0x00000000
+.long    0x00555555, 0x00500000, 0x00400000
+.long    0x00555555, 0x00500000, 0xFFC00000
+.long    0xFFCCCCCD, 0x00500000, 0x00000000
+objectPlayerFaces:
 .long    0x457C441A
 .long    0x9E2A1F4C
 .long    0x00000000
@@ -3159,43 +3125,23 @@ objectPlayer:
 .long    0x00000008
 .long    0x00000C80
 objectSmallLeafyTree:
-.long    0x0000000B
-.long    0x00000005
-.long    0x00000094
-.long    0x00000002
-.long    0x00300000
-.long    0xFE800000
-.long    0x00300000
-.long    0xFFD9999A
-.long    0x00000000
-.long    0x00000000
-.long    0x00266666
-.long    0x00000000
-.long    0x00000000
-.long    0x00000000
-.long    0xFEF33334
-.long    0xFF400000
-.long    0x00800000
-.long    0xFF400000
-.long    0xFF800000
-.long    0xFF400000
-.long    0xFECCCCCD
-.long    0xFFD55556
-.long    0xFF800000
-.long    0xFEA66667
-.long    0x00400000
-.long    0x00800000
-.long    0xFE59999A
-.long    0x002AAAAA
-.long    0x00C00000
-.long    0xFEA66667
-.long    0xFFC00000
-.long    0xFFA00000
-.long    0xFECCCCCD
-.long    0x00999999
-.long    0x00C00000
-.long    0xFF400000
-.long    0x00C00000
+.long    11
+.long    5
+.long    objectSmallLeafyTreeFaces - objectSmallLeafyTree
+.long    0x2
+objectSmallLeafyTreeVertices:
+.long    0x00300000, 0xFE800000, 0x00300000
+.long    0xFFD9999A, 0x00000000, 0x00000000
+.long    0x00266666, 0x00000000, 0x00000000
+.long    0x00000000, 0xFEF33334, 0xFF400000
+.long    0x00800000, 0xFF400000, 0xFF800000
+.long    0xFF400000, 0xFECCCCCD, 0xFFD55556
+.long    0xFF800000, 0xFEA66667, 0x00400000
+.long    0x00800000, 0xFE59999A, 0x002AAAAA
+.long    0x00C00000, 0xFEA66667, 0xFFC00000
+.long    0xFFA00000, 0xFECCCCCD, 0x00999999
+.long    0x00C00000, 0xFF400000, 0x00C00000
+objectSmallLeafyTreeFaces:
 .long    0x14A01873
 .long    0xAF8F9F93
 .long    0x56A0681E
@@ -3232,52 +3178,26 @@ objectSmallLeafyTree:
 .long    0x00000008
 .long    0x00000080
 objectTallLeafyTree:
-.long    0x0000000E
-.long    0x00000006
-.long    0x000000B8
-.long    0x00000002
-.long    0x0036DB6D
-.long    0xFD733334
-.long    0x00300000
-.long    0xFFD00000
-.long    0x00000000
-.long    0x00000000
-.long    0x00300000
-.long    0x00000000
-.long    0x00000000
-.long    0x00000000
-.long    0xFE0CCCCD
-.long    0xFF400000
-.long    0x00800000
-.long    0xFE59999A
-.long    0xFF800000
-.long    0xFF533334
-.long    0xFE333334
-.long    0xFFC92493
-.long    0xFF400000
-.long    0xFEA66667
-.long    0x00600000
-.long    0x00000000
-.long    0xFF19999A
-.long    0xFF666667
-.long    0xFF800000
-.long    0xFF400000
-.long    0xFFA00000
-.long    0xFFA00000
-.long    0xFE800000
-.long    0x00999999
-.long    0x00C00000
-.long    0xFECCCCCD
-.long    0x00C00000
-.long    0xFFB33334
-.long    0xFF19999A
-.long    0x00E66666
-.long    0x00800000
-.long    0xFF400000
-.long    0x00C00000
-.long    0x00300000
-.long    0xFE59999A
-.long    0x00300000
+.long    14
+.long    6
+.long    objectTallLeafyTreeFaces - objectTallLeafyTree
+.long    0x2
+objectTallLeafyTreeVertices:
+.long    0x0036DB6D, 0xFD733334, 0x00300000
+.long    0xFFD00000, 0x00000000, 0x00000000
+.long    0x00300000, 0x00000000, 0x00000000
+.long    0x00000000, 0xFE0CCCCD, 0xFF400000
+.long    0x00800000, 0xFE59999A, 0xFF800000
+.long    0xFF533334, 0xFE333334, 0xFFC92493
+.long    0xFF400000, 0xFEA66667, 0x00600000
+.long    0x00000000, 0xFF19999A, 0xFF666667
+.long    0xFF800000, 0xFF400000, 0xFFA00000
+.long    0xFFA00000, 0xFE800000, 0x00999999
+.long    0x00C00000, 0xFECCCCCD, 0x00C00000
+.long    0xFFB33334, 0xFF19999A, 0x00E66666
+.long    0x00800000, 0xFF400000, 0x00C00000
+.long    0x00300000, 0xFE59999A, 0x00300000
+objectTallLeafyTreeFaces:
 .long    0xFD3D01DD
 .long    0xD2CB371E
 .long    0x6F20024E
@@ -3321,25 +3241,17 @@ objectTallLeafyTree:
 .long    0x00000008
 .long    0x00000040
 objectSmokingRemainsLeft:
-.long    0x00000005
-.long    0x00000002
-.long    0x0000004C
-.long    0x00000000
-.long    0xFFD9999A
-.long    0x00000000
-.long    0x00000000
-.long    0x00266666
-.long    0x00000000
-.long    0x00000000
-.long    0x002B3333
-.long    0xFFC00000
-.long    0x00000000
-.long    0x00300000
-.long    0xFF800000
-.long    0x00000000
-.long    0xFFD55556
-.long    0xFECCCCCD
-.long    0x00000000
+.long    5
+.long    2
+.long    objectSmokingRemainsLeftFaces - objectSmokingRemainsLeft
+.long    0x0
+objectSmokingRemainsLeftVertices:
+.long    0xFFD9999A, 0x00000000, 0x00000000
+.long    0x00266666, 0x00000000, 0x00000000
+.long    0x002B3333, 0xFFC00000, 0x00000000
+.long    0x00300000, 0xFF800000, 0x00000000
+.long    0xFFD55556, 0xFECCCCCD, 0x00000000
+objectSmokingRemainsLeftFaces:
 .long    0x00000000
 .long    0x00000000
 .long    0x00000000
@@ -3355,25 +3267,17 @@ objectSmokingRemainsLeft:
 .long    0x00000004
 .long    0x00000000
 objectSmokingRemainsRight:
-.long    0x00000005
-.long    0x00000002
-.long    0x0000004C
-.long    0x00000000
-.long    0x002AAAAA
-.long    0x00000000
-.long    0x00000000
-.long    0xFFD55556
-.long    0x00000000
-.long    0x00000000
-.long    0xFFD4CCCD
-.long    0xFFD00000
-.long    0x00000000
-.long    0xFFD00000
-.long    0xFFA00000
-.long    0x00000000
-.long    0x002AAAAA
-.long    0xFEA66667
-.long    0x00000000
+.long    5
+.long    2
+.long    objectSmokingRemainsRightFaces - objectSmokingRemainsRight
+.long    0x0
+objectSmokingRemainsRightVertices:
+.long    0x002AAAAA, 0x00000000, 0x00000000
+.long    0xFFD55556, 0x00000000, 0x00000000
+.long    0xFFD4CCCD, 0xFFD00000, 0x00000000
+.long    0xFFD00000, 0xFFA00000, 0x00000000
+.long    0x002AAAAA, 0xFEA66667, 0x00000000
+objectSmokingRemainsRightFaces:
 .long    0x00000000
 .long    0x00000000
 .long    0x00000000
@@ -3389,25 +3293,17 @@ objectSmokingRemainsRight:
 .long    0x00000004
 .long    0x00000000
 objectFirTree:
-.long    0x00000005
-.long    0x00000002
-.long    0x0000004C
-.long    0x00000002
-.long    0xFFA00000
-.long    0xFFC92493
-.long    0xFFC92493
-.long    0x00600000
-.long    0xFFC92493
-.long    0xFFC92493
-.long    0x00000000
-.long    0xFE333334
-.long    0x0036DB6D
-.long    0x00266666
-.long    0x00000000
-.long    0x00000000
-.long    0xFFD9999A
-.long    0x00000000
-.long    0x00000000
+.long    5
+.long    2
+.long    objectFirTreeFaces - objectFirTree
+.long    0x2
+objectFirTreeVertices:
+.long    0xFFA00000, 0xFFC92493, 0xFFC92493
+.long    0x00600000, 0xFFC92493, 0xFFC92493
+.long    0x00000000, 0xFE333334, 0x0036DB6D
+.long    0x00266666, 0x00000000, 0x00000000
+.long    0xFFD9999A, 0x00000000, 0x00000000
+objectFirTreeFaces:
 .long    0x00000000
 .long    0x00000000
 .long    0x00000000
@@ -3423,49 +3319,25 @@ objectFirTree:
 .long    0x00000002
 .long    0x00000040
 objectGazebo:
-.long    0x0000000D
-.long    0x00000008
-.long    0x000000AC
-.long    0x00000002
-.long    0x00000000
-.long    0xFF000000
-.long    0x00000000
-.long    0xFF800000
-.long    0xFF400000
-.long    0x00800000
-.long    0xFF800000
-.long    0xFF400000
-.long    0xFF800000
-.long    0x00800000
-.long    0xFF400000
-.long    0xFF800000
-.long    0x00800000
-.long    0xFF400000
-.long    0x00800000
-.long    0xFF800000
-.long    0x00000000
-.long    0x00800000
-.long    0xFF800000
-.long    0x00000000
-.long    0xFF800000
-.long    0x00800000
-.long    0x00000000
-.long    0xFF800000
-.long    0x00800000
-.long    0x00000000
-.long    0x00800000
-.long    0xFF99999A
-.long    0xFF400000
-.long    0x00800000
-.long    0xFF99999A
-.long    0xFF400000
-.long    0xFF800000
-.long    0x00666666
-.long    0xFF400000
-.long    0xFF800000
-.long    0x00666666
-.long    0xFF400000
-.long    0x00800000
+.long    13
+.long    8
+.long    objectGazeboFaces - objectGazebo
+.long    0x2
+objectGazeboVertices:
+.long    0x00000000, 0xFF000000, 0x00000000
+.long    0xFF800000, 0xFF400000, 0x00800000
+.long    0xFF800000, 0xFF400000, 0xFF800000
+.long    0x00800000, 0xFF400000, 0xFF800000
+.long    0x00800000, 0xFF400000, 0x00800000
+.long    0xFF800000, 0x00000000, 0x00800000
+.long    0xFF800000, 0x00000000, 0xFF800000
+.long    0x00800000, 0x00000000, 0xFF800000
+.long    0x00800000, 0x00000000, 0x00800000
+.long    0xFF99999A, 0xFF400000, 0x00800000
+.long    0xFF99999A, 0xFF400000, 0xFF800000
+.long    0x00666666, 0xFF400000, 0xFF800000
+.long    0x00666666, 0xFF400000, 0x00800000
+objectGazeboFaces:
 .long    0x00000000
 .long    0x00000000
 .long    0x78000000
@@ -3523,58 +3395,28 @@ objectGazebo:
 .long    0x00000003
 .long    0x00000400
 objectBuilding:
-.long    0x00000010
-.long    0x0000000C
-.long    0x000000D0
-.long    0x00000000
-.long    0xFF19999A
-.long    0xFF266667
-.long    0x00000000
-.long    0xFF400000
-.long    0xFF266667
-.long    0x00000000
-.long    0x00C00000
-.long    0xFF266667
-.long    0x00000000
-.long    0x00E66666
-.long    0xFF266667
-.long    0x00000000
-.long    0xFF19999A
-.long    0xFF8CCCCD
-.long    0x00A66666
-.long    0xFF19999A
-.long    0xFF8CCCCD
-.long    0xFF59999A
-.long    0x00E66666
-.long    0xFF8CCCCD
-.long    0x00A66666
-.long    0x00E66666
-.long    0xFF8CCCCD
-.long    0xFF59999A
-.long    0xFF400000
-.long    0xFF666667
-.long    0x00800000
-.long    0xFF400000
-.long    0xFF666667
-.long    0xFF800000
-.long    0x00C00000
-.long    0xFF666667
-.long    0x00800000
-.long    0x00C00000
-.long    0xFF666667
-.long    0xFF800000
-.long    0xFF400000
-.long    0x00000000
-.long    0x00800000
-.long    0xFF400000
-.long    0x00000000
-.long    0xFF800000
-.long    0x00C00000
-.long    0x00000000
-.long    0x00800000
-.long    0x00C00000
-.long    0x00000000
-.long    0xFF800000
+.long    16
+.long    12
+.long    objectBuildingFaces - objectBuilding
+.long    0x0
+objectBuildingVertices:
+.long    0xFF19999A, 0xFF266667, 0x00000000
+.long    0xFF400000, 0xFF266667, 0x00000000
+.long    0x00C00000, 0xFF266667, 0x00000000
+.long    0x00E66666, 0xFF266667, 0x00000000
+.long    0xFF19999A, 0xFF8CCCCD, 0x00A66666
+.long    0xFF19999A, 0xFF8CCCCD, 0xFF59999A
+.long    0x00E66666, 0xFF8CCCCD, 0x00A66666
+.long    0x00E66666, 0xFF8CCCCD, 0xFF59999A
+.long    0xFF400000, 0xFF666667, 0x00800000
+.long    0xFF400000, 0xFF666667, 0xFF800000
+.long    0x00C00000, 0xFF666667, 0x00800000
+.long    0x00C00000, 0xFF666667, 0xFF800000
+.long    0xFF400000, 0x00000000, 0x00800000
+.long    0xFF400000, 0x00000000, 0xFF800000
+.long    0x00C00000, 0x00000000, 0x00800000
+.long    0x00C00000, 0x00000000, 0xFF800000
+objectBuildingFaces:
 .long    0x00000000
 .long    0x99CD0E6D
 .long    0x3EE445CC
@@ -3660,28 +3502,18 @@ objectBuilding:
 .long    0x00000007
 .long    0x00000800
 objectSmokingBuilding:
-.long    0x00000006
-.long    0x00000006
-.long    0x00000058
-.long    0x00000000
-.long    0xFF400000
-.long    0x00000001
-.long    0x00800000
-.long    0xFF400000
-.long    0x00000001
-.long    0xFF800000
-.long    0x00C00000
-.long    0x00000001
-.long    0x00800000
-.long    0x00C00000
-.long    0x00000001
-.long    0xFF800000
-.long    0xFF400000
-.long    0xFF99999A
-.long    0x00800000
-.long    0x00C00000
-.long    0xFFB33334
-.long    0xFF800000
+.long    6
+.long    6
+.long    objectSmokingBuildingFaces - objectSmokingBuilding
+.long    0x0
+objectSmokingBuildingVertices:
+.long    0xFF400000, 0x00000001, 0x00800000
+.long    0xFF400000, 0x00000001, 0xFF800000
+.long    0x00C00000, 0x00000001, 0x00800000
+.long    0x00C00000, 0x00000001, 0xFF800000
+.long    0xFF400000, 0xFF99999A, 0x00800000
+.long    0x00C00000, 0xFFB33334, 0xFF800000
+objectSmokingBuildingFaces:
 .long    0x00000000
 .long    0x78000000
 .long    0x00000000
@@ -3725,28 +3557,18 @@ objectSmokingBuilding:
 .long    0x00000005
 .long    0x00000777
 objectSmokingGazebo:
-.long    0x00000006
-.long    0x00000004
-.long    0x00000058
-.long    0x00000002
-.long    0x00000000
-.long    0xFF8CCCCD
-.long    0xFFF00000
-.long    0x00199999
-.long    0xFF8CCCCD
-.long    0xFFF00000
-.long    0x00800000
-.long    0x00000000
-.long    0x00800000
-.long    0xFF800000
-.long    0x00000000
-.long    0x00800000
-.long    0x00800000
-.long    0x00000000
-.long    0xFF800000
-.long    0xFF800000
-.long    0x00000000
-.long    0xFF800000
+.long    6
+.long    4
+.long    objectSmokingGazeboFaces - objectSmokingGazebo
+.long    0x2
+objectSmokingGazeboVertices:
+.long    0x00000000, 0xFF8CCCCD, 0xFFF00000
+.long    0x00199999, 0xFF8CCCCD, 0xFFF00000
+.long    0x00800000, 0x00000000, 0x00800000
+.long    0xFF800000, 0x00000000, 0x00800000
+.long    0x00800000, 0x00000000, 0xFF800000
+.long    0xFF800000, 0x00000000, 0xFF800000
+objectSmokingGazeboFaces:
 .long    0x00000000
 .long    0xA24BB5BE
 .long    0x4AF6A1AD
@@ -3776,49 +3598,25 @@ objectSmokingGazebo:
 .long    0x00000005
 .long    0x00000000
 objectRocket:
-.long    0x0000000D
-.long    0x00000008
-.long    0x000000AC
-.long    0x00000002
-.long    0x00000000
-.long    0xFE400000
-.long    0x00000000
-.long    0xFFC80000
-.long    0xFFD745D2
-.long    0x00380000
-.long    0xFFC80000
-.long    0xFFD745D2
-.long    0xFFC80000
-.long    0x00380000
-.long    0xFFD745D2
-.long    0x00380000
-.long    0x00380000
-.long    0xFFD745D2
-.long    0xFFC80000
-.long    0xFF900000
-.long    0x00000000
-.long    0x00700000
-.long    0xFF900000
-.long    0x00000000
-.long    0xFF900000
-.long    0x00700000
-.long    0x00000000
-.long    0x00700000
-.long    0x00700000
-.long    0x00000000
-.long    0xFF900000
-.long    0xFFE40000
-.long    0xFF071C72
-.long    0x001C0000
-.long    0xFFE40000
-.long    0xFF071C72
-.long    0xFFE40000
-.long    0x001C0000
-.long    0xFF071C72
-.long    0x001C0000
-.long    0x001C0000
-.long    0xFF071C72
-.long    0xFFE40000
+.long    13
+.long    8
+.long    objectRocketFaces - objectRocket
+.long    0x2
+objectRocketVertices:
+.long    0x00000000, 0xFE400000, 0x00000000
+.long    0xFFC80000, 0xFFD745D2, 0x00380000
+.long    0xFFC80000, 0xFFD745D2, 0xFFC80000
+.long    0x00380000, 0xFFD745D2, 0x00380000
+.long    0x00380000, 0xFFD745D2, 0xFFC80000
+.long    0xFF900000, 0x00000000, 0x00700000
+.long    0xFF900000, 0x00000000, 0xFF900000
+.long    0x00700000, 0x00000000, 0x00700000
+.long    0x00700000, 0x00000000, 0xFF900000
+.long    0xFFE40000, 0xFF071C72, 0x001C0000
+.long    0xFFE40000, 0xFF071C72, 0xFFE40000
+.long    0x001C0000, 0xFF071C72, 0x001C0000
+.long    0x001C0000, 0xFF071C72, 0xFFE40000
+objectRocketFaces:
 .long    0x00000000
 .long    0x00000000
 .long    0x00000000
