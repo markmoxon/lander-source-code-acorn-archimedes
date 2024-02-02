@@ -2384,14 +2384,25 @@ ENDIF
                                     \ from R9 into (R2, R3, R4), and update R9
                                     \ to point to the next vertex
 
- ADD     R0, R11, #var_054          \ Set R0 to the address of var_054
+ ADD     R0, R11, #var_054          \ Set R0 to the address of the coordinate
+                                    \ at var_054 to use in the following
+                                    \ calculation
 
- ADD     R1, R11, #var_064          \ Set R1 to the address of var_064
+ ADD     R1, R11, #var_064          \ Set R1 to the address of var_064, so we
+                                    \ store the results of the following
+                                    \ calculation here
 
  STMIA   R0, {R2-R4}                \ Store the vertex coordinates in var_054
 
- BL      sub_9254                   \ ??? Process the vertex and store the
-                                    \ results in var_064 (i.e. R1)
+ BL      MultiplyVectorByMatrix     \ Calculate the following, multiplying the
+                                    \ coordinate in R0 by the matrix in var_030:
+                                    \
+                                    \   var_064 = var_030 * R0
+                                    \
+                                    \           = var_030 * var_054
+                                    \
+                                    \ So this rotates the coordinate in R0 by
+                                    \ the rotation matrix in var_030
 
  ADD     R0, R11, #var_000          \ Set R0 to the address of var_000
 
@@ -2457,15 +2468,25 @@ ENDIF
 .dobj3
 
  MOV     R0, R9                     \ Copy the value of R9 into R0, so R0 points
-                                    \ to the current face data
+                                    \ to the current face data, which contains
+                                    \ the face's normal vector
 
  ADD     R9, R9, #12                \ Add 12 to R9 so it points to the fourth
                                     \ word in the current face data
 
- ADD     R1, R11, #var_054          \ Set R1 to the address of var_054
+ ADD     R1, R11, #var_054          \ Set R1 to the address of var_054, so we
+                                    \ store the results of the following
+                                    \ calculation here
 
- BL      sub_9254                   \ ??? Process the vertex and store the
-                                    \ results in var_054 (i.e. R1)
+ BL      MultiplyVectorByMatrix     \ Calculate the following, multiplying the
+                                    \ vector in R0 by the matrix in var_030:
+                                    \
+                                    \   var_054 = var_030 * R0
+                                    \
+                                    \           = var_030 * normal
+                                    \
+                                    \ So this rotates the normal vector in R0 by
+                                    \ the rotation matrix in var_030
 
  LDR     R1, [R11, #var_058]        \ Set R1 to var_058
 
@@ -2475,8 +2496,12 @@ ENDIF
  MVNEQ   R1, #0
 
  ADDNE   R2, R11, #var_084          \ Otherwise bit 0 of var_114 is set, so set
- ADDNE   R0, R11, #var_054          \ R0 to the address of var_084 and R0 to the
- BLNE    sub_928C                   \ address of var_054, and call sub_928C ???
+ ADDNE   R0, R11, #var_054          \ R2 to the address of var_084 and R0 to the
+ BLNE    GetDotProduct              \ address of var_054, and call GetDotProduct
+                                    \ to calculate the dot product of these two
+                                    \ vectors, storing the result in R3 (so if
+                                    \ R3 is negative, the face is facing away
+                                    \ from us) ??? what are 084/054?
 
  STMFD   R13!, {R8-R9, R11-R12}     \ Store the registers that we want to use on
                                     \ the stack so they can be retrieved at
@@ -2517,8 +2542,9 @@ ENDIF
 
 .dobj4
 
- CMP     R3, #0                     \ If bit 31 of R3 is not set, jump to dobj5
- BPL     dobj5                      \ to skip the following
+ CMP     R3, #0                     \ If R3 is negative then the face is facing
+ BPL     dobj5                      \ away from us and isn't visible, so jump to 
+                                    \ dobj5 to skip drawing the face
 
  LDMIA   R9, {R4-R7}                \ Set R4, R5, R6, R7 to the fourth, fifth,
                                     \ sixth and seventh words of face data
@@ -2941,110 +2967,222 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9254
+\       Name: MultiplyVectorByMatrix
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Geometry)
+\    Summary: Multiply a 3D vector by the matrix in var_030
+\
+\ ------------------------------------------------------------------------------
+\
+\ Multiply the matrix at var_030 and the vector at R0 and store the result
+\ at the address in R1 as follows:
+\
+\   [ R1   ]   [ var_030    var_030+4  var_030+8  ]   [ R0   ]
+\   [ R1+4 ] = [ var_030+12 var_030+16 var_030+20 ] . [ R0+4 ]
+\   [ R1+8 ]   [ var_030+24 var_030+28 var_030+32 ]   [ R0+8 ]
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The address of the vector to multiply
+\
+\   R1                              The address to store the result
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   [R1 R1+4 R1+8]                  The result of the multiplication as a vector
 \
 \ ******************************************************************************
 
-.sub_9254
+.MultiplyVectorByMatrix
 
- LDRB    R2, [R11, #var_114]        \ 
- TST     R2, #1                     \ 
- LDMEQIA R0, {R2-R4}                \ 
- STMEQIA R1, {R2-R4}                \ 
- MOVEQ   PC, R14                    \ 
- STMFD   R13!, {R6-R7, R14}         \ 
- ADD     R2, R11, #var_030          \ 
- BL      sub_928C                   \ 
+ LDRB    R2, [R11, #var_114]        \ If bit 0 of var_114 is clear, set R1 = R0:
+ TST     R2, #%00000001             \ 
+ LDMEQIA R0, {R2-R4}                \   [ R1   ]   [ R0   ]
+ STMEQIA R1, {R2-R4}                \   [ R1+4 ] = [ R0+4 ]
+ MOVEQ   PC, R14                    \   [ R1+8 ]   [ R0+8 ]
+                                    \
+                                    \ and return from the subroutine ???
+ 
+ STMFD   R13!, {R6-R7, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+ 
+ ADD     R2, R11, #var_030          \ Set R2 to the address of the 3x3 matrix at
+                                    \ var_030
+
+ BL      GetDotProduct              \ Set R1 = R2 . R0, so:
  STR     R3, [R1]                   \ 
- BL      sub_928C                   \ 
- STR     R3, [R1, #4]               \ 
- BL      sub_928C                   \ 
- STR     R3, [R1, #8]               \ 
- LDMFD   R13!, {R6-R7, PC}          \ 
+ BL      GetDotProduct              \   [R1  ]   [ R2    R2+4  R2+8  ]   [R0  ]
+ STR     R3, [R1, #4]               \   [R1+4] = [ R2+12 R2+16 R2+20 ] . [R0+4]
+ BL      GetDotProduct              \   [R1+8]   [ R2+24 R2+28 R2+32 ]   [R0+8]
+ STR     R3, [R1, #8]               \
+                                    \ which is the result we want
+ 
+ LDMFD   R13!, {R6-R7, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: sub_928C
+\       Name: GetDotProduct
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Geometry)
+\    Summary: Calculate the dot product of two 3D vectors
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the dot product of the 3D vectors at R0 and R2 as follows:
+\
+\   [ R0   ]   [ R2   ]   [ R0   * R2 ]
+\   [ R0+4 ] . [ R2+4 ] = [ R0+4 * R2+4 ]
+\   [ R0+8x]   [ R2+8 ]   [ R0+8 * R2*8 ]
+\
+\ and set the flags according to the result. R2 is updated to the next vector in
+\ memory, so repeated calls will work through the following multiplication,
+\ returning one row at a time:
+\
+\   [ R2    R2+4  R2+8  ]   [ R0   ]
+\   [ R2+12 R2+16 R2+20 ] . [ R0+4 ]
+\   [ R2+24 R2+28 R2+32 ]   [ R0+8 ]
+\
+\ See the MultiplyVectorByMatrix routine to see this calculation in use.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The address of the first vector
+\
+\   R2                              The address of the second vector
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R2                              Updated to the address of the next R2 vector
+\
+\   R3                              The dot product
+\
+\   Flags                           Set according to the result in R3
 \
 \ ******************************************************************************
 
-.sub_928C
+.GetDotProduct
 
- LDR     R4, [R2], #4               \ 
- LDR     R5, [R0]                   \ 
- EOR     R7, R4, R5                 \ 
- TEQ     R4, #0                     \ 
- RSBMI   R4, R4, #0                 \ 
- MOVS    R4, R4, LSL #2             \ 
- TEQ     R5, #0                     \ 
- RSBMI   R5, R5, #0                 \ 
- MOV     R5, R5, LSL #1             \ 
- AND     R4, R4, #&FE000000         \ 
- ORR     R4, R4, #&1000000          \ 
- MOV     R3, #0                     \ 
+ LDR     R4, [R2], #4               \ Set R4 to the x-coordinate of R2 (let's
+                                    \ call it xR2), and increment R2 to point to
+                                    \ the y-coordinate of R2
+
+ LDR     R5, [R0]                   \ Set R5 to the x-coordinate of R0 (let's
+                                    \ call it xR0)
+
+                                    \ Set R3 = R4 * R5 using the shift-and-add
+                                    \ multiplication algorithm
+
+ EOR     R7, R4, R5                 \ Set the sign of the result in R7
+
+ TEQ     R4, #0                     \ Set R4 = 4 * |R4|
+ RSBMI   R4, R4, #0
+ MOVS    R4, R4, LSL #2
+
+ TEQ     R5, #0                     \ Set R5 = 2 * |R5|
+ RSBMI   R5, R5, #0
+ MOV     R5, R5, LSL #1
+
+ AND     R4, R4, #&FE000000         \ Zero all but the top byte of R4, ensuring
+ ORR     R4, R4, #&01000000         \ that bit 0 of the top byte is set so the
+                                    \ value of the top byte is at least 1
+
+ MOV     R3, #0                     \ Set R3 = 0 to use for building the sum in
+                                    \ our shift-and-add multiplication result
 
 .lab_92BC
 
- MOV     R5, R5, LSR #1             \ 
- ADDHS   R3, R3, R5                 \ 
- MOVS    R4, R4, LSL #1             \ 
- BNE     lab_92BC                   \ 
- MOV     R3, R3, LSR #1             \ 
- TEQ     R7, #0                     \ 
- RSBMI   R3, R3, #0                 \ 
- LDR     R4, [R2], #4               \ 
- LDR     R5, [R0, #4]               \ 
- EOR     R7, R4, R5                 \ 
- TEQ     R4, #0                     \ 
- RSBMI   R4, R4, #0                 \ 
- MOVS    R4, R4, LSL #2             \ 
- TEQ     R5, #0                     \ 
- RSBMI   R5, R5, #0                 \ 
- MOV     R5, R5, LSL #1             \ 
- AND     R4, R4, #&FE000000         \ 
- ORR     R4, R4, #&1000000          \ 
- MOV     R6, #0                     \ 
+ MOV     R5, R5, LSR #1             \ If bit 0 of R5 is set, add R5 to the
+ ADDCS   R3, R3, R5                 \ result in R3, shifting R5 to the right
+
+ MOVS    R4, R4, LSL #1             \ Shift R4 left by one place
+
+ BNE     lab_92BC                   \ Loop back if R4 is non-zero
+
+ MOV     R3, R3, LSR #1             \ Set R3 = R3 / 2
+
+ TEQ     R7, #0                     \ Apply the sign from R7 to R3 to get the
+ RSBMI   R3, R3, #0                 \ final result, so:
+                                    \
+                                    \   R3 = R4 * R5
+                                    \      = xR0 * xR2
+
+ LDR     R4, [R2], #4               \ Set R4 to the y-coordinate at R2+4 (let's
+                                    \ call it yR2), and increment R2 to point to
+                                    \ the z-coordinate of R2
+
+ LDR     R5, [R0, #4]               \ Set R5 to the y-coordinate at R0+4 (let's
+                                    \ call it yR0)
+
+ EOR     R7, R4, R5                 \ Set R6 = R4 * R5 using the shift-and-add
+ TEQ     R4, #0                     \ algorithm again (see above)
+ RSBMI   R4, R4, #0                 \
+ MOVS    R4, R4, LSL #2             \ This is the first part of the calculation
+ TEQ     R5, #0
+ RSBMI   R5, R5, #0
+ MOV     R5, R5, LSL #1
+ AND     R4, R4, #&FE000000
+ ORR     R4, R4, #&01000000
+ MOV     R6, #0
 
 .lab_9308
 
- MOV     R5, R5, LSR #1             \ 
- ADDHS   R6, R6, R5                 \ 
- MOVS    R4, R4, LSL #1             \ 
- BNE     lab_9308                   \ 
- MOV     R6, R6, LSR #1             \ 
- TEQ     R7, #0                     \ 
- RSBMI   R6, R6, #0                 \ 
- ADD     R3, R3, R6                 \ 
- LDR     R4, [R2], #4               \ 
- LDR     R5, [R0, #8]               \ 
- EOR     R7, R4, R5                 \ 
- TEQ     R4, #0                     \ 
- RSBMI   R4, R4, #0                 \ 
- MOVS    R4, R4, LSL #2             \ 
- TEQ     R5, #0                     \ 
- RSBMI   R5, R5, #0                 \ 
- MOV     R5, R5, LSL #1             \ 
- AND     R4, R4, #&FE000000         \ 
- ORR     R4, R4, #&1000000          \ 
- MOV     R6, #0                     \ 
+ MOV     R5, R5, LSR #1             \ This is the second part of the calculation
+ ADDHS   R6, R6, R5                 \ so we now have:
+ MOVS    R4, R4, LSL #1             \
+ BNE     lab_9308                   \   R6 = R4 * R5
+ MOV     R6, R6, LSR #1             \      = yR0 * yR2
+ TEQ     R7, #0
+ RSBMI   R6, R6, #0
+
+ ADD     R3, R3, R6                 \ Set R3 = R3 + R6
+                                    \        = xR0 * xR2 + yR0 * yR2
+
+ LDR     R4, [R2], #4               \ Set R4 to the z-coordinate at R2+8 (let's
+                                    \ call it zR2), and increment R2 to point to
+                                    \ the next coordinate at R2+12
+
+ LDR     R5, [R0, #8]               \ Set R5 to the z-coordinate at R0+8 (let's
+                                    \ call it zR0)
+
+ EOR     R7, R4, R5                 \ Set R6 = R4 * R5 using the shift-and-add
+ TEQ     R4, #0                     \ algorithm again (see above)
+ RSBMI   R4, R4, #0                 \
+ MOVS    R4, R4, LSL #2             \ This is the first part of the calculation
+ TEQ     R5, #0
+ RSBMI   R5, R5, #0
+ MOV     R5, R5, LSL #1
+ AND     R4, R4, #&FE000000
+ ORR     R4, R4, #&01000000
+ MOV     R6, #0
 
 .lab_9358
 
- MOV     R5, R5, LSR #1             \ 
- ADDHS   R6, R6, R5                 \ 
- MOVS    R4, R4, LSL #1             \ 
- BNE     lab_9358                   \ 
- MOV     R6, R6, LSR #1             \ 
- TEQ     R7, #0                     \ 
- RSBMI   R6, R6, #0                 \ 
- ADDS    R3, R3, R6                 \ 
- MOV     PC, R14                    \ 
+ MOV     R5, R5, LSR #1             \ This is the second part of the calculation
+ ADDHS   R6, R6, R5                 \ so we now have:
+ MOVS    R4, R4, LSL #1             \
+ BNE     lab_9358                   \   R6 = R4 * R5
+ MOV     R6, R6, LSR #1             \      = zR0 * zR2
+ TEQ     R7, #0
+ RSBMI   R6, R6, #0
+
+ ADDS    R3, R3, R6                 \ Set R3 = R3 + R6
+                                    \        = xR0 * xR2 + yR0 * yR2 + zR0 * zR2
+                                    \
+                                    \ which is the result we want
+                                    \
+                                    \ We also set the flags depending on the
+                                    \ result
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
