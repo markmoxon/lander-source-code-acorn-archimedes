@@ -23,7 +23,10 @@
 .set var_050, 0x50
 .set var_054, 0x54
 .set var_058, 0x58
+.set var_064, 0x64
+.set var_074, 0x74
 .set var_078, 0x78
+.set var_084, 0x84
 .set var_094, 0x94
 .set var_098, 0x98
 .set var_09C, 0x9C
@@ -58,10 +61,14 @@
 .set var_154, 0x154
 .set var_158, 0x158
 .set fuelBurnRate, 0x15C
+.set var_160, 0x160
 .set var_168, 0x168
 .set var_170, 0x170
 .set var_174, 0x174
 .set stringBuffer, 0x200
+.set var_400, 0x400
+.set var_500, 0x500
+.set var_600, 0x600
 .set var_700, 0x700
 .set var_71C, 0x71C
 .set objectMap, 0x4400
@@ -121,7 +128,7 @@ DrawLandscape:
  AND     R8, R4, #0xFF000000
  SUB     R4, R4, R8
  STR     R8, [R11, #xLandscape]
- ADD     R5, R11, #0x160
+ ADD     R5, R11, #var_160
  LDR     R0, var_800C
  LDMFD   R0, {R0-R2}
  SUB     R0, R0, R4
@@ -130,7 +137,7 @@ DrawLandscape:
  MOV     R0, #0
  STRB    R0, [R11, #var_0E4]
  MOV     R6, #0
- ADD     R7, R11, #0x400
+ ADD     R7, R11, #var_400
  STRB    R6, [R11, #var_0F8]
 lab_80DC:
  LDRB    R1, [R11, #var_0E4]
@@ -139,9 +146,9 @@ lab_80DC:
  LDRB    R10, [R0, #1]
  LDRB    R0, [R0]
  STRB    R0, [R11, #var_0F0]
- ADD     R0, R11, #0x160
+ ADD     R0, R11, #var_160
  LDMIA   R0, {R0-R2}
- ADD     R4, R11, #0x170
+ ADD     R4, R11, #var_170
  STMIA   R4, {R0-R2}
  LDR     R8, [R11, #xLandscape]
  SUB     R8, R8, #0x5800000
@@ -152,7 +159,7 @@ lab_8114:
  LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
  STR     R0, [R11, #var_174]
- ADD     R0, R11, #0x170
+ ADD     R0, R11, #var_170
  BL      sub_9748
  BHS     DrawGraphicsBuffers
  STMIA   R7!, {R0-R1}
@@ -163,7 +170,7 @@ lab_8114:
  MOVEQ   R6, #0
  BEQ     DrawGraphicsBuffers
  STMFD   R13!, {R6-R8}
- ADD     R14, R11, #0xC4
+ ADD     R14, R11, #var_0C4
  LDMIA   R14, {R4-R7}
  STMIA   R14, {R0-R3}
  CMP     R4, #0x80000000
@@ -196,10 +203,10 @@ DrawGraphicsBuffers:
  LDRB    R0, [R11, #var_0F8]
  EORS    R0, R0, #1
  STRB    R0, [R11, #var_0F8]
- ADDNE   R6, R11, #0x400
- ADDEQ   R6, R11, #0x500
- ADDEQ   R7, R11, #0x400
- ADDNE   R7, R11, #0x500
+ ADDNE   R6, R11, #var_400
+ ADDEQ   R6, R11, #var_500
+ ADDEQ   R7, R11, #var_400
+ ADDNE   R7, R11, #var_500
  B       lab_80DC
 lab_81E0:
  MOV     R0, #9
@@ -360,7 +367,7 @@ lab_8424:
  STR     R0, [R11, #var_158]
  STR     R1, [R11, #var_154]
  BL      sub_93E4
- ADD     R14, R11, #0x94
+ ADD     R14, R11, #var_094
  LDMIA   R14, {R0-R5}
  CMN     R1, #0x34000000
  LDRLTB  R9, [R11, #fuelBurnRate]
@@ -390,7 +397,7 @@ lab_8424:
  CMP     R1, #0
  MOVPL   R1, #0
  ADD     R2, R2, #0x5000000
- ADD     R14, R11, #0x13C
+ ADD     R14, R11, #xCamera
  STMIA   R14, {R0-R2}
  MOV     R8, R0
  MOV     R9, R2
@@ -419,7 +426,7 @@ lab_850C:
  BLGT    sub_8654
  CMP     R1, #0
  MOVMI   R1, #0
- ADD     R3, R11, #0x30
+ ADD     R3, R11, #var_030
  LDR     R14, objectPlayerAddr
  STR     R14, [R11, #objectData]
  MOV     R0, #0
@@ -431,7 +438,7 @@ lab_850C:
  LDRB    R10, [R11, #fuelBurnRate]
  TST     R10, #6
  BEQ     lab_85F4
- ADD     R14, R11, #0xA0
+ ADD     R14, R11, #var_0A0
  LDMIA   R14, {R0-R2, R6-R8}
  ADD     R3, R0, R6, ASR #7
  ADD     R4, R1, R7, ASR #7
@@ -439,7 +446,7 @@ lab_850C:
  MOV     R3, R3, ASR #1
  MOV     R4, R4, ASR #1
  MOV     R5, R5, ASR #1
- ADD     R0, R11, #0x94
+ ADD     R0, R11, #var_094
  LDMIA   R0, {R0-R2}
  SUB     R0, R0, R3
  SUB     R1, R1, R4
@@ -479,7 +486,7 @@ lab_85F4:
  LDR     R8, [R11, #currentScore]
  SUB     R8, R8, #1
  STR     R8, [R11, #currentScore]
- ADD     R14, R11, #0x94
+ ADD     R14, R11, #var_094
  LDMIA   R14, {R0-R5}
  LDR     R6, [R11, #var_030]
  LDR     R7, [R11, #var_03C]
@@ -500,7 +507,7 @@ lab_85F4:
 lab_8650:
  LDMFD   R13!, {PC}
 sub_8654:
- ADD     R3, R11, #0x94
+ ADD     R3, R11, #var_094
  LDMIA   R3, {R0-R5}
  CMP     R0, #0x8000000
  CMPLO   R2, #0x8000000
@@ -599,7 +606,7 @@ var_87EC:
 .long    var_802C
 MoveAndDrawParticles:
  STMFD   R13!, {R10, R12, R14}
- ADD     R10, R11, #0x700
+ ADD     R10, R11, #var_700
  LDR     R12, var_87EC
 lab_8800:
  LDMIA   R10, {R0-R7}
@@ -666,7 +673,7 @@ lab_88E8:
  BLO     sub_86C4
  LDR     R14, objectRockAddr
  STR     R14, [R11, #objectData]
- ADD     R3, R11, #0x30
+ ADD     R3, R11, #var_030
  BL      DrawObject
  B       lab_8800
 lab_8904:
@@ -1090,16 +1097,16 @@ DrawObject:
  MOVPL   R4, R4, LSL #1
  MOV     R5, #0
  STRB    R5, [R11, #var_120]
-lab_8EFC:
+dobj1:
  MOVS    R4, R4, LSL #1
  ADDPL   R5, R5, #1
- BPL     lab_8EFC
+ BPL     dobj1
  MOV     R0, R0, LSL R5
  MOV     R1, R1, LSL R5
  MOV     R2, R2, LSL R5
- ADD     R4, R11, #0x84
+ ADD     R4, R11, #var_084
  STMIA   R4, {R0-R2}
- ADD     R4, R11, #0x30
+ ADD     R4, R11, #var_030
  CMP     R3, R4
  LDMNEIA R3!, {R0-R2}
  STMNEIA R4!, {R0-R2}
@@ -1109,60 +1116,60 @@ lab_8EFC:
  STMNEIA R4!, {R0-R2}
  LDR     R0, [R11, #objectData]
  LDR     R8, [R0]
- ADD     R9, R0, #0x10
- ADD     R10, R11, #0x600
- LDRB    R1, [R0, #0xC]
+ ADD     R9, R0, #16
+ ADD     R10, R11, #var_600
+ LDRB    R1, [R0, #12]
  STRB    R1, [R11, #var_114]
-lab_8F54:
+dobj2:
  LDMIA   R9!, {R2-R4}
- ADD     R0, R11, #0x54
- ADD     R1, R11, #0x64
+ ADD     R0, R11, #var_054
+ ADD     R1, R11, #var_064
  STMIA   R0, {R2-R4}
  BL      sub_9254
- ADD     R0, R11, #0
+ ADD     R0, R11, #var_000
  BL      sub_991C
- ADD     R0, R11, #0x74
+ ADD     R0, R11, #var_074
  BL      sub_9748
  STMIA   R10!, {R0-R1}
- ADD     R0, R11, #0x74
+ ADD     R0, R11, #var_074
  BL      sub_82AC
  STR     R0, [R11, #var_078]
- ADD     R0, R11, #0x74
+ ADD     R0, R11, #var_074
  BL      sub_9748
  STMIA   R10!, {R0-R1}
- LDR     R14, [R10, #-0xC]
+ LDR     R14, [R10, #-12]
  CMP     R14, R1
  MVNHS   R14, #0
  STRHSB  R14, [R11, #var_120]
  SUBS    R8, R8, #1
- BNE     lab_8F54
+ BNE     dobj2
  LDR     R1, [R11, #objectData]
  LDR     R0, [R1, #8]
  ADD     R9, R1, R0
  LDR     R8, [R1, #4]
-lab_8FBC:
+dobj3:
  MOV     R0, R9
- ADD     R9, R9, #0xC
- ADD     R1, R11, #0x54
+ ADD     R9, R9, #12
+ ADD     R1, R11, #var_054
  BL      sub_9254
  LDR     R1, [R11, #var_058]
  LDRB    R14, [R11, #var_114]
  TST     R14, #1
  MVNEQ   R3, #0
  MVNEQ   R1, #0
- ADDNE   R2, R11, #0x84
- ADDNE   R0, R11, #0x54
+ ADDNE   R2, R11, #var_084
+ ADDNE   R0, R11, #var_054
  BLNE    sub_928C
  STMFD   R13!, {R8-R9, R11-R12}
  CMP     R1, #0
- BPL     lab_9038
+ BPL     dobj4
  LDRB    R14, [R11, #var_114]
  TST     R14, #2
- BEQ     lab_9038
+ BEQ     dobj4
  STMFD   R13!, {R3, R9, R11}
  LDMIA   R9, {R5-R7}
  MOV     R8, #0
- ADD     R10, R11, #0x600
+ ADD     R10, R11, #var_600
  ADD     R10, R10, #8
  ADD     R5, R10, R5, LSL #4
  LDMIA   R5, {R0-R1}
@@ -1172,11 +1179,11 @@ lab_8FBC:
  LDMIA   R7, {R4-R5}
  BL      DrawTriangleIntoBuffer1
  LDMFD   R13!, {R3, R9, R11}
-lab_9038:
+dobj4:
  CMP     R3, #0
- BPL     lab_90F4
+ BPL     dobj5
  LDMIA   R9, {R4-R7}
- ADD     R10, R11, #0x600
+ ADD     R10, R11, #var_600
  LDR     R1, [R11, #var_058]
  LDR     R0, [R11, #var_054]
  RSB     R1, R1, #0x80000000
@@ -1220,11 +1227,11 @@ lab_9038:
  ADD     R6, R10, R6, LSL #4
  LDMIA   R6, {R4-R5}
  BL      DrawTriangleIntoBuffer2
-lab_90F4:
+dobj5:
  LDMFD   R13!, {R8-R9, R11-R12}
- ADD     R9, R9, #0x10
+ ADD     R9, R9, #16
  SUBS    R8, R8, #1
- BNE     lab_8FBC
+ BNE     dobj3
  LDMFD   R13!, {R6-R12, PC}
 PrintCurrentScore:
  LDR     R0, [R11, #currentScore]
@@ -1328,7 +1335,7 @@ sub_9254:
  STMEQIA R1, {R2-R4}
  MOVEQ   PC, R14
  STMFD   R13!, {R6-R7, R14}
- ADD     R2, R11, #0x30
+ ADD     R2, R11, #var_030
  BL      sub_928C
  STR     R3, [R1]
  BL      sub_928C
@@ -1401,7 +1408,7 @@ lab_9358:
  ADDS    R3, R3, R6
  MOV     PC, R14
 sub_937C:
- ADD     R2, R11, #0x30
+ ADD     R2, R11, #var_030
  LDR     R0, [R2, #4]
  LDR     R1, [R2, #0xC]
  STR     R0, [R2, #0xC]
@@ -1772,34 +1779,32 @@ lab_9890:
  RSBMI   R1, R6, #0x40
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
-var_98E4:
- ADD     R4, R11, #0x64
-var_98E8:
- ADD     R4, R11, #0x74
-var_98EC:
+mod_98E4:
+ ADD     R4, R11, #var_064
+mod_98E8:
+ ADD     R4, R11, #var_074
+sub_98EC:
  MOV     R4, R12
- ADD     R4, R11, #0x170
- ADD     R4, R11, #0x160
+ ADD     R4, R11, #var_170
+ ADD     R4, R11, #var_160
  STMFD   R13!, {R14}
- LDR     R1, var_98EC
- STR     R1, var_9938
+ LDR     R1, sub_98EC
+ STR     R1, sub_991C+28
  LDMIA   R0, {R0-R2}
  MOV     R3, R12
- BL      sub_9924
- LDR     R1, var_98E8
- STR     R1, var_9938
+ BL      sub_991C+8
+ LDR     R1, mod_98E8
+ STR     R1, sub_991C+28
  LDMFD   R13!, {PC}
 sub_991C:
  LDMIA   R0, {R0-R2}
- ADD     R3, R11, #0x64
-sub_9924:
+ ADD     R3, R11, #var_064
  STMFD   R13!, {R5-R6}
  LDMIA   R3, {R3-R5}
  ADD     R0, R0, R3
  ADD     R1, R1, R4
  ADD     R2, R2, R5
-var_9938:
- ADD     R3, R11, #0x74
+ ADD     R3, R11, #var_074
  STMIA   R3, {R0-R2}
  LDMFD   R13!, {R5-R6}
  MOV     PC, R14
@@ -1864,7 +1869,7 @@ lab_9A0C:
  TEQ     R4, #0
  RSBMI   R7, R7, #0
  ADD     R14, R14, #2
- ADD     R8, R11, #0x64
+ ADD     R8, R11, #var_064
  STMIA   R8, {R5-R7, R14}
  LDMFD   R13!, {R5-R8, PC}
 randomSeed1:

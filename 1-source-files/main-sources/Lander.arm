@@ -102,7 +102,13 @@
 
  var_058 = &58                      \ 
 
+ var_064 = &64                      \ 
+
+ var_074 = &74                      \ 
+
  var_078 = &78                      \ 
+
+ var_084 = &84                      \ 
 
  var_094 = &94                      \ 
 
@@ -138,7 +144,7 @@
  var_10C = &10C                     \ 
 
  objectData = &110                  \ The address of the data block for the
-                                    \ object that is being displayed
+                                    \ object that is being drawn
 
  var_114 = &114                     \ 
 
@@ -199,6 +205,8 @@
  fuelBurnRate = &15C                \ The current fuel burn rate (bit 0 is
                                     \ ignored)
 
+ var_160 = &160                     \ 
+
  var_168 = &168                     \ 
 
  var_170 = &170                     \ 
@@ -207,6 +215,12 @@
 
  stringBuffer = &200                \ A string buffer that's used when printing
                                     \ the scores
+
+ var_400 = &400                     \ 
+
+ var_500 = &500                     \ 
+
+ var_600 = &600                     \ 
 
  var_700 = &700                     \ 
 
@@ -434,7 +448,7 @@ ENDIF
  AND     R8, R4, #&FF000000         \ 
  SUB     R4, R4, R8                 \ 
  STR     R8, [R11, #xLandscape]     \ 
- ADD     R5, R11, #&160             \ 
+ ADD     R5, R11, #var_160          \ 
  LDR     R0, var_800C               \ 
  LDMFD   R0, {R0-R2}                \ 
  SUB     R0, R0, R4                 \ 
@@ -443,7 +457,7 @@ ENDIF
  MOV     R0, #0                     \ 
  STRB    R0, [R11, #var_0E4]        \ 
  MOV     R6, #0                     \ 
- ADD     R7, R11, #&400             \ 
+ ADD     R7, R11, #var_400          \ 
  STRB    R6, [R11, #var_0F8]        \ 
 
 .lab_80DC
@@ -454,9 +468,9 @@ ENDIF
  LDRB    R10, [R0, #1]              \ 
  LDRB    R0, [R0]                   \ 
  STRB    R0, [R11, #var_0F0]        \ 
- ADD     R0, R11, #&160             \ 
+ ADD     R0, R11, #var_160          \ 
  LDMIA   R0, {R0-R2}                \ 
- ADD     R4, R11, #&170             \ 
+ ADD     R4, R11, #var_170          \ 
  STMIA   R4, {R0-R2}                \ 
  LDR     R8, [R11, #xLandscape]     \ 
  SUB     R8, R8, #&5800000          \ 
@@ -469,7 +483,7 @@ ENDIF
  LDR     R14, [R11, #yCamera]       \ 
  SUB     R0, R0, R14                \ 
  STR     R0, [R11, #var_174]        \ 
- ADD     R0, R11, #&170             \ 
+ ADD     R0, R11, #var_170          \ 
  BL      sub_9748                   \ 
  BHS     DrawGraphicsBuffers        \ 
  STMIA   R7!, {R0-R1}               \ 
@@ -480,7 +494,7 @@ ENDIF
  MOVEQ   R6, #0                     \ 
  BEQ     DrawGraphicsBuffers        \ 
  STMFD   R13!, {R6-R8}              \ 
- ADD     R14, R11, #&C4             \ 
+ ADD     R14, R11, #var_0C4         \ 
  LDMIA   R14, {R4-R7}               \ 
  STMIA   R14, {R0-R3}               \ 
  CMP     R4, #&80000000             \ 
@@ -526,10 +540,10 @@ ENDIF
  LDRB    R0, [R11, #var_0F8]        \ 
  EORS    R0, R0, #1                 \ 
  STRB    R0, [R11, #var_0F8]        \ 
- ADDNE   R6, R11, #&400             \ 
- ADDEQ   R6, R11, #&500             \ 
- ADDEQ   R7, R11, #&400             \ 
- ADDNE   R7, R11, #&500             \ 
+ ADDNE   R6, R11, #var_400          \ 
+ ADDEQ   R6, R11, #var_500          \ 
+ ADDEQ   R7, R11, #var_400          \ 
+ ADDNE   R7, R11, #var_500          \ 
  B       lab_80DC                   \ 
 
 .lab_81E0
@@ -944,7 +958,7 @@ ENDIF
  STR     R0, [R11, #var_158]        \ 
  STR     R1, [R11, #var_154]        \ 
  BL      sub_93E4                   \ 
- ADD     R14, R11, #&94             \ 
+ ADD     R14, R11, #var_094         \ 
  LDMIA   R14, {R0-R5}               \ 
  CMN     R1, #&34000000             \ 
  LDRLTB  R9, [R11, #fuelBurnRate]   \ 
@@ -974,7 +988,7 @@ ENDIF
  CMP     R1, #0                     \ 
  MOVPL   R1, #0                     \ 
  ADD     R2, R2, #&5000000          \ 
- ADD     R14, R11, #&13C            \ 
+ ADD     R14, R11, #xCamera         \ 
  STMIA   R14, {R0-R2}               \ 
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
@@ -1007,7 +1021,7 @@ ENDIF
  BLGT    sub_8654                   \ 
  CMP     R1, #0                     \ 
  MOVMI   R1, #0                     \ 
- ADD     R3, R11, #&30              \ 
+ ADD     R3, R11, #var_030          \ 
  LDR     R14, objectPlayerAddr      \ 
  STR     R14, [R11, #objectData]    \ 
  MOV     R0, #0                     \ 
@@ -1019,7 +1033,7 @@ ENDIF
  LDRB    R10, [R11, #fuelBurnRate]  \ 
  TST     R10, #6                    \ 
  BEQ     lab_85F4                   \ 
- ADD     R14, R11, #&A0             \ 
+ ADD     R14, R11, #var_0A0         \ 
  LDMIA   R14, {R0-R2, R6-R8}        \ 
  ADD     R3, R0, R6, ASR #7         \ 
  ADD     R4, R1, R7, ASR #7         \ 
@@ -1027,7 +1041,7 @@ ENDIF
  MOV     R3, R3, ASR #1             \ 
  MOV     R4, R4, ASR #1             \ 
  MOV     R5, R5, ASR #1             \ 
- ADD     R0, R11, #&94              \ 
+ ADD     R0, R11, #var_094          \ 
  LDMIA   R0, {R0-R2}                \ 
  SUB     R0, R0, R3                 \ 
  SUB     R1, R1, R4                 \ 
@@ -1071,7 +1085,7 @@ ENDIF
  SUB     R8, R8, #1
  STR     R8, [R11, #currentScore]
 
- ADD     R14, R11, #&94             \ 
+ ADD     R14, R11, #var_094         \ 
  LDMIA   R14, {R0-R5}               \ 
  LDR     R6, [R11, #var_030]        \ 
  LDR     R7, [R11, #var_03C]        \ 
@@ -1105,7 +1119,7 @@ ENDIF
 
 .sub_8654
 
- ADD     R3, R11, #&94              \ 
+ ADD     R3, R11, #var_094          \ 
  LDMIA   R3, {R0-R5}                \ 
  CMP     R0, #&8000000              \ 
  CMPLO   R2, #&8000000              \ 
@@ -1305,7 +1319,7 @@ ENDIF
 .MoveAndDrawParticles
 
  STMFD   R13!, {R10, R12, R14}      \ 
- ADD     R10, R11, #&700            \ 
+ ADD     R10, R11, #var_700         \ 
  LDR     R12, var_87EC              \ 
 
 .lab_8800
@@ -1378,7 +1392,7 @@ ENDIF
  BLO     sub_86C4                   \ 
  LDR     R14, objectRockAddr        \ 
  STR     R14, [R11, #objectData]    \ 
- ADD     R3, R11, #&30              \ 
+ ADD     R3, R11, #var_030          \ 
  BL      DrawObject                 \ 
  B       lab_8800                   \ 
 
@@ -2252,9 +2266,13 @@ ENDIF
 \
 \ Arguments:
 \
-\   (R0, R1, R2)                    (x, y, z) of object
+\   (R0, R1, R2)                    3D coordinate (x, y, z) of object
 \
-\   R3                              ??? address of var_030
+\   R3                              The address of a nine-word variable (is this
+\                                   an orientation vector?)
+\
+\   objectData                      The address of the data block for the object
+\                                   that is being drawn
 \
 \ ******************************************************************************
 
@@ -2267,10 +2285,14 @@ ENDIF
                                     \ contains the addresses of the graphics
                                     \ buffers
 
- ADD     R4, R11, #var_000          \ Set R4 = var_000 ???
+ ADD     R4, R11, #var_000          \ Set R4 to the address of var_000
 
  STMIA   R4, {R0-R2}                \ Store (R0, R1, R2) in the first three
                                     \ words of var_000
+
+                                    \ We now scale up the coordinate (x, y, z)
+                                    \ in (R0, R1, R2) as high as it can go while
+                                    \ still staying within 32-bit words
 
  MOVS    R4, R0                     \ Set R4 = |R0|
  MVNMI   R4, R4                     \        = |x|
@@ -2281,158 +2303,309 @@ ENDIF
  ORR     R4, R4, R5                 \ Set R4 = |R0| or |R1| or R2
  ORR     R4, R4, R2                 \        = |x| or |y| or z
  ORRS    R4, R4, #1                 \
-                                    \ Rounded up to the nearest odd number
+                                    \ And round it up to the nearest odd number
+                                    \
+                                    \ So this sets R4 to a number that is
+                                    \ greater than |x|, |y| and z, so R4 is
+                                    \ therefore an upper bound on the values of
+                                    \ all three coordinates
 
- MOVPL   R4, R4, LSL #1             \ If R4 >= 0, set R4 = R4 << 1
+ MOVPL   R4, R4, LSL #1             \ If R4 is positive then we know bit 7 is
+                                    \ clear, so shift the sign bit off the end
+                                    \ so we don't include it in the scale factor
+                                    \ calculation below
 
- MOV     R5, #0                     \ Set var_120 = 0
- STRB    R5, [R11, #var_120]
+                                    \ We now work out how many times we can
+                                    \ scale up R4 so that it is as large as
+                                    \ possible but still fits within a 32-bit
+                                    \ word
 
-.lab_8EFC
+ MOV     R5, #0                     \ Set R5 = 0 to use as the scale factor in
+                                    \ the following loop
 
- MOVS    R4, R4, LSL #1             \ 
- ADDPL   R5, R5, #1                 \ 
- BPL     lab_8EFC                   \ 
+ STRB    R5, [R11, #var_120]        \ Set var_120 = 0 ???
 
- MOV     R0, R0, LSL R5             \ 
- MOV     R1, R1, LSL R5             \ 
- MOV     R2, R2, LSL R5             \ 
- ADD     R4, R11, #&84              \ 
- STMIA   R4, {R0-R2}                \ 
- ADD     R4, R11, #&30              \ 
- CMP     R3, R4                     \ 
- LDMNEIA R3!, {R0-R2}               \ 
+.dobj1
+
+ MOVS    R4, R4, LSL #1             \ Shift R4 to the left until the top bit is
+ ADDPL   R5, R5, #1                 \ set, incrementing R5 for each shift so R5
+ BPL     dobj1                      \ contains the scale factor we have applied
+                                    \ to R4
+                                    \
+                                    \ So this scales R4 as high as possible
+                                    \ while still staying within 32 bits, with
+                                    \ the scale factor given in R5 
+
+ MOV     R0, R0, LSL R5             \ We now scale up the coordinate (x, y, z)
+ MOV     R1, R1, LSL R5             \ in (R0, R1, R2) by the scale factor in R5,
+ MOV     R2, R2, LSL R5             \ as we know the result will stay within
+                                    \ 32-bit words
+
+ ADD     R4, R11, #var_084          \ Store (R0, R1, R2) in the first three
+ STMIA   R4, {R0-R2}                \ words of var_084
+
+ ADD     R4, R11, #var_030          \ If R3 does not point to var_030 variable,
+ CMP     R3, R4                     \ copy nine words from the variable that R3
+ LDMNEIA R3!, {R0-R2}               \ does point to, and put them into var_030
  STMNEIA R4!, {R0-R2}               \ 
  LDMNEIA R3!, {R0-R2}               \ 
  STMNEIA R4!, {R0-R2}               \ 
  LDMNEIA R3!, {R0-R2}               \ 
  STMNEIA R4!, {R0-R2}               \ 
- LDR     R0, [R11, #objectData]     \ 
- LDR     R8, [R0]                   \ 
- ADD     R9, R0, #&10               \ 
- ADD     R10, R11, #&600            \ 
- LDRB    R1, [R0, #&C]              \ 
- STRB    R1, [R11, #var_114]        \ 
 
-.lab_8F54
+ LDR     R0, [R11, #objectData]     \ Set R0 to the address of the data block
+                                    \ for the object that is being drawn
 
- LDMIA   R9!, {R2-R4}               \ 
- ADD     R0, R11, #&54              \ 
- ADD     R1, R11, #&64              \ 
- STMIA   R0, {R2-R4}                \ 
- BL      sub_9254                   \ 
- ADD     R0, R11, #0                \ 
- BL      sub_991C                   \ 
- ADD     R0, R11, #&74              \ 
- BL      sub_9748                   \ 
- STMIA   R10!, {R0-R1}              \ 
- ADD     R0, R11, #&74              \ 
- BL      sub_82AC                   \ 
- STR     R0, [R11, #var_078]        \ 
- ADD     R0, R11, #&74              \ 
- BL      sub_9748                   \ 
- STMIA   R10!, {R0-R1}              \ 
- LDR     R14, [R10, #-&C]           \ 
- CMP     R14, R1                    \ 
- MVNHS   R14, #0                    \ 
- STRHSB  R14, [R11, #var_120]       \ 
- SUBS    R8, R8, #1                 \ 
- BNE     lab_8F54                   \ 
- LDR     R1, [R11, #objectData]     \ 
- LDR     R0, [R1, #8]               \ 
- ADD     R9, R1, R0                 \ 
- LDR     R8, [R1, #4]               \ 
+ LDR     R8, [R0]                   \ Set R8 to the first word of the data
+                                    \ block, which contains the number of
+                                    \ vertices
 
-.lab_8FBC
+ ADD     R9, R0, #16                \ Set R9 to the address of the vertices data
+                                    \ in the data block, which appears from the
+                                    \ 16th byte onwards
 
- MOV     R0, R9                     \ 
- ADD     R9, R9, #&C                \ 
- ADD     R1, R11, #&54              \ 
- BL      sub_9254                   \ 
- LDR     R1, [R11, #var_058]        \ 
- LDRB    R14, [R11, #var_114]       \ 
- TST     R14, #1                    \ 
- MVNEQ   R3, #0                     \ 
- MVNEQ   R1, #0                     \ 
- ADDNE   R2, R11, #&84              \ 
- ADDNE   R0, R11, #&54              \ 
- BLNE    sub_928C                   \ 
- STMFD   R13!, {R8-R9, R11-R12}     \ 
- CMP     R1, #0                     \ 
- BPL     lab_9038                   \ 
- LDRB    R14, [R11, #var_114]       \ 
- TST     R14, #2                    \ 
- BEQ     lab_9038                   \ 
- STMFD   R13!, {R3, R9, R11}        \ 
- LDMIA   R9, {R5-R7}                \ 
- MOV     R8, #0                     \ 
- ADD     R10, R11, #&600            \ 
- ADD     R10, R10, #8               \ 
- ADD     R5, R10, R5, LSL #4        \ 
- LDMIA   R5, {R0-R1}                \ 
- ADD     R6, R10, R6, LSL #4        \ 
- LDMIA   R6, {R2-R3}                \ 
- ADD     R7, R10, R7, LSL #4        \ 
- LDMIA   R7, {R4-R5}                \ 
- BL      DrawTriangleIntoBuffer1    \ 
- LDMFD   R13!, {R3, R9, R11}        \ 
+ ADD     R10, R11, #var_600         \ Set R10 to the address of var_600
 
-.lab_9038
+ LDRB    R1, [R0, #12]              \ Set var_114 to the fourth word of the data
+ STRB    R1, [R11, #var_114]        \ block, which contains the object flags
 
- CMP     R3, #0                     \ 
- BPL     lab_90F4                   \ 
- LDMIA   R9, {R4-R7}                \ 
- ADD     R10, R11, #&600            \ 
- LDR     R1, [R11, #var_058]        \ 
- LDR     R0, [R11, #var_054]        \ 
- RSB     R1, R1, #&80000000         \ 
- MOV     R1, R1, LSR #28            \ 
- CMP     R0, #0                     \ 
+                                    \ We now iterate through the vertices in the
+                                    \ data block, using R8 as a loop counter (as
+                                    \ we set it above to the number of vertices)
+                                    \
+                                    \ As we iterate through the vertices we
+                                    \ process them in various ways - this might
+                                    \ involve orientation vectors, projection
+                                    \ etc. ???
+
+.dobj2
+
+ LDMIA   R9!, {R2-R4}               \ Load the coordinates of the next vertex
+                                    \ from R9 into (R2, R3, R4), and update R9
+                                    \ to point to the next vertex
+
+ ADD     R0, R11, #var_054          \ Set R0 to the address of var_054
+
+ ADD     R1, R11, #var_064          \ Set R1 to the address of var_064
+
+ STMIA   R0, {R2-R4}                \ Store the vertex coordinates in var_054
+
+ BL      sub_9254                   \ ??? Process the vertex and store the
+                                    \ results in var_064 (i.e. R1)
+
+ ADD     R0, R11, #var_000          \ Set R0 to the address of var_000
+
+ BL      sub_991C                   \ ??? Process var_064 and store in var_074
+
+ ADD     R0, R11, #var_074          \ Set R0 to the address of var_074
+
+ BL      sub_9748                   \ ??? Returns (R0, R1) - maybe this is a
+                                    \ projection from 3D to 2D?
+
+ STMIA   R10!, {R0-R1}              \ Store (R0, R1) in var_600 and update R10
+                                    \ to point to the next coordinate in var_600
+
+ ADD     R0, R11, #var_074          \ Set R0 to the address of var_074
+
+ BL      sub_82AC                   \ ??? Gets the landscape altitude into R0
+
+ STR     R0, [R11, #var_078]        \ Set var_078 = R0
+
+ ADD     R0, R11, #var_074          \ Set R0 to the address of var_074
+
+ BL      sub_9748                   \ ??? As above, is this projection?
+
+ STMIA   R10!, {R0-R1}              \ Store (R0, R1) in var_600 and update R10
+                                    \ to point to the next coordinate in var_600
+
+ LDR     R14, [R10, #-12]           \ Set R14 to the second coordinate from the
+                                    \ previous ???projection, i.e. y-coordinate?
+
+ CMP     R14, R1                    \ If previous y-coordinate >= this y-coord
+ MVNHS   R14, #0                    \ then set var_120 = 0
+ STRHSB  R14, [R11, #var_120]
+
+ SUBS    R8, R8, #1                 \ Decrement the loop counter, which keeps
+                                    \ track of the number of vertices we have
+                                    \ processed
+
+ BNE     dobj2                      \ Loop back to dobj2 to move on to the next
+                                    \ vertex, until we have processed them all
+
+                                    \ We now move on to the face data
+
+ LDR     R1, [R11, #objectData]     \ Set R1 to the address of the data block
+                                    \ for the object that is being drawn
+
+ LDR     R0, [R1, #8]               \ Set R0 to the third word of the data
+                                    \ block, which contains the offset from the
+                                    \ start of the data block to the face data
+
+ ADD     R9, R1, R0                 \ Set R9 to the address of the face data in
+                                    \ the data block
+
+ LDR     R8, [R1, #4]               \ Set R8 to the second word of the data
+                                    \ block, which contains the number of faces
+
+                                    \ We now iterate through the faces in the
+                                    \ data block, using R8 as a loop counter (as
+                                    \ we just set it to the number of faces)
+                                    \
+                                    \ As we iterate through the faces we draw
+                                    \ them
+
+.dobj3
+
+ MOV     R0, R9                     \ Copy the value of R9 into R0, so R0 points
+                                    \ to the current face data
+
+ ADD     R9, R9, #12                \ Add 12 to R9 so it points to the fourth
+                                    \ word in the current face data
+
+ ADD     R1, R11, #var_054          \ Set R1 to the address of var_054
+
+ BL      sub_9254                   \ ??? Process the vertex and store the
+                                    \ results in var_054 (i.e. R1)
+
+ LDR     R1, [R11, #var_058]        \ Set R1 to var_058
+
+ LDRB    R14, [R11, #var_114]       \ If bit 0 of var_114 is zero, set
+ TST     R14, #1                    \ R1 and R3 = 0
+ MVNEQ   R3, #0
+ MVNEQ   R1, #0
+
+ ADDNE   R2, R11, #var_084          \ Otherwise bit 0 of var_114 is set, so set
+ ADDNE   R0, R11, #var_054          \ R0 to the address of var_084 and R0 to the
+ BLNE    sub_928C                   \ address of var_054, and call sub_928C ???
+
+ STMFD   R13!, {R8-R9, R11-R12}     \ Store the registers that we want to use on
+                                    \ the stack so they can be retrieved at
+                                    \ dobj5 after the face has been processed
+
+ CMP     R1, #0                     \ If R1 is positive, jump to dobj4 to skip
+ BPL     dobj4                      \ the following
+
+ LDRB    R14, [R11, #var_114]       \ If bit 1 of var_114 is zero, jump to dobj4
+ TST     R14, #2                    \ to skip the following
+ BEQ     dobj4
+
+ STMFD   R13!, {R3, R9, R11}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDMIA   R9, {R5-R7}                \ Set R5, R6, R7 to the fourth, fifth and
+                                    \ sixth words of face data
+
+ MOV     R8, #0                     \ Set R8 = 0
+
+ ADD     R10, R11, #var_600         \ Set R10 to the address of the third word
+ ADD     R10, R10, #8               \ in var_600
+
+ ADD     R5, R10, R5, LSL #4        \ Set (R0, R1) to the two words at offset
+ LDMIA   R5, {R0-R1}                \ R5 * 16 from the table at R10 (var_600+8)
+
+ ADD     R6, R10, R6, LSL #4        \ Set (R2, R3) to the two words at offset
+ LDMIA   R6, {R2-R3}                \ R6 * 16 from the table at R10 (var_600+8)
+
+ ADD     R7, R10, R7, LSL #4        \ Set (R4, R5) to the two words at offset
+ LDMIA   R7, {R4-R5}                \ R7 * 16 from the table at R10 (var_600+8)
+
+ BL      DrawTriangleIntoBuffer1    \ Draw triangle, so presumably the above are
+                                    \ three 2D coordinates ???
+
+ LDMFD   R13!, {R3, R9, R11}        \ Retrieve the registers that we stored on
+                                    \ the stack
+
+.dobj4
+
+ CMP     R3, #0                     \ If bit 31 of R3 is not set, jump to dobj5
+ BPL     dobj5                      \ to ckip the following
+
+ LDMIA   R9, {R4-R7}                \ Set R4, R5, R6, R7 to the fourth, fifth,
+                                    \ sixth and seventh words of face data
+
+ ADD     R10, R11, #var_600         \ Set R10 to the address of var_600
+
+ LDR     R1, [R11, #var_058]        \ Set R1 = var_058
+
+ LDR     R0, [R11, #var_054]        \ Set R0 = var_054
+
+ RSB     R1, R1, #&80000000         \ Set R1 = (&80000000 - R1) >> 28
+ MOV     R1, R1, LSR #28            \        = (&80000000 - var_058) >> 28
+
+ CMP     R0, #0                     \ If R0 is negative, increment R1
  ADDMI   R1, R1, #1                 \ 
- SUBS    R1, R1, #5                 \ 
- MOVMI   R1, #0                     \ 
+
+ SUBS    R1, R1, #5                 \ Set R1 = R1 - 5
+
+ MOVMI   R1, #0                     \ If R1 < 0, set R1 = 0
+
  MOV     R8, #&F                    \ 
  AND     R0, R8, R7, LSR #8         \ 
  AND     R2, R8, R7, LSR #4         \ 
  AND     R7, R7, R8                 \ 
  ADD     R0, R0, R1                 \ 
+
  CMP     R0, #&10                   \ 
  MOVHS   R0, #&F                    \ 
+
  ADD     R2, R2, R1                 \ 
  CMP     R2, #&10                   \ 
  MOVHS   R2, #&F                    \ 
+
  ADD     R7, R7, R1                 \ 
  CMP     R7, #&10                   \ 
  MOVHS   R7, #&F                    \ 
+
  ORR     R8, R2, R7                 \ 
  AND     R8, R8, #3                 \ 
  ORR     R8, R8, R0                 \ 
  AND     R8, R8, #7                 \ 
+
  TST     R0, #8                     \ 
  ORRNE   R8, R8, #&10               \ 
+
  AND     R2, R2, #&C                \ 
  ORR     R8, R8, R2, LSL #3         \ 
+
  TST     R7, #4                     \ 
  ORRNE   R8, R8, #8                 \ 
+
  TST     R7, #8                     \ 
  ORRNE   R8, R8, #&80               \ 
+
  ORR     R8, R8, R8, LSL #8         \ 
  ORR     R8, R8, R8, LSL #16        \ 
  ORR     R8, R8, R8, LSL #24        \ 
- ADD     R4, R10, R4, LSL #4        \ 
- LDMIA   R4, {R0-R1}                \ 
- ADD     R5, R10, R5, LSL #4        \ 
- LDMIA   R5, {R2-R3}                \ 
- ADD     R6, R10, R6, LSL #4        \ 
- LDMIA   R6, {R4-R5}                \ 
- BL      DrawTriangleIntoBuffer2    \ 
 
-.lab_90F4
+ ADD     R4, R10, R4, LSL #4        \ Set (R0, R1) to the two words at offset
+ LDMIA   R4, {R0-R1}                \ R4 * 16 from the table at R10 (var_600)
 
- LDMFD   R13!, {R8-R9, R11-R12}     \ 
- ADD     R9, R9, #&10               \ 
- SUBS    R8, R8, #1                 \ 
- BNE     lab_8FBC                   \ 
+ ADD     R5, R10, R5, LSL #4        \ Set (R2, R3) to the two words at offset
+ LDMIA   R5, {R2-R3}                \ R5 * 16 from the table at R10 (var_600)
+
+ ADD     R6, R10, R6, LSL #4        \ Set (R4, R5) to the two words at offset
+ LDMIA   R6, {R4-R5}                \ R6 * 16 from the table at R10 (var_600)
+
+ BL      DrawTriangleIntoBuffer2    \ Draw triangle, so presumably the above are
+                                    \ three 2D coordinates ???
+
+.dobj5
+
+ LDMFD   R13!, {R8-R9, R11-R12}     \ Retrieve the registers that we stored on
+                                    \ the stack before processing the face
+
+ ADD     R9, R9, #16                \ Add 16 to R9 so it points to the next
+                                    \ batch of face data (R9 already points to
+                                    \ the fourth word in the current face data,
+                                    \ so this skips the next four, thereby
+                                    \ skipping all seven words of face data)
+
+ SUBS    R8, R8, #1                 \ Decrement the loop counter, which keeps
+                                    \ track of the number of faces we have
+                                    \ processed
+
+ BNE     dobj3                      \ Loop back to dobj3 to move on to the next
+                                    \ face, until we have processed them all
 
  LDMFD   R13!, {R6-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -2776,7 +2949,7 @@ ENDIF
  STMEQIA R1, {R2-R4}                \ 
  MOVEQ   PC, R14                    \ 
  STMFD   R13!, {R6-R7, R14}         \ 
- ADD     R2, R11, #&30              \ 
+ ADD     R2, R11, #var_030          \ 
  BL      sub_928C                   \ 
  STR     R3, [R1]                   \ 
  BL      sub_928C                   \ 
@@ -2877,7 +3050,7 @@ ENDIF
 
 .sub_937C
 
- ADD     R2, R11, #&30              \ 
+ ADD     R2, R11, #var_030          \ 
  LDR     R0, [R2, #4]               \ 
  LDR     R1, [R2, #&C]              \ 
  STR     R0, [R2, #&C]              \ 
@@ -3346,52 +3519,34 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_98E4
+\       Name: sub_98EC
 \       Type: Variable
 \   Category: ???
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.var_98E4
+.mod_98E4
 
- ADD     R4, R11, #&64              \ 
+ ADD     R4, R11, #var_064          \ 
 
-\ ******************************************************************************
-\
-\       Name: var_98E8
-\       Type: Variable
-\   Category: ???
-\    Summary: ???
-\
-\ ******************************************************************************
+.mod_98E8
 
-.var_98E8
+ ADD     R4, R11, #var_074          \ 
 
- ADD     R4, R11, #&74              \ 
-
-\ ******************************************************************************
-\
-\       Name: var_98EC
-\       Type: Variable
-\   Category: ???
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.var_98EC
+.sub_98EC
 
  MOV     R4, R12                    \ 
- ADD     R4, R11, #&170             \ 
- ADD     R4, R11, #&160             \ 
+ ADD     R4, R11, #var_170          \ 
+ ADD     R4, R11, #var_160          \ 
  STMFD   R13!, {R14}                \ 
- LDR     R1, var_98EC               \ 
- STR     R1, var_9938               \ 
+ LDR     R1, sub_98EC               \ 
+ STR     R1, sub_991C+28            \ 
  LDMIA   R0, {R0-R2}                \ 
  MOV     R3, R12                    \ 
- BL      sub_9924                   \ 
- LDR     R1, var_98E8               \ 
- STR     R1, var_9938               \ 
+ BL      sub_991C+8                 \ 
+ LDR     R1, mod_98E8               \ 
+ STR     R1, sub_991C+28            \ 
  LDMFD   R13!, {PC}                 \ 
 
 \ ******************************************************************************
@@ -3406,37 +3561,13 @@ ENDIF
 .sub_991C
 
  LDMIA   R0, {R0-R2}                \ 
- ADD     R3, R11, #&64              \ 
-
-\ ******************************************************************************
-\
-\       Name: sub_9924
-\       Type: Subroutine
-\   Category: ???
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.sub_9924
-
+ ADD     R3, R11, #var_064          \ 
  STMFD   R13!, {R5-R6}              \ 
  LDMIA   R3, {R3-R5}                \ 
  ADD     R0, R0, R3                 \ 
  ADD     R1, R1, R4                 \ 
  ADD     R2, R2, R5                 \ 
-
-\ ******************************************************************************
-\
-\       Name: var_9938
-\       Type: Variable
-\   Category: ???
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.var_9938
-
- ADD     R3, R11, #&74              \ 
+ ADD     R3, R11, #var_074          \ 
  STMIA   R3, {R0-R2}                \ 
  LDMFD   R13!, {R5-R6}              \ 
  MOV     PC, R14                    \ 
@@ -3518,7 +3649,7 @@ ENDIF
  TEQ     R4, #0                     \ 
  RSBMI   R7, R7, #0                 \ 
  ADD     R14, R14, #2               \ 
- ADD     R8, R11, #&64              \ 
+ ADD     R8, R11, #var_064          \ 
  STMIA   R8, {R5-R7, R14}           \ 
  LDMFD   R13!, {R5-R8, PC}          \ 
 
