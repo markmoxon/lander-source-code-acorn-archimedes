@@ -2468,11 +2468,13 @@ ENDIF
 .dobj3
 
  MOV     R0, R9                     \ Copy the value of R9 into R0, so R0 points
-                                    \ to the current face data, which contains
-                                    \ the face's normal vector
+                                    \ to the start of the current face data,
+                                    \ which is where the face's normal vector is
+                                    \ stored
 
  ADD     R9, R9, #12                \ Add 12 to R9 so it points to the fourth
-                                    \ word in the current face data
+                                    \ word in the current face data, which is
+                                    \ where the vertex numbers is stored
 
  ADD     R1, R11, #var_054          \ Set R1 to the address of var_054, so we
                                     \ store the results of the following
@@ -2490,8 +2492,8 @@ ENDIF
 
  LDR     R1, [R11, #var_058]        \ Set R1 to var_058
 
- LDRB    R14, [R11, #var_114]       \ If bit 0 of var_114 is zero, set
- TST     R14, #%00000001            \ R1 and R3 = 0
+ LDRB    R14, [R11, #var_114]       \ If bit 0 of var_114 is zero, set both R1
+ TST     R14, #%00000001            \ and R3 to 0
  MVNEQ   R3, #0
  MVNEQ   R1, #0
 
@@ -2535,7 +2537,8 @@ ENDIF
  LDMIA   R7, {R4-R5}                \ R7 * 16 from the table at R10 (var_600+8)
 
  BL      DrawTriangleIntoBuffer1    \ Draw triangle, so presumably the above are
-                                    \ three 2D coordinates ???
+                                    \ three 2D coordinates, colour in R8 = 0 =
+                                    \ black so is this the shadow ???
 
  LDMFD   R13!, {R3, R9, R11}        \ Retrieve the registers that we stored on
                                     \ the stack
