@@ -38,15 +38,18 @@
  OS_WriteS = &01                    \ The operating system call to write a
                                     \ string to all the output streams
 
- OS_ReadC = &04                     \ 
+ OS_ReadC = &04                     \ The operating system call to read a key
+                                    \ press
 
- OS_Byte = &06                      \ 
+ OS_Byte = &06                      \ General-purpose operating system calls
 
- OS_Word = &07                      \ 
+ OS_Word = &07                      \ General-purpose operating system calls
 
- OS_Mouse = &1C                     \ 
+ OS_Mouse = &1C                     \ The operating system call to read the
+                                    \ mouse status
 
- OS_BinaryToDecimal = &28           \ 
+ OS_BinaryToDecimal = &28           \ The operating system call to convert a
+                                    \ number into a string
 
  OBJ_ROCKET = 9                     \ The object type of the three rockets
                                     \ along the edge of the launchpad
@@ -78,37 +81,47 @@
                                     \ where #offset is one of the following
                                     \ variables
 
- var_000 = &00                      \ 
+ xObject = &00                      \ The x-coordinate of the object currently
+                                    \ being drawn
 
- var_030 = &30                      \ 
+ yObject = &04                      \ The y-coordinate of the object currently
+                                    \ being drawn
 
- var_034 = &34                      \ 
+ zObject = &08                      \ The z-coordinate of the object currently
+                                    \ being drawn
 
- var_038 = &38                      \ 
+ rotationMatrix = &30               \ The rotation matrix of the object
+                                    \ currently being drawn (i.e. the object's
+                                    \ three orientation vectors)
 
- var_03C = &3C                      \ 
+ xNoseV = &30                       \ The nose vector
+ yNoseV = &34
+ zNoseV = &38
 
- var_040 = &40                      \ 
+ xRoofV = &3C                       \ The roof vector
+ yRoofV = &40
+ zRoofV = &44
 
- var_044 = &44                      \ 
+ xSideV = &48                       \ The side vector
+ ySideV = &4C
+ zSideV = &50
 
- var_048 = &48                      \ 
+ xVertex = &54                      \ The x-coordinate of the vertex being
+                                    \ processed
 
- var_04C = &4C                      \ 
+ yVertex = &58                      \ The y-coordinate of the vertex being
+                                    \ processed
 
- var_050 = &50                      \ 
+ xVertexRotated = &64               \ The coordinates of the vertex after being
+                                    \ rotated by the object's orientation
+                                    \ vectors
 
- var_054 = &54                      \ 
+ xCoord = &74                       \ Used to store a 3D coordinate
+ yCoord = &78
+ zCoord = &7C
 
- var_058 = &58                      \ 
-
- var_064 = &64                      \ 
-
- var_074 = &74                      \ 
-
- var_078 = &78                      \ 
-
- var_084 = &84                      \ 
+ xObjectScaled = &84                \ The x-coordinate of the vertex being
+                                    \ processed, scaled as high as possible
 
  var_094 = &94                      \ 
 
@@ -128,8 +141,8 @@
 
  var_0F0 = &F0                      \ 
 
- objectType = &F4                   \ The type of the object that is being
-                                    \ displayed
+ objectType = &F4                   \ The type of the object currently being
+                                    \ drawn
 
  var_0F8 = &F8                      \ 
 
@@ -144,15 +157,17 @@
  var_10C = &10C                     \ 
 
  objectData = &110                  \ The address of the data block for the
-                                    \ object that is being drawn
+                                    \ object currentlt being drawn
 
- var_114 = &114                     \ 
+ objectFlags = &114                 \ The flags of the object currently being
+                                    \ drawn
 
  mainLoopCount = &118               \ The main loop counter
 
  var_11C = &11C                     \ 
 
- var_120 = &120                     \ 
+ crashedFlag = &120                 \ If this is non-zero then the object being
+                                    \ processed has crashed into the ground
 
  currentScore = &124                \ Our current score, which is displayed at
                                     \ the left end of the score bar
@@ -220,7 +235,7 @@
 
  var_500 = &500                     \ 
 
- var_600 = &600                     \ 
+ vertexProjected = &600             \ Projected vertices
 
  var_700 = &700                     \ 
 
@@ -257,7 +272,7 @@
                                     \ does not include altitude data, so the
                                     \ y-axis is ignored (as the altitude of an
                                     \ object on the landscape is determined by
-                                    \ the landscape height at that point); you
+                                    \ the landscape altitude at that point); you
                                     \ can think of the object map as a paper map
                                     \ that is draped over the landscape, and
                                     \ whose longitude and latitude values map to
@@ -381,39 +396,40 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_802C
-\       Type: Variable
-\   Category: ???
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.var_802C
-
- EQUD    &00026600
- EQUD    &000276D4
- EQUD    &000287A8
- EQUD    &0002987C
- EQUD    &0002A950
- EQUD    &0002BA24
- EQUD    &0002CAF8
- EQUD    &0002DBCC
- EQUD    &0002ECA0
- EQUD    &0002FD74
- EQUD    &00030E48
- EQUD    &00031F1C
-
-\ ******************************************************************************
-\
 \       Name: graphicsBuffers
 \       Type: Variable
 \   Category: Graphics buffers
-\    Summary: The 12 graphics buffers that store graphics commands according to
-\             distance
+\    Summary: The addresses of each of the graphics buffers (these values do not
+\             change)
 \
 \ ******************************************************************************
 
 .graphicsBuffers
+
+ EQUD    &00026600                  \ Address of graphics buffer 0
+ EQUD    &000276D4                  \ Address of graphics buffer 1
+ EQUD    &000287A8                  \ Address of graphics buffer 2
+ EQUD    &0002987C                  \ Address of graphics buffer 3
+ EQUD    &0002A950                  \ Address of graphics buffer 4
+ EQUD    &0002BA24                  \ Address of graphics buffer 5
+ EQUD    &0002CAF8                  \ Address of graphics buffer 6
+ EQUD    &0002DBCC                  \ Address of graphics buffer 7
+ EQUD    &0002ECA0                  \ Address of graphics buffer 8
+ EQUD    &0002FD74                  \ Address of graphics buffer 9
+ EQUD    &00030E48                  \ Address of graphics buffer 10
+ EQUD    &00031F1C                  \ Address of graphics buffer 11
+
+\ ******************************************************************************
+\
+\       Name: graphicsBuffersEnd
+\       Type: Variable
+\   Category: Graphics buffers
+\    Summary: The end addresses of each of the graphics buffers (these values
+\             get updated as objects are drawn into the buffers)
+\
+\ ******************************************************************************
+
+.graphicsBuffersEnd
 
  EQUD    &00026600                  \ Address of graphics buffer 0
  EQUD    &000276D4                  \ Address of graphics buffer 1
@@ -484,7 +500,7 @@ ENDIF
  SUB     R0, R0, R14                \ 
  STR     R0, [R11, #var_174]        \ 
  ADD     R0, R11, #var_170          \ 
- BL      sub_9748                   \ 
+ BL      ProjectVertexOntoScreen    \ 
  BHS     DrawGraphicsBuffers        \ 
  STMIA   R7!, {R0-R1}               \ 
  CMP     R6, #0                     \ 
@@ -617,7 +633,7 @@ ENDIF
  LDR     R2, sinTableAddr           \ Set R2 to the address of the sine lookup
                                     \ table
 
- BIC     R0, R0, #&300000           \ R0 = R0 AND ~&300000
+ BIC     R0, R0, #&00300000         \ R0 = R0 AND ~&00300000
                                     \
                                     \ So this clears bits 21 and 22 of R0, so
                                     \ R0 >> 20 ends in two clear bits (so it's
@@ -654,7 +670,7 @@ ENDIF
                                     \   R3 = 5x + 3z
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set:
- BIC     R1, R1, #&300000           \
+ BIC     R1, R1, #&00300000         \
  LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
                                     \      = sin(4x + 3z)
 
@@ -679,7 +695,7 @@ ENDIF
                                     \   R1 = 3z - 5x
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set:
- BIC     R1, R1, #&300000           \
+ BIC     R1, R1, #&00300000         \
  LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
                                     \      = sin(3z - 5x)
 
@@ -707,7 +723,7 @@ ENDIF
                                     \   R1 = 3x + 3z
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set:
- BIC     R1, R1, #&300000           \
+ BIC     R1, R1, #&00300000         \
  LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
                                     \      = sin(3x + 3z)
 
@@ -728,7 +744,7 @@ ENDIF
                                     \   R1 = 5x + 11z
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set:
- BIC     R1, R1, #&300000           \
+ BIC     R1, R1, #&00300000         \
  LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
                                     \      = sin(5x + 11z)
 
@@ -752,7 +768,7 @@ ENDIF
                                     \   R1 = 10x + 7z
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set:
- BIC     R1, R1, #&300000           \
+ BIC     R1, R1, #&00300000         \
  LDR     R1, [R2, R1, LSR #20]      \   R1 = sin(R1)
                                     \      = sin(10x + 7z)
 
@@ -789,14 +805,27 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_82AC
+\       Name: GetLandscapeBelowObject
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Landscape
+\    Summary: Calculate the landscape altitude directly below a 3D coordinate
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The address of a 3D coordinate (x, y, z)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R0                              The altitude (y-coordinate) of the landscape
+\                                   directly below the coordinate
 \
 \ ******************************************************************************
 
-.sub_82AC
+.GetLandscapeBelowObject
 
  STMFD   R13!, {R8-R9, R14}         \ 
  LDR     R8, [R0]                   \ 
@@ -964,9 +993,9 @@ ENDIF
  LDRLTB  R9, [R11, #fuelBurnRate]   \ 
  BICLT   R9, R9, #6                 \ 
  STRLTB  R9, [R11, #fuelBurnRate]   \ 
- LDR     R6, [R11, #var_034]        \ 
- LDR     R7, [R11, #var_040]        \ 
- LDR     R8, [R11, #var_04C]        \ 
+ LDR     R6, [R11, #yNoseV]         \ 
+ LDR     R7, [R11, #yRoofV]         \ 
+ LDR     R8, [R11, #ySideV]         \ 
  LDRB    R9, [R11, #fuelBurnRate]   \ 
  TST     R9, #4                     \ 
  SUB     R3, R3, R3, ASR #6         \ 
@@ -994,7 +1023,7 @@ ENDIF
  MOV     R9, R2                     \ 
  SUB     R9, R9, #&05000000         \ 
  BL      GetLandscapeAltitude       \ 
- SUB     R0, R0, #&640000           \ 
+ SUB     R0, R0, #&00640000         \ 
  LDR     R1, [R11, #var_098]        \ 
  SUB     R14, R0, R1                \ 
  CMP     R14, #&01800000            \ 
@@ -1021,13 +1050,13 @@ ENDIF
  BLGT    sub_8654                   \ 
  CMP     R1, #0                     \ 
  MOVMI   R1, #0                     \ 
- ADD     R3, R11, #var_030          \ 
+ ADD     R3, R11, #rotationMatrix   \ 
  LDR     R14, objectPlayerAddr      \ 
  STR     R14, [R11, #objectData]    \ 
  MOV     R0, #0                     \ 
  MOV     R2, #&0F000000             \ 
  BL      DrawObject                 \ 
- LDRB    R10, [R11, #var_120]       \ 
+ LDRB    R10, [R11, #crashedFlag]   \ 
  CMP     R10, #0                    \ 
  BLNE    LoseLife                   \ 
  LDRB    R10, [R11, #fuelBurnRate]  \ 
@@ -1049,7 +1078,7 @@ ENDIF
  ADD     R0, R0, R6, ASR #7         \ 
  ADD     R1, R1, R7, ASR #7         \ 
  ADD     R2, R2, R8, ASR #7         \ 
- MOV     R7, #&1D0000               \ 
+ MOV     R7, #&001D0000             \ 
  MOV     R6, #8                     \ 
  MOV     R8, #&A                    \ 
  MOV     R9, #&1D                   \ 
@@ -1087,9 +1116,9 @@ ENDIF
 
  ADD     R14, R11, #var_094         \ 
  LDMIA   R14, {R0-R5}               \ 
- LDR     R6, [R11, #var_030]        \ 
- LDR     R7, [R11, #var_03C]        \ 
- LDR     R8, [R11, #var_048]        \ 
+ LDR     R6, [R11, #xNoseV]         \ 
+ LDR     R7, [R11, #xRoofV]         \ 
+ LDR     R8, [R11, #xSideV]         \ 
  ADD     R3, R3, R6, ASR #8         \ 
  ADD     R4, R4, R7, ASR #8         \ 
  ADD     R5, R5, R8, ASR #8         \ 
@@ -1132,7 +1161,7 @@ ENDIF
  RSBMI   R5, R5, #0                 \ 
  ADD     R3, R3, R4                 \ 
  ADD     R3, R3, R5                 \ 
- CMP     R3, #&200000               \ 
+ CMP     R3, #&00200000             \ 
  MOVHS   PC, R14                    \ 
  MOV     R1, #&02EC0000             \ 
  LDR     R3, [R11, #fuelLevel]      \ 
@@ -1185,7 +1214,7 @@ ENDIF
 
  LDMIA   R0, {R0-R2}                \ 
 
- SUB     R1, R1, #&500000           \ 
+ SUB     R1, R1, #&00500000         \ 
 
  BL      sub_8CBC                   \ 
 
@@ -1303,9 +1332,9 @@ ENDIF
 
 .var_87EC
 
- EQUD    graphicsBuffers
+ EQUD    graphicsBuffersEnd
 
- EQUD    var_802C
+ EQUD    graphicsBuffers
 
 \ ******************************************************************************
 \
@@ -1335,10 +1364,10 @@ ENDIF
  ADD     R0, R0, R3                 \ 
  ADD     R1, R1, R4                 \ 
  ADD     R2, R2, R5                 \ 
- TST     R7, #&100000               \ 
+ TST     R7, #&00100000             \ 
  LDRNE   R14, [R11, #gravity]       \ 
  ADDNE   R4, R4, R14                \ 
- TST     R7, #&10000                \ 
+ TST     R7, #&00010000             \ 
  BLNE    sub_893C                   \ 
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
@@ -1346,7 +1375,7 @@ ENDIF
  BL      GetLandscapeAltitude       \ 
  MOV     R9, R0                     \ 
  LDMFD   R13!, {R0-R3}              \ 
- TST     R7, #&200000               \ 
+ TST     R7, #&00200000             \ 
  BLNE    sub_89C8                   \ 
  CMP     R1, R9                     \ 
  BLGT    sub_8998                   \ 
@@ -1366,7 +1395,7 @@ ENDIF
  RSBMI   R14, R0, #0                \ 
  CMP     R14, #&06000000            \ 
  BHS     lab_8800                   \ 
- TST     R7, #&20000                \ 
+ TST     R7, #&00020000             \ 
  BEQ     lab_8904                   \ 
  STMFD   R13!, {R0-R2}              \ 
  LDR     R14, [R11, #var_130]       \ 
@@ -1392,7 +1421,7 @@ ENDIF
  BLO     sub_86C4                   \ 
  LDR     R14, objectRockAddr        \ 
  STR     R14, [R11, #objectData]    \ 
- ADD     R3, R11, #var_030          \ 
+ ADD     R3, R11, #rotationMatrix   \ 
  BL      DrawObject                 \ 
  B       lab_8800                   \ 
 
@@ -1402,12 +1431,12 @@ ENDIF
  LDR     R14, [R11, #yCamera]       \ 
  SUB     R1, R9, R14                \ 
  MOV     R8, R2                     \ 
- BL      sub_9670                   \ 
- BLLO    DrawParticleIntoBuffer2    \ 
+ BL      ProjectParticleOntoScreen  \ 
+ BLLO    DrawParticleIntoBuffer     \ 
  LDMFD   R13!, {R0-R2, R7}          \ 
  MOV     R8, R2                     \ 
- BL      sub_9670                   \ 
- BLLO    DrawParticleIntoBuffer1    \ 
+ BL      ProjectParticleOntoScreen  \ 
+ BLLO    DrawParticleIntoNearBuffer \ 
  LDMIA   R10, {R0-R7}               \ 
  CMP     R7, #0                     \ 
  BNE     lab_880C                   \ 
@@ -1444,7 +1473,7 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
- ORR     R7, R7, #&1D0000           \ 
+ ORR     R7, R7, #&001D0000         \ 
  LDMFD   R13!, {R0-R2, R6}          \ 
  MOV     PC, R14                    \ 
 
@@ -1462,7 +1491,7 @@ ENDIF
  MOV     R1, R9                     \ 
  CMP     R9, #SEA_LEVEL             \ 
  BEQ     lab_8A34                   \ 
- TST     R7, #&80000                \ 
+ TST     R7, #&00080000             \ 
  BEQ     lab_8A58                   \ 
  TST     R7, #&01000000             \ 
  BNE     lab_8A28                   \ 
@@ -1500,7 +1529,7 @@ ENDIF
  BHS     lab_8A28                   \ 
  ADD     R8, R8, #&C                \ 
  STRB    R8, [R14]                  \ 
- TST     R7, #&20000                \ 
+ TST     R7, #&00020000             \ 
 
  LDREQ   R8, [R11, #currentScore]   \ If ???, increment the current score by 20
  ADDEQ   R8, R8, #20
@@ -1518,12 +1547,12 @@ ENDIF
 
 .lab_8A34
 
- TST     R7, #&40000                \ 
+ TST     R7, #&00040000             \ 
  BEQ     lab_8A58                   \ 
- TST     R7, #&800000               \ 
+ TST     R7, #&00800000             \ 
  MOVNE   R8, #&41                   \ 
  MOVEQ   R8, #4                     \ 
- SUB     R1, R1, #&100000           \ 
+ SUB     R1, R1, #&00100000         \ 
 
 .lab_8A4C
 
@@ -1673,7 +1702,7 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
- ORR     R7, R7, #&80000            \ 
+ ORR     R7, R7, #&00080000         \ 
  MVN     R4, #&80000                \ 
  LDMFD   R13!, {R0-R2}              \ 
  MOV     R9, #&19                   \ 
@@ -1714,7 +1743,7 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
- ORR     R7, R7, #&1C0000           \ 
+ ORR     R7, R7, #&001C0000         \ 
  LDMFD   R13!, {R0-R2}              \ 
  MOV     R9, #&1A                   \ 
  MOV     R8, #&A                    \ 
@@ -1754,7 +1783,7 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
- ORR     R7, R7, #&FE0000           \ 
+ ORR     R7, R7, #&00FE0000         \ 
  LDMFD   R13!, {R0-R2}              \ 
  MOV     R9, #&1B                   \ 
  MOV     R8, #&A                    \ 
@@ -1773,7 +1802,7 @@ ENDIF
 .sub_8C40
 
  STMFD   R13!, {R8, R14}            \ 
- MOV     R7, #&1D0000               \ 
+ MOV     R7, #&001D0000             \ 
  MOV     R9, #&1D                   \ 
  MOV     R8, #8                     \ 
  MOV     R6, #8                     \ 
@@ -1811,7 +1840,7 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
- ORR     R7, R7, #&100000           \ 
+ ORR     R7, R7, #&00100000         \ 
  LDMFD   R13!, {R0-R2}              \ 
  MOV     R9, #&1A                   \ 
  MOV     R8, #&A                    \ 
@@ -2188,7 +2217,8 @@ ENDIF
 
 .dobs5
 
- ADD     R3, R11, #var_030          \ Set R3 to the address of var_030 ???
+ ADD     R3, R11, #rotationMatrix   \ Set R3 to the address of the object's
+                                    \ rotation matrix, to pass to DrawObject
 
  BL      DrawObject                 \ Draw the object
 
@@ -2213,12 +2243,12 @@ ENDIF
  LDR     R14, [R11, #yCamera]       \ Set R1 = R1 + yCamera
  ADD     R1, R1, R14                \         = y + yCamera
                                     \
-                                    \ This reverts R1 to the height of the
+                                    \ This reverts R1 to the altitude of the
                                     \ landscape at the object
 
  MOV     R0, R8                     \ Set (R0, R1, R2) to (x, y - &C00000, z)
  MOV     R2, R9                     \
- SUB     R1, R1, #&C00000           \ So this is a coordinate towards the
+ SUB     R1, R1, #&00C00000         \ So this is a coordinate towards the
                                     \ bottom of the object ???
 
  BL      sub_8B0C                   \ Call sub_8B0C to draw the smoke particles
@@ -2257,7 +2287,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawObject
+\       Name: DrawObject (Part 1 of 3)
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw a 3D object
@@ -2266,13 +2296,9 @@ ENDIF
 \
 \ Arguments:
 \
-\   (R0, R1, R2)                    3D coordinate (x, y, z) of object
+\   (R0, R1, R2)                    The 3D coordinate (x, y, z) of the object
 \
-\   R3                              The address of a nine-word variable (is this
-\                                   an orientation vector?)
-\
-\   objectData                      The address of the data block for the object
-\                                   that is being drawn
+\   R3                              The address of the object's rotation matrix
 \
 \ ******************************************************************************
 
@@ -2281,14 +2307,25 @@ ENDIF
  STMFD   R13!, {R6-R12, R14}        \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- LDR     R12, graphicsBuffersAddr   \ Set R12 to the address of the table that
-                                    \ contains the addresses of the graphics
-                                    \ buffers
+ LDR     R12, graphicsBufferEndAddr \ Set R12 to the address of the table that
+                                    \ contains the end addresses of the graphics
+                                    \ buffers, so when we draw the objects, we
+                                    \ can add them as drawing commands onto the
+                                    \ ends of the relevant graphics buffers
+                                    \
+                                    \ In other words, R12 = graphicsBuffersEnd
+                                    \ throughout the following
 
- ADD     R4, R11, #var_000          \ Set R4 to the address of var_000
+ ADD     R4, R11, #xObject          \ Set R4 to the address of xObject
 
  STMIA   R4, {R0-R2}                \ Store (R0, R1, R2) in the first three
-                                    \ words of var_000
+                                    \ words of xObject, so we have:
+                                    \
+                                    \   * xObject = x-coordinate of object
+                                    \
+                                    \   * yObject = y-coordinate of object
+                                    \
+                                    \   * zObject = z-coordinate of object
 
                                     \ We now scale up the coordinate (x, y, z)
                                     \ in (R0, R1, R2) as high as it can go while
@@ -2323,7 +2360,9 @@ ENDIF
  MOV     R5, #0                     \ Set R5 = 0 to use as the scale factor in
                                     \ the following loop
 
- STRB    R5, [R11, #var_120]        \ Set var_120 = 0 ???
+ STRB    R5, [R11, #crashedFlag]    \ Set crashedFlag = 0 to indicate that the
+                                    \ object has not crashed (though we will
+                                    \ change this later if we find that it has)
 
 .dobj1
 
@@ -2341,17 +2380,55 @@ ENDIF
  MOV     R2, R2, LSL R5             \ as we know the result will stay within
                                     \ 32-bit words
 
- ADD     R4, R11, #var_084          \ Store (R0, R1, R2) in the first three
- STMIA   R4, {R0-R2}                \ words of var_084
+ ADD     R4, R11, #xObjectScaled    \ Store (R0, R1, R2) in xObjectScaled,
+ STMIA   R4, {R0-R2}                \ zObjectScaled and zObjectScaled
 
- ADD     R4, R11, #var_030          \ If R3 does not point to var_030 variable,
- CMP     R3, R4                     \ copy nine words from the variable that R3
- LDMNEIA R3!, {R0-R2}               \ does point to, and put them into var_030
- STMNEIA R4!, {R0-R2}
- LDMNEIA R3!, {R0-R2}
- STMNEIA R4!, {R0-R2}
- LDMNEIA R3!, {R0-R2}
- STMNEIA R4!, {R0-R2}
+ ADD     R4, R11, #rotationMatrix   \ If R3 does not already point to the
+ CMP     R3, R4                     \ rotation matrix at rotationMatrix, copy
+ LDMNEIA R3!, {R0-R2}               \ the nine-word matrix from the address in
+ STMNEIA R4!, {R0-R2}               \ R3 into rotationMatrix, so rotationMatrix
+ LDMNEIA R3!, {R0-R2}               \ now contains the the object's rotation
+ STMNEIA R4!, {R0-R2}               \ matrix, which is made up of the three
+ LDMNEIA R3!, {R0-R2}               \ orientation vectors in:
+ STMNEIA R4!, {R0-R2}               \
+                                    \   (xNoseV, yNoseV, zNoseV)
+                                    \   (xRoofV, yRoofV, zRoofV)
+                                    \   (xSideV, ySideV, zSideV)
+
+                                    \ So by this point we have:
+                                    \
+                                    \   * The object's coordinate in:
+                                    \
+                                    \     (xObject, yObject, zObject)
+                                    \
+                                    \   * The scaled-up coordinate in:
+                                    \
+                                    \     (xObjectScaled, yObjectScaled,
+                                    \     zObjectScaled)
+                                    \
+                                    \   * The object's rotation matrix at
+                                    \     rotationMatrix, which is made up of
+                                    \     the orientataion vectors as follows:
+                                    \
+                                    \     (xNoseV, yNoseV, zNoseV)
+                                    \     (xRoofV, yRoofV, zRoofV)
+                                    \     (xSideV, ySideV, zSideV)
+                                    \
+                                    \   * crashedFlag = 0
+                                    \
+                                    \   * R12 = graphicsBuffersEnd
+                                    \
+                                    \ We are now ready to move on to processing
+                                    \ the object's vertices and faces
+
+\ ******************************************************************************
+\
+\       Name: DrawObject (Part 2 of 3)
+\       Type: Subroutine
+\   Category: 3D objects
+\    Summary: Draw a 3D object: Process the object's vertices
+\
+\ ******************************************************************************
 
  LDR     R0, [R11, #objectData]     \ Set R0 to the address of the data block
                                     \ for the object that is being drawn
@@ -2364,77 +2441,111 @@ ENDIF
                                     \ in the data block, which appears from the
                                     \ 16th byte onwards
 
- ADD     R10, R11, #var_600         \ Set R10 to the address of var_600
+ ADD     R10, R11, #vertexProjected \ Set R10 to the address of vertexProjected
+                                    \ which is where we will store the screen
+                                    \ coordinates of the projected vertices
 
- LDRB    R1, [R0, #12]              \ Set var_114 to the fourth word of the data
- STRB    R1, [R11, #var_114]        \ block, which contains the object flags
+ LDRB    R1, [R0, #12]              \ Set objectFlags to the fourth word of the
+ STRB    R1, [R11, #objectFlags]    \ data block, which contains the object's
+                                    \ flags
 
                                     \ We now iterate through the vertices in the
                                     \ data block, using R8 as a loop counter (as
                                     \ we set it above to the number of vertices)
                                     \
                                     \ As we iterate through the vertices we
-                                    \ process them in various ways - this might
-                                    \ involve orientation vectors, projection
-                                    \ etc. ???
+                                    \ rotate each one by the object's rotation
+                                    \ matrix (to orientate the object properly)
+                                    \ and project it onto the screen, saving the
+                                    \ results in the vertexProjected table
 
 .dobj2
 
  LDMIA   R9!, {R2-R4}               \ Load the coordinates of the next vertex
                                     \ from R9 into (R2, R3, R4), and update R9
-                                    \ to point to the next vertex
+                                    \ to point to the vertex after that, ready
+                                    \ for the next iteration
 
- ADD     R0, R11, #var_054          \ Set R0 to the address of the coordinate
-                                    \ at var_054 to use in the following
-                                    \ calculation
+ ADD     R0, R11, #xVertex          \ Set R0 to the address of xVertex
 
- ADD     R1, R11, #var_064          \ Set R1 to the address of var_064, so we
-                                    \ store the results of the following
-                                    \ calculation here
+ ADD     R1, R11, #xVertexRotated   \ Set R1 to the address of xVertexRotated
 
- STMIA   R0, {R2-R4}                \ Store the vertex coordinates in var_054
+ STMIA   R0, {R2-R4}                \ Store the vertex coordinates in xVertex,
+                                    \ so (xVertex, yVertex, zVertex) contains
+                                    \ the vertex coordinates
 
- BL      MultiplyVectorByMatrix     \ Calculate the following, multiplying the
-                                    \ coordinate in R0 by the matrix in var_030:
+ BL      MultiplyVectorByMatrix     \ Multiply the coordinates at R0 (i.e. the
+                                    \ vertex coordinates at xVertex) by the
+                                    \ rotation matrix in rotationMatrix, and
+                                    \ store the results at R1 (i.e. the rotated
+                                    \ coordinates at xVertexRotated):
                                     \
-                                    \   var_064 = var_030 * R0
+                                    \   xVertexRotated = rotationMatrix * R0
                                     \
-                                    \           = var_030 * var_054
+                                    \                = rotationMatrix * xVertex
                                     \
-                                    \ So this rotates the coordinate in R0 by
-                                    \ the rotation matrix in var_030
+                                    \ So this rotates the vertex coordinates by
+                                    \ the object's rotation matrix
 
- ADD     R0, R11, #var_000          \ Set R0 to the address of var_000
+ ADD     R0, R11, #xObject          \ Set R0 to the address of xObject
 
- BL      sub_991C                   \ ??? Process var_064 and store in var_074
+ BL      AddVectors                 \ Call AddVectors to set:
+                                    \
+                                    \   [xCoord]   [xObject]   [xVertexRotated]
+                                    \   [yCoord] = [yObject] + [yVertexRotated]
+                                    \   [zCoord]   [zObject]   [zVertexRotated]
+                                    \
+                                    \ So (xCoord, yCoord, zCoord) contains the
+                                    \ coordinates of this vertex in 3D space,
+                                    \ using the game's coordinate system
 
- ADD     R0, R11, #var_074          \ Set R0 to the address of var_074
+ ADD     R0, R11, #xCoord           \ Set R0 to the address of xCoord
 
- BL      sub_9748                   \ ??? Returns (R0, R1) - maybe this is a
-                                    \ projection from 3D to 2D?
+ BL      ProjectVertexOntoScreen    \ Project (xCoord, yCoord, zCoord) onto the
+                                    \ screen, returning the results in (R0, R1)
 
- STMIA   R10!, {R0-R1}              \ Store (R0, R1) in var_600 and update R10
-                                    \ to point to the next coordinate in var_600
+ STMIA   R10!, {R0-R1}              \ Store (R0, R1) in vertexProjected and
+                                    \ update R10 to point to the next coordinate
+                                    \ in vertexProjected, ready for us to add
+                                    \ the shadow's projected vertex next
 
- ADD     R0, R11, #var_074          \ Set R0 to the address of var_074
+ ADD     R0, R11, #xCoord           \ Set R0 to the address of xCoord
 
- BL      sub_82AC                   \ ??? Gets the landscape altitude into R0
+ BL      GetLandscapeBelowObject    \ Get the landscape altitude below the
+                                    \ vertex and return it in R0
 
- STR     R0, [R11, #var_078]        \ Set var_078 = R0
+ STR     R0, [R11, #yCoord]         \ Set yCoord = R0, so (xCoord, yCoord,
+                                    \ zCoord) now contains the coordinate on the
+                                    \ landscape directly below the vertex
+                                    \
+                                    \ We use this coordinate for the object's
+                                    \ shadow, which we store in vertexProjected
+                                    \ just after the normally projected vertex
 
- ADD     R0, R11, #var_074          \ Set R0 to the address of var_074
+ ADD     R0, R11, #xCoord           \ Set R0 to the address of xCoord
 
- BL      sub_9748                   \ ??? As above, is this projection?
+ BL      ProjectVertexOntoScreen    \ Store (R0, R1) in vertexProjected and
+                                    \ update R10 to point to the next coordinate
+                                    \ in vertexProjected, ready for the next
+                                    \ iteration
 
- STMIA   R10!, {R0-R1}              \ Store (R0, R1) in var_600 and update R10
-                                    \ to point to the next coordinate in var_600
+ STMIA   R10!, {R0-R1}              \ Store (R0, R1) in vertexProjected and
+                                    \ update R10 to point to the next coordinate
+                                    \ in vertexProjected, ready for the next
+                                    \ iteration
 
  LDR     R14, [R10, #-12]           \ Set R14 to the second coordinate from the
-                                    \ previous ???projection, i.e. y-coordinate?
+                                    \ previous projection, i.e. the y-coordinate
+                                    \ of the projected vertex
 
- CMP     R14, R1                    \ If previous y-coordinate >= this y-coord
- MVNHS   R14, #0                    \ then set var_120 = &FF
- STRHSB  R14, [R11, #var_120]
+ CMP     R14, R1                    \ If R14 >= R1 then the y-coordinate of the
+ MVNHS   R14, #0                    \ shadow is bigger than the y-coordinate of
+ STRHSB  R14, [R11, #crashedFlag]   \ the object, which means the shadow is at a
+                                    \ higher altitude than the object
+                                    \
+                                    \ This can only happen if the object has hit
+                                    \ the ground, so set crashedFlag = &FF to
+                                    \ indicate that the object has crashed
 
  SUBS    R8, R8, #1                 \ Decrement the loop counter, which keeps
                                     \ track of the number of vertices we have
@@ -2443,7 +2554,17 @@ ENDIF
  BNE     dobj2                      \ Loop back to dobj2 to move on to the next
                                     \ vertex, until we have processed them all
 
-                                    \ We now move on to the face data
+                                    \ We now move on to processing the object's
+                                    \ face data so we can draw the visible faces
+
+\ ******************************************************************************
+\
+\       Name: DrawObject (Part 3 of 3)
+\       Type: Subroutine
+\   Category: 3D objects
+\    Summary: Draw a 3D object: Draw the object's faces
+\
+\ ******************************************************************************
 
  LDR     R1, [R11, #objectData]     \ Set R1 to the address of the data block
                                     \ for the object that is being drawn
@@ -2476,34 +2597,35 @@ ENDIF
                                     \ word in the current face data, which is
                                     \ where the vertex numbers is stored
 
- ADD     R1, R11, #var_054          \ Set R1 to the address of var_054, so we
+ ADD     R1, R11, #xVertex          \ Set R1 to the address of xVertex, so we
                                     \ store the results of the following
                                     \ calculation here
 
  BL      MultiplyVectorByMatrix     \ Calculate the following, multiplying the
-                                    \ vector in R0 by the matrix in var_030:
+                                    \ vector in R0 by the rotation matrix in
+                                    \ rotationMatrix:
                                     \
-                                    \   var_054 = var_030 * R0
+                                    \   xVertex = rotationMatrix * R0
                                     \
-                                    \           = var_030 * normal
+                                    \           = rotationMatrix * normal
                                     \
                                     \ So this rotates the normal vector in R0 by
-                                    \ the rotation matrix in var_030
+                                    \ the rotation matrix in rotationMatrix
 
- LDR     R1, [R11, #var_058]        \ Set R1 to var_058
+ LDR     R1, [R11, #yVertex]        \ Set R1 to yVertex
 
- LDRB    R14, [R11, #var_114]       \ If bit 0 of var_114 is zero, set both R1
- TST     R14, #%00000001            \ and R3 to 0
+ LDRB    R14, [R11, #objectFlags]   \ If bit 0 of objectFlags is zero, set both
+ TST     R14, #%00000001            \ R1 and R3 to 0
  MVNEQ   R3, #0
  MVNEQ   R1, #0
 
- ADDNE   R2, R11, #var_084          \ Otherwise bit 0 of var_114 is set, so set
- ADDNE   R0, R11, #var_054          \ R2 to the address of var_084 and R0 to the
- BLNE    GetDotProduct              \ address of var_054, and call GetDotProduct
-                                    \ to calculate the dot product of these two
-                                    \ vectors, storing the result in R3 (so if
-                                    \ R3 is negative, the face is facing away
-                                    \ from us) ??? what are 084/054?
+ ADDNE   R2, R11, #xObjectScaled    \ Otherwise bit 0 of objectFlags is set, so
+ ADDNE   R0, R11, #xVertex          \ set R2 to the address of xObjectScaled and
+ BLNE    GetDotProduct              \ R0 to the address of xVertex, and call
+                                    \ GetDotProduct to calculate the dot product
+                                    \ of these two vectors, storing the result
+                                    \ in R3 (so if R3 is negative, the face is
+                                    \ facing away from us) ???
 
  STMFD   R13!, {R8-R9, R11-R12}     \ Store the registers that we want to use on
                                     \ the stack so they can be retrieved at
@@ -2512,8 +2634,8 @@ ENDIF
  CMP     R1, #0                     \ If R1 is positive, jump to dobj4 to skip
  BPL     dobj4                      \ the following
 
- LDRB    R14, [R11, #var_114]       \ If bit 1 of var_114 is zero, jump to dobj4
- TST     R14, #%00000010            \ to skip the following
+ LDRB    R14, [R11, #objectFlags]   \ If bit 1 of objectFlags is zero, jump to
+ TST     R14, #%00000010            \ dobj4 to skip the following
  BEQ     dobj4
 
  STMFD   R13!, {R3, R9, R11}        \ Store the registers that we want to use on
@@ -2524,19 +2646,19 @@ ENDIF
 
  MOV     R8, #0                     \ Set R8 = 0
 
- ADD     R10, R11, #var_600         \ Set R10 to the address of the third word
- ADD     R10, R10, #8               \ in var_600
+ ADD     R10, R11, #vertexProjected \ Set R10 to the address of the third word
+ ADD     R10, R10, #8               \ in vertexProjected
 
  ADD     R5, R10, R5, LSL #4        \ Set (R0, R1) to the two words at offset
- LDMIA   R5, {R0-R1}                \ R5 * 16 from the table at R10 (var_600+8)
+ LDMIA   R5, {R0-R1}                \ R5 * 16 from the table at R10 (vertexProjected+8)
 
  ADD     R6, R10, R6, LSL #4        \ Set (R2, R3) to the two words at offset
- LDMIA   R6, {R2-R3}                \ R6 * 16 from the table at R10 (var_600+8)
+ LDMIA   R6, {R2-R3}                \ R6 * 16 from the table at R10 (vertexProjected+8)
 
  ADD     R7, R10, R7, LSL #4        \ Set (R4, R5) to the two words at offset
- LDMIA   R7, {R4-R5}                \ R7 * 16 from the table at R10 (var_600+8)
+ LDMIA   R7, {R4-R5}                \ R7 * 16 from the table at R10 (vertexProjected+8)
 
- BL      DrawTriangleIntoBuffer1    \ Draw triangle, so presumably the above are
+ BL      DrawTriangleIntoBuffer     \ Draw triangle, so presumably the above are
                                     \ three 2D coordinates, colour in R8 = 0 =
                                     \ black so is this the shadow ???
 
@@ -2552,14 +2674,14 @@ ENDIF
  LDMIA   R9, {R4-R7}                \ Set R4, R5, R6, R7 to the fourth, fifth,
                                     \ sixth and seventh words of face data
 
- ADD     R10, R11, #var_600         \ Set R10 to the address of var_600
+ ADD     R10, R11, #vertexProjected \ Set R10 to the address of vertexProjected
 
- LDR     R1, [R11, #var_058]        \ Set R1 = var_058
+ LDR     R1, [R11, #yVertex]        \ Set R1 = yVertex
 
- LDR     R0, [R11, #var_054]        \ Set R0 = var_054
+ LDR     R0, [R11, #xVertex]        \ Set R0 = xVertex
 
  RSB     R1, R1, #&80000000         \ Set R1 = (&80000000 - R1) >> 28
- MOV     R1, R1, LSR #28            \        = (&80000000 - var_058) >> 28
+ MOV     R1, R1, LSR #28            \        = (&80000000 - yVertex) >> 28
 
  CMP     R0, #0                     \ If R0 is negative, increment R1
  ADDMI   R1, R1, #1
@@ -2613,15 +2735,15 @@ ENDIF
  ORR     R8, R8, R8, LSL #24        \ a colour byte) ???
 
  ADD     R4, R10, R4, LSL #4        \ Set (R0, R1) to the two words at offset
- LDMIA   R4, {R0-R1}                \ R4 * 16 from the table at R10 (var_600)
+ LDMIA   R4, {R0-R1}                \ R4 * 16 from the table at R10 (vertexProjected)
 
  ADD     R5, R10, R5, LSL #4        \ Set (R2, R3) to the two words at offset
- LDMIA   R5, {R2-R3}                \ R5 * 16 from the table at R10 (var_600)
+ LDMIA   R5, {R2-R3}                \ R5 * 16 from the table at R10 (vertexProjected)
 
  ADD     R6, R10, R6, LSL #4        \ Set (R4, R5) to the two words at offset
- LDMIA   R6, {R4-R5}                \ R6 * 16 from the table at R10 (var_600)
+ LDMIA   R6, {R4-R5}                \ R6 * 16 from the table at R10 (vertexProjected)
 
- BL      DrawTriangleIntoBuffer2    \ Draw triangle, so presumably the above are
+ BL      DrawTriangleIntoNearBuffer \ Draw triangle, so presumably the above are
                                     \ three 2D coordinates, with R8 the colour
                                     \ ???
 
@@ -2944,45 +3066,50 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: graphicsBuffersAddr
+\       Name: graphicsBufferEndAddr
 \       Type: Variable
 \   Category: Graphics buffers
-\    Summary: The address of the table of graphics buffer addresses
+\    Summary: The address of the table containing the end addresses of the
+\             graphics buffers
 \
 \ ******************************************************************************
 
-.graphicsBuffersAddr
+.graphicsBufferEndAddr
+
+ EQUD    graphicsBuffersEnd
+
+\ ******************************************************************************
+\
+\       Name: graphicsBufferAddr
+\       Type: Variable
+\   Category: Graphics buffers
+\    Summary: The address of the table containing the addresses of the graphics
+\             buffers
+\
+\ ******************************************************************************
+
+.graphicsBufferAddr
 
  EQUD    graphicsBuffers
-
-\ ******************************************************************************
-\
-\       Name: var_9250
-\       Type: Variable
-\   Category: Graphics buffers
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.var_9250
-
- EQUD    var_802C
 
 \ ******************************************************************************
 \
 \       Name: MultiplyVectorByMatrix
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: Multiply a 3D vector by the matrix in var_030
+\    Summary: Multiply a 3D vector by the rotation matrix in rotationMatrix
 \
 \ ------------------------------------------------------------------------------
 \
-\ Multiply the matrix at var_030 and the vector at R0 and store the result
-\ at the address in R1 as follows:
+\ Multiply the vector at R0 by the rotation matrix at rotationMatrix and store
+\ the result at the address in R1:
 \
-\   [ R1   ]   [ var_030    var_030+4  var_030+8  ]   [ R0   ]
-\   [ R1+4 ] = [ var_030+12 var_030+16 var_030+20 ] . [ R0+4 ]
-\   [ R1+8 ]   [ var_030+24 var_030+28 var_030+32 ]   [ R0+8 ]
+\   [ R1   ]   [ xNoseV yNoseV zNoseV ]   [ R0   ]
+\   [ R1+4 ] = [ xRoofV yRoofV zRoofV ] . [ R0+4 ]
+\   [ R1+8 ]   [ xSideV ySideV zSideV ]   [ R0+8 ]
+\
+\ So this rotates a coordinate by the orientation vectors (i.e. the object's
+\ rotation matrix).
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3002,7 +3129,7 @@ ENDIF
 
 .MultiplyVectorByMatrix
 
- LDRB    R2, [R11, #var_114]        \ If bit 0 of var_114 is clear, set R1 = R0:
+ LDRB    R2, [R11, #objectFlags]    \ If bit 0 of objectFlags is clear, set:
  TST     R2, #%00000001             \ 
  LDMEQIA R0, {R2-R4}                \   [ R1   ]   [ R0   ]
  STMEQIA R1, {R2-R4}                \   [ R1+4 ] = [ R0+4 ]
@@ -3013,8 +3140,9 @@ ENDIF
  STMFD   R13!, {R6-R7, R14}         \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
  
- ADD     R2, R11, #var_030          \ Set R2 to the address of the 3x3 matrix at
-                                    \ var_030
+ ADD     R2, R11, #rotationMatrix   \ Set R2 to the address of the rotation
+                                    \ matrix at rotationMatrix, which contains
+                                    \ the object's rotation matrix
 
  BL      GetDotProduct              \ Set R1 = R2 . R0, so:
  STR     R3, [R1]                   \ 
@@ -3189,28 +3317,28 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_937C
+\       Name: TransposeRotationMatrix
 \       Type: Subroutine
 \   Category: ???
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_937C
+.TransposeRotationMatrix
 
- ADD     R2, R11, #var_030          \ 
+ ADD     R2, R11, #rotationMatrix   \ 
  LDR     R0, [R2, #4]               \ 
- LDR     R1, [R2, #&C]              \ 
- STR     R0, [R2, #&C]              \ 
+ LDR     R1, [R2, #12]              \ 
+ STR     R0, [R2, #12]              \ 
  STR     R1, [R2, #4]               \ 
  LDR     R0, [R2, #8]               \ 
- LDR     R1, [R2, #&18]             \ 
- STR     R0, [R2, #&18]             \ 
+ LDR     R1, [R2, #24]              \ 
+ STR     R0, [R2, #24]              \ 
  STR     R1, [R2, #8]               \ 
- LDR     R0, [R2, #&14]             \ 
- LDR     R1, [R2, #&1C]             \ 
- STR     R0, [R2, #&1C]             \ 
- STR     R1, [R2, #&14]             \ 
+ LDR     R0, [R2, #20]              \ 
+ LDR     R1, [R2, #28]              \ 
+ STR     R0, [R2, #28]              \ 
+ STR     R1, [R2, #20]              \ 
  MOV     PC, R14                    \ 
 
 \ ******************************************************************************
@@ -3251,18 +3379,18 @@ ENDIF
  STMFD   R13!, {R0-R1, R14}         \ 
  ADD     R0, R0, #&40000000         \ 
  LDR     R14, sinTableAddr          \ 
- BIC     R0, R0, #&300000           \ 
+ BIC     R0, R0, #&00300000         \ 
  LDR     R2, [R14, R0, LSR #20]     \ 
  ADD     R1, R1, #&40000000         \ 
  LDR     R14, sinTableAddr          \ 
- BIC     R1, R1, #&300000           \ 
+ BIC     R1, R1, #&00300000         \ 
  LDR     R3, [R14, R1, LSR #20]     \ 
  LDMFD   R13!, {R4-R5}              \ 
  LDR     R14, sinTableAddr          \ 
- BIC     R4, R4, #&300000           \ 
+ BIC     R4, R4, #&00300000         \ 
  LDR     R0, [R14, R4, LSR #20]     \ 
  LDR     R14, sinTableAddr          \ 
- BIC     R5, R5, #&300000           \ 
+ BIC     R5, R5, #&00300000         \ 
  LDR     R1, [R14, R5, LSR #20]     \ 
  STMFD   R13!, {R0-R3}              \ 
  EOR     R14, R2, R3                \ 
@@ -3285,7 +3413,7 @@ ENDIF
  MOV     R4, R4, LSR #1             \ 
  TEQ     R14, #0                    \ 
  RSBMI   R4, R4, #0                 \ 
- STR     R4, [R11, #var_030]        \ 
+ STR     R4, [R11, #xNoseV]         \ 
  EOR     R14, R0, R1                \ 
  TEQ     R0, #0                     \ 
  RSBMI   R0, R0, #0                 \ 
@@ -3306,7 +3434,7 @@ ENDIF
  MOV     R4, R4, LSR #1             \ 
  TEQ     R14, #0                    \ 
  RSBMI   R4, R4, #0                 \ 
- STR     R4, [R11, #var_04C]        \ 
+ STR     R4, [R11, #ySideV]         \ 
  LDMFD   R13, {R0-R3}               \ 
  EOR     R14, R1, R2                \ 
  TEQ     R1, #0                     \ 
@@ -3329,7 +3457,7 @@ ENDIF
  TEQ     R14, #0                    \ 
  RSBMI   R4, R4, #0                 \ 
  RSB     R4, R4, #0                 \ 
- STR     R4, [R11, #var_048]        \ 
+ STR     R4, [R11, #xSideV]         \ 
  EOR     R14, R0, R3                \ 
  TEQ     R0, #0                     \ 
  RSBMI   R0, R0, #0                 \ 
@@ -3351,14 +3479,14 @@ ENDIF
  TEQ     R14, #0                    \ 
  RSBMI   R4, R4, #0                 \ 
  RSB     R4, R4, #0                 \ 
- STR     R4, [R11, #var_034]        \ 
+ STR     R4, [R11, #yNoseV]         \ 
  LDMFD   R13!, {R0-R3, R14}         \ 
- STR     R0, [R11, #var_03C]        \ 
- STR     R1, [R11, #var_038]        \ 
- STR     R2, [R11, #var_040]        \ 
- STR     R3, [R11, #var_050]        \ 
+ STR     R0, [R11, #xRoofV]         \ 
+ STR     R1, [R11, #zNoseV]         \ 
+ STR     R2, [R11, #yRoofV]         \ 
+ STR     R3, [R11, #zSideV]         \ 
  MOV     R0, #0                     \ 
- STR     R0, [R11, #var_044]        \ 
+ STR     R0, [R11, #zRoofV]         \ 
  MOV     PC, R14                    \ 
 
 \ ******************************************************************************
@@ -3449,21 +3577,21 @@ ENDIF
  BNE     lab_9648                   \ 
  ADD     R2, R14, R4                \ 
  LDR     R14, squareRootTableAddr   \ 
- BIC     R2, R2, #&300000           \ 
+ BIC     R2, R2, #&00300000         \ 
  LDR     R0, [R14, R2, LSR #20]     \ 
  LDMFD   R13!, {PC}                 \ 
  LDMIA   R0, {R0-R2}                \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_9670
+\       Name: ProjectParticleOntoScreen
 \       Type: Subroutine
-\   Category: ???
+\   Category: Maths (Geometry)
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_9670
+.ProjectParticleOntoScreen
 
  CMN     R2, #&80000000             \ 
  MOVHS   PC, R14                    \ 
@@ -3531,14 +3659,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9748
+\       Name: ProjectVertexOntoScreen
 \       Type: Subroutine
-\   Category: ???
+\   Category: Maths (Geometry)
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_9748
+.ProjectVertexOntoScreen
 
  LDMIA   R0, {R0-R2}                \ 
  CMN     R2, #&80000000             \ 
@@ -3676,11 +3804,11 @@ ENDIF
 
 .mod_98E4
 
- ADD     R4, R11, #var_064          \ 
+ ADD     R4, R11, #xVertexRotated   \ 
 
 .mod_98E8
 
- ADD     R4, R11, #var_074          \ 
+ ADD     R4, R11, #xCoord           \ 
 
 .sub_98EC
 
@@ -3689,36 +3817,62 @@ ENDIF
  ADD     R4, R11, #var_160          \ 
  STMFD   R13!, {R14}                \ 
  LDR     R1, sub_98EC               \ 
- STR     R1, sub_991C+28            \ 
+ STR     R1, AddVectors+28          \ 
  LDMIA   R0, {R0-R2}                \ 
  MOV     R3, R12                    \ 
- BL      sub_991C+8                 \ 
+ BL      AddVectors+8               \ 
  LDR     R1, mod_98E8               \ 
- STR     R1, sub_991C+28            \ 
+ STR     R1, AddVectors+28          \ 
  LDMFD   R13!, {PC}                 \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_991C
+\       Name: AddVectors
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Geometry)
+\    Summary: Add two vectors
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   [ xCoord   ]   [ R0   ] + [ xVertexRotated ]
+\   [ xCoord+4 ] = [ R0+4 ] + [ yVertexRotated ]
+\   [ xCoord+8 ]   [ R0+8 ] + [ zVertexRotated ]
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The address of a 3D vector
 \
 \ ******************************************************************************
 
-.sub_991C
+.AddVectors
 
- LDMIA   R0, {R0-R2}                \ 
- ADD     R3, R11, #var_064          \ 
- STMFD   R13!, {R5-R6}              \ 
- LDMIA   R3, {R3-R5}                \ 
+ LDMIA   R0, {R0-R2}                \ Fetch the coordinate from R0 into
+                                    \ (R0, R1, R2)
+
+ ADD     R3, R11, #xVertexRotated   \ Set R3 to the address of the coordinates
+                                    \ in xVertexRotated
+
+ STMFD   R13!, {R5-R6}              \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDMIA   R3, {R3-R5}                \ Fetch the vector at xVertexRotated
+
  ADD     R0, R0, R3                 \ 
  ADD     R1, R1, R4                 \ 
  ADD     R2, R2, R5                 \ 
- ADD     R3, R11, #var_074          \ 
+
+ ADD     R3, R11, #xCoord           \ 
+
  STMIA   R3, {R0-R2}                \ 
- LDMFD   R13!, {R5-R6}              \ 
- MOV     PC, R14                    \ 
+
+ LDMFD   R13!, {R5-R6}              \ Retrieve the registers that we stored on
+                                    \ the stack
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3797,7 +3951,7 @@ ENDIF
  TEQ     R4, #0                     \ 
  RSBMI   R7, R7, #0                 \ 
  ADD     R14, R14, #2               \ 
- ADD     R8, R11, #var_064          \ 
+ ADD     R8, R11, #xVertexRotated   \ 
  STMIA   R8, {R5-R7, R14}           \ 
  LDMFD   R13!, {R5-R8, PC}          \ 
 
@@ -4403,19 +4557,19 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawParticleIntoBuffer1
+\       Name: DrawParticleIntoNearBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.DrawParticleIntoBuffer1
+.DrawParticleIntoNearBuffer
 
  STMFD   R13!, {R9, R14}            \ 
  RSB     R14, R8, #&14000000        \ 
  ADD     R14, R14, #&01000000       \ 
- BIC     R14, R14, #&C00000         \ 
+ BIC     R14, R14, #&00C00000       \ 
  LDR     R9, [R12, R14, LSR #22]    \ 
  MOV     R8, R8, LSR #25            \ 
  CMP     R8, #8                     \ 
@@ -4430,18 +4584,18 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawParticleIntoBuffer2
+\       Name: DrawParticleIntoBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.DrawParticleIntoBuffer2
+.DrawParticleIntoBuffer
 
  STMFD   R13!, {R9, R14}            \ 
  RSB     R14, R8, #&14000000        \ 
- BIC     R14, R14, #&C00000         \ 
+ BIC     R14, R14, #&00C00000       \ 
  LDR     R9, [R12, R14, LSR #22]    \ 
  MOV     R8, R8, LSR #25            \ 
  CMP     R8, #8                     \ 
@@ -4455,46 +4609,115 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangleIntoBuffer1
+\       Name: DrawTriangleIntoBuffer
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: Draw a triangle into the correct graphics buffer according to its
+\             distance
+\
+\ ------------------------------------------------------------------------------
+\
+\ This command draws a triangle into the correct graphics buffer.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R9                              The address of the seven parameter words in
+\                                   the graphics buffer
+\
+\   R12                             The address of the table of containing the
+\                                   end addresses of the graphics buffers
+\                                   (i.e. graphicsBuffersEnd)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R9                              Updated to point to the next word in the
+\                                   graphics buffer
+\
+\   R12                             R12 is preserved
+\
+\ ******************************************************************************
+
+.DrawTriangleIntoBuffer
+
+ STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the triangle
+
+ RSB     R14, R14, #&14000000       \ Set R14 = &14000000 - R14
+                                    \
+                                    \ We use the top byte of this number as the
+                                    \ number of the graphics buffer to draw into
+                                    \
+                                    \ This ensures that more distant triangles
+                                    \ are drawn into lower-numbered graphics
+                                    \ buffers, so higher z-coordinates map to
+                                    \ lower buffer numbers (so buffer 0 is for
+                                    \ objects that are far away and buffer 11 is
+                                    \ for the closest objects to the viewer)
+                                    \
+                                    \ Why &14000000 (20 tiles)? ???
+
+ CMP     R14, #&0B000000            \ Cap R14 to a maximum value of &0A000000,
+ MOVHS   R14, #&0A000000            \ so the maximum buffer number we draw into
+                                    \ is 10 (why not 11?) ???
+
+ BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
+                                    \ the buffer number, and we're going to look
+                                    \ up the corresponding buffer address from a
+                                    \ lookup table with four bytes per entry, so
+                                    \ we clear bits 22 and 23 to ensure that
+                                    \ R14 >> 22 contains the value of the top
+                                    \ byte * 4, which we can then use as an
+                                    \ offset into the lookup table to fetch the
+                                    \ address of the end of the buffer, which is
+                                    \ where we can store our triangle-drawing
+                                    \ command
+
+ LDR     R9, [R12, R14, LSR #22]    \ Set R9 to the address of the next free
+                                    \ byte in the graphics buffer whose number
+                                    \ matches the top byte of R14, fetching the
+                                    \ address from the lookup table at R12
+
+ MOV     R7, #18                    \ The command number for drawing a triangle
+ STR     R7, [R9], #4               \ is 18, so we store a value of 18 in the
+                                    \ graphics buffer and increment the address
+                                    \ in R9 to point to the next word in the
+                                    \ buffer
+
+ STMIA   R9!, {R0-R5, R8}           \ Store the three pixel coordinates from R0
+                                    \ to R5, and then the colour in R8, in the
+                                    \ buffer
+
+ STR     R9, [R12, R14, LSR #22]    \ Update the end address in the table at R12
+                                    \ to point to the new end address of the
+                                    \ graphics buffer
+
+ LDMFD   R13!, {R9, PC}             \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DrawTriangleIntoNearBuffer
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.DrawTriangleIntoBuffer1
+.DrawTriangleIntoNearBuffer
 
  STMFD   R13!, {R9, R14}            \ 
- LDR     R14, [R11, #8]             \ 
- RSB     R14, R14, #&14000000       \ 
- CMP     R14, #&0B000000            \ 
- MOVHS   R14, #&0A000000            \ 
- BIC     R14, R14, #&C00000         \ 
- LDR     R9, [R12, R14, LSR #22]    \ 
- MOV     R7, #&12                   \ 
- STR     R7, [R9], #4               \ 
- STMIA   R9!, {R0-R5, R8}           \ 
- STR     R9, [R12, R14, LSR #22]    \ 
- LDMFD   R13!, {R9, PC}             \ 
-
-\ ******************************************************************************
-\
-\       Name: DrawTriangleIntoBuffer2
-\       Type: Subroutine
-\   Category: Drawing triangles
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.DrawTriangleIntoBuffer2
-
- STMFD   R13!, {R9, R14}            \ 
- LDR     R14, [R11, #8]             \ 
+ LDR     R14, [R11, #zObject]       \ 
  RSB     R14, R14, #&14000000       \ 
  ADD     R14, R14, #&01000000       \ 
  CMP     R14, #&0B000000            \ 
  MOVHS   R14, #&0A000000            \ 
- BIC     R14, R14, #&C00000         \ 
+ BIC     R14, R14, #&00C00000       \ 
  LDR     R9, [R12, R14, LSR #22]    \ 
  MOV     R7, #&12                   \ 
  STR     R7, [R9], #4               \ 
@@ -4507,14 +4730,15 @@ ENDIF
 \       Name: bufferJump
 \       Type: Variable
 \   Category: Graphics buffers
-\    Summary: The jump table for drawing commands in the graphics buffers
+\    Summary: The jump table for drawing commands that we store in the graphics
+\             buffers
 \
 \ ******************************************************************************
 
 .bufferJump
 
- EQUD    Draw3x2ParticleFromBuffer
- EQUD    Draw3x2ParticleFromBuffer
+ EQUD    Draw3x2ParticleFromBuffer  \ Drawing commands 0 to 8 draw large
+ EQUD    Draw3x2ParticleFromBuffer  \ particles
  EQUD    Draw3x2ParticleFromBuffer
  EQUD    Draw3x2ParticleFromBuffer
  EQUD    Draw3x2ParticleFromBuffer
@@ -4523,8 +4747,8 @@ ENDIF
  EQUD    Draw2x1ParticleFromBuffer
  EQUD    Draw1x1ParticleFromBuffer
 
- EQUD    Draw3x1ParticleFromBuffer
- EQUD    Draw3x1ParticleFromBuffer
+ EQUD    Draw3x1ParticleFromBuffer  \ Drawing commands 9 to 17 draw small
+ EQUD    Draw3x1ParticleFromBuffer  \ particles
  EQUD    Draw3x1ParticleFromBuffer
  EQUD    Draw3x1ParticleFromBuffer
  EQUD    Draw3x1ParticleFromBuffer
@@ -4533,9 +4757,9 @@ ENDIF
  EQUD    Draw2x1ParticleFromBuffer
  EQUD    Draw1x1ParticleFromBuffer
 
- EQUD    DrawTriangleFromBuffer
+ EQUD    DrawTriangleFromBuffer     \ Drawing command 18 draws a triangle
 
- EQUD    TerminateGraphicsBuffer
+ EQUD    TerminateGraphicsBuffer    \ Drawing command 19 terminates the buffer
 
 \ ******************************************************************************
 \
@@ -4584,12 +4808,13 @@ ENDIF
  STMFD   R13!, {R6-R12, R14}        \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- LDR     R1, graphicsBuffersAddr    \ Set R1 to the address of the table that
-                                    \ contains the addresses of the graphics
+ LDR     R1, graphicsBufferEndAddr  \ Set R1 to the address of the table that
+                                    \ contains the end addresses of the graphics
                                     \ buffers
 
  LDR     R9, [R1, R0, LSL #2]       \ Set R9 to the R0-th entry from the
-                                    \ graphicsBuffers table
+                                    \ graphicsBuffersEnd table, which contains
+                                    \ the end address for graphics buffer R0
 
  LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
                                     \ we are drawing in, pointing just below
@@ -4597,8 +4822,12 @@ ENDIF
                                     \ screen
 .DrawNextFromGraphicsBuffer
 
- LDR     R0, [R9], #4               \ Fetch R0 from the address in graphicsBuffers
-                                    \ table and increment R9 to the next address
+ LDR     R0, [R9], #4               \ Fetch the address of the next free byte in
+                                    \ the graphics buffer (which is the same as
+                                    \ the end address of the buffer) from the 
+                                    \ graphicsBuffersEnd table, put it into R0
+                                    \ and increment R9 to point to the next
+                                    \ buffer's end address
 
  labOffset = P% + 8 - bufferJump    \ Set labOffset to the offset back to the
                                     \ bufferJump table from the next instruction
@@ -4623,8 +4852,8 @@ ENDIF
 .AddTerminatorsToBuffers
 
  STMFD   R13!, {R12, R14}           \ 
- LDR     R12, graphicsBuffersAddr   \ 
- LDR     R14, var_9250              \ 
+ LDR     R12, graphicsBufferEndAddr \ 
+ LDR     R14, graphicsBufferAddr    \ 
  MOV     R0, #&B                    \ 
  MOV     R1, #&13                   \ 
 
@@ -6439,7 +6668,7 @@ ENDIF
 
 .objectRockVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &00000000, &00000000, &00A00000        \ Vertex 0
  EQUD    &00A00000, &00A00000, &00000000        \ Vertex 1
  EQUD    &FF600000, &00A00000, &00000000        \ Vertex 2
@@ -6527,7 +6756,7 @@ ENDIF
 
 .objectPulsatingPyramidVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &00000000, &01000000, &00000000        \ Vertex 0
  EQUD    &00C00000, &FF800000, &00C00000        \ Vertex 1
  EQUD    &FF400000, &FF800000, &00C00000        \ Vertex 2
@@ -6600,7 +6829,7 @@ ENDIF
 
 .objectPlayerVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
 
  EQUD    &01000000, &00500000, &00800000        \ Vertex 0
  EQUD    &01000000, &00500000, &FF800000        \ Vertex 1
@@ -6699,7 +6928,7 @@ ENDIF
 
 .objectSmallLeafyTreeVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &00300000, &FE800000, &00300000        \ Vertex 0
  EQUD    &FFD9999A, &00000000, &00000000        \ Vertex 1
  EQUD    &00266666, &00000000, &00000000        \ Vertex 2
@@ -6771,7 +7000,7 @@ ENDIF
 
 .objectTallLeafyTreeVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &0036DB6D, &FD733334, &00300000        \ Vertex 0
  EQUD    &FFD00000, &00000000, &00000000        \ Vertex 1
  EQUD    &00300000, &00000000, &00000000        \ Vertex 2
@@ -6853,7 +7082,7 @@ ENDIF
 
 .objectSmokingRemainsLeftVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &FFD9999A, &00000000, &00000000        \ Vertex 0
  EQUD    &00266666, &00000000, &00000000        \ Vertex 1
  EQUD    &002B3333, &FFC00000, &00000000        \ Vertex 2
@@ -6898,7 +7127,7 @@ ENDIF
 
 .objectSmokingRemainsRightVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &002AAAAA, &00000000, &00000000        \ Vertex 0
  EQUD    &FFD55556, &00000000, &00000000        \ Vertex 1
  EQUD    &FFD4CCCD, &FFD00000, &00000000        \ Vertex 2
@@ -6943,7 +7172,7 @@ ENDIF
 
 .objectFirTreeVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &FFA00000, &FFC92493, &FFC92493        \ Vertex 0
  EQUD    &00600000, &FFC92493, &FFC92493        \ Vertex 1
  EQUD    &00000000, &FE333334, &0036DB6D        \ Vertex 2
@@ -6988,7 +7217,7 @@ ENDIF
 
 .objectGazeboVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &00000000, &FF000000, &00000000        \ Vertex 0
  EQUD    &FF800000, &FF400000, &00800000        \ Vertex 1
  EQUD    &FF800000, &FF400000, &FF800000        \ Vertex 2
@@ -7083,7 +7312,7 @@ ENDIF
 
 .objectBuildingVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &FF19999A, &FF266667, &00000000        \ Vertex 0
  EQUD    &FF400000, &FF266667, &00000000        \ Vertex 1
  EQUD    &00C00000, &FF266667, &00000000        \ Vertex 2
@@ -7209,7 +7438,7 @@ ENDIF
 
 .objectSmokingBuildingVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &FF400000, &00000001, &00800000        \ Vertex 0
  EQUD    &FF400000, &00000001, &FF800000        \ Vertex 1
  EQUD    &00C00000, &00000001, &00800000        \ Vertex 2
@@ -7283,7 +7512,7 @@ ENDIF
 
 .objectSmokingGazeboVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &00000000, &FF8CCCCD, &FFF00000        \ Vertex 0
  EQUD    &00199999, &FF8CCCCD, &FFF00000        \ Vertex 1
  EQUD    &00800000, &00000000, &00800000        \ Vertex 2
@@ -7343,7 +7572,7 @@ ENDIF
 
 .objectRocketVertices
 
-    \      xVertex,   yVertex,   zVertex
+    \      xObject,   yObject,   zObject
  EQUD    &00000000, &FE400000, &00000000        \ Vertex 0
  EQUD    &FFC80000, &FFD745D2, &00380000        \ Vertex 1
  EQUD    &FFC80000, &FFD745D2, &FFC80000        \ Vertex 2

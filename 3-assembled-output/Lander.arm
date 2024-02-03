@@ -11,22 +11,26 @@
 .set SEA_LEVEL, 0x05500000
 .set stack, 0x000121FC
 .set workspace, stack + 4
-.set var_000, 0x00
-.set var_030, 0x30
-.set var_034, 0x34
-.set var_038, 0x38
-.set var_03C, 0x3C
-.set var_040, 0x40
-.set var_044, 0x44
-.set var_048, 0x48
-.set var_04C, 0x4C
-.set var_050, 0x50
-.set var_054, 0x54
-.set var_058, 0x58
-.set var_064, 0x64
-.set var_074, 0x74
-.set var_078, 0x78
-.set var_084, 0x84
+.set xObject, 0x00
+.set yObject, 0x04
+.set zObject, 0x08
+.set rotationMatrix, 0x30
+.set xNoseV, 0x30
+.set yNoseV, 0x34
+.set zNoseV, 0x38
+.set xRoofV, 0x3C
+.set yRoofV, 0x40
+.set zRoofV, 0x44
+.set xSideV, 0x48
+.set ySideV, 0x4C
+.set zSideV, 0x50
+.set xVertex, 0x54
+.set yVertex, 0x58
+.set xVertexRotated, 0x64
+.set xCoord, 0x74
+.set yCoord, 0x78
+.set zCoord, 0x7C
+.set xObjectScaled, 0x84
 .set var_094, 0x94
 .set var_098, 0x98
 .set var_09C, 0x9C
@@ -43,10 +47,10 @@
 .set var_108, 0x108
 .set var_10C, 0x10C
 .set objectData, 0x110
-.set var_114, 0x114
+.set objectFlags, 0x114
 .set mainLoopCount, 0x118
 .set var_11C, 0x11C
-.set var_120, 0x120
+.set crashedFlag, 0x120
 .set currentScore, 0x124
 .set fuelLevel, 0x128
 .set gravity, 0x12C
@@ -68,7 +72,7 @@
 .set stringBuffer, 0x200
 .set var_400, 0x400
 .set var_500, 0x500
-.set var_600, 0x600
+.set vertexProjected, 0x600
 .set var_700, 0x700
 .set var_71C, 0x71C
 .set objectMap, 0x4400
@@ -92,7 +96,7 @@ var_8010:
 .long    0x0DE30DE4
 var_8028:
 .long    var_8010
-var_802C:
+graphicsBuffers:
 .long    0x00026600
 .long    0x000276D4
 .long    0x000287A8
@@ -105,7 +109,7 @@ var_802C:
 .long    0x0002FD74
 .long    0x00030E48
 .long    0x00031F1C
-graphicsBuffers:
+graphicsBuffersEnd:
 .long    0x00026600
 .long    0x000276D4
 .long    0x000287A8
@@ -160,7 +164,7 @@ lab_8114:
  SUB     R0, R0, R14
  STR     R0, [R11, #var_174]
  ADD     R0, R11, #var_170
- BL      sub_9748
+ BL      ProjectVertexOntoScreen
  BHS     DrawGraphicsBuffers
  STMIA   R7!, {R0-R1}
  CMP     R6, #0
@@ -219,38 +223,38 @@ GetLandscapeAltitude:
  STR     R0, [R11, #prevAltitude]
  SUB     R0, R8, R9, LSL #1
  LDR     R2, sinTableAddr
- BIC     R0, R0, #0x300000
+ BIC     R0, R0, #0x00300000
  LDR     R0, [R2, R0, LSR #20]
  MOV     R0, R0, ASR #7
  ADD     R1, R9, R8, LSL #1
  ADD     R1, R9, R1, LSL #1
  ADD     R3, R1, R8
  LDR     R2, sinTableAddr
- BIC     R1, R1, #0x300000
+ BIC     R1, R1, #0x00300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #7
  SUB     R1, R9, R8, LSL #1
  RSB     R1, R8, R1, LSL #1
  ADD     R1, R1, R9
  LDR     R2, sinTableAddr
- BIC     R1, R1, #0x300000
+ BIC     R1, R1, #0x00300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #7
  ADD     R1, R9, R8, LSL #1
  ADD     R1, R9, R1, LSL #2
  SUB     R1, R1, R8
  LDR     R2, sinTableAddr
- BIC     R1, R1, #0x300000
+ BIC     R1, R1, #0x00300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #7
  ADD     R1, R3, R9, LSL #3
  LDR     R2, sinTableAddr
- BIC     R1, R1, #0x300000
+ BIC     R1, R1, #0x00300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #8
  ADD     R1, R9, R3, LSL #1
  LDR     R2, sinTableAddr
- BIC     R1, R1, #0x300000
+ BIC     R1, R1, #0x00300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #8
  RSB     R0, R0, #0x05000000
@@ -261,7 +265,7 @@ GetLandscapeAltitude:
  MOVLO   R0, #LAUNCHPAD_ALTITUDE
  STR     R0, [R11, #altitude]
  MOV     PC, R14
-sub_82AC:
+GetLandscapeBelowObject:
  STMFD   R13!, {R8-R9, R14}
  LDR     R8, [R0]
  LDR     R1, [R11, #xCamera]
@@ -373,9 +377,9 @@ lab_8424:
  LDRLTB  R9, [R11, #fuelBurnRate]
  BICLT   R9, R9, #6
  STRLTB  R9, [R11, #fuelBurnRate]
- LDR     R6, [R11, #var_034]
- LDR     R7, [R11, #var_040]
- LDR     R8, [R11, #var_04C]
+ LDR     R6, [R11, #yNoseV]
+ LDR     R7, [R11, #yRoofV]
+ LDR     R8, [R11, #ySideV]
  LDRB    R9, [R11, #fuelBurnRate]
  TST     R9, #4
  SUB     R3, R3, R3, ASR #6
@@ -403,7 +407,7 @@ lab_8424:
  MOV     R9, R2
  SUB     R9, R9, #0x05000000
  BL      GetLandscapeAltitude
- SUB     R0, R0, #0x640000
+ SUB     R0, R0, #0x00640000
  LDR     R1, [R11, #var_098]
  SUB     R14, R0, R1
  CMP     R14, #0x01800000
@@ -426,13 +430,13 @@ lab_850C:
  BLGT    sub_8654
  CMP     R1, #0
  MOVMI   R1, #0
- ADD     R3, R11, #var_030
+ ADD     R3, R11, #rotationMatrix
  LDR     R14, objectPlayerAddr
  STR     R14, [R11, #objectData]
  MOV     R0, #0
  MOV     R2, #0x0F000000
  BL      DrawObject
- LDRB    R10, [R11, #var_120]
+ LDRB    R10, [R11, #crashedFlag]
  CMP     R10, #0
  BLNE    LoseLife
  LDRB    R10, [R11, #fuelBurnRate]
@@ -454,7 +458,7 @@ lab_850C:
  ADD     R0, R0, R6, ASR #7
  ADD     R1, R1, R7, ASR #7
  ADD     R2, R2, R8, ASR #7
- MOV     R7, #0x1D0000
+ MOV     R7, #0x001D0000
  MOV     R6, #8
  MOV     R8, #0xA
  MOV     R9, #0x1D
@@ -488,9 +492,9 @@ lab_85F4:
  STR     R8, [R11, #currentScore]
  ADD     R14, R11, #var_094
  LDMIA   R14, {R0-R5}
- LDR     R6, [R11, #var_030]
- LDR     R7, [R11, #var_03C]
- LDR     R8, [R11, #var_048]
+ LDR     R6, [R11, #xNoseV]
+ LDR     R7, [R11, #xRoofV]
+ LDR     R8, [R11, #xSideV]
  ADD     R3, R3, R6, ASR #8
  ADD     R4, R4, R7, ASR #8
  ADD     R5, R5, R8, ASR #8
@@ -520,7 +524,7 @@ sub_8654:
  RSBMI   R5, R5, #0
  ADD     R3, R3, R4
  ADD     R3, R3, R5
- CMP     R3, #0x200000
+ CMP     R3, #0x00200000
  MOVHS   PC, R14
  MOV     R1, #0x02EC0000
  LDR     R3, [R11, #fuelLevel]
@@ -545,7 +549,7 @@ LoseLife:
  MOV     R8, #81
  ADD     R0, R11, #var_094
  LDMIA   R0, {R0-R2}
- SUB     R1, R1, #0x500000
+ SUB     R1, R1, #0x00500000
  BL      sub_8CBC
 lose1:
  LDR     R0, [R11, #mainLoopCount]
@@ -602,8 +606,8 @@ GameOver:
  SWI     OS_ReadC
  B       StartNewGame
 var_87EC:
+.long    graphicsBuffersEnd
 .long    graphicsBuffers
-.long    var_802C
 MoveAndDrawParticles:
  STMFD   R13!, {R10, R12, R14}
  ADD     R10, R11, #var_700
@@ -618,10 +622,10 @@ lab_880C:
  ADD     R0, R0, R3
  ADD     R1, R1, R4
  ADD     R2, R2, R5
- TST     R7, #0x100000
+ TST     R7, #0x00100000
  LDRNE   R14, [R11, #gravity]
  ADDNE   R4, R4, R14
- TST     R7, #0x10000
+ TST     R7, #0x00010000
  BLNE    sub_893C
  MOV     R8, R0
  MOV     R9, R2
@@ -629,7 +633,7 @@ lab_880C:
  BL      GetLandscapeAltitude
  MOV     R9, R0
  LDMFD   R13!, {R0-R3}
- TST     R7, #0x200000
+ TST     R7, #0x00200000
  BLNE    sub_89C8
  CMP     R1, R9
  BLGT    sub_8998
@@ -649,7 +653,7 @@ lab_880C:
  RSBMI   R14, R0, #0
  CMP     R14, #0x06000000
  BHS     lab_8800
- TST     R7, #0x20000
+ TST     R7, #0x00020000
  BEQ     lab_8904
  STMFD   R13!, {R0-R2}
  LDR     R14, [R11, #var_130]
@@ -673,7 +677,7 @@ lab_88E8:
  BLO     sub_86C4
  LDR     R14, objectRockAddr
  STR     R14, [R11, #objectData]
- ADD     R3, R11, #var_030
+ ADD     R3, R11, #rotationMatrix
  BL      DrawObject
  B       lab_8800
 lab_8904:
@@ -681,12 +685,12 @@ lab_8904:
  LDR     R14, [R11, #yCamera]
  SUB     R1, R9, R14
  MOV     R8, R2
- BL      sub_9670
- BLLO    DrawParticleIntoBuffer2
+ BL      ProjectParticleOntoScreen
+ BLLO    DrawParticleIntoBuffer
  LDMFD   R13!, {R0-R2, R7}
  MOV     R8, R2
- BL      sub_9670
- BLLO    DrawParticleIntoBuffer1
+ BL      ProjectParticleOntoScreen
+ BLLO    DrawParticleIntoNearBuffer
  LDMIA   R10, {R0-R7}
  CMP     R7, #0
  BNE     lab_880C
@@ -712,14 +716,14 @@ sub_893C:
  ORRNE   R7, R7, #8
  TST     R2, #8
  ORRNE   R7, R7, #0x80
- ORR     R7, R7, #0x1D0000
+ ORR     R7, R7, #0x001D0000
  LDMFD   R13!, {R0-R2, R6}
  MOV     PC, R14
 sub_8998:
  MOV     R1, R9
  CMP     R9, #SEA_LEVEL
  BEQ     lab_8A34
- TST     R7, #0x80000
+ TST     R7, #0x00080000
  BEQ     lab_8A58
  TST     R7, #0x01000000
  BNE     lab_8A28
@@ -746,7 +750,7 @@ sub_89C8:
  BHS     lab_8A28
  ADD     R8, R8, #0xC
  STRB    R8, [R14]
- TST     R7, #0x20000
+ TST     R7, #0x00020000
  LDREQ   R8, [R11, #currentScore]
  ADDEQ   R8, R8, #20
  STREQ   R8, [R11, #currentScore]
@@ -758,12 +762,12 @@ lab_8A28:
  BL      sub_8CBC
  B       lab_8A58
 lab_8A34:
- TST     R7, #0x40000
+ TST     R7, #0x00040000
  BEQ     lab_8A58
- TST     R7, #0x800000
+ TST     R7, #0x00800000
  MOVNE   R8, #0x41
  MOVEQ   R8, #4
- SUB     R1, R1, #0x100000
+ SUB     R1, R1, #0x00100000
 lab_8A4C:
  BL      sub_8C58
  SUBS    R8, R8, #1
@@ -840,7 +844,7 @@ sub_8B0C:
  ORRNE   R7, R7, #8
  TST     R2, #8
  ORRNE   R7, R7, #0x80
- ORR     R7, R7, #0x80000
+ ORR     R7, R7, #0x00080000
  MVN     R4, #0x80000
  LDMFD   R13!, {R0-R2}
  MOV     R9, #0x19
@@ -868,7 +872,7 @@ sub_8B70:
  ORRNE   R7, R7, #8
  TST     R2, #8
  ORRNE   R7, R7, #0x80
- ORR     R7, R7, #0x1C0000
+ ORR     R7, R7, #0x001C0000
  LDMFD   R13!, {R0-R2}
  MOV     R9, #0x1A
  MOV     R8, #0xA
@@ -895,7 +899,7 @@ sub_8BD8:
  ORRNE   R7, R7, #8
  TST     R2, #8
  ORRNE   R7, R7, #0x80
- ORR     R7, R7, #0xFE0000
+ ORR     R7, R7, #0x00FE0000
  LDMFD   R13!, {R0-R2}
  MOV     R9, #0x1B
  MOV     R8, #0xA
@@ -903,7 +907,7 @@ sub_8BD8:
  B       lab_8A94
 sub_8C40:
  STMFD   R13!, {R8, R14}
- MOV     R7, #0x1D0000
+ MOV     R7, #0x001D0000
  MOV     R9, #0x1D
  MOV     R8, #8
  MOV     R6, #8
@@ -928,7 +932,7 @@ sub_8C58:
  ORRNE   R7, R7, #8
  TST     R2, #8
  ORRNE   R7, R7, #0x80
- ORR     R7, R7, #0x100000
+ ORR     R7, R7, #0x00100000
  LDMFD   R13!, {R0-R2}
  MOV     R9, #0x1A
  MOV     R8, #0xA
@@ -1062,7 +1066,7 @@ dobs4:
  CMP     R14, #12
  BHS     dobs6
 dobs5:
- ADD     R3, R11, #var_030
+ ADD     R3, R11, #rotationMatrix
  BL      DrawObject
  B       dobs3
 dobs6:
@@ -1074,7 +1078,7 @@ dobs6:
  ADD     R1, R1, R14
  MOV     R0, R8
  MOV     R2, R9
- SUB     R1, R1, #0xC00000
+ SUB     R1, R1, #0x00C00000
  BL      sub_8B0C
  LDMFD   R13!, {R0-R7, R9}
  B       dobs5
@@ -1084,8 +1088,8 @@ objectRockAddr:
 .long    objectRock
 DrawObject:
  STMFD   R13!, {R6-R12, R14}
- LDR     R12, graphicsBuffersAddr
- ADD     R4, R11, #var_000
+ LDR     R12, graphicsBufferEndAddr
+ ADD     R4, R11, #xObject
  STMIA   R4, {R0-R2}
  MOVS    R4, R0
  MVNMI   R4, R4
@@ -1096,7 +1100,7 @@ DrawObject:
  ORRS    R4, R4, #1
  MOVPL   R4, R4, LSL #1
  MOV     R5, #0
- STRB    R5, [R11, #var_120]
+ STRB    R5, [R11, #crashedFlag]
 dobj1:
  MOVS    R4, R4, LSL #1
  ADDPL   R5, R5, #1
@@ -1104,9 +1108,9 @@ dobj1:
  MOV     R0, R0, LSL R5
  MOV     R1, R1, LSL R5
  MOV     R2, R2, LSL R5
- ADD     R4, R11, #var_084
+ ADD     R4, R11, #xObjectScaled
  STMIA   R4, {R0-R2}
- ADD     R4, R11, #var_030
+ ADD     R4, R11, #rotationMatrix
  CMP     R3, R4
  LDMNEIA R3!, {R0-R2}
  STMNEIA R4!, {R0-R2}
@@ -1117,30 +1121,30 @@ dobj1:
  LDR     R0, [R11, #objectData]
  LDR     R8, [R0]
  ADD     R9, R0, #16
- ADD     R10, R11, #var_600
+ ADD     R10, R11, #vertexProjected
  LDRB    R1, [R0, #12]
- STRB    R1, [R11, #var_114]
+ STRB    R1, [R11, #objectFlags]
 dobj2:
  LDMIA   R9!, {R2-R4}
- ADD     R0, R11, #var_054
- ADD     R1, R11, #var_064
+ ADD     R0, R11, #xVertex
+ ADD     R1, R11, #xVertexRotated
  STMIA   R0, {R2-R4}
  BL      MultiplyVectorByMatrix
- ADD     R0, R11, #var_000
- BL      sub_991C
- ADD     R0, R11, #var_074
- BL      sub_9748
+ ADD     R0, R11, #xObject
+ BL      AddVectors
+ ADD     R0, R11, #xCoord
+ BL      ProjectVertexOntoScreen
  STMIA   R10!, {R0-R1}
- ADD     R0, R11, #var_074
- BL      sub_82AC
- STR     R0, [R11, #var_078]
- ADD     R0, R11, #var_074
- BL      sub_9748
+ ADD     R0, R11, #xCoord
+ BL      GetLandscapeBelowObject
+ STR     R0, [R11, #yCoord]
+ ADD     R0, R11, #xCoord
+ BL      ProjectVertexOntoScreen
  STMIA   R10!, {R0-R1}
  LDR     R14, [R10, #-12]
  CMP     R14, R1
  MVNHS   R14, #0
- STRHSB  R14, [R11, #var_120]
+ STRHSB  R14, [R11, #crashedFlag]
  SUBS    R8, R8, #1
  BNE     dobj2
  LDR     R1, [R11, #objectData]
@@ -1150,26 +1154,26 @@ dobj2:
 dobj3:
  MOV     R0, R9
  ADD     R9, R9, #12
- ADD     R1, R11, #var_054
+ ADD     R1, R11, #xVertex
  BL      MultiplyVectorByMatrix
- LDR     R1, [R11, #var_058]
- LDRB    R14, [R11, #var_114]
+ LDR     R1, [R11, #yVertex]
+ LDRB    R14, [R11, #objectFlags]
  TST     R14, #0x1
  MVNEQ   R3, #0
  MVNEQ   R1, #0
- ADDNE   R2, R11, #var_084
- ADDNE   R0, R11, #var_054
+ ADDNE   R2, R11, #xObjectScaled
+ ADDNE   R0, R11, #xVertex
  BLNE    GetDotProduct
  STMFD   R13!, {R8-R9, R11-R12}
  CMP     R1, #0
  BPL     dobj4
- LDRB    R14, [R11, #var_114]
+ LDRB    R14, [R11, #objectFlags]
  TST     R14, #0x2
  BEQ     dobj4
  STMFD   R13!, {R3, R9, R11}
  LDMIA   R9, {R5-R7}
  MOV     R8, #0
- ADD     R10, R11, #var_600
+ ADD     R10, R11, #vertexProjected
  ADD     R10, R10, #8
  ADD     R5, R10, R5, LSL #4
  LDMIA   R5, {R0-R1}
@@ -1177,15 +1181,15 @@ dobj3:
  LDMIA   R6, {R2-R3}
  ADD     R7, R10, R7, LSL #4
  LDMIA   R7, {R4-R5}
- BL      DrawTriangleIntoBuffer1
+ BL      DrawTriangleIntoBuffer
  LDMFD   R13!, {R3, R9, R11}
 dobj4:
  CMP     R3, #0
  BPL     dobj5
  LDMIA   R9, {R4-R7}
- ADD     R10, R11, #var_600
- LDR     R1, [R11, #var_058]
- LDR     R0, [R11, #var_054]
+ ADD     R10, R11, #vertexProjected
+ LDR     R1, [R11, #yVertex]
+ LDR     R0, [R11, #xVertex]
  RSB     R1, R1, #0x80000000
  MOV     R1, R1, LSR #28
  CMP     R0, #0
@@ -1226,7 +1230,7 @@ dobj4:
  LDMIA   R5, {R2-R3}
  ADD     R6, R10, R6, LSL #4
  LDMIA   R6, {R4-R5}
- BL      DrawTriangleIntoBuffer2
+ BL      DrawTriangleIntoNearBuffer
 dobj5:
  LDMFD   R13!, {R8-R9, R11-R12}
  ADD     R9, R9, #16
@@ -1324,18 +1328,18 @@ DrawFuelLevel:
  MOV     R10, R1, LSR #4
  BL      DrawHorizontalLine
  LDMFD   R13!, {R10-R12, PC}
-graphicsBuffersAddr:
+graphicsBufferEndAddr:
+.long    graphicsBuffersEnd
+graphicsBufferAddr:
 .long    graphicsBuffers
-var_9250:
-.long    var_802C
 MultiplyVectorByMatrix:
- LDRB    R2, [R11, #var_114]
+ LDRB    R2, [R11, #objectFlags]
  TST     R2, #0x1
  LDMEQIA R0, {R2-R4}
  STMEQIA R1, {R2-R4}
  MOVEQ   PC, R14
  STMFD   R13!, {R6-R7, R14}
- ADD     R2, R11, #var_030
+ ADD     R2, R11, #rotationMatrix
  BL      GetDotProduct
  STR     R3, [R1]
  BL      GetDotProduct
@@ -1407,20 +1411,20 @@ lab_9358:
  RSBMI   R6, R6, #0
  ADDS    R3, R3, R6
  MOV     PC, R14
-sub_937C:
- ADD     R2, R11, #var_030
+TransposeRotationMatrix:
+ ADD     R2, R11, #rotationMatrix
  LDR     R0, [R2, #4]
- LDR     R1, [R2, #0xC]
- STR     R0, [R2, #0xC]
+ LDR     R1, [R2, #12]
+ STR     R0, [R2, #12]
  STR     R1, [R2, #4]
  LDR     R0, [R2, #8]
- LDR     R1, [R2, #0x18]
- STR     R0, [R2, #0x18]
+ LDR     R1, [R2, #24]
+ STR     R0, [R2, #24]
  STR     R1, [R2, #8]
- LDR     R0, [R2, #0x14]
- LDR     R1, [R2, #0x1C]
- STR     R0, [R2, #0x1C]
- STR     R1, [R2, #0x14]
+ LDR     R0, [R2, #20]
+ LDR     R1, [R2, #28]
+ STR     R0, [R2, #28]
+ STR     R1, [R2, #20]
  MOV     PC, R14
 sub_93B4:
  STMFD   R13!, {R5-R6, R14}
@@ -1439,18 +1443,18 @@ sub_93E4:
  STMFD   R13!, {R0-R1, R14}
  ADD     R0, R0, #0x40000000
  LDR     R14, sinTableAddr
- BIC     R0, R0, #0x300000
+ BIC     R0, R0, #0x00300000
  LDR     R2, [R14, R0, LSR #20]
  ADD     R1, R1, #0x40000000
  LDR     R14, sinTableAddr
- BIC     R1, R1, #0x300000
+ BIC     R1, R1, #0x00300000
  LDR     R3, [R14, R1, LSR #20]
  LDMFD   R13!, {R4-R5}
  LDR     R14, sinTableAddr
- BIC     R4, R4, #0x300000
+ BIC     R4, R4, #0x00300000
  LDR     R0, [R14, R4, LSR #20]
  LDR     R14, sinTableAddr
- BIC     R5, R5, #0x300000
+ BIC     R5, R5, #0x00300000
  LDR     R1, [R14, R5, LSR #20]
  STMFD   R13!, {R0-R3}
  EOR     R14, R2, R3
@@ -1471,7 +1475,7 @@ lab_9450:
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
- STR     R4, [R11, #var_030]
+ STR     R4, [R11, #xNoseV]
  EOR     R14, R0, R1
  TEQ     R0, #0
  RSBMI   R0, R0, #0
@@ -1490,7 +1494,7 @@ lab_9498:
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
- STR     R4, [R11, #var_04C]
+ STR     R4, [R11, #ySideV]
  LDMFD   R13, {R0-R3}
  EOR     R14, R1, R2
  TEQ     R1, #0
@@ -1511,7 +1515,7 @@ lab_94E4:
  TEQ     R14, #0
  RSBMI   R4, R4, #0
  RSB     R4, R4, #0
- STR     R4, [R11, #var_048]
+ STR     R4, [R11, #xSideV]
  EOR     R14, R0, R3
  TEQ     R0, #0
  RSBMI   R0, R0, #0
@@ -1531,14 +1535,14 @@ lab_9530:
  TEQ     R14, #0
  RSBMI   R4, R4, #0
  RSB     R4, R4, #0
- STR     R4, [R11, #var_034]
+ STR     R4, [R11, #yNoseV]
  LDMFD   R13!, {R0-R3, R14}
- STR     R0, [R11, #var_03C]
- STR     R1, [R11, #var_038]
- STR     R2, [R11, #var_040]
- STR     R3, [R11, #var_050]
+ STR     R0, [R11, #xRoofV]
+ STR     R1, [R11, #zNoseV]
+ STR     R2, [R11, #yRoofV]
+ STR     R3, [R11, #zSideV]
  MOV     R0, #0
- STR     R0, [R11, #var_044]
+ STR     R0, [R11, #zRoofV]
  MOV     PC, R14
 sub_9574:
  STMFD   R13!, {R14}
@@ -1606,11 +1610,11 @@ lab_9648:
  BNE     lab_9648
  ADD     R2, R14, R4
  LDR     R14, squareRootTableAddr
- BIC     R2, R2, #0x300000
+ BIC     R2, R2, #0x00300000
  LDR     R0, [R14, R2, LSR #20]
  LDMFD   R13!, {PC}
  LDMIA   R0, {R0-R2}
-sub_9670:
+ProjectParticleOntoScreen:
  CMN     R2, #0x80000000
  MOVHS   PC, R14
  MOVS    R3, R0
@@ -1668,7 +1672,7 @@ lab_9700:
  CMP     R0, #320
  CMPLO   R1, #0xEF
  LDMFD   R13!, {R7, PC}
-sub_9748:
+ProjectVertexOntoScreen:
  LDMIA   R0, {R0-R2}
  CMN     R2, #0x80000000
  MOVHS   PC, R14
@@ -1780,31 +1784,31 @@ lab_9890:
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
 mod_98E4:
- ADD     R4, R11, #var_064
+ ADD     R4, R11, #xVertexRotated
 mod_98E8:
- ADD     R4, R11, #var_074
+ ADD     R4, R11, #xCoord
 sub_98EC:
  MOV     R4, R12
  ADD     R4, R11, #var_170
  ADD     R4, R11, #var_160
  STMFD   R13!, {R14}
  LDR     R1, sub_98EC
- STR     R1, sub_991C+28
+ STR     R1, AddVectors+28
  LDMIA   R0, {R0-R2}
  MOV     R3, R12
- BL      sub_991C+8
+ BL      AddVectors+8
  LDR     R1, mod_98E8
- STR     R1, sub_991C+28
+ STR     R1, AddVectors+28
  LDMFD   R13!, {PC}
-sub_991C:
+AddVectors:
  LDMIA   R0, {R0-R2}
- ADD     R3, R11, #var_064
+ ADD     R3, R11, #xVertexRotated
  STMFD   R13!, {R5-R6}
  LDMIA   R3, {R3-R5}
  ADD     R0, R0, R3
  ADD     R1, R1, R4
  ADD     R2, R2, R5
- ADD     R3, R11, #var_074
+ ADD     R3, R11, #xCoord
  STMIA   R3, {R0-R2}
  LDMFD   R13!, {R5-R6}
  MOV     PC, R14
@@ -1869,7 +1873,7 @@ lab_9A0C:
  TEQ     R4, #0
  RSBMI   R7, R7, #0
  ADD     R14, R14, #2
- ADD     R8, R11, #var_064
+ ADD     R8, R11, #xVertexRotated
  STMIA   R8, {R5-R7, R14}
  LDMFD   R13!, {R5-R8, PC}
 randomSeed1:
@@ -1980,11 +1984,11 @@ DrawTriangleFromBuffer:
  BL      DrawTriangle
  LDMFD   R13!, {R9, R12}
  B       DrawNextFromGraphicsBuffer
-DrawParticleIntoBuffer1:
+DrawParticleIntoNearBuffer:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
  ADD     R14, R14, #0x01000000
- BIC     R14, R14, #0xC00000
+ BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R8, R8, LSR #25
  CMP     R8, #8
@@ -1996,10 +2000,10 @@ DrawParticleIntoBuffer1:
  STR     R1, [R9], #4
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-DrawParticleIntoBuffer2:
+DrawParticleIntoBuffer:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
- BIC     R14, R14, #0xC00000
+ BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R8, R8, LSR #25
  CMP     R8, #8
@@ -2010,27 +2014,27 @@ DrawParticleIntoBuffer2:
  STR     R1, [R9], #4
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-DrawTriangleIntoBuffer1:
+DrawTriangleIntoBuffer:
  STMFD   R13!, {R9, R14}
- LDR     R14, [R11, #8]
+ LDR     R14, [R11, #zObject]
  RSB     R14, R14, #0x14000000
  CMP     R14, #0x0B000000
  MOVHS   R14, #0x0A000000
- BIC     R14, R14, #0xC00000
+ BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
- MOV     R7, #0x12
+ MOV     R7, #18
  STR     R7, [R9], #4
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-DrawTriangleIntoBuffer2:
+DrawTriangleIntoNearBuffer:
  STMFD   R13!, {R9, R14}
- LDR     R14, [R11, #8]
+ LDR     R14, [R11, #zObject]
  RSB     R14, R14, #0x14000000
  ADD     R14, R14, #0x01000000
  CMP     R14, #0x0B000000
  MOVHS   R14, #0x0A000000
- BIC     R14, R14, #0xC00000
+ BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R7, #0x12
  STR     R7, [R9], #4
@@ -2060,7 +2064,7 @@ bufferJump:
 .long    TerminateGraphicsBuffer
 DrawGraphicsBuffer:
  STMFD   R13!, {R6-R12, R14}
- LDR     R1, graphicsBuffersAddr
+ LDR     R1, graphicsBufferEndAddr
  LDR     R9, [R1, R0, LSL #2]
  LDR     R12, screenAddr
 DrawNextFromGraphicsBuffer:
@@ -2072,8 +2076,8 @@ TerminateGraphicsBuffer:
  LDMFD   R13!, {R6-R12, PC}
 AddTerminatorsToBuffers:
  STMFD   R13!, {R12, R14}
- LDR     R12, graphicsBuffersAddr
- LDR     R14, var_9250
+ LDR     R12, graphicsBufferEndAddr
+ LDR     R14, graphicsBufferAddr
  MOV     R0, #0xB
  MOV     R1, #0x13
 lab_9D10:
