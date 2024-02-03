@@ -51,9 +51,9 @@
  OBJ_ROCKET = 9                     \ The object type of the three rockets
                                     \ along the edge of the launchpad
 
- LAUNCHPAD_ALTITUDE = &3500000      \ Altitude of the launchpad
+ LAUNCHPAD_ALTITUDE = &03500000     \ Altitude of the launchpad
 
- SEA_LEVEL = &5500000               \ Sea level
+ SEA_LEVEL = &05500000              \ Sea level
 
 \ ******************************************************************************
 \
@@ -473,7 +473,7 @@ ENDIF
  ADD     R4, R11, #var_170          \ 
  STMIA   R4, {R0-R2}                \ 
  LDR     R8, [R11, #xLandscape]     \ 
- SUB     R8, R8, #&5800000          \ 
+ SUB     R8, R8, #&05800000         \ 
  MOV     R0, #&80000000             \ 
  STR     R0, [R11, #var_0C4]        \ 
 
@@ -519,9 +519,9 @@ ENDIF
 
  SUBS    R10, R10, #1               \ 
  LDRNE   R0, [R11, #var_170]        \ 
- ADDNE   R0, R0, #&1000000          \ 
+ ADDNE   R0, R0, #&01000000         \ 
  STRNE   R0, [R11, #var_170]        \ 
- ADDNE   R8, R8, #&1000000          \ 
+ ADDNE   R8, R8, #&01000000         \ 
  BNE     lab_8114                   \ 
  LDRB    R0, [R11, #var_0E4]        \ 
  SUBS    R0, R0, #2                 \ 
@@ -532,9 +532,9 @@ ENDIF
  BEQ     lab_81E0                   \ 
  STRB    R0, [R11, #var_0E4]        \ 
  LDR     R0, [R11, #var_168]        \ 
- SUB     R0, R0, #&1000000          \ 
+ SUB     R0, R0, #&01000000         \ 
  STR     R0, [R11, #var_168]        \ 
- SUB     R9, R9, #&1000000          \ 
+ SUB     R9, R9, #&01000000         \ 
  MOV     R0, #&80000000             \ 
  STR     R0, [R7]                   \ 
  LDRB    R0, [R11, #var_0F8]        \ 
@@ -569,9 +569,9 @@ ENDIF
 \
 \ The altitude at landscape coordinate (x, z) is calculated as follows:
 \
-\ &5000000 - (   2*sin(x - 2z)  + 2*sin(4x + 3z)  + 2*sin(3z - 5x)
-\              + 2*sin(3x + 3z) +   sin(5x + 11z) +   sin(10x + 7z)
-\            ) / 256
+\ &05000000 - (   2*sin(x - 2z)  + 2*sin(4x + 3z)  + 2*sin(3z - 5x)
+\               + 2*sin(3x + 3z) +   sin(5x + 11z) +   sin(10x + 7z)
+\             ) / 256
 \
 \ Note that the object map is flat, like a paper map, so the x- and z-axes on
 \ the map correspond to the x- and z-axes in the three-dimensional space when
@@ -583,7 +583,7 @@ ENDIF
 \
 \ The altitude is capped to a maximum value of SEA_LEVEL, and the altitude on
 \ the launchpad is set to LAUNCHPAD_ALTITUDE. The launchpad is defined as (x, z)
-\ where 0 <= x < &8000000 and 0 <= z < &8000000, so that's tiles 0 to 7 along
+\ where 0 <= x < &08000000 and 0 <= z < &08000000, so that's tiles 0 to 7 along
 \ each axis (with the origin being at the front-left corner of the launchpad).
 \
 \ ------------------------------------------------------------------------------
@@ -763,9 +763,9 @@ ENDIF
                                     \      +
                                     \      (sin(5x + 11z) + sin(10x + 7z)) / 256
 
- RSB     R0, R0, #&5000000          \ R0 = &5000000 - R0
+ RSB     R0, R0, #&05000000         \ R0 = &05000000- R0
                                     \
-                                    \    = &5000000 -
+                                    \    = &05000000-
                                     \      (2*sin(x - 2z) + 2*sin(4x + 3z)
                                     \                     + 2*sin(3z - 5x)
                                     \                     + 2*sin(3x + 3z)
@@ -778,8 +778,8 @@ ENDIF
  MOVGT   R0, #SEA_LEVEL             \ we don't create landscapes lower then sea
                                     \ level
 
- CMP     R8, #&8000000              \ If R8 and R9 are both < &8000000, then
- CMPLO   R9, #&8000000              \ this coordinate is on the launchpad, so
+ CMP     R8, #&08000000             \ If R8 and R9 are both < &08000000, then
+ CMPLO   R9, #&08000000             \ this coordinate is on the launchpad, so
  MOVLO   R0, #LAUNCHPAD_ALTITUDE    \ set R0 = LAUNCHPAD_ALTITUDE
 
  STR     R0, [R11, #altitude]       \ Set altitude = R0, so we return the result
@@ -987,17 +987,17 @@ ENDIF
  STMIA   R14, {R0-R8}               \ 
  CMP     R1, #0                     \ 
  MOVPL   R1, #0                     \ 
- ADD     R2, R2, #&5000000          \ 
+ ADD     R2, R2, #&05000000         \ 
  ADD     R14, R11, #xCamera         \ 
  STMIA   R14, {R0-R2}               \ 
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
- SUB     R9, R9, #&5000000          \ 
+ SUB     R9, R9, #&05000000         \ 
  BL      GetLandscapeAltitude       \ 
  SUB     R0, R0, #&640000           \ 
  LDR     R1, [R11, #var_098]        \ 
  SUB     R14, R0, R1                \ 
- CMP     R14, #&1800000             \ 
+ CMP     R14, #&01800000            \ 
  BHS     lab_850C                   \ 
  STMFD   R13!, {R0}                 \ 
  ADD     R14, R11, #objectMap       \ 
@@ -1025,7 +1025,7 @@ ENDIF
  LDR     R14, objectPlayerAddr      \ 
  STR     R14, [R11, #objectData]    \ 
  MOV     R0, #0                     \ 
- MOV     R2, #&F000000              \ 
+ MOV     R2, #&0F000000             \ 
  BL      DrawObject                 \ 
  LDRB    R10, [R11, #var_120]       \ 
  CMP     R10, #0                    \ 
@@ -1100,7 +1100,7 @@ ENDIF
  ADD     R1, R1, R7, ASR #7         \ 
  ADD     R2, R2, R8, ASR #7         \ 
  MOV     R6, #&14                   \ 
- MOV     R7, #&1BC0000              \ 
+ MOV     R7, #&01BC0000             \ 
  ORR     R7, R7, #&FF               \ 
  BL      sub_8A84                   \ 
 
@@ -1121,8 +1121,8 @@ ENDIF
 
  ADD     R3, R11, #var_094          \ 
  LDMIA   R3, {R0-R5}                \ 
- CMP     R0, #&8000000              \ 
- CMPLO   R2, #&8000000              \ 
+ CMP     R0, #&08000000             \ 
+ CMPLO   R2, #&08000000             \ 
  BHS     LoseLife                   \ 
  CMP     R3, #0                     \ 
  RSBMI   R3, R3, #0                 \ 
@@ -1134,7 +1134,7 @@ ENDIF
  ADD     R3, R3, R5                 \ 
  CMP     R3, #&200000               \ 
  MOVHS   PC, R14                    \ 
- MOV     R1, #&2EC0000              \ 
+ MOV     R1, #&02EC0000             \ 
  LDR     R3, [R11, #fuelLevel]      \ 
  ADD     R3, R3, #&20               \ 
  CMP     R3, #&1400                 \ 
@@ -1360,11 +1360,11 @@ ENDIF
  SUB     R1, R1, R8                 \ 
  CMP     R2, #&14000000             \ 
  BHS     lab_8800                   \ 
- CMP     R2, #&A000000              \ 
+ CMP     R2, #&0A000000             \ 
  BLO     lab_8800                   \ 
  MOVS    R14, R0                    \ 
  RSBMI   R14, R0, #0                \ 
- CMP     R14, #&6000000             \ 
+ CMP     R14, #&06000000            \ 
  BHS     lab_8800                   \ 
  TST     R7, #&20000                \ 
  BEQ     lab_8904                   \ 
@@ -1374,17 +1374,17 @@ ENDIF
  BEQ     lab_88E8                   \ 
  CMP     R0, #0                     \ 
  RSBMI   R0, R0, #0                 \ 
- SUBS    R2, R2, #&F000000          \ 
+ SUBS    R2, R2, #&0F000000         \ 
  RSBMI   R2, R2, #0                 \ 
- CMP     R0, #&1000000              \ 
- CMPLO   R2, #&1000000              \ 
+ CMP     R0, #&01000000             \ 
+ CMPLO   R2, #&01000000             \ 
  BHS     lab_88E8                   \ 
  LDR     R0, [R11, #yCamera]        \ 
  ADD     R1, R1, R0                 \ 
  LDR     R0, [R11, #var_098]        \ 
  SUBS    R1, R1, R0                 \ 
  RSBMI   R1, R1, #0                 \ 
- CMP     R1, #&1000000              \ 
+ CMP     R1, #&01000000             \ 
 
 .lab_88E8
 
@@ -1464,7 +1464,7 @@ ENDIF
  BEQ     lab_8A34                   \ 
  TST     R7, #&80000                \ 
  BEQ     lab_8A58                   \ 
- TST     R7, #&1000000              \ 
+ TST     R7, #&01000000             \ 
  BNE     lab_8A28                   \ 
  MOV     R3, R3, ASR #1             \ 
  MOV     R4, R4, ASR #1             \ 
@@ -1484,7 +1484,7 @@ ENDIF
 .sub_89C8
 
  SUB     R8, R9, R1                 \ 
- CMP     R8, #&1800000              \ 
+ CMP     R8, #&01800000             \ 
  MOVHS   PC, R14                    \ 
  STMFD   R13!, {R2}                 \ 
  STR     R14, [R11, #objectType]    \ 
@@ -1857,7 +1857,7 @@ ENDIF
  LDR     R0, [R11, #xCamera]        \ 
  MOV     R1, #0                     \ 
  LDR     R2, [R11, #zCamera]        \ 
- SUB     R2, R2, #&6000000          \ 
+ SUB     R2, R2, #&06000000         \ 
  BL      sub_8CBC                   \ 
  LDMFD   R13!, {PC}                 \ 
 
@@ -1877,7 +1877,7 @@ ENDIF
  LDR     R0, [R11, #xCamera]        \ 
  MOV     R1, #0                     \ 
  LDR     R2, [R11, #zCamera]        \ 
- SUB     R2, R2, #&6000000          \ 
+ SUB     R2, R2, #&06000000         \ 
 
 .lab_8D14
 
@@ -1901,7 +1901,7 @@ ENDIF
  LDR     R0, [R11, #xCamera]        \ 
  MVN     R1, #&10000000             \ 
  LDR     R2, [R11, #zCamera]        \ 
- SUB     R2, R2, #&6000000          \ 
+ SUB     R2, R2, #&06000000         \ 
  BL      sub_8BD8                   \ 
  LDMFD   R13!, {R6-R9, PC}          \ 
 
@@ -1936,7 +1936,7 @@ ENDIF
  LDR     R0, [R11, #xCamera]        \ 
  MVN     R1, #&20000000             \ 
  LDR     R2, [R11, #zCamera]        \ 
- SUB     R2, R2, #&6000000          \ 
+ SUB     R2, R2, #&06000000         \ 
  BL      sub_8BD8                   \ 
  LDMFD   R13!, {PC}                 \ 
 
@@ -2038,9 +2038,9 @@ ENDIF
                                     \ of the tile containing zCamera, i.e. the
                                     \ tile directly below our viewpoint
 
- SUB     R8, R8, #&5800000          \ Set xLandscape = R8 - &5800000
+ SUB     R8, R8, #&05800000         \ Set xLandscape = R8 - &05800000
  STR     R8, [R11, #xLandscape]     \
-                                    \ Each tile is &1000000 coordinates wide,
+                                    \ Each tile is &01000000 coordinates wide,
                                     \ and the visible landscape is 12 tiles wide
                                     \
                                     \ We already rounded xCamera down to the
@@ -2107,7 +2107,7 @@ ENDIF
 
 .dobs3
 
- ADD     R8, R8, #&1000000          \ Step along the x-axis by one whole tile,
+ ADD     R8, R8, #&01000000         \ Step along the x-axis by one whole tile,
                                     \ going from left to right
 
  SUBS    R6, R6, #1                 \ Decrement the x-axis loop counter in R6
@@ -2115,7 +2115,7 @@ ENDIF
  BNE     dobs2                      \ Loop back to check the next tile until we
                                     \ have checked along the whole x-axis
 
- SUB     R9, R9, #&1000000          \ Step along the z-axis by one whole tile,
+ SUB     R9, R9, #&01000000         \ Step along the z-axis by one whole tile,
                                     \ going from front to back
 
  SUBS    R7, R7, #1                 \ Decrement the z-axis loop counter in R6
@@ -3273,7 +3273,7 @@ ENDIF
  RSBMI   R3, R3, #0                 \ 
  MOV     R3, R3, LSL #1             \ 
  AND     R2, R2, #&FE000000         \ 
- ORR     R2, R2, #&1000000          \ 
+ ORR     R2, R2, #&01000000         \ 
  MOV     R4, #0                     \ 
 
 .lab_9450
@@ -3294,7 +3294,7 @@ ENDIF
  RSBMI   R1, R1, #0                 \ 
  MOV     R1, R1, LSL #1             \ 
  AND     R0, R0, #&FE000000         \ 
- ORR     R0, R0, #&1000000          \ 
+ ORR     R0, R0, #&01000000         \ 
  MOV     R4, #0                     \ 
 
 .lab_9498
@@ -3316,7 +3316,7 @@ ENDIF
  RSBMI   R2, R2, #0                 \ 
  MOV     R2, R2, LSL #1             \ 
  AND     R1, R1, #&FE000000         \ 
- ORR     R1, R1, #&1000000          \ 
+ ORR     R1, R1, #&01000000         \ 
  MOV     R4, #0                     \ 
 
 .lab_94E4
@@ -3338,7 +3338,7 @@ ENDIF
  RSBMI   R3, R3, #0                 \ 
  MOV     R3, R3, LSL #1             \ 
  AND     R0, R0, #&FE000000         \ 
- ORR     R0, R0, #&1000000          \ 
+ ORR     R0, R0, #&01000000         \ 
  MOV     R4, #0                     \ 
 
 .lab_9530
@@ -3416,7 +3416,7 @@ ENDIF
 .lab_95F0
 
  LDR     R14, arctanTableAddr       \ 
- BIC     R2, R2, #&1800000          \ 
+ BIC     R2, R2, #&01800000         \ 
  LDR     R1, [R14, R2, LSR #23]     \ 
  TST     R3, #1                     \ 
  ADDEQ   R1, R1, R3, LSL #29        \ 
@@ -3426,7 +3426,7 @@ ENDIF
  MOV     R3, R0                     \ 
  MOVS    R3, R3, LSL #1             \ 
  AND     R3, R3, #&FE000000         \ 
- ORR     R3, R3, #&1000000          \ 
+ ORR     R3, R3, #&01000000         \ 
  MOV     R4, #0                     \ 
 
 .lab_9624
@@ -3438,7 +3438,7 @@ ENDIF
  MOV     R3, R2                     \ 
  MOVS    R3, R3, LSL #1             \ 
  AND     R3, R3, #&FE000000         \ 
- ORR     R3, R3, #&1000000          \ 
+ ORR     R3, R3, #&01000000         \ 
  MOV     R14, #0                    \ 
 
 .lab_9648
@@ -3742,7 +3742,7 @@ ENDIF
  RSBMI   R1, R1, #0                 \ 
  MOV     R1, R1, LSL #1             \ 
  AND     R8, R8, #&FE000000         \ 
- ORR     R8, R8, #&1000000          \ 
+ ORR     R8, R8, #&01000000         \ 
  MOV     R5, #0                     \ 
 
 .lab_997C
@@ -3763,7 +3763,7 @@ ENDIF
  RSBMI   R2, R2, #0                 \ 
  MOV     R2, R2, LSL #1             \ 
  AND     R8, R8, #&FE000000         \ 
- ORR     R8, R8, #&1000000          \ 
+ ORR     R8, R8, #&01000000         \ 
  MOV     R6, #0                     \ 
 
 .lab_99C4
@@ -3784,7 +3784,7 @@ ENDIF
  RSBMI   R3, R3, #0                 \ 
  MOV     R3, R3, LSL #1             \ 
  AND     R8, R8, #&FE000000         \ 
- ORR     R8, R8, #&1000000          \ 
+ ORR     R8, R8, #&01000000         \ 
  MOV     R7, #0                     \ 
 
 .lab_9A0C
@@ -4414,7 +4414,7 @@ ENDIF
 
  STMFD   R13!, {R9, R14}            \ 
  RSB     R14, R8, #&14000000        \ 
- ADD     R14, R14, #&1000000        \ 
+ ADD     R14, R14, #&01000000       \ 
  BIC     R14, R14, #&C00000         \ 
  LDR     R9, [R12, R14, LSR #22]    \ 
  MOV     R8, R8, LSR #25            \ 
@@ -4467,8 +4467,8 @@ ENDIF
  STMFD   R13!, {R9, R14}            \ 
  LDR     R14, [R11, #8]             \ 
  RSB     R14, R14, #&14000000       \ 
- CMP     R14, #&B000000             \ 
- MOVHS   R14, #&A000000             \ 
+ CMP     R14, #&0B000000            \ 
+ MOVHS   R14, #&0A000000            \ 
  BIC     R14, R14, #&C00000         \ 
  LDR     R9, [R12, R14, LSR #22]    \ 
  MOV     R7, #&12                   \ 
@@ -4491,9 +4491,9 @@ ENDIF
  STMFD   R13!, {R9, R14}            \ 
  LDR     R14, [R11, #8]             \ 
  RSB     R14, R14, #&14000000       \ 
- ADD     R14, R14, #&1000000        \ 
- CMP     R14, #&B000000             \ 
- MOVHS   R14, #&A000000             \ 
+ ADD     R14, R14, #&01000000       \ 
+ CMP     R14, #&0B000000            \ 
+ MOVHS   R14, #&0A000000            \ 
  BIC     R14, R14, #&C00000         \ 
  LDR     R9, [R12, R14, LSR #22]    \ 
  MOV     R7, #&12                   \ 
@@ -5414,7 +5414,7 @@ ENDIF
  STMFD   R13!, {R11}                \ 
  ADD     R11, R11, R11, LSL #2      \ 
  ADD     R11, R12, R11, LSL #6      \ 
- CMP     R4, #&1400000              \ 
+ CMP     R4, #&01400000             \ 
  BPL     lab_A46C                   \ 
  CMP     R5, #0                     \ 
  BMI     lab_A46C                   \ 
@@ -5422,7 +5422,7 @@ ENDIF
  MOVPL   R0, R4, LSR #16            \ 
  ADDPL   R11, R11, R4, LSR #16      \ 
  MOVMI   R0, #0                     \ 
- CMP     R5, #&1400000              \ 
+ CMP     R5, #&01400000             \ 
  RSBLO   R10, R0, R5, LSR #16       \ 
  RSBHS   R10, R0, #320              \ 
  CMP     R10, #0                    \ 
@@ -6189,10 +6189,10 @@ ENDIF
  MOV     R0, #1                     \ Set var_158 = 1 ???
  STR     R0, [R11, #var_158]        \ 
 
- MOV     R0, #&4000000              \ Set var_094 = &4000000 ???
- MOV     R2, R0                     \     var_098 = &2EC0000 ???
- ADD     R3, R11, #var_094          \     var_09C = &4000000 ???
- MOV     R1, #&2EC0000
+ MOV     R0, #&04000000             \ Set var_094 = &04000000 ???
+ MOV     R2, R0                     \     var_098 = &02EC0000 ???
+ ADD     R3, R11, #var_094          \     var_09C = &04000000 ???
+ MOV     R1, #&02EC0000
  STMIA   R3!, {R0-R2}
 
  MOV     R0, #0                     \ Set var_0A0 = 0 ???

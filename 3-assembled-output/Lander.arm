@@ -7,8 +7,8 @@
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
 .set OBJ_ROCKET, 9
-.set LAUNCHPAD_ALTITUDE, 0x3500000
-.set SEA_LEVEL, 0x5500000
+.set LAUNCHPAD_ALTITUDE, 0x03500000
+.set SEA_LEVEL, 0x05500000
 .set stack, 0x000121FC
 .set workspace, stack + 4
 .set var_000, 0x00
@@ -151,7 +151,7 @@ lab_80DC:
  ADD     R4, R11, #var_170
  STMIA   R4, {R0-R2}
  LDR     R8, [R11, #xLandscape]
- SUB     R8, R8, #0x5800000
+ SUB     R8, R8, #0x05800000
  MOV     R0, #0x80000000
  STR     R0, [R11, #var_0C4]
 lab_8114:
@@ -182,9 +182,9 @@ lab_816C:
 DrawGraphicsBuffers:
  SUBS    R10, R10, #1
  LDRNE   R0, [R11, #var_170]
- ADDNE   R0, R0, #0x1000000
+ ADDNE   R0, R0, #0x01000000
  STRNE   R0, [R11, #var_170]
- ADDNE   R8, R8, #0x1000000
+ ADDNE   R8, R8, #0x01000000
  BNE     lab_8114
  LDRB    R0, [R11, #var_0E4]
  SUBS    R0, R0, #2
@@ -195,9 +195,9 @@ DrawGraphicsBuffers:
  BEQ     lab_81E0
  STRB    R0, [R11, #var_0E4]
  LDR     R0, [R11, #var_168]
- SUB     R0, R0, #0x1000000
+ SUB     R0, R0, #0x01000000
  STR     R0, [R11, #var_168]
- SUB     R9, R9, #0x1000000
+ SUB     R9, R9, #0x01000000
  MOV     R0, #0x80000000
  STR     R0, [R7]
  LDRB    R0, [R11, #var_0F8]
@@ -253,11 +253,11 @@ GetLandscapeAltitude:
  BIC     R1, R1, #0x300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #8
- RSB     R0, R0, #0x5000000
+ RSB     R0, R0, #0x05000000
  CMP     R0, #SEA_LEVEL
  MOVGT   R0, #SEA_LEVEL
- CMP     R8, #0x8000000
- CMPLO   R9, #0x8000000
+ CMP     R8, #0x08000000
+ CMPLO   R9, #0x08000000
  MOVLO   R0, #LAUNCHPAD_ALTITUDE
  STR     R0, [R11, #altitude]
  MOV     PC, R14
@@ -396,17 +396,17 @@ lab_8424:
  STMIA   R14, {R0-R8}
  CMP     R1, #0
  MOVPL   R1, #0
- ADD     R2, R2, #0x5000000
+ ADD     R2, R2, #0x05000000
  ADD     R14, R11, #xCamera
  STMIA   R14, {R0-R2}
  MOV     R8, R0
  MOV     R9, R2
- SUB     R9, R9, #0x5000000
+ SUB     R9, R9, #0x05000000
  BL      GetLandscapeAltitude
  SUB     R0, R0, #0x640000
  LDR     R1, [R11, #var_098]
  SUB     R14, R0, R1
- CMP     R14, #0x1800000
+ CMP     R14, #0x01800000
  BHS     lab_850C
  STMFD   R13!, {R0}
  ADD     R14, R11, #objectMap
@@ -430,7 +430,7 @@ lab_850C:
  LDR     R14, objectPlayerAddr
  STR     R14, [R11, #objectData]
  MOV     R0, #0
- MOV     R2, #0xF000000
+ MOV     R2, #0x0F000000
  BL      DrawObject
  LDRB    R10, [R11, #var_120]
  CMP     R10, #0
@@ -501,7 +501,7 @@ lab_85F4:
  ADD     R1, R1, R7, ASR #7
  ADD     R2, R2, R8, ASR #7
  MOV     R6, #0x14
- MOV     R7, #0x1BC0000
+ MOV     R7, #0x01BC0000
  ORR     R7, R7, #0xFF
  BL      sub_8A84
 lab_8650:
@@ -509,8 +509,8 @@ lab_8650:
 sub_8654:
  ADD     R3, R11, #var_094
  LDMIA   R3, {R0-R5}
- CMP     R0, #0x8000000
- CMPLO   R2, #0x8000000
+ CMP     R0, #0x08000000
+ CMPLO   R2, #0x08000000
  BHS     LoseLife
  CMP     R3, #0
  RSBMI   R3, R3, #0
@@ -522,7 +522,7 @@ sub_8654:
  ADD     R3, R3, R5
  CMP     R3, #0x200000
  MOVHS   PC, R14
- MOV     R1, #0x2EC0000
+ MOV     R1, #0x02EC0000
  LDR     R3, [R11, #fuelLevel]
  ADD     R3, R3, #0x20
  CMP     R3, #0x1400
@@ -643,11 +643,11 @@ lab_880C:
  SUB     R1, R1, R8
  CMP     R2, #0x14000000
  BHS     lab_8800
- CMP     R2, #0xA000000
+ CMP     R2, #0x0A000000
  BLO     lab_8800
  MOVS    R14, R0
  RSBMI   R14, R0, #0
- CMP     R14, #0x6000000
+ CMP     R14, #0x06000000
  BHS     lab_8800
  TST     R7, #0x20000
  BEQ     lab_8904
@@ -657,17 +657,17 @@ lab_880C:
  BEQ     lab_88E8
  CMP     R0, #0
  RSBMI   R0, R0, #0
- SUBS    R2, R2, #0xF000000
+ SUBS    R2, R2, #0x0F000000
  RSBMI   R2, R2, #0
- CMP     R0, #0x1000000
- CMPLO   R2, #0x1000000
+ CMP     R0, #0x01000000
+ CMPLO   R2, #0x01000000
  BHS     lab_88E8
  LDR     R0, [R11, #yCamera]
  ADD     R1, R1, R0
  LDR     R0, [R11, #var_098]
  SUBS    R1, R1, R0
  RSBMI   R1, R1, #0
- CMP     R1, #0x1000000
+ CMP     R1, #0x01000000
 lab_88E8:
  LDMFD   R13!, {R0-R2}
  BLO     sub_86C4
@@ -721,7 +721,7 @@ sub_8998:
  BEQ     lab_8A34
  TST     R7, #0x80000
  BEQ     lab_8A58
- TST     R7, #0x1000000
+ TST     R7, #0x01000000
  BNE     lab_8A28
  MOV     R3, R3, ASR #1
  MOV     R4, R4, ASR #1
@@ -730,7 +730,7 @@ sub_8998:
  MOV     PC, R14
 sub_89C8:
  SUB     R8, R9, R1
- CMP     R8, #0x1800000
+ CMP     R8, #0x01800000
  MOVHS   PC, R14
  STMFD   R13!, {R2}
  STR     R14, [R11, #objectType]
@@ -950,7 +950,7 @@ sub_8CDC:
  LDR     R0, [R11, #xCamera]
  MOV     R1, #0
  LDR     R2, [R11, #zCamera]
- SUB     R2, R2, #0x6000000
+ SUB     R2, R2, #0x06000000
  BL      sub_8CBC
  LDMFD   R13!, {PC}
 sub_8CFC:
@@ -959,7 +959,7 @@ sub_8CFC:
  LDR     R0, [R11, #xCamera]
  MOV     R1, #0
  LDR     R2, [R11, #zCamera]
- SUB     R2, R2, #0x6000000
+ SUB     R2, R2, #0x06000000
 lab_8D14:
  BL      sub_8C40
  SUBS    R8, R8, #1
@@ -970,7 +970,7 @@ sub_8D24:
  LDR     R0, [R11, #xCamera]
  MVN     R1, #0x10000000
  LDR     R2, [R11, #zCamera]
- SUB     R2, R2, #0x6000000
+ SUB     R2, R2, #0x06000000
  BL      sub_8BD8
  LDMFD   R13!, {R6-R9, PC}
 sub_8D40:
@@ -985,7 +985,7 @@ sub_8D40:
  LDR     R0, [R11, #xCamera]
  MVN     R1, #0x20000000
  LDR     R2, [R11, #zCamera]
- SUB     R2, R2, #0x6000000
+ SUB     R2, R2, #0x06000000
  BL      sub_8BD8
  LDMFD   R13!, {PC}
 objectTypes:
@@ -1020,7 +1020,7 @@ DrawObjects:
  AND     R8, R0, #0xFF000000
  LDR     R1, [R11, #zCamera]
  AND     R9, R1, #0xFF000000
- SUB     R8, R8, #0x5800000
+ SUB     R8, R8, #0x05800000
  STR     R8, [R11, #xLandscape]
  MOV     R7, #11
 dobs1:
@@ -1034,10 +1034,10 @@ dobs2:
  CMP     R0, #0xFF
  BNE     dobs4
 dobs3:
- ADD     R8, R8, #0x1000000
+ ADD     R8, R8, #0x01000000
  SUBS    R6, R6, #1
  BNE     dobs2
- SUB     R9, R9, #0x1000000
+ SUB     R9, R9, #0x01000000
  SUBS    R7, R7, #1
  BNE     dobs1
  LDMFD   R13!, {R5-R12, PC}
@@ -1461,7 +1461,7 @@ sub_93E4:
  RSBMI   R3, R3, #0
  MOV     R3, R3, LSL #1
  AND     R2, R2, #0xFE000000
- ORR     R2, R2, #0x1000000
+ ORR     R2, R2, #0x01000000
  MOV     R4, #0
 lab_9450:
  MOV     R3, R3, LSR #1
@@ -1480,7 +1480,7 @@ lab_9450:
  RSBMI   R1, R1, #0
  MOV     R1, R1, LSL #1
  AND     R0, R0, #0xFE000000
- ORR     R0, R0, #0x1000000
+ ORR     R0, R0, #0x01000000
  MOV     R4, #0
 lab_9498:
  MOV     R1, R1, LSR #1
@@ -1500,7 +1500,7 @@ lab_9498:
  RSBMI   R2, R2, #0
  MOV     R2, R2, LSL #1
  AND     R1, R1, #0xFE000000
- ORR     R1, R1, #0x1000000
+ ORR     R1, R1, #0x01000000
  MOV     R4, #0
 lab_94E4:
  MOV     R2, R2, LSR #1
@@ -1520,7 +1520,7 @@ lab_94E4:
  RSBMI   R3, R3, #0
  MOV     R3, R3, LSL #1
  AND     R0, R0, #0xFE000000
- ORR     R0, R0, #0x1000000
+ ORR     R0, R0, #0x01000000
  MOV     R4, #0
 lab_9530:
  MOV     R3, R3, LSR #1
@@ -1577,7 +1577,7 @@ lab_95D4:
  MOVS    R2, R2, LSL #24
 lab_95F0:
  LDR     R14, arctanTableAddr
- BIC     R2, R2, #0x1800000
+ BIC     R2, R2, #0x01800000
  LDR     R1, [R14, R2, LSR #23]
  TST     R3, #1
  ADDEQ   R1, R1, R3, LSL #29
@@ -1587,7 +1587,7 @@ lab_95F0:
  MOV     R3, R0
  MOVS    R3, R3, LSL #1
  AND     R3, R3, #0xFE000000
- ORR     R3, R3, #0x1000000
+ ORR     R3, R3, #0x01000000
  MOV     R4, #0
 lab_9624:
  MOV     R0, R0, LSR #1
@@ -1597,7 +1597,7 @@ lab_9624:
  MOV     R3, R2
  MOVS    R3, R3, LSL #1
  AND     R3, R3, #0xFE000000
- ORR     R3, R3, #0x1000000
+ ORR     R3, R3, #0x01000000
  MOV     R14, #0
 lab_9648:
  MOV     R2, R2, LSR #1
@@ -1820,7 +1820,7 @@ sub_9948:
  RSBMI   R1, R1, #0
  MOV     R1, R1, LSL #1
  AND     R8, R8, #0xFE000000
- ORR     R8, R8, #0x1000000
+ ORR     R8, R8, #0x01000000
  MOV     R5, #0
 lab_997C:
  MOV     R1, R1, LSR #1
@@ -1839,7 +1839,7 @@ lab_997C:
  RSBMI   R2, R2, #0
  MOV     R2, R2, LSL #1
  AND     R8, R8, #0xFE000000
- ORR     R8, R8, #0x1000000
+ ORR     R8, R8, #0x01000000
  MOV     R6, #0
 lab_99C4:
  MOV     R2, R2, LSR #1
@@ -1858,7 +1858,7 @@ lab_99C4:
  RSBMI   R3, R3, #0
  MOV     R3, R3, LSL #1
  AND     R8, R8, #0xFE000000
- ORR     R8, R8, #0x1000000
+ ORR     R8, R8, #0x01000000
  MOV     R7, #0
 lab_9A0C:
  MOV     R3, R3, LSR #1
@@ -1983,7 +1983,7 @@ DrawTriangleFromBuffer:
 DrawParticleIntoBuffer1:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
- ADD     R14, R14, #0x1000000
+ ADD     R14, R14, #0x01000000
  BIC     R14, R14, #0xC00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R8, R8, LSR #25
@@ -2014,8 +2014,8 @@ DrawTriangleIntoBuffer1:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #8]
  RSB     R14, R14, #0x14000000
- CMP     R14, #0xB000000
- MOVHS   R14, #0xA000000
+ CMP     R14, #0x0B000000
+ MOVHS   R14, #0x0A000000
  BIC     R14, R14, #0xC00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R7, #0x12
@@ -2027,9 +2027,9 @@ DrawTriangleIntoBuffer2:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #8]
  RSB     R14, R14, #0x14000000
- ADD     R14, R14, #0x1000000
- CMP     R14, #0xB000000
- MOVHS   R14, #0xA000000
+ ADD     R14, R14, #0x01000000
+ CMP     R14, #0x0B000000
+ MOVHS   R14, #0x0A000000
  BIC     R14, R14, #0xC00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R7, #0x12
@@ -2589,7 +2589,7 @@ lab_A414:
  STMFD   R13!, {R11}
  ADD     R11, R11, R11, LSL #2
  ADD     R11, R12, R11, LSL #6
- CMP     R4, #0x1400000
+ CMP     R4, #0x01400000
  BPL     lab_A46C
  CMP     R5, #0
  BMI     lab_A46C
@@ -2597,7 +2597,7 @@ lab_A414:
  MOVPL   R0, R4, LSR #16
  ADDPL   R11, R11, R4, LSR #16
  MOVMI   R0, #0
- CMP     R5, #0x1400000
+ CMP     R5, #0x01400000
  RSBLO   R10, R0, R5, LSR #16
  RSBHS   R10, R0, #320
  CMP     R10, #0
@@ -2839,10 +2839,10 @@ PlacePlayerOnLaunchpad:
  STR     R0, [R11, #var_154]
  MOV     R0, #1
  STR     R0, [R11, #var_158]
- MOV     R0, #0x4000000
+ MOV     R0, #0x04000000
  MOV     R2, R0
  ADD     R3, R11, #var_094
- MOV     R1, #0x2EC0000
+ MOV     R1, #0x02EC0000
  STMIA   R3!, {R0-R2}
  MOV     R0, #0
  MOV     R1, #0
