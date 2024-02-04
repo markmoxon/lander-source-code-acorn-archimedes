@@ -48,7 +48,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    43: .set var_0A4, 0xA4
                             	    44: .set var_0A8, 0xA8
                             	    45: .set previousColumn, 0xC4
-                            	    46: .set drawingTileRow, 0xE4
+                            	    46: .set tileCornerRow, 0xE4
                             	    47: .set unusedRowData, 0xF0
                             	    48: .set objectType, 0xF4
                             	    49: .set tileRowOddEven, 0xF8
@@ -170,12 +170,12 @@ Source: "3-assembled-output/Lander.arm"
 00:000080C0 032042E0        	   152:  SUB     R2, R2, R3
 00:000080C4 070085E8        	   153:  STMIA   R5, {R0-R2}
 00:000080C8 0000A0E3        	   154:  MOV     R0, #0
-00:000080CC E400CBE5        	   155:  STRB    R0, [R11, #drawingTileRow]
+00:000080CC E400CBE5        	   155:  STRB    R0, [R11, #tileCornerRow]
 00:000080D0 0060A0E3        	   156:  MOV     R6, #0
 00:000080D4 017B8BE2        	   157:  ADD     R7, R11, #cornerStore1
 00:000080D8 F860CBE5        	   158:  STRB    R6, [R11, #tileRowOddEven]
                             	   159: land1:
-00:000080DC E410DBE5        	   160:  LDRB    R1, [R11, #drawingTileRow]
+00:000080DC E410DBE5        	   160:  LDRB    R1, [R11, #tileCornerRow]
 00:000080E0 C0001FE5        	   161:  LDR     R0, rowConfigAddr
 00:000080E4 810080E0        	   162:  ADD     R0, R0, R1, LSL #1
 00:000080E8 01A0D0E5        	   163:  LDRB    R10, [R0, #1]
@@ -221,14 +221,14 @@ Source: "3-assembled-output/Lander.arm"
 00:0000817C 70018B15        	   203:  STRNE   R0, [R11, #xLandscapeCol]
 00:00008180 01848812        	   204:  ADDNE   R8, R8, #0x01000000
 00:00008184 E2FFFF1A        	   205:  BNE     land2
-00:00008188 E400DBE5        	   206:  LDRB    R0, [R11, #drawingTileRow]
+00:00008188 E400DBE5        	   206:  LDRB    R0, [R11, #tileCornerRow]
 00:0000818C 020050E2        	   207:  SUBS    R0, R0, #2
 00:00008190 D106005B        	   208:  BLPL    DrawGraphicsBuffer
-00:00008194 E400DBE5        	   209:  LDRB    R0, [R11, #drawingTileRow]
+00:00008194 E400DBE5        	   209:  LDRB    R0, [R11, #tileCornerRow]
 00:00008198 010090E2        	   210:  ADDS    R0, R0, #1
 00:0000819C 0B0050E3        	   211:  CMP     R0, #11
 00:000081A0 0E00000A        	   212:  BEQ     land5
-00:000081A4 E400CBE5        	   213:  STRB    R0, [R11, #drawingTileRow]
+00:000081A4 E400CBE5        	   213:  STRB    R0, [R11, #tileCornerRow]
 00:000081A8 68019BE5        	   214:  LDR     R0, [R11, #zLandscapeRow]
 00:000081AC 010440E2        	   215:  SUB     R0, R0, #0x01000000
 00:000081B0 68018BE5        	   216:  STR     R0, [R11, #zLandscapeRow]
@@ -330,7 +330,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008320 0010A003        	   312:  MOVEQ   R1, #0
 00:00008324 0420A003        	   313:  MOVEQ   R2, #4
 00:00008328 0000A003        	   314:  MOVEQ   R0, #0
-00:0000832C E480DBE5        	   315:  LDRB    R8, [R11, #drawingTileRow]
+00:0000832C E480DBE5        	   315:  LDRB    R8, [R11, #tileCornerRow]
 00:00008330 2E3B88E0        	   316:  ADD     R3, R8, R14, LSR #22
 00:00008334 030080E0        	   317:  ADD     R0, R0, R3
 00:00008338 031081E0        	   318:  ADD     R1, R1, R3
@@ -10338,7 +10338,6 @@ dobs6                            A:00008E8C
 dotp1                            A:000092BC
 dotp2                            A:00009308
 dotp3                            A:00009358
-drawingTileRow                   S:000000E4
 endCode                          A:00011A24
 entr1                            A:0000A6E4
 fuelBarColour                    A:000091EC
@@ -10558,6 +10557,7 @@ sub_9574                         A:00009574
 sub_98EC                         A:000098EC
 sub_9948                         A:00009948
 term1                            A:00009D10
+tileCornerRow                    S:000000E4
 tileRowOddEven                   S:000000F8
 typeOffset                       S:000000CC
 unusedRowData                    S:000000F0
@@ -10606,8 +10606,8 @@ zRoofV                           S:00000044
 zSideV                           S:00000050
 
 Symbols by value:
-00000000 xObject
 00000000 OS_WriteC
+00000000 xObject
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10616,8 +10616,8 @@ Symbols by value:
 00000009 OBJ_ROCKET
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 rotationMatrix
 00000030 xNoseV
+00000030 rotationMatrix
 00000034 yNoseV
 00000038 zNoseV
 0000003C xRoofV
@@ -10626,8 +10626,8 @@ Symbols by value:
 00000048 xSideV
 0000004C ySideV
 00000050 zSideV
-00000054 varOffset
 00000054 xVertex
+00000054 varOffset
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10641,7 +10641,7 @@ Symbols by value:
 000000A8 var_0A8
 000000C4 previousColumn
 000000CC typeOffset
-000000E4 drawingTileRow
+000000E4 tileCornerRow
 000000F0 unusedRowData
 000000F4 objectType
 000000F8 tileRowOddEven

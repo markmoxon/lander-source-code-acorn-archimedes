@@ -43,7 +43,7 @@
 .set var_0A4, 0xA4
 .set var_0A8, 0xA8
 .set previousColumn, 0xC4
-.set drawingTileRow, 0xE4
+.set tileCornerRow, 0xE4
 .set unusedRowData, 0xF0
 .set objectType, 0xF4
 .set tileRowOddEven, 0xF8
@@ -152,12 +152,12 @@ DrawLandscapeAndBuffers:
  SUB     R2, R2, R3
  STMIA   R5, {R0-R2}
  MOV     R0, #0
- STRB    R0, [R11, #drawingTileRow]
+ STRB    R0, [R11, #tileCornerRow]
  MOV     R6, #0
  ADD     R7, R11, #cornerStore1
  STRB    R6, [R11, #tileRowOddEven]
 land1:
- LDRB    R1, [R11, #drawingTileRow]
+ LDRB    R1, [R11, #tileCornerRow]
  LDR     R0, rowConfigAddr
  ADD     R0, R0, R1, LSL #1
  LDRB    R10, [R0, #1]
@@ -203,14 +203,14 @@ land4:
  STRNE   R0, [R11, #xLandscapeCol]
  ADDNE   R8, R8, #0x01000000
  BNE     land2
- LDRB    R0, [R11, #drawingTileRow]
+ LDRB    R0, [R11, #tileCornerRow]
  SUBS    R0, R0, #2
  BLPL    DrawGraphicsBuffer
- LDRB    R0, [R11, #drawingTileRow]
+ LDRB    R0, [R11, #tileCornerRow]
  ADDS    R0, R0, #1
  CMP     R0, #11
  BEQ     land5
- STRB    R0, [R11, #drawingTileRow]
+ STRB    R0, [R11, #tileCornerRow]
  LDR     R0, [R11, #zLandscapeRow]
  SUB     R0, R0, #0x01000000
  STR     R0, [R11, #zLandscapeRow]
@@ -312,7 +312,7 @@ GetLandscapeTileColour:
  MOVEQ   R1, #0
  MOVEQ   R2, #4
  MOVEQ   R0, #0
- LDRB    R8, [R11, #drawingTileRow]
+ LDRB    R8, [R11, #tileCornerRow]
  ADD     R3, R8, R14, LSR #22
  ADD     R0, R0, R3
  ADD     R1, R1, R3

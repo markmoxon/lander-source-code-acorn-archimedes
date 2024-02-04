@@ -178,8 +178,8 @@
                                     \ column while working along a row from left
                                     \ to right
 
- drawingTileRow = &E4               \ The number of the landscape tile row that
-                                    \ is currently being drawn
+ tileCornerRow = &E4                \ The number of the landscape tile corner
+                                    \ row that is currently being processed
 
  unusedRowData = &F0                \ Storage for the first data byte in the
                                     \ rowConfig table, which is stored but never
@@ -188,8 +188,9 @@
  objectType = &F4                   \ The type of the object currently being
                                     \ drawn
 
- tileRowOddEven = &F8               \ A counter that flips every tile row that
-                                    \ we draw, so we can trigger actions
+ tileRowOddEven = &F8               \ A counter that flips every time we process
+                                    \ a tile corner row when drawing the
+                                    \ landscape, so we can trigger actions
                                     \ accordingly
 
  altitude = &100                    \ The altitude of the landscape at the
@@ -492,26 +493,41 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ Both the landscape and objects are drawn one tile row at a time, working from
-\ the back to the front. In each iteration, a landscape tile row is drawn, and
-\ then the objects are drawn for the row that's two tile rows behind the
-\ landscape. This ensures that the landscape always appears behind the objects
-\ that are near that part of the landscape.
+\ the back to the front. In each iteration, we process a horizontal row of tile
+\ corners, working from left to right and back to front. For each corner we draw
+\ a landscape tile where possible (i.e. when we have already processed the other
+\ three corners in that tile, so we don't start drawing until we reach the
+\ second corner on the second row).
+\
+\ Objects are drawn after the tiles on which they sit. This is achieved by
+\ staggering the drawing of objects so they are drawn two rows later than the
+\ landscape, so we draw an object two iterations after we have finished drawing
+\ all four of its surrounding tiles. This ensures that the landscape always
+\ appears behind the objects that sit on it.
 \
 \ More specifically, we do the following:
 \
 \   * Part 1: Start by setting up all the variables
 \
-\   * For drawingTileRow = 0 to 10, do the following:
+\   * We now step through each row of tile corners, working through the tile
+\     corners from left to right, one row at a time, keeping track of the row
+\     number in tileCornerRow = 0 to 10
 \
-\     * Part 2: Draw landscape for row drawingTileRow, working through the tiles
-\               from left to right one corner coordinate at a time, and drawing
-\               each tile as a quadrilateral once we have four valid corner
-\               coordinates from the previous row and columns
+\     For each row of tile corners, we do the following:
 \
-\     * Part 3: If drawingTileRow >= 2, draw graphics buffer drawingTileRow - 2
+\     * Part 2: Work along the current row of tile corners, from left to right,
+\               one corner coordinate at a time, and draw each tile as a
+\               quadrilateral once we have four valid corner coordinates from
+\               the previous row and previous column
+\
+\     * Part 3: If tileCornerRow >= 2, also draw the contents of the graphics
+\               buffer with number tileCornerRow - 2
 \
 \   * Part 4: Finish by drawing the objects in graphics buffer 9 and graphics
 \             buffer 10
+\
+\ So we draw the objects in graphics buffer 0 just after we process tile corner
+\ row 2, so that's just after we draw the tiles between corner rows 1 and 2.
 \
 \ Note that graphics buffer 11 is defined but is not used, as the landscape is
 \ only ten tile rows deep.
@@ -535,7 +551,9 @@ ENDIF
                                     \ zCamera in terms of whole tiles
 
  STR     R9, [R11, #zLandscape]     \ Set zLandscape to the z-coordinate of the
-                                    \ tile containing the camera
+                                    \ tile containing the camera (though this
+                                    \ isn't actually used - the value of R9 is
+                                    \ used, though)
 
  LDR     R4, [R11, #xCamera]        \ Set R4 to the x-coordinate of the camera
 
@@ -548,7 +566,7 @@ ENDIF
                                     \ So R4 contains the fractional element of
                                     \ xCamera in terms of whole tiles
 
- STR     R8, [R11, #xLandscape]     \ Set xLandscape to the y-coordinate of the
+ STR     R8, [R11, #xLandscape]     \ Set xLandscape to the x-coordinate of the
                                     \ tile containing the camera
 
  ADD     R5, R11, #xLandscapeRow    \ Set R5 to the address of xLandscapeRow
@@ -568,67 +586,92 @@ ENDIF
 
  STMIA   R5, {R0-R2}                \ (R0, R1, R2) now contains the coordinate
                                     \ of the far-left corner of the back row of
-                                    \ the landscape, which is the first row we
-                                    \ will draw, so store it in (xLandscapeRow,
-                                    \ yLandscapeRow, zLandscapeRow)
+                                    \ the landscape, which is the first corner
+                                    \ row that we will process, so store it in
+                                    \ (xLandscapeRow, yLandscapeRow,
+                                    \ zLandscapeRow)
 
- MOV     R0, #0                     \ Set drawingTileRow = 0 to use as the number
- STRB    R0, [R11, #drawingTileRow] \ of the tile row we are currently drawing,
-                                    \ drawing the rows from tile 0 (at the back)
-                                    \ to tile row 10 (at the front)
+ MOV     R0, #0                     \ Set tileCornerRow = 0 to use as the
+ STRB    R0, [R11, #tileCornerRow]  \ number of the tile corner row we are
+                                    \ currently processing, working through the
+                                    \ corner rows from row 0 (at the back) to
+                                    \ row 10 (at the front)
 
- MOV     R6, #0                     \ Set R6 = 0
+ MOV     R6, #0                     \ Set R6 = 0 to use as the address of the
+                                    \ previous row's coordinates, which we set
+                                    \ to zero as we don't havea previous row yet
 
  ADD     R7, R11, #cornerStore1     \ Set R7 to the address of cornerStore1
 
  STRB    R6, [R11, #tileRowOddEven] \ Set tileRowOddEven = 0, which we will flip
-                                    \ between 0 and 1 for each tile row that we
-                                    \ draw
+                                    \ between 0 and 1 for each tile corner row
+                                    \ that we process
 
                                     \ So we now have the following variables set
-                                    \ up, ready for the iterations through tile
-                                    \ rows and the columns in those rows:
+                                    \ up, ready for the iteration through each
+                                    \ row of tile corners, stepping from left to
+                                    \ right, column by column:
                                     \
                                     \   * R6 = 0
                                     \
                                     \     R6 always points to the set of corner
-                                    \     coordinates from the previous tile
-                                    \     row, so it starts out as null as there
-                                    \     is no previous row at this point
+                                    \     pixel coordinates from the previous
+                                    \     tile corner row, so it starts out as
+                                    \     zero as there is no previous row at
+                                    \     this point
                                     \
                                     \   * R7 = address of cornerStore1
                                     \
                                     \     R7 always points to the place where we
-                                    \     store the corner coordinates for this
-                                    \     row as we work our way along it
+                                    \     store the pixel coordinates for the
+                                    \     current row corner as we work our way
+                                    \     along the row it (we store these
+                                    \     coordinates so we can draw the tiles
+                                    \     when we're on the next corner row in
+                                    \     the next iteration)
                                     \
                                     \   * R9 = the z-coordinate of the tile
-                                    \     containing the camera, so (R8, R9) is
-                                    \     the coordinate of each corner as we
+                                    \     containing the camera
                                     \
-                                    \     R9 steps forward by the tile size on
-                                    \     each iteration ???
+                                    \     So (x, R9) is the coordinate of each
+                                    \     corner on the corner row we're working
+                                    \     along from left to right (though this
+                                    \     does not seem to be right, as isn't R9
+                                    \     the z-coord of the front of the
+                                    \     landscape not the back ???)
                                     \
                                     \   * zLandscapeRow = the z-coordinate of
-                                    \     the far-left corner of the tile row we
-                                    \     are drawing
+                                    \     the back corner row of the landscape
                                     \
-                                    \     zLandscapeRow steps along by the tile
-                                    \     size on each iteration ???
+                                    \     So zLandscapeRow keeps track of the
+                                    \     z-coordinate of the tile corner row
+                                    \     that we are processing, decreasing as
+                                    \     we move towards the front of the tile
+                                    \     landscape
                                     \
                                     \   * tileRowOddEven = 0
                                     \
                                     \     tileRowOddEven flips between 0 and 1
-                                    \     for each tile row, so we can set the
-                                    \     correct values of R6 and R7 at the end
-                                    \     of each iteration
+                                    \     for each tile corner row, so we can
+                                    \     set the correct values of R6 and R7 at
+                                    \     the end of each iteration
                                     \
-                                    \   * drawingTileRow = 0
+                                    \   * tileCornerRow = 0
                                     \
-                                    \     drawingTileRow contains the number of
-                                    \     the tile row that we are currently
-                                    \     drawing, which increments on each
-                                    \     iteration
+                                    \     tileCornerRow contains the number of
+                                    \     the tile corner row that we are
+                                    \     currently processing, which increments
+                                    \     on each iteration as we move forwards
+                                    \
+                                    \  * xLandscape is the x-coordinate of the
+                                    \    tile containing the camera
+                                    \
+                                    \    This is the same as the x-coordinate of
+                                    \    the left end of each tile corner row,
+                                    \    which is the only use for this variable
+                                    \    in the following
+                                    \
+                                    \ We now fall through into part 2
 
 \ ******************************************************************************
 \
@@ -639,10 +682,15 @@ ENDIF
 \
 \ ******************************************************************************
 
+                                    \ We're now ready to iterate through the
+                                    \ landscape, from left to right and back to
+                                    \ front, looping back to land1 after
+                                    \ processing each corner row
+
 .land1
 
- LDRB    R1, [R11, #drawingTileRow] \ Set R1 to the number of the tile row we
-                                    \ are currently drawing
+ LDRB    R1, [R11, #tileCornerRow]  \ Set R1 to the number of the tile corner
+                                    \ row we are currently processing
 
  LDR     R0, rowConfigAddr          \ Set R0 to the address of the pair of
  ADD     R0, R0, R1, LSL #1         \ bytes in the rowConfig table for the tile
@@ -650,50 +698,67 @@ ENDIF
 
  LDRB    R10, [R0, #1]              \ Set R10 to the second byte from the pair
                                     \ in rowConfig, which is the number of tile
-                                    \ corners in the row (we use R10 as a loop
-                                    \ counter below when working our way along
-                                    \ the row)
+                                    \ corners in the row
+                                    \
+                                    \ We now use R10 as a loop counter when
+                                    \ working our way along the row, counting
+                                    \ tile corners as we progress
 
  LDRB    R0, [R0]                   \ Set unusedRowData to the first byte from
  STRB    R0, [R11, #unusedRowData]  \ the pair in rowConfig, though this value
                                     \ is not used, so this has no effect
 
- ADD     R0, R11, #xLandscapeRow    \ Fetch the coordinate from xLandscapeRow
- LDMIA   R0, {R0-R2}                \ into (R0, R1, R2), which contains the
-                                    \ coordinates of the far-left corner of the
-                                    \ landscape row that we need to draw
+ ADD     R0, R11, #xLandscapeRow    \ Fetch the coordinate from (xLandscapeRow,
+ LDMIA   R0, {R0-R2}                \ yLandscapeRow, zLandscapeRow) into
+                                    \ (R0, R1, R2), so they contain the
+                                    \ coordinates of the left end of the corner
+                                    \ row that we need to process
 
  ADD     R4, R11, #xLandscapeCol    \ Store the coordinates in (xLandscapeCol,
  STMIA   R4, {R0-R2}                \ yLandscapeCol, zLandscapeCol) so we can
-                                    \ start drawing from the left end of this
-                                    \ tile row
+                                    \ start processing from the left end of this
+                                    \ tile corner row, using these coordinates
+                                    \ as we work through the columns, updating
+                                    \ yLandscapeCol with the landscape height as
+                                    \ we go
 
- LDR     R8, [R11, #xLandscape]     \ Set R8 = xLandscape - &05800000, so R8
- SUB     R8, R8, #&05800000         \ is the coordinate of the left end of this
-                                    \ row
+ LDR     R8, [R11, #xLandscape]     \ Set R8 = xLandscape - &05800000, so R8 is
+ SUB     R8, R8, #&05800000         \ now the coordinate of the tile corner at
+                                    \ the left end of the corner row
 
  MOV     R0, #&80000000             \ Set previousColumn = &80000000 to denote
  STR     R0, [R11, #previousColumn] \ that we don't have corner coordinates from
                                     \ the previous column yet (as we are
                                     \ starting a new row)
 
-                                    \ We now do the following loop R10 times
+                                    \ We now do the following loop R10 times,
+                                    \ once for each of the tile corners in the
+                                    \ row, looping back to land2 as we move
+                                    \ right through the columns
 
 .land2
 
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9), which is
-                                    \ the point on this row (R9 feels wrong ???)
+                                    \ the current corner on this row
+                                    \
+                                    \ (R9 feels wrong, as it's set to the
+                                    \ z-coord at the front of the landscape, not
+                                    \ the back, isn't it ???)
 
  LDR     R14, [R11, #yCamera]       \ Set yLandscapeCol = R0 - yCamera
  SUB     R0, R0, R14                \                   = altitude - yCamera
- STR     R0, [R11, #yLandscapeCol]
+ STR     R0, [R11, #yLandscapeCol]  \
+                                    \ So this stores the landscape height in the
+                                    \ yLandscapeCol coordinate
 
  ADD     R0, R11, #xLandscapeCol    \ Set R0 to the address of xLandscapeCol
 
  BL      ProjectVertexOntoScreen    \ Project (xLandscapeCol, yLandscapeCol,
                                     \ zLandscapeCol) onto the screen, returning
-                                    \ the results in (R0, R1)
+                                    \ the results in (R0, R1), so this projects
+                                    \ the tile corner as it sits on the
+                                    \ landscape
                                     \
                                     \ This also sets the flags using CMN R0, #0
 
@@ -702,21 +767,26 @@ ENDIF
                                     \ the screen
 
  STMIA   R7!, {R0-R1}               \ Store the corner coordinates in (R0, R1)
-                                    \ in R7, updating R7 as we go
+                                    \ in R7, updating R7 as we go, as R7 is
+                                    \ where we store the tile corner pixel
+                                    \ coordinates as we go
 
  CMP     R6, #0                     \ If R6 = 0 then this is either the very
- BEQ     land4                      \ first tile row, or we have already fetched
-                                    \ all the data from the storage at R6
+ BEQ     land4                      \ first tile corner row, or we have already
+                                    \ fetched all the data for the previous row
+                                    \ from the storage at R6
                                     \
                                     \ In either case, jump to land4 to skip
                                     \ drawing this tile as we can't draw tiles
                                     \ without the corresponding corner
-                                    \ coordinates from the previous row
+                                    \ coordinates from the previous row and
+                                    \ previous column
 
- LDMIA   R6!, {R2-R3}               \ Load the corner coordinates from R6 into
-                                    \ (R2, R3), updating R6 as we go, so this
-                                    \ fetches the corresponding corner
-                                    \ coordinates from the previous tile row
+ LDMIA   R6!, {R2-R3}               \ Load the corner pixel coordinates from R6
+                                    \ into (R2, R3), updating R6 as we go, so
+                                    \ this fetches the corresponding corner
+                                    \ pixel coordinates from the previous tile
+                                    \ corner row
 
  CMP     R2, #&80000000             \ If R2 = &80000000 then we have reached the
  MOVEQ   R6, #0                     \ end of the storage in R6, so set R6 = 0
@@ -725,24 +795,27 @@ ENDIF
                                     \ skip drawing this tile
 
                                     \ If we get here then we have the
-                                    \ following corner coordinates calculated:
+                                    \ following pixel corner coordinates
+                                    \ calculated:
                                     \
                                     \   (R0, R1) = new corner from this row
                                     \
                                     \   (R2, R3) = corresponding corner from
-                                    \              previous row
+                                    \              previous row (i.e. the corner
+                                    \              that's back by one row)
 
  STMFD   R13!, {R6-R8}              \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- ADD     R14, R11, #previousColumn  \ We now need to fetch the previous corners
- LDMIA   R14, {R4-R7}               \ looking left along the tile row, so we can
-                                    \ draw a tile from there to the new corner
+ ADD     R14, R11, #previousColumn  \ We now need to fetch the previous corners,
+ LDMIA   R14, {R4-R7}               \ looking left along the tile row to the
+                                    \ previous column of corners, so we can draw
+                                    \ a tile from there to the new corner
                                     \
-                                    \ We will have stored these corners to the
-                                    \ left in the previousColumn variable in the
+                                    \ We will have stored these previous corners
+                                    \ in the previousColumn table in the
                                     \ previous iteration, so fetch them into
-                                    \ R4 to R7, so:
+                                    \ R4 to R7 like this:
                                     \
                                     \   (R4, R5) = corner from the column to the
                                     \              left on this row
@@ -750,27 +823,31 @@ ENDIF
                                     \   (R6, R7) = corresponding corner from the
                                     \              previous row
 
- STMIA   R14, {R0-R3}               \ Store the new corners in (R0, R1) and
-                                    \ (R2, R3) in previousColumn so we can fetch
-                                    \ them in the next iteration
+ STMIA   R14, {R0-R3}               \ Store the new corners from this corner row
+                                    \ in (R0, R1) and (R2, R3) in previousColumn
+                                    \ so we can fetch them in the next iteration
+                                    \ in the same way
 
  CMP     R4, #&80000000             \ If R4 = &80000000 then this is actually
  BEQ     land3                      \ the first column of corner coordinates in
                                     \ this row, so we can't yet draw the tile,
-                                    \ so jump to land3 to skip the drawing
+                                    \ so jump to land3 to skip the drawing part
 
-                                    \ If we get here then we have a tile to draw
+                                    \ If we get here then we actually have a
+                                    \ tile to draw
 
- BL      GetLandscapeTileColour     \ Calculate the tile colour and return it in
-                                    \ R8
+ BL      GetLandscapeTileColour     \ Calculate the tile colour, depending on
+                                    \ the slope, and return it in R8
 
  BL      DrawQuadrilateral          \ Draw the tile by drawing a quadrilateral
                                     \ in colour R8 with corners at:
                                     \
-                                    \   (R0, R1)
-                                    \   (R2, R3)
-                                    \   (R4, R5)
-                                    \   (R6, R7)
+                                    \   (R0, R1) = the corner we're processing
+                                    \   (R2, R3) = same corner in previous row
+                                    \   (R4, R5) = previous column in this row
+                                    \   (R6, R7) = previous row, previous column
+                                    \
+                                    \ So this draws the tile we want on-screen
 
 .land3
 
@@ -784,47 +861,49 @@ ENDIF
                                     \ row
 
  LDRNE   R0, [R11, #xLandscapeCol]  \ If we haven't yet processed all the tile
- ADDNE   R0, R0, #&01000000         \ corners in this row, add a tile width to
- STRNE   R0, [R11, #xLandscapeCol]  \ xLandscapeCol and R8 to move along the
- ADDNE   R8, R8, #&01000000         \ row, and jump back to land2 to process the
- BNE     land2                      \ next tile
+ ADDNE   R0, R0, #&01000000         \ corners in this row, add a tile's width to
+ STRNE   R0, [R11, #xLandscapeCol]  \ xLandscapeCol and R8 to move them along
+ ADDNE   R8, R8, #&01000000         \ the row to the next tile corner, and jump
+ BNE     land2                      \ back to land2 to process the next corner
+
+                                    \ By this point have drawn all the tiles in
+                                    \ this row, so we now move on to the objects
+                                    \ in the graphics buffers
 
 \ ******************************************************************************
 \
 \       Name: DrawLandscapeAndBuffers (Part 3 of 4)
 \       Type: Subroutine
 \   Category: Landscape
-\    Summary: Draw the objects in the graphics buffers for two rows behind
+\    Summary: Draw the objects in the graphics buffers for two rows behind the
+\             current corner row
 \
 \ ******************************************************************************
 
-                                    \ We have now drawn all the tiles in this
-                                    \ landscape row, so we now move on to the
-                                    \ objects in the graphics buffers
+ LDRB    R0, [R11, #tileCornerRow]  \ Set R0 to the number of the tile corner
+                                    \ row we are currently processing
 
- LDRB    R0, [R11, #drawingTileRow] \ Set R0 to the number of the tile row we
-                                    \ are currently drawing
-
- SUBS    R0, R0, #2                 \ Subtract 2 from the tile row to get the
-                                    \ number of the row two tile rows behind the
-                                    \ the current row
+ SUBS    R0, R0, #2                 \ Subtract 2 from the corner row to get the
+                                    \ number of the row that's two tile rows
+                                    \ behind the the current row
 
  BLPL    DrawGraphicsBuffer         \ If this results in a valid graphics buffer
-                                    \ number, draw the contents of the buffer
+                                    \ number, i.e. one that is positive, draw
+                                    \ the contents of the buffer
 
- LDRB    R0, [R11, #drawingTileRow] \ Set R0 to the number of the tile row we
-                                    \ are currently drawing
+ LDRB    R0, [R11, #tileCornerRow]  \ Set R0 to the number of the tile corner
+                                    \ row we are currently processing
 
  ADDS    R0, R0, #1                 \ Increment the tile row number in R0 to
                                     \ move forwards by one tile row
 
- CMP     R0, #11                    \ If R0 = 11 then we already drawn the last
+ CMP     R0, #11                    \ If R0 = 11 then we just drew the final
  BEQ     land5                      \ tile row, so jump to land5 to finish off
                                     \ by drawing graphics buffers 9 and 10
 
- STRB    R0, [R11, #drawingTileRow] \ Otherwise store the updated tile row
-                                    \ number in drawingTileRow, so we step
-                                    \ forwards through the tile rows
+ STRB    R0, [R11, #tileCornerRow]  \ Otherwise store the updated tile corner
+                                    \ row number in tileCornerRow, ready for the
+                                    \ next corner row
 
  LDR     R0, [R11, #zLandscapeRow]  \ Subtract a tile's width from zLandscapeRow
  SUB     R0, R0, #&01000000         \ to move the coordinates of the current row
@@ -835,8 +914,9 @@ ENDIF
                                     \ from back to front
 
  MOV     R0, #&80000000             \ Store &80000000 in the address in R7 to
- STR     R0, [R7]                   \ reset the store, ready to replace it with
-                                    \ the new row's corner coordinates
+ STR     R0, [R7]                   \ reset the store, so it's ready to be used
+                                    \ to store the new row's pixel corner
+                                    \ coordinates
 
  LDRB    R0, [R11, #tileRowOddEven] \ Flip the value of tileRowOddEven between
  EORS    R0, R0, #1                 \ 0 and 1, setting the flags to feed into
@@ -855,13 +935,13 @@ ENDIF
                                     \   * R7 = address of cornerStore1
                                     \
                                     \ So R6 and R7 swap over after each row, so
-                                    \ R6 always points to the set of corner
-                                    \ coordinates from the previous tile row,
+                                    \ R6 always points to the set of pixel
+                                    \ corner coordinates from the previous row,
                                     \ and R7 points to the place where we store
-                                    \ this row's corner coordinates
+                                    \ this row's pixel corner coordinates
 
- B       land1                      \ Loop back to land1 to draw the next tile
-                                    \ row
+ B       land1                      \ Loop back to land1 to process the next row
+                                    \ of tile corners
 
 \ ******************************************************************************
 \
@@ -1266,20 +1346,21 @@ ENDIF
  MOVEQ   R2, #4                     \ red and green are zero
  MOVEQ   R0, #0
 
- LDRB    R8, [R11, #drawingTileRow] \ Set the tile's brightness in R3 to:
+ LDRB    R8, [R11, #tileCornerRow]  \ Set the tile's brightness in R3 to:
  ADD     R3, R8, R14, LSR #22       \
-                                    \   drawingTileRow + slope >> 22
+                                    \   tileCornerRow + slope >> 22
                                     \
-                                    \ where drawingTileRow is the number of the
-                                    \ tile row that we're drawing (so it goes
-                                    \ from 0 at the back to 11 at the front)
+                                    \ where tileCornerRow is the number of the
+                                    \ tile  orner row that we're processing (so
+                                    \ it goes from 0 at the back to 11 at the
+                                    \ front)
                                     \
                                     \ As we draw the landscape from back to
                                     \ front and left to right, this means that:
                                     \
                                     \   * Tiles nearer the front will have a
                                     \     higher brightness level than those at
-                                    \     the back (as drawingTileRow will be
+                                    \     the back (as tileCornerRow will be
                                     \     higher for closer tiles)
                                     \
                                     \   * Tiles that face to the left will have
@@ -2623,7 +2704,7 @@ ENDIF
                                     \ have checked along the whole x-axis
 
  SUB     R9, R9, #&01000000         \ Step along the z-axis by one whole tile,
-                                    \ going from front to back
+                                    \ going from back to front
 
  SUBS    R7, R7, #1                 \ Decrement the z-axis loop counter in R6
 
@@ -3937,27 +4018,30 @@ ENDIF
 \
 \       Name: TransposeRotationMatrix
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Unused
+\    Summary: Transpose the rotation matriz
 \
 \ ******************************************************************************
 
 .TransposeRotationMatrix
 
- ADD     R2, R11, #rotationMatrix   \ 
- LDR     R0, [R2, #4]               \ 
- LDR     R1, [R2, #12]              \ 
- STR     R0, [R2, #12]              \ 
- STR     R1, [R2, #4]               \ 
- LDR     R0, [R2, #8]               \ 
- LDR     R1, [R2, #24]              \ 
- STR     R0, [R2, #24]              \ 
- STR     R1, [R2, #8]               \ 
- LDR     R0, [R2, #20]              \ 
- LDR     R1, [R2, #28]              \ 
- STR     R0, [R2, #28]              \ 
- STR     R1, [R2, #20]              \ 
- MOV     PC, R14                    \ 
+ ADD     R2, R11, #rotationMatrix   \ Set R2 to the address of the rotation
+                                    \ matrix
+
+ LDR     R0, [R2, #4]               \ Transpose it by swapping coordinates on
+ LDR     R1, [R2, #12]              \ either side of the diagonal from the
+ STR     R0, [R2, #12]              \ top-left to bottom-right
+ STR     R1, [R2, #4]
+ LDR     R0, [R2, #8]
+ LDR     R1, [R2, #24]
+ STR     R0, [R2, #24]
+ STR     R1, [R2, #8]
+ LDR     R0, [R2, #20]
+ LDR     R1, [R2, #28]
+ STR     R0, [R2, #28]
+ STR     R1, [R2, #20]
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
