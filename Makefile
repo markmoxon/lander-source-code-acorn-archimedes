@@ -1,6 +1,16 @@
 VASM?=vasmarm_std
 PYTHON?=python
 
+# The deploy target deploys !Lander to a web server so archi.medes.live can load it
+#
+# LANDER_PATH should be set to the scp path of the server hosting the build
+#
+# e.g. export $LANDER_PATH=name@server.com:~/path/to
+#
+# Once deployed, you can load a URL like this to see the compiled game:
+#
+# https://archi.medes.live/#ff=14400&disc=https://server.com/path/to/!Lander.zip&autoboot=desktop%20filer_opendir%20HostFS::HostFS.$
+
 .PHONY:all
 all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
@@ -19,16 +29,6 @@ all:
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
 
 deploy:
-	# This target deploys !Lander to a web server so archi.medes.live can load it
-	#
-	# LANDER_PATH should be set to the scp path of the server hosting the build
-	#
-	# e.g. export $LANDER_PATH=name@server.com:~/path/to
-	#
-	# Once deployed, you can load a URL like this to see the compiled game:
-	#
-	# https://archi.medes.live/#ff=14400&disc=https://server.com/path/to/!Lander.zip&autoboot=desktop%20filer_opendir%20HostFS::HostFS.$
-
 	cp -r 5-compiled-game-discs/riscos/!Lander .
 	echo " " > T-$$(date +%H-%M-%S),fff
 	zip -r \!Lander.zip !Lander T*
