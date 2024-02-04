@@ -59,12 +59,12 @@ Source: "3-assembled-output/Lander.arm"
                             	    54: .set objectData, 0x110
                             	    55: .set objectFlags, 0x114
                             	    56: .set mainLoopCount, 0x118
-                            	    57: .set var_11C, 0x11C
+                            	    57: .set crashLoopCount, 0x11C
                             	    58: .set crashedFlag, 0x120
                             	    59: .set currentScore, 0x124
                             	    60: .set fuelLevel, 0x128
                             	    61: .set gravity, 0x12C
-                            	    62: .set var_130, 0x130
+                            	    62: .set playingGame, 0x130
                             	    63: .set remainingLives, 0x134
                             	    64: .set highScore, 0x138
                             	    65: .set xCamera, 0x13C
@@ -133,7 +133,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008080 74FD0200        	   128: .long    0x0002FD74
 00:00008084 480E0300        	   129: .long    0x00030E48
 00:00008088 1C1F0300        	   130: .long    0x00031F1C
-                            	   131: DrawLandscape:
+                            	   131: DrawLandscapeAndBuffers:
 00:0000808C E0432DE9        	   132:  STMFD   R13!, {R5-R9, R14}
 00:00008090 44319BE5        	   133:  LDR     R3, [R11, #zCamera]
 00:00008094 FF9403E2        	   134:  AND     R9, R3, #0xFF000000
@@ -154,7 +154,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000080D0 0060A0E3        	   149:  MOV     R6, #0
 00:000080D4 017B8BE2        	   150:  ADD     R7, R11, #var_400
 00:000080D8 F860CBE5        	   151:  STRB    R6, [R11, #var_0F8]
-                            	   152: lab_80DC:
+                            	   152: land1:
 00:000080DC E410DBE5        	   153:  LDRB    R1, [R11, #var_0E4]
 00:000080E0 C0001FE5        	   154:  LDR     R0, var_8028
 00:000080E4 810080E0        	   155:  ADD     R0, R0, R1, LSL #1
@@ -169,45 +169,45 @@ Source: "3-assembled-output/Lander.arm"
 00:00008108 168548E2        	   164:  SUB     R8, R8, #0x05800000
 00:0000810C 0201A0E3        	   165:  MOV     R0, #0x80000000
 00:00008110 C4008BE5        	   166:  STR     R0, [R11, #var_0C4]
-                            	   167: lab_8114:
+                            	   167: land2:
 00:00008114 360000EB        	   168:  BL      GetLandscapeAltitude
 00:00008118 40E19BE5        	   169:  LDR     R14, [R11, #yCamera]
 00:0000811C 0E0040E0        	   170:  SUB     R0, R0, R14
 00:00008120 74018BE5        	   171:  STR     R0, [R11, #var_174]
 00:00008124 170E8BE2        	   172:  ADD     R0, R11, #var_170
 00:00008128 860500EB        	   173:  BL      ProjectVertexOntoScreen
-00:0000812C 0F00002A        	   174:  BHS     DrawGraphicsBuffers
+00:0000812C 0F00002A        	   174:  BHS     land4
 00:00008130 0300A7E8        	   175:  STMIA   R7!, {R0-R1}
 00:00008134 000056E3        	   176:  CMP     R6, #0
-00:00008138 0C00000A        	   177:  BEQ     DrawGraphicsBuffers
+00:00008138 0C00000A        	   177:  BEQ     land4
 00:0000813C 0C00B6E8        	   178:  LDMIA   R6!, {R2-R3}
 00:00008140 020152E3        	   179:  CMP     R2, #0x80000000
 00:00008144 0060A003        	   180:  MOVEQ   R6, #0
-00:00008148 0800000A        	   181:  BEQ     DrawGraphicsBuffers
+00:00008148 0800000A        	   181:  BEQ     land4
 00:0000814C C0012DE9        	   182:  STMFD   R13!, {R6-R8}
 00:00008150 C4E08BE2        	   183:  ADD     R14, R11, #var_0C4
 00:00008154 F0009EE8        	   184:  LDMIA   R14, {R4-R7}
 00:00008158 0F008EE8        	   185:  STMIA   R14, {R0-R3}
 00:0000815C 020154E3        	   186:  CMP     R4, #0x80000000
-00:00008160 0100000A        	   187:  BEQ     lab_816C
+00:00008160 0100000A        	   187:  BEQ     land3
 00:00008164 5C0000EB        	   188:  BL      sub_82DC
 00:00008168 160700EB        	   189:  BL      DrawQuadrilateral
-                            	   190: lab_816C:
+                            	   190: land3:
 00:0000816C C001BDE8        	   191:  LDMFD   R13!, {R6-R8}
-                            	   192: DrawGraphicsBuffers:
+                            	   192: land4:
 00:00008170 01A05AE2        	   193:  SUBS    R10, R10, #1
 00:00008174 70019B15        	   194:  LDRNE   R0, [R11, #var_170]
 00:00008178 01048012        	   195:  ADDNE   R0, R0, #0x01000000
 00:0000817C 70018B15        	   196:  STRNE   R0, [R11, #var_170]
 00:00008180 01848812        	   197:  ADDNE   R8, R8, #0x01000000
-00:00008184 E2FFFF1A        	   198:  BNE     lab_8114
+00:00008184 E2FFFF1A        	   198:  BNE     land2
 00:00008188 E400DBE5        	   199:  LDRB    R0, [R11, #var_0E4]
 00:0000818C 020050E2        	   200:  SUBS    R0, R0, #2
 00:00008190 D106005B        	   201:  BLPL    DrawGraphicsBuffer
 00:00008194 E400DBE5        	   202:  LDRB    R0, [R11, #var_0E4]
 00:00008198 010090E2        	   203:  ADDS    R0, R0, #1
-00:0000819C 0B0050E3        	   204:  CMP     R0, #0xB
-00:000081A0 0E00000A        	   205:  BEQ     lab_81E0
+00:0000819C 0B0050E3        	   204:  CMP     R0, #11
+00:000081A0 0E00000A        	   205:  BEQ     gbuf1
 00:000081A4 E400CBE5        	   206:  STRB    R0, [R11, #var_0E4]
 00:000081A8 68019BE5        	   207:  LDR     R0, [R11, #var_168]
 00:000081AC 010440E2        	   208:  SUB     R0, R0, #0x01000000
@@ -222,11 +222,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000081D0 056C8B02        	   217:  ADDEQ   R6, R11, #var_500
 00:000081D4 017B8B02        	   218:  ADDEQ   R7, R11, #var_400
 00:000081D8 057C8B12        	   219:  ADDNE   R7, R11, #var_500
-00:000081DC BEFFFFEA        	   220:  B       lab_80DC
-                            	   221: lab_81E0:
+00:000081DC BEFFFFEA        	   220:  B       land1
+                            	   221: gbuf1:
 00:000081E0 0900A0E3        	   222:  MOV     R0, #9
 00:000081E4 BC0600EB        	   223:  BL      DrawGraphicsBuffer
-00:000081E8 0A00A0E3        	   224:  MOV     R0, #0xA
+00:000081E8 0A00A0E3        	   224:  MOV     R0, #10
 00:000081EC BA0600EB        	   225:  BL      DrawGraphicsBuffer
 00:000081F0 E083BDE8        	   226:  LDMFD   R13!, {R5-R9, PC}
                             	   227: GetLandscapeAltitude:
@@ -438,7 +438,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008508 0100BDE8        	   433:  LDMFD   R13!, {R0}
                             	   434: lab_850C:
 00:0000850C 000051E1        	   435:  CMP     R1, R0
-00:00008510 4F0000CB        	   436:  BLGT    sub_8654
+00:00008510 4F0000CB        	   436:  BLGT    LandOnLaunchpad
 00:00008514 000051E3        	   437:  CMP     R1, #0
 00:00008518 0010A043        	   438:  MOVMI   R1, #0
 00:0000851C 30308BE2        	   439:  ADD     R3, R11, #rotationMatrix
@@ -521,7 +521,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000864C 0C0100EB        	   516:  BL      sub_8A84
                             	   517: lab_8650:
 00:00008650 0080BDE8        	   518:  LDMFD   R13!, {PC}
-                            	   519: sub_8654:
+                            	   519: LandOnLaunchpad:
 00:00008654 94308BE2        	   520:  ADD     R3, R11, #var_094
 00:00008658 3F0093E8        	   521:  LDMIA   R3, {R0-R5}
 00:0000865C 020350E3        	   522:  CMP     R0, #0x08000000
@@ -554,9 +554,9 @@ Source: "3-assembled-output/Lander.arm"
 00:000086C4 0014BDE8        	   549:  LDMFD   R13!, {R10, R12}
                             	   550: LoseLife:
 00:000086C8 0000A0E3        	   551:  MOV     R0, #0
-00:000086CC 30018BE5        	   552:  STR     R0, [R11, #var_130]
+00:000086CC 30018BE5        	   552:  STR     R0, [R11, #playingGame]
 00:000086D0 1E00A0E3        	   553:  MOV     R0, #30
-00:000086D4 1C018BE5        	   554:  STR     R0, [R11, #var_11C]
+00:000086D4 1C018BE5        	   554:  STR     R0, [R11, #crashLoopCount]
 00:000086D8 5180A0E3        	   555:  MOV     R8, #81
 00:000086DC 94008BE2        	   556:  ADD     R0, R11, #var_094
 00:000086E0 070090E8        	   557:  LDMIA   R0, {R0-R2}
@@ -570,15 +570,15 @@ Source: "3-assembled-output/Lander.arm"
 00:000086FC 3C0000EB        	   565:  BL      MoveAndDrawParticles
 00:00008700 B50100EB        	   566:  BL      DrawObjects
 00:00008704 7C0500EB        	   567:  BL      AddTerminatorsToBuffers
-00:00008708 5FFEFFEB        	   568:  BL      DrawLandscape
+00:00008708 5FFEFFEB        	   568:  BL      DrawLandscapeAndBuffers
 00:0000870C 7D0200EB        	   569:  BL      PrintCurrentScore
 00:00008710 890500EB        	   570:  BL      SwitchScreenBank
 00:00008714 18019BE5        	   571:  LDR     R0, [R11, #mainLoopCount]
 00:00008718 010080E2        	   572:  ADD     R0, R0, #1
 00:0000871C 18018BE5        	   573:  STR     R0, [R11, #mainLoopCount]
-00:00008720 1C019BE5        	   574:  LDR     R0, [R11, #var_11C]
+00:00008720 1C019BE5        	   574:  LDR     R0, [R11, #crashLoopCount]
 00:00008724 010050E2        	   575:  SUBS    R0, R0, #1
-00:00008728 1C018BE5        	   576:  STR     R0, [R11, #var_11C]
+00:00008728 1C018BE5        	   576:  STR     R0, [R11, #crashLoopCount]
 00:0000872C EEFFFF5A        	   577:  BPL     lose1
 00:00008730 34019BE5        	   578:  LDR     R0, [R11, #remainingLives]
 00:00008734 010050E2        	   579:  SUBS    R0, R0, #1
@@ -675,7 +675,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000889C 020817E3        	   662:  TST     R7, #0x00020000
 00:000088A0 1700000A        	   663:  BEQ     lab_8904
 00:000088A4 07002DE9        	   664:  STMFD   R13!, {R0-R2}
-00:000088A8 30E19BE5        	   665:  LDR     R14, [R11, #var_130]
+00:000088A8 30E19BE5        	   665:  LDR     R14, [R11, #playingGame]
 00:000088AC 00005EE3        	   666:  CMP     R14, #0
 00:000088B0 0C00000A        	   667:  BEQ     lab_88E8
 00:000088B4 000050E3        	   668:  CMP     R0, #0
@@ -1379,11 +1379,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000092B0 FE4404E2        	  1366:  AND     R4, R4, #0xFE000000
 00:000092B4 014484E3        	  1367:  ORR     R4, R4, #0x01000000
 00:000092B8 0030A0E3        	  1368:  MOV     R3, #0
-                            	  1369: lab_92BC:
+                            	  1369: dotp1:
 00:000092BC A550A0E1        	  1370:  MOV     R5, R5, LSR #1
 00:000092C0 05308320        	  1371:  ADDCS   R3, R3, R5
 00:000092C4 8440B0E1        	  1372:  MOVS    R4, R4, LSL #1
-00:000092C8 FBFFFF1A        	  1373:  BNE     lab_92BC
+00:000092C8 FBFFFF1A        	  1373:  BNE     dotp1
 00:000092CC A330A0E1        	  1374:  MOV     R3, R3, LSR #1
 00:000092D0 000037E3        	  1375:  TEQ     R7, #0
 00:000092D4 00306342        	  1376:  RSBMI   R3, R3, #0
@@ -1399,11 +1399,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000092FC FE4404E2        	  1386:  AND     R4, R4, #0xFE000000
 00:00009300 014484E3        	  1387:  ORR     R4, R4, #0x01000000
 00:00009304 0060A0E3        	  1388:  MOV     R6, #0
-                            	  1389: lab_9308:
+                            	  1389: dotp2:
 00:00009308 A550A0E1        	  1390:  MOV     R5, R5, LSR #1
 00:0000930C 05608620        	  1391:  ADDHS   R6, R6, R5
 00:00009310 8440B0E1        	  1392:  MOVS    R4, R4, LSL #1
-00:00009314 FBFFFF1A        	  1393:  BNE     lab_9308
+00:00009314 FBFFFF1A        	  1393:  BNE     dotp2
 00:00009318 A660A0E1        	  1394:  MOV     R6, R6, LSR #1
 00:0000931C 000037E3        	  1395:  TEQ     R7, #0
 00:00009320 00606642        	  1396:  RSBMI   R6, R6, #0
@@ -1420,11 +1420,11 @@ Source: "3-assembled-output/Lander.arm"
 00:0000934C FE4404E2        	  1407:  AND     R4, R4, #0xFE000000
 00:00009350 014484E3        	  1408:  ORR     R4, R4, #0x01000000
 00:00009354 0060A0E3        	  1409:  MOV     R6, #0
-                            	  1410: lab_9358:
+                            	  1410: dotp3:
 00:00009358 A550A0E1        	  1411:  MOV     R5, R5, LSR #1
 00:0000935C 05608620        	  1412:  ADDHS   R6, R6, R5
 00:00009360 8440B0E1        	  1413:  MOVS    R4, R4, LSL #1
-00:00009364 FBFFFF1A        	  1414:  BNE     lab_9358
+00:00009364 FBFFFF1A        	  1414:  BNE     dotp3
 00:00009368 A660A0E1        	  1415:  MOV     R6, R6, LSR #1
 00:0000936C 000037E3        	  1416:  TEQ     R7, #0
 00:00009370 00606642        	  1417:  RSBMI   R6, R6, #0
@@ -2097,15 +2097,15 @@ Source: "3-assembled-output/Lander.arm"
 00:00009CFC 00502DE9        	  2084:  STMFD   R13!, {R12, R14}
 00:00009D00 BCCA1FE5        	  2085:  LDR     R12, graphicsBufferEndAddr
 00:00009D04 BCEA1FE5        	  2086:  LDR     R14, graphicsBufferAddr
-00:00009D08 0B00A0E3        	  2087:  MOV     R0, #0xB
-00:00009D0C 1310A0E3        	  2088:  MOV     R1, #0x13
-                            	  2089: lab_9D10:
+00:00009D08 0B00A0E3        	  2087:  MOV     R0, #11
+00:00009D0C 1310A0E3        	  2088:  MOV     R1, #19
+                            	  2089: term1:
 00:00009D10 00219CE7        	  2090:  LDR     R2, [R12, R0, LSL #2]
 00:00009D14 001082E5        	  2091:  STR     R1, [R2]
 00:00009D18 00219EE7        	  2092:  LDR     R2, [R14, R0, LSL #2]
 00:00009D1C 00218CE7        	  2093:  STR     R2, [R12, R0, LSL #2]
 00:00009D20 010050E2        	  2094:  SUBS    R0, R0, #1
-00:00009D24 F9FFFF5A        	  2095:  BPL     lab_9D10
+00:00009D24 F9FFFF5A        	  2095:  BPL     term1
 00:00009D28 0090BDE8        	  2096:  LDMFD   R13!, {R12, PC}
                             	  2097: screenBank2Addr:
 00:00009D2C 0094FD01        	  2098: .long    0x01FD8000 + 320 * 16
@@ -2871,7 +2871,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A800 0120A0E3        	  2842:  MOV     R2, #1
 00:0000A804 55FAFFEB        	  2843:  BL      PrintScoreInBothBanks
 00:0000A808 0000E0E3        	  2844:  MVN     R0, #0
-00:0000A80C 30018BE5        	  2845:  STR     R0, [R11, #var_130]
+00:0000A80C 30018BE5        	  2845:  STR     R0, [R11, #playingGame]
 00:0000A810 0000A0E3        	  2846:  MOV     R0, #0
 00:0000A814 3C018BE5        	  2847:  STR     R0, [R11, #xCamera]
 00:0000A818 44018BE5        	  2848:  STR     R0, [R11, #zCamera]
@@ -2904,7 +2904,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A880 DBF7FFEB        	  2875:  BL      MoveAndDrawParticles
 00:0000A884 54F9FFEB        	  2876:  BL      DrawObjects
 00:0000A888 1BFDFFEB        	  2877:  BL      AddTerminatorsToBuffers
-00:0000A88C FEF5FFEB        	  2878:  BL      DrawLandscape
+00:0000A88C FEF5FFEB        	  2878:  BL      DrawLandscapeAndBuffers
 00:0000A890 1CFAFFEB        	  2879:  BL      PrintCurrentScore
 00:0000A894 58FAFFEB        	  2880:  BL      DrawFuelLevel
 00:0000A898 27FDFFEB        	  2881:  BL      SwitchScreenBank
@@ -10239,9 +10239,8 @@ Draw3x1ParticleFromBuffer        A:00009B78
 Draw3x2ParticleFromBuffer        A:00009B40
 DrawFuelLevel                    A:000091FC
 DrawGraphicsBuffer               A:00009CDC
-DrawGraphicsBuffers              A:00008170
 DrawHorizontalLine               A:0000A4C8
-DrawLandscape                    A:0000808C
+DrawLandscapeAndBuffers          A:0000808C
 DrawLineSegment                  A:0000A524
 DrawNextFromGraphicsBuffer       A:00009CEC
 DrawObject                       A:00008EC4
@@ -10263,6 +10262,7 @@ GetLandscapeBelowObject          A:000082AC
 GetRandomNumbers                 A:00009A40
 GetVertexCoordinate              A:0000991C
 LAUNCHPAD_ALTITUDE               S:03500000
+LandOnLaunchpad                  A:00008654
 LoseLife                         A:000086C8
 MainLoop                         A:0000A850
 MoveAndDrawParticles             A:000087F4
@@ -10296,6 +10296,7 @@ arctanTable                      A:0000C810
 arctanTableAddr                  A:000091F4
 bank1                            A:00009DAC
 bufferJump                       A:00009C8C
+crashLoopCount                   S:0000011C
 crashedFlag                      S:00000120
 currentScore                     S:00000124
 divisionTable                    A:0000DA10
@@ -10311,11 +10312,15 @@ dobs3                            A:00008E1C
 dobs4                            A:00008E38
 dobs5                            A:00008E80
 dobs6                            A:00008E8C
+dotp1                            A:000092BC
+dotp2                            A:00009308
+dotp3                            A:00009358
 endCode                          A:00011A24
 entr1                            A:0000A6E4
 fuelBarColour                    A:000091EC
 fuelBurnRate                     S:0000015C
 fuelLevel                        S:00000128
+gbuf1                            A:000081E0
 graphicsBufferAddr               A:00009250
 graphicsBufferEndAddr            A:0000924C
 graphicsBuffers                  A:0000802C
@@ -10327,10 +10332,6 @@ initialFuelLevel                 A:0000A580
 initialHighScore                 A:0000A57C
 initialScore                     A:0000A578
 labOffset                        S:0000006C
-lab_80DC                         A:000080DC
-lab_8114                         A:00008114
-lab_816C                         A:0000816C
-lab_81E0                         A:000081E0
 lab_8400                         A:00008400
 lab_8408                         A:00008408
 lab_841C                         A:0000841C
@@ -10353,9 +10354,6 @@ lab_8AA0                         A:00008AA0
 lab_8AC8                         A:00008AC8
 lab_8CC0                         A:00008CC0
 lab_8D14                         A:00008D14
-lab_92BC                         A:000092BC
-lab_9308                         A:00009308
-lab_9358                         A:00009358
 lab_9450                         A:00009450
 lab_9498                         A:00009498
 lab_94E4                         A:000094E4
@@ -10379,7 +10377,6 @@ lab_9890                         A:00009890
 lab_997C                         A:0000997C
 lab_99C4                         A:000099C4
 lab_9A0C                         A:00009A0C
-lab_9D10                         A:00009D10
 lab_9E20                         A:00009E20
 lab_9E40                         A:00009E40
 lab_9E60                         A:00009E60
@@ -10427,6 +10424,10 @@ lab_A3CC                         A:0000A3CC
 lab_A414                         A:0000A414
 lab_A46C                         A:0000A46C
 lab_A470                         A:0000A470
+land1                            A:000080DC
+land2                            A:00008114
+land3                            A:0000816C
+land4                            A:00008170
 lineJump                         A:0000A480
 lose1                            A:000086EC
 mainLoopCount                    S:00000118
@@ -10481,6 +10482,7 @@ objectTallLeafyTreeFaces         A:0000AEDC
 objectTallLeafyTreeVertices      A:0000AE34
 objectType                       S:000000F4
 objectTypes                      A:00008D78
+playingGame                      S:00000130
 prevAltitude                     S:00000104
 prsb1                            A:000091A0
 prsb2                            A:000091D8
@@ -10505,7 +10507,6 @@ stackAddr                        A:0000A570
 stackPointerOnEntry              A:0000A584
 stringBuffer                     S:00000200
 sub_82DC                         A:000082DC
-sub_8654                         A:00008654
 sub_86C4                         A:000086C4
 sub_893C                         A:0000893C
 sub_8998                         A:00008998
@@ -10528,6 +10529,7 @@ sub_93E4                         A:000093E4
 sub_9574                         A:00009574
 sub_98EC                         A:000098EC
 sub_9948                         A:00009948
+term1                            A:00009D10
 typeOffset                       S:000000CC
 varOffset                        S:00000054
 var_094                          S:00000094
@@ -10541,8 +10543,6 @@ var_0F0                          S:000000F0
 var_0F8                          S:000000F8
 var_108                          S:00000108
 var_10C                          S:0000010C
-var_11C                          S:0000011C
-var_130                          S:00000130
 var_154                          S:00000154
 var_158                          S:00000158
 var_160                          S:00000160
@@ -10606,8 +10606,8 @@ Symbols by value:
 00000048 xSideV
 0000004C ySideV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10632,12 +10632,12 @@ Symbols by value:
 00000110 objectData
 00000114 objectFlags
 00000118 mainLoopCount
-0000011C var_11C
+0000011C crashLoopCount
 00000120 crashedFlag
 00000124 currentScore
 00000128 fuelLevel
 0000012C gravity
-00000130 var_130
+00000130 playingGame
 00000134 remainingLives
 00000138 highScore
 0000013C xCamera
@@ -10658,19 +10658,19 @@ Symbols by value:
 00000600 vertexProjected
 00000700 var_700
 00004400 objectMap
-00008000 CODE
 00008000 var_8000
+00008000 CODE
 0000800C var_800C
 00008010 var_8010
 00008028 var_8028
 0000802C graphicsBuffers
 0000805C graphicsBuffersEnd
-0000808C DrawLandscape
-000080DC lab_80DC
-00008114 lab_8114
-0000816C lab_816C
-00008170 DrawGraphicsBuffers
-000081E0 lab_81E0
+0000808C DrawLandscapeAndBuffers
+000080DC land1
+00008114 land2
+0000816C land3
+00008170 land4
+000081E0 gbuf1
 000081F4 GetLandscapeAltitude
 000082AC GetLandscapeBelowObject
 000082DC sub_82DC
@@ -10683,7 +10683,7 @@ Symbols by value:
 0000850C lab_850C
 000085F4 lab_85F4
 00008650 lab_8650
-00008654 sub_8654
+00008654 LandOnLaunchpad
 000086C4 sub_86C4
 000086C8 LoseLife
 000086EC lose1
@@ -10750,9 +10750,9 @@ Symbols by value:
 00009250 graphicsBufferAddr
 00009254 MultiplyVectorByMatrix
 0000928C GetDotProduct
-000092BC lab_92BC
-00009308 lab_9308
-00009358 lab_9358
+000092BC dotp1
+00009308 dotp2
+00009358 dotp3
 0000937C TransposeRotationMatrix
 000093B4 sub_93B4
 000093E4 sub_93E4
@@ -10808,7 +10808,7 @@ Symbols by value:
 00009CEC DrawNextFromGraphicsBuffer
 00009CF8 TerminateGraphicsBuffer
 00009CFC AddTerminatorsToBuffers
-00009D10 lab_9D10
+00009D10 term1
 00009D2C screenBank2Addr
 00009D30 screenBank1Addr
 00009D34 screenBankNumber

@@ -54,12 +54,12 @@
 .set objectData, 0x110
 .set objectFlags, 0x114
 .set mainLoopCount, 0x118
-.set var_11C, 0x11C
+.set crashLoopCount, 0x11C
 .set crashedFlag, 0x120
 .set currentScore, 0x124
 .set fuelLevel, 0x128
 .set gravity, 0x12C
-.set var_130, 0x130
+.set playingGame, 0x130
 .set remainingLives, 0x134
 .set highScore, 0x138
 .set xCamera, 0x13C
@@ -128,7 +128,7 @@ graphicsBuffersEnd:
 .long    0x0002FD74
 .long    0x00030E48
 .long    0x00031F1C
-DrawLandscape:
+DrawLandscapeAndBuffers:
  STMFD   R13!, {R5-R9, R14}
  LDR     R3, [R11, #zCamera]
  AND     R9, R3, #0xFF000000
@@ -149,7 +149,7 @@ DrawLandscape:
  MOV     R6, #0
  ADD     R7, R11, #var_400
  STRB    R6, [R11, #var_0F8]
-lab_80DC:
+land1:
  LDRB    R1, [R11, #var_0E4]
  LDR     R0, var_8028
  ADD     R0, R0, R1, LSL #1
@@ -164,45 +164,45 @@ lab_80DC:
  SUB     R8, R8, #0x05800000
  MOV     R0, #0x80000000
  STR     R0, [R11, #var_0C4]
-lab_8114:
+land2:
  BL      GetLandscapeAltitude
  LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
  STR     R0, [R11, #var_174]
  ADD     R0, R11, #var_170
  BL      ProjectVertexOntoScreen
- BHS     DrawGraphicsBuffers
+ BHS     land4
  STMIA   R7!, {R0-R1}
  CMP     R6, #0
- BEQ     DrawGraphicsBuffers
+ BEQ     land4
  LDMIA   R6!, {R2-R3}
  CMP     R2, #0x80000000
  MOVEQ   R6, #0
- BEQ     DrawGraphicsBuffers
+ BEQ     land4
  STMFD   R13!, {R6-R8}
  ADD     R14, R11, #var_0C4
  LDMIA   R14, {R4-R7}
  STMIA   R14, {R0-R3}
  CMP     R4, #0x80000000
- BEQ     lab_816C
+ BEQ     land3
  BL      sub_82DC
  BL      DrawQuadrilateral
-lab_816C:
+land3:
  LDMFD   R13!, {R6-R8}
-DrawGraphicsBuffers:
+land4:
  SUBS    R10, R10, #1
  LDRNE   R0, [R11, #var_170]
  ADDNE   R0, R0, #0x01000000
  STRNE   R0, [R11, #var_170]
  ADDNE   R8, R8, #0x01000000
- BNE     lab_8114
+ BNE     land2
  LDRB    R0, [R11, #var_0E4]
  SUBS    R0, R0, #2
  BLPL    DrawGraphicsBuffer
  LDRB    R0, [R11, #var_0E4]
  ADDS    R0, R0, #1
- CMP     R0, #0xB
- BEQ     lab_81E0
+ CMP     R0, #11
+ BEQ     gbuf1
  STRB    R0, [R11, #var_0E4]
  LDR     R0, [R11, #var_168]
  SUB     R0, R0, #0x01000000
@@ -217,11 +217,11 @@ DrawGraphicsBuffers:
  ADDEQ   R6, R11, #var_500
  ADDEQ   R7, R11, #var_400
  ADDNE   R7, R11, #var_500
- B       lab_80DC
-lab_81E0:
+ B       land1
+gbuf1:
  MOV     R0, #9
  BL      DrawGraphicsBuffer
- MOV     R0, #0xA
+ MOV     R0, #10
  BL      DrawGraphicsBuffer
  LDMFD   R13!, {R5-R9, PC}
 GetLandscapeAltitude:
@@ -433,7 +433,7 @@ lab_8508:
  LDMFD   R13!, {R0}
 lab_850C:
  CMP     R1, R0
- BLGT    sub_8654
+ BLGT    LandOnLaunchpad
  CMP     R1, #0
  MOVMI   R1, #0
  ADD     R3, R11, #rotationMatrix
@@ -516,7 +516,7 @@ lab_85F4:
  BL      sub_8A84
 lab_8650:
  LDMFD   R13!, {PC}
-sub_8654:
+LandOnLaunchpad:
  ADD     R3, R11, #var_094
  LDMIA   R3, {R0-R5}
  CMP     R0, #0x08000000
@@ -549,9 +549,9 @@ sub_86C4:
  LDMFD   R13!, {R10, R12}
 LoseLife:
  MOV     R0, #0
- STR     R0, [R11, #var_130]
+ STR     R0, [R11, #playingGame]
  MOV     R0, #30
- STR     R0, [R11, #var_11C]
+ STR     R0, [R11, #crashLoopCount]
  MOV     R8, #81
  ADD     R0, R11, #var_094
  LDMIA   R0, {R0-R2}
@@ -565,15 +565,15 @@ lose1:
  BL      MoveAndDrawParticles
  BL      DrawObjects
  BL      AddTerminatorsToBuffers
- BL      DrawLandscape
+ BL      DrawLandscapeAndBuffers
  BL      PrintCurrentScore
  BL      SwitchScreenBank
  LDR     R0, [R11, #mainLoopCount]
  ADD     R0, R0, #1
  STR     R0, [R11, #mainLoopCount]
- LDR     R0, [R11, #var_11C]
+ LDR     R0, [R11, #crashLoopCount]
  SUBS    R0, R0, #1
- STR     R0, [R11, #var_11C]
+ STR     R0, [R11, #crashLoopCount]
  BPL     lose1
  LDR     R0, [R11, #remainingLives]
  SUBS    R0, R0, #1
@@ -662,7 +662,7 @@ lab_880C:
  TST     R7, #0x00020000
  BEQ     lab_8904
  STMFD   R13!, {R0-R2}
- LDR     R14, [R11, #var_130]
+ LDR     R14, [R11, #playingGame]
  CMP     R14, #0
  BEQ     lab_88E8
  CMP     R0, #0
@@ -1366,11 +1366,11 @@ GetDotProduct:
  AND     R4, R4, #0xFE000000
  ORR     R4, R4, #0x01000000
  MOV     R3, #0
-lab_92BC:
+dotp1:
  MOV     R5, R5, LSR #1
  ADDCS   R3, R3, R5
  MOVS    R4, R4, LSL #1
- BNE     lab_92BC
+ BNE     dotp1
  MOV     R3, R3, LSR #1
  TEQ     R7, #0
  RSBMI   R3, R3, #0
@@ -1386,11 +1386,11 @@ lab_92BC:
  AND     R4, R4, #0xFE000000
  ORR     R4, R4, #0x01000000
  MOV     R6, #0
-lab_9308:
+dotp2:
  MOV     R5, R5, LSR #1
  ADDHS   R6, R6, R5
  MOVS    R4, R4, LSL #1
- BNE     lab_9308
+ BNE     dotp2
  MOV     R6, R6, LSR #1
  TEQ     R7, #0
  RSBMI   R6, R6, #0
@@ -1407,11 +1407,11 @@ lab_9308:
  AND     R4, R4, #0xFE000000
  ORR     R4, R4, #0x01000000
  MOV     R6, #0
-lab_9358:
+dotp3:
  MOV     R5, R5, LSR #1
  ADDHS   R6, R6, R5
  MOVS    R4, R4, LSL #1
- BNE     lab_9358
+ BNE     dotp3
  MOV     R6, R6, LSR #1
  TEQ     R7, #0
  RSBMI   R6, R6, #0
@@ -2084,15 +2084,15 @@ AddTerminatorsToBuffers:
  STMFD   R13!, {R12, R14}
  LDR     R12, graphicsBufferEndAddr
  LDR     R14, graphicsBufferAddr
- MOV     R0, #0xB
- MOV     R1, #0x13
-lab_9D10:
+ MOV     R0, #11
+ MOV     R1, #19
+term1:
  LDR     R2, [R12, R0, LSL #2]
  STR     R1, [R2]
  LDR     R2, [R14, R0, LSL #2]
  STR     R2, [R12, R0, LSL #2]
  SUBS    R0, R0, #1
- BPL     lab_9D10
+ BPL     term1
  LDMFD   R13!, {R12, PC}
 screenBank2Addr:
 .long    0x01FD8000 + 320 * 16
@@ -2842,7 +2842,7 @@ PlacePlayerOnLaunchpad:
  MOV     R2, #1
  BL      PrintScoreInBothBanks
  MVN     R0, #0
- STR     R0, [R11, #var_130]
+ STR     R0, [R11, #playingGame]
  MOV     R0, #0
  STR     R0, [R11, #xCamera]
  STR     R0, [R11, #zCamera]
@@ -2875,7 +2875,7 @@ MainLoop:
  BL      MoveAndDrawParticles
  BL      DrawObjects
  BL      AddTerminatorsToBuffers
- BL      DrawLandscape
+ BL      DrawLandscapeAndBuffers
  BL      PrintCurrentScore
  BL      DrawFuelLevel
  BL      SwitchScreenBank

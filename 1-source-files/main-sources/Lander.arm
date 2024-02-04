@@ -203,7 +203,7 @@
 
  mainLoopCount = &118               \ The main loop counter
 
- var_11C = &11C                     \ 
+ crashLoopCount = &11C              \ The loop counter for the crash animation
 
  crashedFlag = &120                 \ If this is non-zero then the object being
                                     \ processed has crashed into the ground
@@ -223,7 +223,13 @@
  gravity = &12C                     \ The current setting of gravity (which
                                     \ changes on higher levels)
 
- var_130 = &130                     \ 
+ playingGame = &130                 \ A flag to determine whether the game is
+                                    \ being player, or whether this is the crash
+                                    \ animation:
+                                    \
+                                    \   * 0 = this is the crash animation
+                                    \
+                                    \   * -1 = game is being played
 
  remainingLives = &134              \ The number of remaining lives, which is
                                     \ displayed towards the right end of the
@@ -490,14 +496,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawLandscape
+\       Name: DrawLandscapeAndBuffers
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.DrawLandscape
+.DrawLandscapeAndBuffers
 
  STMFD   R13!, {R5-R9, R14}         \ 
  LDR     R3, [R11, #zCamera]        \ 
@@ -520,7 +526,7 @@ ENDIF
  ADD     R7, R11, #var_400          \ 
  STRB    R6, [R11, #var_0F8]        \ 
 
-.lab_80DC
+.land1
 
  LDRB    R1, [R11, #var_0E4]        \ 
  LDR     R0, var_8028               \ 
@@ -537,7 +543,7 @@ ENDIF
  MOV     R0, #&80000000             \ 
  STR     R0, [R11, #var_0C4]        \ 
 
-.lab_8114
+.land2
 
  BL      GetLandscapeAltitude       \ 
  LDR     R14, [R11, #yCamera]       \ 
@@ -545,51 +551,47 @@ ENDIF
  STR     R0, [R11, #var_174]        \ 
  ADD     R0, R11, #var_170          \ 
  BL      ProjectVertexOntoScreen    \ 
- BHS     DrawGraphicsBuffers        \ 
+ BHS     land4                      \ 
  STMIA   R7!, {R0-R1}               \ 
  CMP     R6, #0                     \ 
- BEQ     DrawGraphicsBuffers        \ 
+ BEQ     land4                      \ 
  LDMIA   R6!, {R2-R3}               \ 
  CMP     R2, #&80000000             \ 
  MOVEQ   R6, #0                     \ 
- BEQ     DrawGraphicsBuffers        \ 
+ BEQ     land4                      \ 
  STMFD   R13!, {R6-R8}              \ 
  ADD     R14, R11, #var_0C4         \ 
  LDMIA   R14, {R4-R7}               \ 
  STMIA   R14, {R0-R3}               \ 
  CMP     R4, #&80000000             \ 
- BEQ     lab_816C                   \ 
+ BEQ     land3                      \ 
  BL      sub_82DC                   \ 
  BL      DrawQuadrilateral          \ 
 
-.lab_816C
+.land3
 
  LDMFD   R13!, {R6-R8}              \ 
 
-\ ******************************************************************************
-\
-\       Name: DrawGraphicsBuffers
-\       Type: Subroutine
-\   Category: Graphics buffers
-\    Summary: ???
-\
-\ ******************************************************************************
-
-.DrawGraphicsBuffers
+.land4
 
  SUBS    R10, R10, #1               \ 
  LDRNE   R0, [R11, #var_170]        \ 
  ADDNE   R0, R0, #&01000000         \ 
  STRNE   R0, [R11, #var_170]        \ 
  ADDNE   R8, R8, #&01000000         \ 
- BNE     lab_8114                   \ 
+ BNE     land2                      \ 
+
  LDRB    R0, [R11, #var_0E4]        \ 
+
  SUBS    R0, R0, #2                 \ 
  BLPL    DrawGraphicsBuffer         \ 
+
  LDRB    R0, [R11, #var_0E4]        \ 
  ADDS    R0, R0, #1                 \ 
- CMP     R0, #&B                    \ 
- BEQ     lab_81E0                   \ 
+
+ CMP     R0, #11                    \ 
+ BEQ     gbuf1                      \ 
+
  STRB    R0, [R11, #var_0E4]        \ 
  LDR     R0, [R11, #var_168]        \ 
  SUB     R0, R0, #&01000000         \ 
@@ -604,15 +606,18 @@ ENDIF
  ADDEQ   R6, R11, #var_500          \ 
  ADDEQ   R7, R11, #var_400          \ 
  ADDNE   R7, R11, #var_500          \ 
- B       lab_80DC                   \ 
+ B       land1                      \ 
 
-.lab_81E0
+.gbuf1
 
- MOV     R0, #9                     \ 
- BL      DrawGraphicsBuffer         \ 
- MOV     R0, #&A                    \ 
- BL      DrawGraphicsBuffer         \ 
- LDMFD   R13!, {R5-R9, PC}          \ 
+ MOV     R0, #9                     \ Draw the contents of graphics buffer 9
+ BL      DrawGraphicsBuffer
+
+ MOV     R0, #10                    \ Draw the contents of graphics buffer 10
+ BL      DrawGraphicsBuffer
+
+ LDMFD   R13!, {R5-R9, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -947,7 +952,7 @@ ENDIF
 \
 \       Name: MoveAndDrawPlayer
 \       Type: Subroutine
-\   Category: ???
+\   Category: Player
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -1091,7 +1096,7 @@ ENDIF
 .lab_850C
 
  CMP     R1, R0                     \ 
- BLGT    sub_8654                   \ 
+ BLGT    LandOnLaunchpad            \ 
  CMP     R1, #0                     \ 
  MOVMI   R1, #0                     \ 
  ADD     R3, R11, #rotationMatrix   \ 
@@ -1183,14 +1188,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8654
+\       Name: LandOnLaunchpad
 \       Type: Subroutine
-\   Category: ???
+\   Category: Player
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_8654
+.LandOnLaunchpad
 
  ADD     R3, R11, #var_094          \ 
  LDMIA   R3, {R0-R5}                \ 
@@ -1246,33 +1251,34 @@ ENDIF
 
 .LoseLife
 
- MOV     R0, #0                     \ Set var_130 = 0 ???
- STR     R0, [R11, #var_130]
+ MOV     R0, #0                     \ Set playingGame = 0 to flag that the game
+ STR     R0, [R11, #playingGame]    \ is no longer being played and that this is
+                                    \ the crash animation
 
- MOV     R0, #30                    \ Set var_11C = 30 ??? Loop counter for
- STR     R0, [R11, #var_11C]        \ the "main loop" clone below
+ MOV     R0, #30                    \ Set crashLoopCount = 30 to act as a loop
+ STR     R0, [R11, #crashLoopCount] \ the crash animation below
 
- MOV     R8, #81                    \ 
+ MOV     R8, #81                    \ Set R8 = 8 to use as a counter in sub_8CBC
 
- ADD     R0, R11, #var_094          \ 
+ ADD     R0, R11, #var_094          \ Set (R0, R1, R2) to the coordinate in
+ LDMIA   R0, {R0-R2}                \ var_094
 
- LDMIA   R0, {R0-R2}                \ 
+ SUB     R1, R1, #&00500000         \ Subtract &00500000 from the y-coordinate
 
- SUB     R1, R1, #&00500000         \ 
-
- BL      sub_8CBC                   \ 
+ BL      sub_8CBC                   \ ???
 
 .lose1
 
-                                    \ This is a repeat of the main loop but with
-                                    \ three differences (there are no calls to
-                                    \ sub_8D40, MoveAndDrawPlayer or
+                                    \ We now run a cut-down version of the main
+                                    \ loop to display the crash animation (this
+                                    \ is like the main loop but there are no
+                                    \ calls to sub_8D40, MoveAndDrawPlayer or
                                     \ DrawFuelLevel)
 
- LDR     R0, [R11, #mainLoopCount]  \ Same as in main loop
+ LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24 ???
  MOV     R0, R0, LSL #24
 
- MOV     R1, R0, LSL #1             \ Same as in main loop
+ MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25 ???
 
  BL      sub_93E4                   \ ???
 
@@ -1286,9 +1292,10 @@ ENDIF
                                     \ buildings, into the graphics buffers
 
  BL      AddTerminatorsToBuffers    \ Add terminators to the ends of the
-                                    \ graphics buffers
+                                    \ graphics buffers so we know when to stop
+                                    \ drawing
 
- BL      DrawLandscape              \ Draw the landscape and the contents of the
+ BL      DrawLandscapeAndBuffers    \ Draw the landscape and the contents of the
                                     \ graphics buffers
 
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
@@ -1301,18 +1308,24 @@ ENDIF
  ADD     R0, R0, #1
  STR     R0, [R11, #mainLoopCount]
 
- LDR     R0, [R11, #var_11C]        \ Decrement the loop counter for the above
- SUBS    R0, R0, #1                 \ ???
- STR     R0, [R11, #var_11C]
+ LDR     R0, [R11, #crashLoopCount] \ Decrement the loop counter for the crash
+ SUBS    R0, R0, #1                 \ animation above
+ STR     R0, [R11, #crashLoopCount]
 
- BPL     lose1                      \ Loop back to keep running the main loop
-                                    \ above
+ BPL     lose1                      \ Loop back to keep running the crash
+                                    \ animation until the loop counter runs down
 
  LDR     R0, [R11, #remainingLives] \ Decrement the number of remaining lives
  SUBS    R0, R0, #1                 \ and set the flags accordingly
  STR     R0, [R11, #remainingLives] \ 
 
- ADD     R13, R13, #4               \ 
+ ADD     R13, R13, #4               \ Increment the stack pointer by one word so
+                                    \ we discard the return address from the top
+                                    \ of the stack, so we rejoin the main loop
+                                    \ without keeping the return address of the
+                                    \ subroutine we were in before we jumped
+                                    \ here (i.e. MoveAndDrawPlayer or
+                                    \ LandOnLaunchpad)
 
  BNE     PlacePlayerOnLaunchpad     \ If we still have one or more lives left,
                                     \ jump to PlacePlayerOnLaunchpad to play the
@@ -1446,7 +1459,7 @@ ENDIF
  TST     R7, #&00020000             \ 
  BEQ     lab_8904                   \ 
  STMFD   R13!, {R0-R2}              \ 
- LDR     R14, [R11, #var_130]       \ 
+ LDR     R14, [R11, #playingGame]   \ 
  CMP     R14, #0                    \ 
  BEQ     lab_88E8                   \ 
  CMP     R0, #0                     \ 
@@ -3414,14 +3427,14 @@ ENDIF
  MOV     R3, #0                     \ Set R3 = 0 to use for building the sum in
                                     \ our shift-and-add multiplication result
 
-.lab_92BC
+.dotp1
 
  MOV     R5, R5, LSR #1             \ If bit 0 of R5 is set, add R5 to the
  ADDCS   R3, R3, R5                 \ result in R3, shifting R5 to the right
 
  MOVS    R4, R4, LSL #1             \ Shift R4 left by one place
 
- BNE     lab_92BC                   \ Loop back if R4 is non-zero
+ BNE     dotp1                      \ Loop back if R4 is non-zero
 
  MOV     R3, R3, LSR #1             \ Set R3 = R3 / 2
 
@@ -3449,12 +3462,12 @@ ENDIF
  ORR     R4, R4, #&01000000
  MOV     R6, #0
 
-.lab_9308
+.dotp2
 
  MOV     R5, R5, LSR #1             \ This is the second part of the calculation
  ADDHS   R6, R6, R5                 \ so we now have:
  MOVS    R4, R4, LSL #1             \
- BNE     lab_9308                   \   R6 = R4 * R5
+ BNE     dotp2                      \   R6 = R4 * R5
  MOV     R6, R6, LSR #1             \      = yR0 * yR2
  TEQ     R7, #0
  RSBMI   R6, R6, #0
@@ -3480,12 +3493,12 @@ ENDIF
  ORR     R4, R4, #&01000000
  MOV     R6, #0
 
-.lab_9358
+.dotp3
 
  MOV     R5, R5, LSR #1             \ This is the second part of the calculation
  ADDHS   R6, R6, R5                 \ so we now have:
  MOVS    R4, R4, LSL #1             \
- BNE     lab_9358                   \   R6 = R4 * R5
+ BNE     dotp3                      \   R6 = R4 * R5
  MOV     R6, R6, LSR #1             \      = zR0 * zR2
  TEQ     R7, #0
  RSBMI   R6, R6, #0
@@ -5344,27 +5357,53 @@ ENDIF
 \       Name: AddTerminatorsToBuffers
 \       Type: Subroutine
 \   Category: Graphics buffers
-\    Summary: ???
+\    Summary: Add terminators to the ends of the graphics buffers so we know
+\             when to stop drawing
 \
 \ ******************************************************************************
 
 .AddTerminatorsToBuffers
 
- STMFD   R13!, {R12, R14}           \ 
- LDR     R12, graphicsBufferEndAddr \ 
- LDR     R14, graphicsBufferAddr    \ 
- MOV     R0, #&B                    \ 
- MOV     R1, #&13                   \ 
+ STMFD   R13!, {R12, R14}           \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
-.lab_9D10
+ LDR     R12, graphicsBufferEndAddr \ Set R12 to the address of the table that
+                                    \ contains the end addresses of the graphics
+                                    \ buffers
 
- LDR     R2, [R12, R0, LSL #2]      \ 
- STR     R1, [R2]                   \ 
- LDR     R2, [R14, R0, LSL #2]      \ 
- STR     R2, [R12, R0, LSL #2]      \ 
- SUBS    R0, R0, #1                 \ 
- BPL     lab_9D10                   \ 
- LDMFD   R13!, {R12, PC}            \ 
+ LDR     R14, graphicsBufferAddr    \ Set R14 to the address of the table that
+                                    \ contains the start addresses of the
+                                    \ graphics buffers
+
+ MOV     R0, #11                    \ We are going to loop through all 12 of the
+                                    \ graphics buffers, so set a counter in R0
+
+ MOV     R1, #19                    \ The command number for terminating a
+                                    \ graphics buffer is 19, so put this in R1
+                                    \ (see bufferJump for a full list of drawing
+                                    \ commands)
+
+.term1
+
+ LDR     R2, [R12, R0, LSL #2]      \ Set R2 to the end address of graphics
+                                    \ buffer number R0
+
+ STR     R1, [R2]                   \ Store the termination command number at
+                                    \ the end of the buffer
+
+ LDR     R2, [R14, R0, LSL #2]      \ Reset the graphicsBufferEnd entry for this
+ STR     R2, [R12, R0, LSL #2]      \ buffer back to the start address from the
+                                    \ graphicsBuffer table, so when we draw the
+                                    \ next frame, we fill up the graphics
+                                    \ buffers from the start again
+
+ SUBS    R0, R0, #1                 \ Decrement the loop counter
+
+ BPL     term1                      \ Loop back until we have terminated all 12
+                                    \ graphics buffers
+
+ LDMFD   R13!, {R12, PC}            \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -6898,8 +6937,9 @@ ENDIF
                                     \ 30 on row 1, just before the high score
                                     \ towards the right end of the score bar
 
- MVN     R0, #0                     \ Set var_130 = -1 ???
- STR     R0, [R11, #var_130]        \ 
+ MVN     R0, #0                     \ Set playingGame = -1 to flag that the game
+ STR     R0, [R11, #playingGame]    \ is being played and that this is not the
+                                    \ crash animation
 
  MOV     R0, #0                     \ Set xCamera = 0 and zCamera = 0
  STR     R0, [R11, #xCamera]        \
@@ -6968,9 +7008,10 @@ ENDIF
                                     \ buildings, into the graphics buffers
 
  BL      AddTerminatorsToBuffers    \ Add terminators to the ends of the
-                                    \ graphics buffers
+                                    \ graphics buffers so we know when to stop
+                                    \ drawing
 
- BL      DrawLandscape              \ Draw the landscape and the contents of the
+ BL      DrawLandscapeAndBuffers    \ Draw the landscape and the contents of the
                                     \ graphics buffers
 
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
