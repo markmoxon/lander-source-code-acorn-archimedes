@@ -42,11 +42,11 @@
 .set var_0A0, 0xA0
 .set var_0A4, 0xA4
 .set var_0A8, 0xA8
-.set var_0C4, 0xC4
-.set var_0E4, 0xE4
-.set var_0F0, 0xF0
+.set previousColumn, 0xC4
+.set drawingTileRow, 0xE4
+.set unusedRowData, 0xF0
 .set objectType, 0xF4
-.set var_0F8, 0xF8
+.set tileRowOddEven, 0xF8
 .set altitude, 0x100
 .set prevAltitude, 0x104
 .set var_108, 0x108
@@ -71,37 +71,44 @@
 .set var_154, 0x154
 .set var_158, 0x158
 .set fuelBurnRate, 0x15C
-.set var_160, 0x160
-.set var_168, 0x168
-.set var_170, 0x170
-.set var_174, 0x174
+.set xLandscapeRow, 0x160
+.set yLandscapeRow, 0x164
+.set zLandscapeRow, 0x168
+.set xLandscapeCol, 0x170
+.set yLandscapeCol, 0x174
+.set zLandscapeCol, 0x178
 .set stringBuffer, 0x200
-.set var_400, 0x400
-.set var_500, 0x500
+.set cornerStore1, 0x400
+.set cornerStore2, 0x500
 .set vertexProjected, 0x600
 .set var_700, 0x700
 .set var_71C, 0x71C
 .set objectMap, 0x4400
 .org     CODE
-var_8000:
+landscapeOrigin:
 .ifdef _RISCOS
  B       DecryptGameBinary
+.long    0x00000000, 0x14000000
 .else
-.long    0xFA800000
+.long    0xFA800000, 0x00000000,  0x14000000
 .endif
-.long    0x00000000
-.long    0x14000000
-var_800C:
-.long    var_8000
-var_8010:
-.long    0x0DE30D3A
-.long    0x0DE30DE4
-.long    0x0DE30DE4
-.long    0x0DE30DE4
-.long    0x0DE30DE4
-.long    0x0DE30DE4
-var_8028:
-.long    var_8010
+landscapeOriginAddr:
+.long    landscapeOrigin
+rowConfig:
+.byte    0x3A, 13
+.byte    0xE3, 13
+.byte    0xE4, 13
+.byte    0xE3, 13
+.byte    0xE4, 13
+.byte    0xE3, 13
+.byte    0xE4, 13
+.byte    0xE3, 13
+.byte    0xE4, 13
+.byte    0xE3, 13
+.byte    0xE4, 13
+.byte    0xE3, 13
+rowConfigAddr:
+.long    rowConfig
 graphicsBuffers:
 .long    0x00026600
 .long    0x000276D4
@@ -138,38 +145,38 @@ DrawLandscapeAndBuffers:
  AND     R8, R4, #0xFF000000
  SUB     R4, R4, R8
  STR     R8, [R11, #xLandscape]
- ADD     R5, R11, #var_160
- LDR     R0, var_800C
+ ADD     R5, R11, #xLandscapeRow
+ LDR     R0, landscapeOriginAddr
  LDMFD   R0, {R0-R2}
  SUB     R0, R0, R4
  SUB     R2, R2, R3
  STMIA   R5, {R0-R2}
  MOV     R0, #0
- STRB    R0, [R11, #var_0E4]
+ STRB    R0, [R11, #drawingTileRow]
  MOV     R6, #0
- ADD     R7, R11, #var_400
- STRB    R6, [R11, #var_0F8]
+ ADD     R7, R11, #cornerStore1
+ STRB    R6, [R11, #tileRowOddEven]
 land1:
- LDRB    R1, [R11, #var_0E4]
- LDR     R0, var_8028
+ LDRB    R1, [R11, #drawingTileRow]
+ LDR     R0, rowConfigAddr
  ADD     R0, R0, R1, LSL #1
  LDRB    R10, [R0, #1]
  LDRB    R0, [R0]
- STRB    R0, [R11, #var_0F0]
- ADD     R0, R11, #var_160
+ STRB    R0, [R11, #unusedRowData]
+ ADD     R0, R11, #xLandscapeRow
  LDMIA   R0, {R0-R2}
- ADD     R4, R11, #var_170
+ ADD     R4, R11, #xLandscapeCol
  STMIA   R4, {R0-R2}
  LDR     R8, [R11, #xLandscape]
  SUB     R8, R8, #0x05800000
  MOV     R0, #0x80000000
- STR     R0, [R11, #var_0C4]
+ STR     R0, [R11, #previousColumn]
 land2:
  BL      GetLandscapeAltitude
  LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
- STR     R0, [R11, #var_174]
- ADD     R0, R11, #var_170
+ STR     R0, [R11, #yLandscapeCol]
+ ADD     R0, R11, #xLandscapeCol
  BL      ProjectVertexOntoScreen
  BHS     land4
  STMIA   R7!, {R0-R1}
@@ -180,7 +187,7 @@ land2:
  MOVEQ   R6, #0
  BEQ     land4
  STMFD   R13!, {R6-R8}
- ADD     R14, R11, #var_0C4
+ ADD     R14, R11, #previousColumn
  LDMIA   R14, {R4-R7}
  STMIA   R14, {R0-R3}
  CMP     R4, #0x80000000
@@ -191,32 +198,32 @@ land3:
  LDMFD   R13!, {R6-R8}
 land4:
  SUBS    R10, R10, #1
- LDRNE   R0, [R11, #var_170]
+ LDRNE   R0, [R11, #xLandscapeCol]
  ADDNE   R0, R0, #0x01000000
- STRNE   R0, [R11, #var_170]
+ STRNE   R0, [R11, #xLandscapeCol]
  ADDNE   R8, R8, #0x01000000
  BNE     land2
- LDRB    R0, [R11, #var_0E4]
+ LDRB    R0, [R11, #drawingTileRow]
  SUBS    R0, R0, #2
  BLPL    DrawGraphicsBuffer
- LDRB    R0, [R11, #var_0E4]
+ LDRB    R0, [R11, #drawingTileRow]
  ADDS    R0, R0, #1
  CMP     R0, #11
  BEQ     land5
- STRB    R0, [R11, #var_0E4]
- LDR     R0, [R11, #var_168]
+ STRB    R0, [R11, #drawingTileRow]
+ LDR     R0, [R11, #zLandscapeRow]
  SUB     R0, R0, #0x01000000
- STR     R0, [R11, #var_168]
+ STR     R0, [R11, #zLandscapeRow]
  SUB     R9, R9, #0x01000000
  MOV     R0, #0x80000000
  STR     R0, [R7]
- LDRB    R0, [R11, #var_0F8]
+ LDRB    R0, [R11, #tileRowOddEven]
  EORS    R0, R0, #1
- STRB    R0, [R11, #var_0F8]
- ADDNE   R6, R11, #var_400
- ADDEQ   R6, R11, #var_500
- ADDEQ   R7, R11, #var_400
- ADDNE   R7, R11, #var_500
+ STRB    R0, [R11, #tileRowOddEven]
+ ADDNE   R6, R11, #cornerStore1
+ ADDEQ   R6, R11, #cornerStore2
+ ADDEQ   R7, R11, #cornerStore1
+ ADDNE   R7, R11, #cornerStore2
  B       land1
 land5:
  MOV     R0, #9
@@ -305,7 +312,7 @@ GetLandscapeTileColour:
  MOVEQ   R1, #0
  MOVEQ   R2, #4
  MOVEQ   R0, #0
- LDRB    R8, [R11, #var_0E4]
+ LDRB    R8, [R11, #drawingTileRow]
  ADD     R3, R8, R14, LSR #22
  ADD     R0, R0, R3
  ADD     R1, R1, R3
@@ -1795,8 +1802,8 @@ mod_98E8:
  ADD     R4, R11, #xCoord
 sub_98EC:
  MOV     R4, R12
- ADD     R4, R11, #var_170
- ADD     R4, R11, #var_160
+ ADD     R4, R11, #xLandscapeCol
+ ADD     R4, R11, #xLandscapeRow
  STMFD   R13!, {R14}
  LDR     R1, sub_98EC
  STR     R1, GetVertexCoordinate+28
@@ -4790,7 +4797,7 @@ divisionTable:
 .ifdef _RISCOS
 DecryptGameBinary:
  MOV     R0, #0xFA800000
- MOV     R1, #var_8000
+ MOV     R1, #landscapeOrigin
  STR     R0, [R1]
  B       Entry
 .endif
