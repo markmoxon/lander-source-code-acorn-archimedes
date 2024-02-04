@@ -6851,7 +6851,8 @@ ENDIF
 
  EQUD    objectRockFaces - objectRock
 
- EQUD    %00000011                  \ Flags
+ EQUD    %00000011                  \ Flags: Bit 0 = 1 = only draw visible faces
+                                    \        Bit 1 = 1 = draw a shadow
 
 .objectRockVertices
 
@@ -6892,7 +6893,8 @@ ENDIF
 
  EQUD    objectPulsatingPyramidFaces - objectPulsatingPyramid
 
- EQUD    %00000001                  \ Flags
+ EQUD    %00000001                  \ Flags: Bit 0 = 1 = only draw visible faces
+                                    \        Bit 1 = 0 = do not draw a shadow
 
 .objectPulsatingPyramidVertices
 
@@ -6930,7 +6932,8 @@ ENDIF
 
  EQUD    objectPlayerFaces - objectPlayer
 
- EQUD    %00000011                  \ Flags
+ EQUD    %00000011                  \ Flags: Bit 0 = 1 = only draw visible faces
+                                    \        Bit 1 = 1 = draw a shadow
 
 .objectPlayerVertices
 
@@ -6976,7 +6979,8 @@ ENDIF
 
  EQUD    objectSmallLeafyTreeFaces - objectSmallLeafyTree
 
- EQUD    %00000010                  \ Flags
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 1 = draw a shadow
 
 .objectSmallLeafyTreeVertices
 
@@ -7019,7 +7023,8 @@ ENDIF
 
  EQUD    objectTallLeafyTreeFaces - objectTallLeafyTree
 
- EQUD    %00000010                  \ Flags
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 1 = draw a shadow
 
 .objectTallLeafyTreeVertices
 
@@ -7066,7 +7071,8 @@ ENDIF
 
  EQUD    objectSmokingRemainsLeftFaces - objectSmokingRemainsLeft
 
- EQUD    %00000000                  \ Flags
+ EQUD    %00000000                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 0 = do not draw a shadow
 
 .objectSmokingRemainsLeftVertices
 
@@ -7100,7 +7106,8 @@ ENDIF
 
  EQUD    objectSmokingRemainsRightFaces - objectSmokingRemainsRight
 
- EQUD    %00000000                  \ Flags
+ EQUD    %00000000                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 0 = do not draw a shadow
 
 .objectSmokingRemainsRightVertices
 
@@ -7134,7 +7141,8 @@ ENDIF
 
  EQUD    objectFirTreeFaces - objectFirTree
 
- EQUD    %00000010                  \ Flags
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 1 = draw a shadow
 
 .objectFirTreeVertices
 
@@ -7168,7 +7176,8 @@ ENDIF
 
  EQUD    objectGazeboFaces - objectGazebo
 
- EQUD    %00000010                  \ Flags
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 1 = draw a shadow
 
 .objectGazeboVertices
 
@@ -7216,7 +7225,8 @@ ENDIF
 
  EQUD    objectBuildingFaces - objectBuilding
 
- EQUD    %00000000                  \ Flags
+ EQUD    %00000000                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 0 = do not draw a shadow
 
 .objectBuildingVertices
 
@@ -7271,7 +7281,8 @@ ENDIF
 
  EQUD    objectSmokingBuildingFaces - objectSmokingBuilding
 
- EQUD    %00000000                  \ Flags
+ EQUD    %00000000                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 0 = do not draw a shadow
 
 .objectSmokingBuildingVertices
 
@@ -7310,7 +7321,8 @@ ENDIF
 
  EQUD    objectSmokingGazeboFaces - objectSmokingGazebo
 
- EQUD    %00000010                  \ Flags
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 1 = draw a shadow
 
 .objectSmokingGazeboVertices
 
@@ -7347,7 +7359,8 @@ ENDIF
 
  EQUD    objectRocketFaces - objectRocket
 
- EQUD    %00000010                  \ Flags
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
+                                    \        Bit 1 = 1 = draw a shadow
 
 .objectRocketVertices
 
