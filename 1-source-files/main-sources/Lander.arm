@@ -1480,11 +1480,11 @@ ENDIF
  SUB     R1, R9, R14                \ 
  MOV     R8, R2                     \ 
  BL      ProjectParticleOntoScreen  \ 
- BLLO    DrawParticleIntoBuffer     \ 
+ BLLO    DrawParticleShadowToBuffer \ 
  LDMFD   R13!, {R0-R2, R7}          \ 
  MOV     R8, R2                     \ 
  BL      ProjectParticleOntoScreen  \ 
- BLLO    DrawParticleIntoNearBuffer \ 
+ BLLO    DrawParticleToBuffer       \ 
  LDMIA   R10, {R0-R7}               \ 
  CMP     R7, #0                     \ 
  BNE     lab_880C                   \ 
@@ -2731,8 +2731,9 @@ ENDIF
                                     \ make up the face
 
  MOV     R8, #0                     \ Set R8 = 0, which we will pass to the
-                                    \ DrawTriangleIntoBuffer routine as the face
-                                    \ colour, so the shadow is drawn in black
+                                    \ DrawTriangleShadowToBuffer routine as the
+                                    \ face colour, so the shadow is drawn in
+                                    \ black
 
  ADD     R10, R11, #vertexProjected \ Set R10 to the address of the third word
  ADD     R10, R10, #8               \ in vertexProjected
@@ -2768,7 +2769,7 @@ ENDIF
                                     \ vertex number in R7, i.e. the third vertex
                                     \ in this face
 
- BL      DrawTriangleIntoBuffer     \ Draw the triangle that shows the shadow
+ BL      DrawTriangleShadowToBuffer \ Draw the triangle that shows the shadow
                                     \ for this face, which uses the vertices of
                                     \ the face, dropped directly down onto the
                                     \ landscape, all drawn in black
@@ -2921,7 +2922,7 @@ ENDIF
                                     \ the pixel coordinate of the vertex number
                                     \ in R6, i.e. the third vertex in this face
 
- BL      DrawTriangleIntoNearBuffer \ Draw the triangle for this face using the
+ BL      DrawTriangleToBuffer       \ Draw the triangle for this face using the
                                     \ projected vertices for the face, drawn in
                                     \ the colour in R8, and draw it one buffer
                                     \ nearer the camera than the shadow, so the
@@ -4757,7 +4758,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawParticleIntoNearBuffer
+\       Name: DrawParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Draw a large coloured particle into a slightly nearer graphics,
@@ -4768,10 +4769,11 @@ ENDIF
 \ This command draws a large coloured particle into a graphics buffer, with the
 \ buffer being chosen according to the distance of the particle in the z-axis,
 \ plus one (so this routine draws the particle into a slightly nearer graphics
-\ buffer than DrawParticleIntoBuffer).
+\ buffer than DrawParticleShadowToBuffer, so shadows never overlap their
+\ corresponding particles).
 \
-\ This command is used for drawing particles, while DrawParticleIntoBuffer is
-\ used for drawing their shadows.
+\ This command is used for drawing particles, while DrawParticleShadowToBuffer
+\ is used for drawing their shadows.
 \
 \ The command numbers for drawing large particles are 0 to 8, with higher
 \ numbers giving smaller particles (so particles are smaller when they are
@@ -4802,7 +4804,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.DrawParticleIntoNearBuffer
+.DrawParticleToBuffer
 
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
@@ -4875,7 +4877,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawParticleIntoBuffer
+\       Name: DrawParticleShadowToBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Draw a small black particle into the correct graphics buffer,
@@ -4887,7 +4889,7 @@ ENDIF
 \ buffer being chosen according to the distance of the particle in the z-axis.
 \
 \ This command is used for drawing particle shadows, while the particles
-\ themselves are drawn by DrawParticleIntoNearBuffer.
+\ themselves are drawn by DrawParticleToBuffer.
 \
 \ The command numbers for drawing small particles are 9 to 17, with higher
 \ numbers giving smaller particles (so particles are smaller when they are
@@ -4922,7 +4924,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.DrawParticleIntoBuffer
+.DrawParticleShadowToBuffer
 
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
@@ -4994,11 +4996,11 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangleIntoBuffer
+\       Name: DrawTriangleShadowToBuffer
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: Draw a triangle into the correct graphics buffer, according to its
-\             distance
+\    Summary: Draw a triangle shadow into the correct graphics buffer, according
+\             to its distance
 \
 \ ------------------------------------------------------------------------------
 \
@@ -5006,7 +5008,8 @@ ENDIF
 \ chosen according to the distance of the triangle in the z-axis.
 \
 \ This command is used for drawing triangle shadows, while the triangles
-\ themselves are drawn by DrawTriangleIntoNearBuffer.
+\ themselves are drawn by DrawTriangleToBuffer. It is always called with a
+\ colour value of 0 in R8, so shadows are always black.
 \
 \ The command number for drawing a triangle is 18, followed by seven parameter
 \ words that match the arguments for the DrawTriangle routine:
@@ -5027,7 +5030,7 @@ ENDIF
 \
 \   (R4, R5)                        Pixel coordinate of corner 4
 \
-\   R8                              Colour
+\   R8                              Colour (always 0 for black)
 \
 \   R12                             The address of the table of containing the
 \                                   end addresses of the graphics buffers
@@ -5041,7 +5044,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.DrawTriangleIntoBuffer
+.DrawTriangleShadowToBuffer
 
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
@@ -5105,20 +5108,21 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangleIntoNearBuffer
+\       Name: DrawTriangleToBuffer
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: Draw a triangle into a slightly nearer graphics buffer, according
-\             to its distance
+\    Summary: Draw a coloured triangle into a slightly nearer graphics buffer,
+\             according to its distance
 \
 \ ------------------------------------------------------------------------------
 \
 \ This command draws a triangle into a graphics buffer, with the buffer being
 \ chosen according to the distance of the triangle in the z-axis, plus one (so
 \ this routine draws the triangle into a slightly nearer graphics buffer than
-\ DrawTriangleIntoBuffer).
+\ DrawTriangleShadowToBuffer, so shadows never overlap their corresponding
+\ triangles).
 \
-\ This command is used for drawing triangles, while DrawTriangleIntoBuffer is
+\ This command is used for drawing triangles, while DrawTriangleShadowToBuffer is
 \ used for drawing their shadows.
 \
 \ The command number for drawing a triangle is 18, followed by seven parameter
@@ -5154,7 +5158,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.DrawTriangleIntoNearBuffer
+.DrawTriangleToBuffer
 
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved

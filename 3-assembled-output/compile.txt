@@ -705,11 +705,11 @@ Source: "3-assembled-output/Lander.arm"
 00:0000890C 0E1049E0        	   692:  SUB     R1, R9, R14
 00:00008910 0280A0E1        	   693:  MOV     R8, R2
 00:00008914 550300EB        	   694:  BL      ProjectParticleOntoScreen
-00:00008918 B504003B        	   695:  BLLO    DrawParticleIntoBuffer
+00:00008918 B504003B        	   695:  BLLO    DrawParticleShadowToBuffer
 00:0000891C 8700BDE8        	   696:  LDMFD   R13!, {R0-R2, R7}
 00:00008920 0280A0E1        	   697:  MOV     R8, R2
 00:00008924 510300EB        	   698:  BL      ProjectParticleOntoScreen
-00:00008928 A204003B        	   699:  BLLO    DrawParticleIntoNearBuffer
+00:00008928 A204003B        	   699:  BLLO    DrawParticleToBuffer
 00:0000892C FF009AE8        	   700:  LDMIA   R10, {R0-R7}
 00:00008930 000057E3        	   701:  CMP     R7, #0
 00:00008934 B4FFFF1A        	   702:  BNE     lab_880C
@@ -1200,7 +1200,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009024 0C0096E8        	  1187:  LDMIA   R6, {R2-R3}
 00:00009028 07728AE0        	  1188:  ADD     R7, R10, R7, LSL #4
 00:0000902C 300097E8        	  1189:  LDMIA   R7, {R4-R5}
-00:00009030 FC0200EB        	  1190:  BL      DrawTriangleIntoBuffer
+00:00009030 FC0200EB        	  1190:  BL      DrawTriangleShadowToBuffer
 00:00009034 080ABDE8        	  1191:  LDMFD   R13!, {R3, R9, R11}
                             	  1192: dobj4:
 00:00009038 000053E3        	  1193:  CMP     R3, #0
@@ -1249,7 +1249,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000090E4 0C0095E8        	  1236:  LDMIA   R5, {R2-R3}
 00:000090E8 06628AE0        	  1237:  ADD     R6, R10, R6, LSL #4
 00:000090EC 300096E8        	  1238:  LDMIA   R6, {R4-R5}
-00:000090F0 D80200EB        	  1239:  BL      DrawTriangleIntoNearBuffer
+00:000090F0 D80200EB        	  1239:  BL      DrawTriangleToBuffer
                             	  1240: dobj5:
 00:000090F4 001BBDE8        	  1241:  LDMFD   R13!, {R8-R9, R11-R12}
 00:000090F8 109089E2        	  1242:  ADD     R9, R9, #16
@@ -2003,7 +2003,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009BAC 8A0000EB        	  1990:  BL      DrawTriangle
 00:00009BB0 0012BDE8        	  1991:  LDMFD   R13!, {R9, R12}
 00:00009BB4 4C0000EA        	  1992:  B       DrawNextFromGraphicsBuffer
-                            	  1993: DrawParticleIntoNearBuffer:
+                            	  1993: DrawParticleToBuffer:
 00:00009BB8 00422DE9        	  1994:  STMFD   R13!, {R9, R14}
 00:00009BBC 05E368E2        	  1995:  RSB     R14, R8, #0x14000000
 00:00009BC0 01E48EE2        	  1996:  ADD     R14, R14, #0x01000000
@@ -2019,7 +2019,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009BE8 041089E4        	  2006:  STR     R1, [R9], #4
 00:00009BEC 2E9B8CE7        	  2007:  STR     R9, [R12, R14, LSR #22]
 00:00009BF0 0082BDE8        	  2008:  LDMFD   R13!, {R9, PC}
-                            	  2009: DrawParticleIntoBuffer:
+                            	  2009: DrawParticleShadowToBuffer:
 00:00009BF4 00422DE9        	  2010:  STMFD   R13!, {R9, R14}
 00:00009BF8 05E368E2        	  2011:  RSB     R14, R8, #0x14000000
 00:00009BFC 03E5CEE3        	  2012:  BIC     R14, R14, #0x00C00000
@@ -2033,7 +2033,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009C1C 041089E4        	  2020:  STR     R1, [R9], #4
 00:00009C20 2E9B8CE7        	  2021:  STR     R9, [R12, R14, LSR #22]
 00:00009C24 0082BDE8        	  2022:  LDMFD   R13!, {R9, PC}
-                            	  2023: DrawTriangleIntoBuffer:
+                            	  2023: DrawTriangleShadowToBuffer:
 00:00009C28 00422DE9        	  2024:  STMFD   R13!, {R9, R14}
 00:00009C2C 08E09BE5        	  2025:  LDR     R14, [R11, #zObject]
 00:00009C30 05E36EE2        	  2026:  RSB     R14, R14, #0x14000000
@@ -2046,7 +2046,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009C4C 3F01A9E8        	  2033:  STMIA   R9!, {R0-R5, R8}
 00:00009C50 2E9B8CE7        	  2034:  STR     R9, [R12, R14, LSR #22]
 00:00009C54 0082BDE8        	  2035:  LDMFD   R13!, {R9, PC}
-                            	  2036: DrawTriangleIntoNearBuffer:
+                            	  2036: DrawTriangleToBuffer:
 00:00009C58 00422DE9        	  2037:  STMFD   R13!, {R9, R14}
 00:00009C5C 08E09BE5        	  2038:  LDR     R14, [R11, #zObject]
 00:00009C60 05E36EE2        	  2039:  RSB     R14, R14, #0x14000000
@@ -10246,13 +10246,13 @@ DrawLineSegment                  A:0000A524
 DrawNextFromGraphicsBuffer       A:00009CEC
 DrawObject                       A:00008EC4
 DrawObjects                      A:00008DDC
-DrawParticleIntoBuffer           A:00009BF4
-DrawParticleIntoNearBuffer       A:00009BB8
+DrawParticleShadowToBuffer       A:00009BF4
+DrawParticleToBuffer             A:00009BB8
 DrawQuadrilateral                A:00009DC8
 DrawTriangle                     A:00009DDC
 DrawTriangleFromBuffer           A:00009BA4
-DrawTriangleIntoBuffer           A:00009C28
-DrawTriangleIntoNearBuffer       A:00009C58
+DrawTriangleShadowToBuffer       A:00009C28
+DrawTriangleToBuffer             A:00009C58
 EndGame                          A:0000A8AC
 Entry                            A:0000A614
 FillTriangle                     A:0000A408
@@ -10799,10 +10799,10 @@ Symbols by value:
 00009B40 Draw3x2ParticleFromBuffer
 00009B78 Draw3x1ParticleFromBuffer
 00009BA4 DrawTriangleFromBuffer
-00009BB8 DrawParticleIntoNearBuffer
-00009BF4 DrawParticleIntoBuffer
-00009C28 DrawTriangleIntoBuffer
-00009C58 DrawTriangleIntoNearBuffer
+00009BB8 DrawParticleToBuffer
+00009BF4 DrawParticleShadowToBuffer
+00009C28 DrawTriangleShadowToBuffer
+00009C58 DrawTriangleToBuffer
 00009C8C bufferJump
 00009CDC DrawGraphicsBuffer
 00009CEC DrawNextFromGraphicsBuffer

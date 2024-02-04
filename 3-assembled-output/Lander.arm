@@ -692,11 +692,11 @@ lab_8904:
  SUB     R1, R9, R14
  MOV     R8, R2
  BL      ProjectParticleOntoScreen
- BLLO    DrawParticleIntoBuffer
+ BLLO    DrawParticleShadowToBuffer
  LDMFD   R13!, {R0-R2, R7}
  MOV     R8, R2
  BL      ProjectParticleOntoScreen
- BLLO    DrawParticleIntoNearBuffer
+ BLLO    DrawParticleToBuffer
  LDMIA   R10, {R0-R7}
  CMP     R7, #0
  BNE     lab_880C
@@ -1187,7 +1187,7 @@ dobj3:
  LDMIA   R6, {R2-R3}
  ADD     R7, R10, R7, LSL #4
  LDMIA   R7, {R4-R5}
- BL      DrawTriangleIntoBuffer
+ BL      DrawTriangleShadowToBuffer
  LDMFD   R13!, {R3, R9, R11}
 dobj4:
  CMP     R3, #0
@@ -1236,7 +1236,7 @@ dobj4:
  LDMIA   R5, {R2-R3}
  ADD     R6, R10, R6, LSL #4
  LDMIA   R6, {R4-R5}
- BL      DrawTriangleIntoNearBuffer
+ BL      DrawTriangleToBuffer
 dobj5:
  LDMFD   R13!, {R8-R9, R11-R12}
  ADD     R9, R9, #16
@@ -1990,7 +1990,7 @@ DrawTriangleFromBuffer:
  BL      DrawTriangle
  LDMFD   R13!, {R9, R12}
  B       DrawNextFromGraphicsBuffer
-DrawParticleIntoNearBuffer:
+DrawParticleToBuffer:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
  ADD     R14, R14, #0x01000000
@@ -2006,7 +2006,7 @@ DrawParticleIntoNearBuffer:
  STR     R1, [R9], #4
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-DrawParticleIntoBuffer:
+DrawParticleShadowToBuffer:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
  BIC     R14, R14, #0x00C00000
@@ -2020,7 +2020,7 @@ DrawParticleIntoBuffer:
  STR     R1, [R9], #4
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-DrawTriangleIntoBuffer:
+DrawTriangleShadowToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
  RSB     R14, R14, #0x14000000
@@ -2033,7 +2033,7 @@ DrawTriangleIntoBuffer:
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
-DrawTriangleIntoNearBuffer:
+DrawTriangleToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
  RSB     R14, R14, #0x14000000
