@@ -2042,7 +2042,7 @@ DrawTriangleIntoNearBuffer:
  MOVHS   R14, #0x0A000000
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
- MOV     R7, #0x12
+ MOV     R7, #18
  STR     R7, [R9], #4
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]

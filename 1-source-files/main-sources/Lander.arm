@@ -1265,30 +1265,34 @@ ENDIF
 .lose1
 
                                     \ This is a repeat of the main loop but with
-                                    \ minor differences (e.g. there is no call
-                                    \ to DrawFuelLevel)
+                                    \ three differences (there are no calls to
+                                    \ sub_8D40, MoveAndDrawPlayer or
+                                    \ DrawFuelLevel)
 
  LDR     R0, [R11, #mainLoopCount]  \ Same as in main loop
  MOV     R0, R0, LSL #24
 
  MOV     R1, R0, LSL #1             \ Same as in main loop
 
- BL      sub_93E4                   \ Same as in main loop
+ BL      sub_93E4                   \ ???
 
                                     \ BL sub_8D40 is missing from main loop
 
- BL      MoveAndDrawParticles       \ Same as in main loop
+ BL      MoveAndDrawParticles       \ Move and draw all the particles, such as
+                                    \ smoke clouds and bullets, into the
+                                    \ graphics buffers
 
- BL      DrawObjects                \ Same as in main loop
+ BL      DrawObjects                \ Draw all the objects, such as trees and
+                                    \ buildings, into the graphics buffers
 
- BL      AddTerminatorsToBuffers    \ Same as in main loop
+ BL      AddTerminatorsToBuffers    \ Add terminators to the ends of the
+                                    \ graphics buffers
 
- BL      DrawLandscape              \ Same as in main loop
+ BL      DrawLandscape              \ Draw the landscape and the contents of the
+                                    \ graphics buffers
 
  BL      PrintCurrentScore          \ Print the number of remaining bullets at
                                     \ the left end of the score bar
-
-                                    \ BL DrawFuelLevel is missing from main loop
 
  BL      SwitchScreenBank           \ Switch screen banks and clear the newly
                                     \ hidden screen bank to black
@@ -4388,7 +4392,7 @@ ENDIF
 \               ^          ^        ^               ^
 \               |          |        |               |
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
-\         (0-319)    (0-255)                  (0-255)  
+\         (0-319)    (0-255)                  (0-255)
 \
 \ This command draws a 2x1-pixel particle at the given coordinates in the
 \ specified colour, with the coordinates specifying the left end of the
@@ -4703,10 +4707,15 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
-\ The seven parameter words for this command are the arguments for the
-\ DrawTriangle routine in register order.
+\ The seven parameter words for this command match the arguments for the
+\ DrawTriangle routine:
 \
-\ This command draws a triangle of the specified size, position and colour.
+\   * Pixel coordinate of corner 1 (x1, y1)
+\   * Pixel coordinate of corner 2 (x2, y2)
+\   * Pixel coordinate of corner 3 (x3, y3)
+\   * Colour
+\
+\ This command draws a triangle of the specified shape and colour.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4751,69 +4760,274 @@ ENDIF
 \       Name: DrawParticleIntoNearBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: ???
+\    Summary: Draw a large coloured particle into a slightly nearer graphics,
+\             buffer according to its distance
+\
+\ ------------------------------------------------------------------------------
+\
+\ This command draws a large coloured particle into a graphics buffer, with the
+\ buffer being chosen according to the distance of the particle in the z-axis,
+\ plus one (so this routine draws the particle into a slightly nearer graphics
+\ buffer than DrawParticleIntoBuffer).
+\
+\ This command is used for drawing particles, while DrawParticleIntoBuffer is
+\ used for drawing their shadows.
+\
+\ The command numbers for drawing large particles are 0 to 8, with higher
+\ numbers giving smaller particles (so particles are smaller when they are
+\ further away, as the command number is based on the z-coordinate). This is
+\ followed by the pixel coordinates, composed into one 32-bit parameter word as
+\ follows:
+\
+\          #20-31     #12-19    #8-11            #0-7
+\    019876543210   98765432     1098        76543210
+\               ^          ^        ^               ^
+\               |          |        |               |
+\   Pixel x-coord     Colour   Unused   Pixel y-coord
+\         (0-319)    (0-255)                  (0-255)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1)                        The pixel coordinate of the particle
+\
+\   R7                              The particle colour
+\
+\   R8                              The 3D z-coordinate of the particle
+\
+\   R12                             The address of the table of containing the
+\                                   end addresses of the graphics buffers
+\                                   (i.e. graphicsBuffersEnd)
 \
 \ ******************************************************************************
 
 .DrawParticleIntoNearBuffer
 
- STMFD   R13!, {R9, R14}            \ 
- RSB     R14, R8, #&14000000        \ 
- ADD     R14, R14, #&01000000       \ 
- BIC     R14, R14, #&00C00000       \ 
- LDR     R9, [R12, R14, LSR #22]    \ 
- MOV     R8, R8, LSR #25            \ 
- CMP     R8, #8                     \ 
- MOVHS   R8, #8                     \ 
- AND     R7, R7, #&FF               \ 
- ADD     R1, R1, R7, LSL #12        \ 
- ADD     R1, R1, R0, LSL #20        \ 
- STR     R8, [R9], #4               \ 
- STR     R1, [R9], #4               \ 
- STR     R9, [R12, R14, LSR #22]    \ 
- LDMFD   R13!, {R9, PC}             \ 
+ STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ RSB     R14, R8, #&14000000        \ Set R14 = &14000000 - R8
+                                    \
+                                    \ We use the top byte of this number as the
+                                    \ number of the graphics buffer to draw into
+                                    \
+                                    \ This ensures that more distant particles
+                                    \ are drawn into lower-numbered graphics
+                                    \ buffers, so higher z-coordinates map to
+                                    \ lower buffer numbers and vice verse (so
+                                    \ buffer 0 is for objects that are far away
+                                    \ and buffer 11 is for the closest objects
+                                    \ to the viewer)
+                                    \
+                                    \ Why &14000000 (20 tiles)? ???
+
+ ADD     R14, R14, #&01000000       \ Add the size of one tile to R14 so we draw
+                                    \ the particle one tile nearer than we would
+                                    \ otherwise (i.e. one buffer nearer)
+
+ BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
+                                    \ the buffer number, and we're going to look
+                                    \ up the corresponding buffer address from a
+                                    \ lookup table with four bytes per entry, so
+                                    \ we clear bits 22 and 23 to ensure that
+                                    \ R14 >> 22 contains the value of the top
+                                    \ byte * 4, which we can then use as an
+                                    \ offset into the lookup table to fetch the
+                                    \ address of the end of the buffer, which is
+                                    \ where we can store our particle-drawing
+                                    \ command
+
+ LDR     R9, [R12, R14, LSR #22]    \ Set R9 to the address of the next free
+                                    \ byte in the graphics buffer whose number
+                                    \ matches the top byte of R14, fetching the
+                                    \ address from the lookup table at R12
+
+ MOV     R8, R8, LSR #25            \ Scale R8 from a 3D z-coordinate into a
+ CMP     R8, #8                     \ number between 0 and 8, which we can use
+ MOVHS   R8, #8                     \ as the drawing command number, as drawing
+                                    \ commands 0 to 9 draw large particles with
+                                    \ higher numbers giving smaller particles
+                                    \ (see bufferJump for a full list of drawing
+                                    \ commands)
+
+ AND     R7, R7, #&FF               \ Encode the two pixel coordinates in R0 and
+ ADD     R1, R1, R7, LSL #12        \ R1 and the colour in R7 into one parameter
+ ADD     R1, R1, R0, LSL #20        \ word in R1, by inserting the value of R0
+                                    \ into bits 20-31 of R1 and the value of R7
+                                    \ into bits 12-19
+
+ STR     R8, [R9], #4               \ Store the drawing command number in the
+                                    \ graphics buffer and increment the address
+                                    \ in R9 to point to the next word in the
+                                    \ buffer
+
+ STR     R1, [R9], #4               \ Store the parameter word in R1 in the
+                                    \ graphics buffer and increment the address in R9
+                                    \ to point to the next word in the buffer
+
+ STR     R9, [R12, R14, LSR #22]    \ Update the end address in the table at R12
+                                    \ to point to the new end address of the
+                                    \ graphics buffer
+
+ LDMFD   R13!, {R9, PC}             \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: DrawParticleIntoBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: ???
+\    Summary: Draw a small black particle into the correct graphics buffer,
+\             according to its distance
+\
+\ ------------------------------------------------------------------------------
+\
+\ This command draws a small black particle into a graphics buffer, with the
+\ buffer being chosen according to the distance of the particle in the z-axis.
+\
+\ This command is used for drawing particle shadows, while the particles
+\ themselves are drawn by DrawParticleIntoNearBuffer.
+\
+\ The command numbers for drawing small particles are 9 to 17, with higher
+\ numbers giving smaller particles (so particles are smaller when they are
+\ further away, as the command number is based on the z-coordinate). This is
+\ followed by the pixel coordinates, composed into one 32-bit parameter word as
+\ follows:
+\
+\          #20-31       #12-19    #8-11            #0-7
+\    019876543210     98765432     1098        76543210
+\               ^            ^        ^               ^
+\               |            |        |               |
+\   Pixel x-coord       Colour   Unused   Pixel y-coord
+\         (0-319)   (always 0)                  (0-255)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1)                        The pixel coordinate of the particle
+\
+\   R8                              The 3D z-coordinate of the particle
+\
+\   R12                             The address of the table of containing the
+\                                   end addresses of the graphics buffers
+\                                   (i.e. graphicsBuffersEnd)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R12                             R12 is preserved
 \
 \ ******************************************************************************
 
 .DrawParticleIntoBuffer
 
- STMFD   R13!, {R9, R14}            \ 
- RSB     R14, R8, #&14000000        \ 
- BIC     R14, R14, #&00C00000       \ 
- LDR     R9, [R12, R14, LSR #22]    \ 
- MOV     R8, R8, LSR #25            \ 
- CMP     R8, #8                     \ 
- MOVHS   R8, #8                     \ 
- ADD     R8, R8, #9                 \ 
- ADD     R1, R1, R0, LSL #20        \ 
- STR     R8, [R9], #4               \ 
- STR     R1, [R9], #4               \ 
- STR     R9, [R12, R14, LSR #22]    \ 
- LDMFD   R13!, {R9, PC}             \ 
+ STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ RSB     R14, R8, #&14000000        \ Set R14 = &14000000 - R8
+                                    \
+                                    \ We use the top byte of this number as the
+                                    \ number of the graphics buffer to draw into
+                                    \
+                                    \ This ensures that more distant particles
+                                    \ are drawn into lower-numbered graphics
+                                    \ buffers, so higher z-coordinates map to
+                                    \ lower buffer numbers and vice verse (so
+                                    \ buffer 0 is for objects that are far away
+                                    \ and buffer 11 is for the closest objects
+                                    \ to the viewer)
+                                    \
+                                    \ Why &14000000 (20 tiles)? ???
+
+ BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
+                                    \ the buffer number, and we're going to look
+                                    \ up the corresponding buffer address from a
+                                    \ lookup table with four bytes per entry, so
+                                    \ we clear bits 22 and 23 to ensure that
+                                    \ R14 >> 22 contains the value of the top
+                                    \ byte * 4, which we can then use as an
+                                    \ offset into the lookup table to fetch the
+                                    \ address of the end of the buffer, which is
+                                    \ where we can store our particle-drawing
+                                    \ command
+
+ LDR     R9, [R12, R14, LSR #22]    \ Set R9 to the address of the next free
+                                    \ byte in the graphics buffer whose number
+                                    \ matches the top byte of R14, fetching the
+                                    \ address from the lookup table at R12
+
+ MOV     R8, R8, LSR #25            \ Scale R8 from a 3D z-coordinate into a
+ CMP     R8, #8                     \ number between 9 and 17, which we can use
+ MOVHS   R8, #8                     \ as the drawing command number, as drawing
+ ADD     R8, R8, #9                 \ commands 9 to 17 draw small particles with
+                                    \ higher numbers giving smaller particles
+                                    \ (see bufferJump for a full list of drawing
+                                    \ commands)
+
+ ADD     R1, R1, R0, LSL #20        \ Encode the two pixel coordinates in R0 and
+                                    \ R1 into one parameterword in R1, by
+                                    \ inserting the value of R0 into bits 20-31
+                                    \ of R1
+                                    \
+                                    \ The colour in bits 12-19 is left at zero,
+                                    \ so the particle is always black
+
+ STR     R8, [R9], #4               \ Store the drawing command number in the
+                                    \ graphics buffer and increment the address
+                                    \ in R9 to point to the next word in the
+                                    \ buffer
+
+ STR     R1, [R9], #4               \ Store the parameter word in R1 in the
+                                    \ graphics buffer and increment the address
+                                    \ in R9 to point to the next word in the
+                                    \ buffer
+
+ STR     R9, [R12, R14, LSR #22]    \ Update the end address in the table at R12
+                                    \ to point to the new end address of the
+                                    \ graphics buffer
+
+ LDMFD   R13!, {R9, PC}             \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
 \       Name: DrawTriangleIntoBuffer
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: Draw a triangle into the correct graphics buffer according to its
+\    Summary: Draw a triangle into the correct graphics buffer, according to its
 \             distance
 \
 \ ------------------------------------------------------------------------------
 \
-\ This command draws a triangle into the correct graphics buffer, depending on
-\ the 
+\ This command draws a triangle into a graphics buffer, with the buffer being
+\ chosen according to the distance of the triangle in the z-axis.
+\
+\ This command is used for drawing triangle shadows, while the triangles
+\ themselves are drawn by DrawTriangleIntoNearBuffer.
+\
+\ The command number for drawing a triangle is 18, followed by seven parameter
+\ words that match the arguments for the DrawTriangle routine:
+\
+\   * Command number (18)
+\   * Pixel coordinate of corner 1 (x1, y1)
+\   * Pixel coordinate of corner 2 (x2, y2)
+\   * Pixel coordinate of corner 3 (x3, y3)
+\   * Colour
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
+\
+\   (R0, R1)                        Pixel coordinate of corner 1
+\
+\   (R2, R2)                        Pixel coordinate of corner 2
+\
+\   (R4, R5)                        Pixel coordinate of corner 4
+\
+\   R8                              Colour
 \
 \   R12                             The address of the table of containing the
 \                                   end addresses of the graphics buffers
@@ -4843,9 +5057,10 @@ ENDIF
                                     \ This ensures that more distant triangles
                                     \ are drawn into lower-numbered graphics
                                     \ buffers, so higher z-coordinates map to
-                                    \ lower buffer numbers (so buffer 0 is for
-                                    \ objects that are far away and buffer 11 is
-                                    \ for the closest objects to the viewer)
+                                    \ lower buffer numbers and vice verse (so
+                                    \ buffer 0 is for objects that are far away
+                                    \ and buffer 11 is for the closest objects
+                                    \ to the viewer)
                                     \
                                     \ Why &14000000 (20 tiles)? ???
 
@@ -4874,7 +5089,8 @@ ENDIF
  STR     R7, [R9], #4               \ is 18, so we store a value of 18 in the
                                     \ graphics buffer and increment the address
                                     \ in R9 to point to the next word in the
-                                    \ buffer
+                                    \ buffer (see bufferJump for a full list of
+                                    \ drawing commands)
 
  STMIA   R9!, {R0-R5, R8}           \ Store the three pixel coordinates from R0
                                     \ to R5, and then the colour in R8, in the
@@ -4892,25 +5108,117 @@ ENDIF
 \       Name: DrawTriangleIntoNearBuffer
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: ???
+\    Summary: Draw a triangle into a slightly nearer graphics buffer, according
+\             to its distance
+\
+\ ------------------------------------------------------------------------------
+\
+\ This command draws a triangle into a graphics buffer, with the buffer being
+\ chosen according to the distance of the triangle in the z-axis, plus one (so
+\ this routine draws the triangle into a slightly nearer graphics buffer than
+\ DrawTriangleIntoBuffer).
+\
+\ This command is used for drawing triangles, while DrawTriangleIntoBuffer is
+\ used for drawing their shadows.
+\
+\ The command number for drawing a triangle is 18, followed by seven parameter
+\ words that match the arguments for the DrawTriangle routine:
+\
+\   * Command number (18)
+\   * Pixel coordinate of corner 1 (x1, y1)
+\   * Pixel coordinate of corner 2 (x2, y2)
+\   * Pixel coordinate of corner 3 (x3, y3)
+\   * Colour
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1)                        Pixel coordinate of corner 1
+\
+\   (R2, R2)                        Pixel coordinate of corner 2
+\
+\   (R4, R5)                        Pixel coordinate of corner 4
+\
+\   R8                              Colour
+\
+\   R12                             The address of the table of containing the
+\                                   end addresses of the graphics buffers
+\                                   (i.e. graphicsBuffersEnd)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R12                             R12 is preserved
 \
 \ ******************************************************************************
 
 .DrawTriangleIntoNearBuffer
 
- STMFD   R13!, {R9, R14}            \ 
- LDR     R14, [R11, #zObject]       \ 
- RSB     R14, R14, #&14000000       \ 
- ADD     R14, R14, #&01000000       \ 
- CMP     R14, #&0B000000            \ 
- MOVHS   R14, #&0A000000            \ 
- BIC     R14, R14, #&00C00000       \ 
- LDR     R9, [R12, R14, LSR #22]    \ 
- MOV     R7, #&12                   \ 
- STR     R7, [R9], #4               \ 
- STMIA   R9!, {R0-R5, R8}           \ 
- STR     R9, [R12, R14, LSR #22]    \ 
- LDMFD   R13!, {R9, PC}             \ 
+ STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the
+                                    \ triangle
+
+ RSB     R14, R14, #&14000000       \ Set R14 = &14000000 - R14
+                                    \
+                                    \ We use the top byte of this number as the
+                                    \ number of the graphics buffer to draw into
+                                    \
+                                    \ This ensures that more distant triangles
+                                    \ are drawn into lower-numbered graphics
+                                    \ buffers, so higher z-coordinates map to
+                                    \ lower buffer numbers and vice verse (so
+                                    \ buffer 0 is for objects that are far away
+                                    \ and buffer 11 is for the closest objects
+                                    \ to the viewer)
+                                    \
+                                    \ Why &14000000 (20 tiles)? ???
+
+ ADD     R14, R14, #&01000000       \ Add the size of one tile to R14 so we draw
+                                    \ the triangle one tile nearer than we would
+                                    \ otherwise (i.e. one buffer nearer)
+
+ CMP     R14, #&0B000000            \ Cap R14 to a maximum value of &0A000000,
+ MOVHS   R14, #&0A000000            \ so the maximum buffer number we draw into
+                                    \ is 10 (why not 11?) ???
+
+ BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
+                                    \ the buffer number, and we're going to look
+                                    \ up the corresponding buffer address from a
+                                    \ lookup table with four bytes per entry, so
+                                    \ we clear bits 22 and 23 to ensure that
+                                    \ R14 >> 22 contains the value of the top
+                                    \ byte * 4, which we can then use as an
+                                    \ offset into the lookup table to fetch the
+                                    \ address of the end of the buffer, which is
+                                    \ where we can store our triangle-drawing
+                                    \ command
+
+ LDR     R9, [R12, R14, LSR #22]    \ Set R9 to the address of the next free
+                                    \ byte in the graphics buffer whose number
+                                    \ matches the top byte of R14, fetching the
+                                    \ address from the lookup table at R12
+
+ MOV     R7, #18                    \ The command number for drawing a triangle
+ STR     R7, [R9], #4               \ is 18, so we store a value of 18 in the
+                                    \ graphics buffer and increment the address
+                                    \ in R9 to point to the next word in the
+                                    \ buffer (see bufferJump for a full list of
+                                    \ drawing commands)
+
+ STMIA   R9!, {R0-R5, R8}           \ Store the three pixel coordinates from R0
+                                    \ to R5, and then the colour in R8, in the
+                                    \ buffer
+
+ STR     R9, [R12, R14, LSR #22]    \ Update the end address in the table at R12
+                                    \ to point to the new end address of the
+                                    \ graphics buffer
+
+ LDMFD   R13!, {R9, PC}             \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -5244,19 +5552,13 @@ ENDIF
 \
 \ Arguments:
 \
-\   R0                              ???
+\   (R0, R1)                        Pixel coordinate of corner 1
 \
-\   R1                              ???
+\   (R2, R2)                        Pixel coordinate of corner 2
 \
-\   R2                              ???
+\   (R4, R5)                        Pixel coordinate of corner 4
 \
-\   R3                              ???
-\
-\   R4                              ???
-\
-\   R5                              ???
-\
-\   R8                              ???
+\   R8                              Colour
 \
 \ ******************************************************************************
 
@@ -6595,10 +6897,11 @@ ENDIF
  MVN     R0, #0                     \ Set var_130 = -1 ???
  STR     R0, [R11, #var_130]        \ 
 
- MOV     R0, #0                     \ Set xCamera = 0 ???
- STR     R0, [R11, #xCamera]
-
- STR     R0, [R11, #zCamera]        \ Set zCamera = 0 ???
+ MOV     R0, #0                     \ Set xCamera = 0 and zCamera = 0
+ STR     R0, [R11, #xCamera]        \
+ STR     R0, [R11, #zCamera]        \ This sets the camera at (0, 0, 0), as
+                                    \ yCamera is never changed from its
+                                    \ initial zero
 
  STR     R0, [R11, #var_154]        \ Set var_154 = 0 ???
 
@@ -6641,27 +6944,27 @@ ENDIF
                                     \ EndGame to acknowledge the escape
                                     \ condition and quit the game
 
- BL      MoveAndDrawPlayer          \ Move and draw the player's ship ???
+ BL      MoveAndDrawPlayer          \ Move the player's ship and draw it into
+                                    \ the graphics buffers
 
  LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24 ???
  MOV     R0, R0, LSL #24
 
  MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25 ???
 
- BL      sub_93E4                   \ Commenting this out does nothing obvious
-                                    \ ???
+ BL      sub_93E4                   \ ???
 
- BL      sub_8D40                   \ Commenting this out does nothing obvious
-                                    \ ???
+ BL      sub_8D40                   \ ???
 
  BL      MoveAndDrawParticles       \ Move and draw all the particles, such as
-                                    \ the engine exhaust and bullets ???
+                                    \ smoke clouds and bullets, into the
+                                    \ graphics buffers
 
  BL      DrawObjects                \ Draw all the objects, such as trees and
-                                    \ buildings ???
+                                    \ buildings, into the graphics buffers
 
- BL      AddTerminatorsToBuffers    \ Add termninators to the graphics buffers
-                                    \ ???
+ BL      AddTerminatorsToBuffers    \ Add terminators to the ends of the
+                                    \ graphics buffers
 
  BL      DrawLandscape              \ Draw the landscape and the contents of the
                                     \ graphics buffers
