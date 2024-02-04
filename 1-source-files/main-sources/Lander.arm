@@ -565,7 +565,7 @@ ENDIF
  STMIA   R14, {R0-R3}               \ 
  CMP     R4, #&80000000             \ 
  BEQ     land3                      \ 
- BL      sub_82DC                   \ 
+ BL      GetLandscapeTileColour     \ 
  BL      DrawQuadrilateral          \ 
 
 .land3
@@ -854,16 +854,18 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: GetLandscapeBelowObject
+\       Name: GetLandscapeBelowVertex
 \       Type: Subroutine
 \   Category: Landscape
-\    Summary: Calculate the landscape altitude directly below a 3D coordinate
+\    Summary: Calculate the landscape altitude directly below an object's vertex
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
-\   R0                              The address of a 3D coordinate (x, y, z)
+\   R0                              The address of an object's vertex (x, y, z),
+\                                   relative to the back of the landscape and in
+\                                   front of the camera
 \
 \ ------------------------------------------------------------------------------
 \
@@ -874,79 +876,205 @@ ENDIF
 \
 \ ******************************************************************************
 
-.GetLandscapeBelowObject
+.GetLandscapeBelowVertex
 
- STMFD   R13!, {R8-R9, R14}         \ 
- LDR     R8, [R0]                   \ 
- LDR     R1, [R11, #xCamera]        \ 
- ADD     R8, R8, R1                 \ 
- LDR     R9, [R0, #8]               \ 
- LDR     R1, [R11, #zCamera]        \ 
- ADD     R9, R9, R1                 \ 
- SUB     R9, R9, #&14000000         \ 
- BL      GetLandscapeAltitude       \ 
- LDR     R14, [R11, #yCamera]       \ 
- SUB     R0, R0, R14                \ 
- LDMFD   R13!, {R8-R9, PC}          \ 
+ STMFD   R13!, {R8-R9, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R8, [R0]                   \ Add xCamera to the x-coordinate in R8
+ LDR     R1, [R11, #xCamera]
+ ADD     R8, R8, R1
+
+ LDR     R9, [R0, #8]               \ Add zCamera to the z-coordinate in R8
+ LDR     R1, [R11, #zCamera]
+ ADD     R9, R9, R1
+
+ SUB     R9, R9, #&14000000         \ Move the coordinate forward by 14 tiles,
+                                    \ as DrawObjects moves objects back by 14
+                                    \ tiles before drawing them, and the
+                                    \ altitude calculation needs the coordinate
+                                    \ to be relative to the front-centre point
+                                    \ of the landscape, not the back
+
+                                    \ The (x, z) coordinate in (R8, R9) is now
+                                    \ relative to the game's coordinate system,
+                                    \ rather than the camera or the back of the
+                                    \ landscape
+
+ BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
+                                    \ coordinates (x, z) = (R8, R9), which is
+                                    \ the point directly below the vertex
+
+ LDR     R14, [R11, #yCamera]       \ Subtract yCamera from the altitude so the
+ SUB     R0, R0, R14                \ result is relative to the camera position
+
+ LDMFD   R13!, {R8-R9, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: sub_82DC
+\       Name: GetLandscapeTileColour
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Landscape
+\    Summary: Calculate the colour of the landscape tile currently being drawn
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R8                              The colour of the landscape tile
 \
 \ ******************************************************************************
 
-.sub_82DC
+.GetLandscapeTileColour
 
- STMFD   R13!, {R0-R4, R14}         \ 
- LDR     R3, [R11, #prevAltitude]   \ 
- LDR     R4, [R11, #altitude]       \ 
- SUBS    R14, R3, R4                \ 
- MOVMI   R14, #0                    \ 
- AND     R2, R4, #&10               \ 
- MOV     R2, #0                     \ 
- AND     R1, R4, #8                 \ 
- MOV     R1, R1, LSR #1             \ 
- ADD     R1, R1, #4                 \ 
- AND     R0, R4, #4                 \ 
- CMP     R4, #LAUNCHPAD_ALTITUDE    \ 
- MOVEQ   R0, #4                     \ 
- MOVEQ   R1, #4                     \ 
- MOVEQ   R2, #4                     \ 
- CMP     R4, #SEA_LEVEL             \ 
- CMPEQ   R3, #SEA_LEVEL             \ 
- MOVEQ   R1, #0                     \ 
- MOVEQ   R2, #4                     \ 
- MOVEQ   R0, #0                     \ 
- LDRB    R8, [R11, #var_0E4]        \ 
- ADD     R3, R8, R14, LSR #22       \ 
- ADD     R0, R0, R3                 \ 
- ADD     R1, R1, R3                 \ 
- ADD     R2, R2, R3                 \ 
- CMP     R0, #&10                   \ 
- MOVHS   R0, #&F                    \ 
- CMP     R1, #&10                   \ 
- MOVHS   R1, #&F                    \ 
- CMP     R2, #&10                   \ 
- MOVHS   R2, #&F                    \ 
- ORR     R8, R1, R2                 \ 
- AND     R8, R8, #3                 \ 
- ORR     R8, R8, R0                 \ 
- AND     R8, R8, #7                 \ 
- TST     R0, #8                     \ 
- ORRNE   R8, R8, #&10               \ 
- AND     R1, R1, #&C                \ 
- ORR     R8, R8, R1, LSL #3         \ 
- TST     R2, #4                     \ 
- ORRNE   R8, R8, #8                 \ 
- TST     R2, #8                     \ 
- ORRNE   R8, R8, #&80               \ 
- ORR     R8, R8, R8, LSL #8         \ 
- ORR     R8, R8, R8, LSL #16        \ 
- ORR     R8, R8, R8, LSL #24        \ 
- LDMFD   R13!, {R0-R4, PC}          \ 
+ STMFD   R13!, {R0-R4, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R3, [R11, #prevAltitude]   \ Set R3 to the altitude of the previous
+                                    \ point on the landscape
+
+ LDR     R4, [R11, #altitude]       \ Set R4 to the altitude of the current
+                                    \ point on the landscape
+
+ SUBS    R14, R3, R4                \ Set R14 to the slope of the tile, which we
+ MOVMI   R14, #0                    \ get from the change of altitude from the
+                                    \ previous point to this one, making sure
+                                    \ the slope value is greater than zero:
+                                    \
+                                    \   R14 = min(0, prevAltitude - altitude)
+                                    \
+                                    \ So if the slope is going down from the
+                                    \ previous point to the current one, then
+                                    \ the slope will be non-zero, but if it is
+                                    \ going up from the previous point to the
+                                    \ current one, it will be zero
+                                    \
+                                    \ As we draw the landscape from left to
+                                    \ right, this means the slope will be large
+                                    \ for tiles that face left, with a greater
+                                    \ value for steeper slopes, while tiles that
+                                    \ face right will have a slope value of zero
+
+                                    \ We now calculate the colour, with the red,
+                                    \ green and blue channels in R0, R1 and R2
+                                    \ respectively
+
+ AND     R2, R4, #&10               \ This instruction appears to have no
+                                    \ effect, as we overwrite the result in the
+                                    \ next instruction, but it looks like it's
+                                    \ all that remains of an experiment to add
+                                    \ blue to the landscape
+
+ MOV     R2, #0                     \ Set the blue channel in R2 to zero, as we
+                                    \ only use blue for the sea
+
+                                    \ We now set the green and red channels
+                                    \ depending on bits 2 and 3 of the altitude,
+                                    \ for red and green respectively
+                                    \
+                                    \ This makes the green channel change more
+                                    \ slowly between neighbouring tiles, with
+                                    \ the red channel changing more quickly,
+                                    \ giving the overall effect of a gentle
+                                    \ green landscape pockmarked with small
+                                    \ groups of red-brown dirt
+
+ AND     R1, R4, #%00001000         \ Set the green channel in R1 to bit 3 of
+ MOV     R1, R1, LSR #1             \ the current point's altitude, as follows:
+ ADD     R1, R1, #4                 \
+                                    \   R1 = (bit 3) * 4 + 4
+                                    \
+                                    \ So it's 4 if bit 3 is clear, or 8 if bit 3
+                                    \ is set
+
+ AND     R0, R4, #%00000100         \ Set the red channel in R0 to bit 2 of the
+                                    \ current point's altitude
+
+ CMP     R4, #LAUNCHPAD_ALTITUDE    \ If the current point is on the launchpad,
+ MOVEQ   R0, #4                     \ set the colour to grey, i.e. red, green
+ MOVEQ   R1, #4                     \ and blue all have the same value of 4
+ MOVEQ   R2, #4
+
+ CMP     R4, #SEA_LEVEL             \ If both the previous and current points
+ CMPEQ   R3, #SEA_LEVEL             \ are at sea level, set the colour to blue,
+ MOVEQ   R1, #0                     \ i.e. the blue channel has value 4 while
+ MOVEQ   R2, #4                     \ red and green are zero
+ MOVEQ   R0, #0
+
+ LDRB    R8, [R11, #var_0E4]        \ Set the tile's brightness in R3 to:
+ ADD     R3, R8, R14, LSR #22       \
+                                    \   var_0E4 + slope >> 22
+                                    \
+                                    \ As we draw the landscape from left to
+                                    \ right, this means tiles that face left
+                                    \ will have a higher brightness level, with
+                                    \ steeper sloping tiles being brighter, and
+                                    \ tiles that face right will be lower
+                                    \
+                                    \ This is because the light source is
+                                    \ directly above and slightly to the left
+
+ ADD     R0, R0, R3                 \ Add the brightness in R3 to all three
+ ADD     R1, R1, R3                 \ channels
+ ADD     R2, R2, R3
+
+ CMP     R0, #16                    \ Ensure that the red channel in R0 fits
+ MOVHS   R0, #15                    \ into four bits
+
+ CMP     R1, #16                    \ Ensure that the green channel in R1 fits
+ MOVHS   R1, #15                    \ into four bits
+
+ CMP     R2, #16                    \ Ensure that the blue channel in R2 fits
+ MOVHS   R2, #15                    \ into four bits
+
+                                    \ We now build a VIDC colour number in R8
+                                    \ by combining the three channels into one
+                                    \ byte, which we then replicate four times
+                                    \ to get a 32-bit colour number
+                                    \
+                                    \ The byte is of the form:
+                                    \
+                                    \   * Bit 7 = blue bit 3
+                                    \   * Bit 6 = green bit 3
+                                    \   * Bit 5 = green bit 2
+                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 3 = blue bit 2
+                                    \   * Bit 2 = red bit 2
+                                    \   * Bit 1 = sum of red/green/blue bit 1
+                                    \   * Bit 0 = sum of red/green/blue bit 0
+                                    \
+                                    \ We now build this colour number in R8 from
+                                    \ the red, green and blue values in R0, R1
+                                    \ and R2
+
+ ORR     R8, R1, R2                 \ Set R8 to the bottom three bits of:
+ AND     R8, R8, #%00000011         \
+ ORR     R8, R8, R0                 \ (the bottom two bits of R1 OR R2) OR R0
+ AND     R8, R8, #%00000111         \
+                                    \ So this sets bits 0, 1 and 2 of R8 as
+                                    \ required
+
+ TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
+ ORRNE   R8, R8, #%00010000         \ set bit 4 of R8
+
+ AND     R1, R1, #%00001100         \ Clear all bits of the green channel in R1
+                                    \ except bits 2-3
+
+ ORR     R8, R8, R1, LSL #3         \ And stick them into bits 5-6 of R8
+
+ TST     R2, #%00000100             \ If bit 2 of the blue channel in R2 is set,
+ ORRNE   R8, R8, #%00001000         \ set bit 3 of R8
+
+ TST     R2, #%00001000             \ If bit 3 of the blue channel in R2 is set,
+ ORRNE   R8, R8, #%10000000         \ set bit 7 of R8
+
+ ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
+ ORR     R8, R8, R8, LSL #16        \ other three bytes in the word to produce
+ ORR     R8, R8, R8, LSL #24        \ a VIDC palette word
+
+ LDMFD   R13!, {R0-R4, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -1071,7 +1199,10 @@ ENDIF
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
  SUB     R9, R9, #&05000000         \ 
- BL      GetLandscapeAltitude       \ 
+
+ BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
+                                    \ coordinates (x, z) = (R8, R9)
+
  SUB     R0, R0, #&00640000         \ 
  LDR     R1, [R11, #var_098]        \ 
  SUB     R14, R0, R1                \ 
@@ -1433,7 +1564,10 @@ ENDIF
  MOV     R8, R0                     \ 
  MOV     R9, R2                     \ 
  STMFD   R13!, {R0-R3}              \ 
- BL      GetLandscapeAltitude       \ 
+
+ BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
+                                    \ coordinates (x, z) = (R8, R9)
+
  MOV     R9, R0                     \ 
  LDMFD   R13!, {R0-R3}              \ 
  TST     R7, #&00200000             \ 
@@ -2091,7 +2225,7 @@ ENDIF
 \       Name: DrawObjects
 \       Type: Subroutine
 \   Category: 3D objects
-\    Summary: ???
+\    Summary: Draw all the objects in the visible portion of the object map
 \
 \ ******************************************************************************
 
@@ -2576,7 +2710,7 @@ ENDIF
 
  ADD     R0, R11, #xCoord           \ Set R0 to the address of xCoord
 
- BL      GetLandscapeBelowObject    \ Get the landscape altitude below the
+ BL      GetLandscapeBelowVertex    \ Get the landscape altitude below the
                                     \ vertex and return it in R0
 
  STR     R0, [R11, #yCoord]         \ Set yCoord = R0, so (xCoord, yCoord,
@@ -2856,16 +2990,19 @@ ENDIF
                                     \ if the face colour is &rgb, this is &b
 
  ADD     R0, R0, R1                 \ Set R0 = R0 + R1 and clip to a maximum
- CMP     R0, #%00010000             \ value of %00001111, so this adds the face
- MOVHS   R0, #%00001111             \ brightness to the red channel
+ CMP     R0, #16                    \ value of 15, so this adds the face
+ MOVHS   R0, #15                    \ brightness to the red channel and ensures
+                                    \ the result fits into four bits
 
  ADD     R2, R2, R1                 \ Set R2 = R2 + R1 and clip to a maximum
- CMP     R2, #%00010000             \ value of %00001111, so this adds the face
- MOVHS   R2, #%00001111             \ brightness to the green channel
+ CMP     R2, #16                    \ value of %00001111, so this adds the face
+ MOVHS   R2, #15                    \ brightness to the green channel and
+                                    \ ensures the result fits into four bits
 
  ADD     R7, R7, R1                 \ Set R7 = R7 + R1 and clip to a maximum
- CMP     R7, #%00010000             \ value of %00001111, so this adds the face
- MOVHS   R7, #%00001111             \ brightness to the blue channel
+ CMP     R7, #16                    \ value of %00001111, so this adds the face
+ MOVHS   R7, #15                    \ brightness to the blue channel and ensures
+                                    \ the result fits into four bits
 
                                     \ We now build a VIDC colour number in R8
                                     \ by combining the three channels into one
@@ -6839,7 +6976,7 @@ ENDIF
                                     \ GetLandscapeAltitude
 
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
-                                    \ coordinates (R8, R9)
+                                    \ coordinates (x, z) = (R8, R9)
 
  MOV     R14, R0                    \ Set R14 to the landscape altitude returned
                                     \ in R0

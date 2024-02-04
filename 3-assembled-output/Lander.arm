@@ -185,7 +185,7 @@ land2:
  STMIA   R14, {R0-R3}
  CMP     R4, #0x80000000
  BEQ     land3
- BL      sub_82DC
+ BL      GetLandscapeTileColour
  BL      DrawQuadrilateral
 land3:
  LDMFD   R13!, {R6-R8}
@@ -271,7 +271,7 @@ GetLandscapeAltitude:
  MOVLO   R0, #LAUNCHPAD_ALTITUDE
  STR     R0, [R11, #altitude]
  MOV     PC, R14
-GetLandscapeBelowObject:
+GetLandscapeBelowVertex:
  STMFD   R13!, {R8-R9, R14}
  LDR     R8, [R0]
  LDR     R1, [R11, #xCamera]
@@ -284,7 +284,7 @@ GetLandscapeBelowObject:
  LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
  LDMFD   R13!, {R8-R9, PC}
-sub_82DC:
+GetLandscapeTileColour:
  STMFD   R13!, {R0-R4, R14}
  LDR     R3, [R11, #prevAltitude]
  LDR     R4, [R11, #altitude]
@@ -292,10 +292,10 @@ sub_82DC:
  MOVMI   R14, #0
  AND     R2, R4, #0x10
  MOV     R2, #0
- AND     R1, R4, #8
+ AND     R1, R4, #0x8
  MOV     R1, R1, LSR #1
  ADD     R1, R1, #4
- AND     R0, R4, #4
+ AND     R0, R4, #0x4
  CMP     R4, #LAUNCHPAD_ALTITUDE
  MOVEQ   R0, #4
  MOVEQ   R1, #4
@@ -310,23 +310,23 @@ sub_82DC:
  ADD     R0, R0, R3
  ADD     R1, R1, R3
  ADD     R2, R2, R3
- CMP     R0, #0x10
- MOVHS   R0, #0xF
- CMP     R1, #0x10
- MOVHS   R1, #0xF
- CMP     R2, #0x10
- MOVHS   R2, #0xF
+ CMP     R0, #16
+ MOVHS   R0, #15
+ CMP     R1, #16
+ MOVHS   R1, #15
+ CMP     R2, #16
+ MOVHS   R2, #15
  ORR     R8, R1, R2
- AND     R8, R8, #3
+ AND     R8, R8, #0x3
  ORR     R8, R8, R0
- AND     R8, R8, #7
- TST     R0, #8
+ AND     R8, R8, #0x7
+ TST     R0, #0x8
  ORRNE   R8, R8, #0x10
- AND     R1, R1, #0xC
+ AND     R1, R1, #0xc
  ORR     R8, R8, R1, LSL #3
- TST     R2, #4
- ORRNE   R8, R8, #8
- TST     R2, #8
+ TST     R2, #0x4
+ ORRNE   R8, R8, #0x8
+ TST     R2, #0x8
  ORRNE   R8, R8, #0x80
  ORR     R8, R8, R8, LSL #8
  ORR     R8, R8, R8, LSL #16
@@ -1142,7 +1142,7 @@ dobj2:
  BL      ProjectVertexOntoScreen
  STMIA   R10!, {R0-R1}
  ADD     R0, R11, #xCoord
- BL      GetLandscapeBelowObject
+ BL      GetLandscapeBelowVertex
  STR     R0, [R11, #yCoord]
  ADD     R0, R11, #xCoord
  BL      ProjectVertexOntoScreen
@@ -1207,14 +1207,14 @@ dobj4:
  AND     R2, R8, R7, LSR #4
  AND     R7, R7, R8
  ADD     R0, R0, R1
- CMP     R0, #0x10
- MOVHS   R0, #0xf
+ CMP     R0, #16
+ MOVHS   R0, #15
  ADD     R2, R2, R1
- CMP     R2, #0x10
- MOVHS   R2, #0xf
+ CMP     R2, #16
+ MOVHS   R2, #15
  ADD     R7, R7, R1
- CMP     R7, #0x10
- MOVHS   R7, #0xf
+ CMP     R7, #16
+ MOVHS   R7, #15
  ORR     R8, R2, R7
  AND     R8, R8, #0x3
  ORR     R8, R8, R0

@@ -190,7 +190,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008158 0F008EE8        	   185:  STMIA   R14, {R0-R3}
 00:0000815C 020154E3        	   186:  CMP     R4, #0x80000000
 00:00008160 0100000A        	   187:  BEQ     land3
-00:00008164 5C0000EB        	   188:  BL      sub_82DC
+00:00008164 5C0000EB        	   188:  BL      GetLandscapeTileColour
 00:00008168 160700EB        	   189:  BL      DrawQuadrilateral
                             	   190: land3:
 00:0000816C C001BDE8        	   191:  LDMFD   R13!, {R6-R8}
@@ -276,7 +276,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000082A0 3506A033        	   271:  MOVLO   R0, #LAUNCHPAD_ALTITUDE
 00:000082A4 00018BE5        	   272:  STR     R0, [R11, #altitude]
 00:000082A8 0EF0A0E1        	   273:  MOV     PC, R14
-                            	   274: GetLandscapeBelowObject:
+                            	   274: GetLandscapeBelowVertex:
 00:000082AC 00432DE9        	   275:  STMFD   R13!, {R8-R9, R14}
 00:000082B0 008090E5        	   276:  LDR     R8, [R0]
 00:000082B4 3C119BE5        	   277:  LDR     R1, [R11, #xCamera]
@@ -289,7 +289,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000082D0 40E19BE5        	   284:  LDR     R14, [R11, #yCamera]
 00:000082D4 0E0040E0        	   285:  SUB     R0, R0, R14
 00:000082D8 0083BDE8        	   286:  LDMFD   R13!, {R8-R9, PC}
-                            	   287: sub_82DC:
+                            	   287: GetLandscapeTileColour:
 00:000082DC 1F402DE9        	   288:  STMFD   R13!, {R0-R4, R14}
 00:000082E0 04319BE5        	   289:  LDR     R3, [R11, #prevAltitude]
 00:000082E4 00419BE5        	   290:  LDR     R4, [R11, #altitude]
@@ -297,10 +297,10 @@ Source: "3-assembled-output/Lander.arm"
 00:000082EC 00E0A043        	   292:  MOVMI   R14, #0
 00:000082F0 102004E2        	   293:  AND     R2, R4, #0x10
 00:000082F4 0020A0E3        	   294:  MOV     R2, #0
-00:000082F8 081004E2        	   295:  AND     R1, R4, #8
+00:000082F8 081004E2        	   295:  AND     R1, R4, #0x8
 00:000082FC A110A0E1        	   296:  MOV     R1, R1, LSR #1
 00:00008300 041081E2        	   297:  ADD     R1, R1, #4
-00:00008304 040004E2        	   298:  AND     R0, R4, #4
+00:00008304 040004E2        	   298:  AND     R0, R4, #0x4
 00:00008308 350654E3        	   299:  CMP     R4, #LAUNCHPAD_ALTITUDE
 00:0000830C 0400A003        	   300:  MOVEQ   R0, #4
 00:00008310 0410A003        	   301:  MOVEQ   R1, #4
@@ -315,23 +315,23 @@ Source: "3-assembled-output/Lander.arm"
 00:00008334 030080E0        	   310:  ADD     R0, R0, R3
 00:00008338 031081E0        	   311:  ADD     R1, R1, R3
 00:0000833C 032082E0        	   312:  ADD     R2, R2, R3
-00:00008340 100050E3        	   313:  CMP     R0, #0x10
-00:00008344 0F00A023        	   314:  MOVHS   R0, #0xF
-00:00008348 100051E3        	   315:  CMP     R1, #0x10
-00:0000834C 0F10A023        	   316:  MOVHS   R1, #0xF
-00:00008350 100052E3        	   317:  CMP     R2, #0x10
-00:00008354 0F20A023        	   318:  MOVHS   R2, #0xF
+00:00008340 100050E3        	   313:  CMP     R0, #16
+00:00008344 0F00A023        	   314:  MOVHS   R0, #15
+00:00008348 100051E3        	   315:  CMP     R1, #16
+00:0000834C 0F10A023        	   316:  MOVHS   R1, #15
+00:00008350 100052E3        	   317:  CMP     R2, #16
+00:00008354 0F20A023        	   318:  MOVHS   R2, #15
 00:00008358 028081E1        	   319:  ORR     R8, R1, R2
-00:0000835C 038008E2        	   320:  AND     R8, R8, #3
+00:0000835C 038008E2        	   320:  AND     R8, R8, #0x3
 00:00008360 008088E1        	   321:  ORR     R8, R8, R0
-00:00008364 078008E2        	   322:  AND     R8, R8, #7
-00:00008368 080010E3        	   323:  TST     R0, #8
+00:00008364 078008E2        	   322:  AND     R8, R8, #0x7
+00:00008368 080010E3        	   323:  TST     R0, #0x8
 00:0000836C 10808813        	   324:  ORRNE   R8, R8, #0x10
-00:00008370 0C1001E2        	   325:  AND     R1, R1, #0xC
+00:00008370 0C1001E2        	   325:  AND     R1, R1, #0xc
 00:00008374 818188E1        	   326:  ORR     R8, R8, R1, LSL #3
-00:00008378 040012E3        	   327:  TST     R2, #4
-00:0000837C 08808813        	   328:  ORRNE   R8, R8, #8
-00:00008380 080012E3        	   329:  TST     R2, #8
+00:00008378 040012E3        	   327:  TST     R2, #0x4
+00:0000837C 08808813        	   328:  ORRNE   R8, R8, #0x8
+00:00008380 080012E3        	   329:  TST     R2, #0x8
 00:00008384 80808813        	   330:  ORRNE   R8, R8, #0x80
 00:00008388 088488E1        	   331:  ORR     R8, R8, R8, LSL #8
 00:0000838C 088888E1        	   332:  ORR     R8, R8, R8, LSL #16
@@ -1155,7 +1155,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008F74 F30100EB        	  1142:  BL      ProjectVertexOntoScreen
 00:00008F78 0300AAE8        	  1143:  STMIA   R10!, {R0-R1}
 00:00008F7C 74008BE2        	  1144:  ADD     R0, R11, #xCoord
-00:00008F80 C9FCFFEB        	  1145:  BL      GetLandscapeBelowObject
+00:00008F80 C9FCFFEB        	  1145:  BL      GetLandscapeBelowVertex
 00:00008F84 78008BE5        	  1146:  STR     R0, [R11, #yCoord]
 00:00008F88 74008BE2        	  1147:  ADD     R0, R11, #xCoord
 00:00008F8C ED0100EB        	  1148:  BL      ProjectVertexOntoScreen
@@ -1220,14 +1220,14 @@ Source: "3-assembled-output/Lander.arm"
 00:00009070 272208E0        	  1207:  AND     R2, R8, R7, LSR #4
 00:00009074 087007E0        	  1208:  AND     R7, R7, R8
 00:00009078 010080E0        	  1209:  ADD     R0, R0, R1
-00:0000907C 100050E3        	  1210:  CMP     R0, #0x10
-00:00009080 0F00A023        	  1211:  MOVHS   R0, #0xf
+00:0000907C 100050E3        	  1210:  CMP     R0, #16
+00:00009080 0F00A023        	  1211:  MOVHS   R0, #15
 00:00009084 012082E0        	  1212:  ADD     R2, R2, R1
-00:00009088 100052E3        	  1213:  CMP     R2, #0x10
-00:0000908C 0F20A023        	  1214:  MOVHS   R2, #0xf
+00:00009088 100052E3        	  1213:  CMP     R2, #16
+00:0000908C 0F20A023        	  1214:  MOVHS   R2, #15
 00:00009090 017087E0        	  1215:  ADD     R7, R7, R1
-00:00009094 100057E3        	  1216:  CMP     R7, #0x10
-00:00009098 0F70A023        	  1217:  MOVHS   R7, #0xf
+00:00009094 100057E3        	  1216:  CMP     R7, #16
+00:00009098 0F70A023        	  1217:  MOVHS   R7, #15
 00:0000909C 078082E1        	  1218:  ORR     R8, R2, R7
 00:000090A0 038008E2        	  1219:  AND     R8, R8, #0x3
 00:000090A4 008088E1        	  1220:  ORR     R8, R8, R0
@@ -10258,7 +10258,8 @@ FillTriangle                     A:0000A408
 GameOver                         A:00008744
 GetDotProduct                    A:0000928C
 GetLandscapeAltitude             A:000081F4
-GetLandscapeBelowObject          A:000082AC
+GetLandscapeBelowVertex          A:000082AC
+GetLandscapeTileColour           A:000082DC
 GetRandomNumbers                 A:00009A40
 GetVertexCoordinate              A:0000991C
 LAUNCHPAD_ALTITUDE               S:03500000
@@ -10506,7 +10507,6 @@ stack                            S:000121FC
 stackAddr                        A:0000A570
 stackPointerOnEntry              A:0000A584
 stringBuffer                     S:00000200
-sub_82DC                         A:000082DC
 sub_86C4                         A:000086C4
 sub_893C                         A:0000893C
 sub_8998                         A:00008998
@@ -10586,8 +10586,8 @@ zRoofV                           S:00000044
 zSideV                           S:00000050
 
 Symbols by value:
-00000000 xObject
 00000000 OS_WriteC
+00000000 xObject
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10606,8 +10606,8 @@ Symbols by value:
 00000048 xSideV
 0000004C ySideV
 00000050 zSideV
-00000054 varOffset
 00000054 xVertex
+00000054 varOffset
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10658,8 +10658,8 @@ Symbols by value:
 00000600 vertexProjected
 00000700 var_700
 00004400 objectMap
-00008000 var_8000
 00008000 CODE
+00008000 var_8000
 0000800C var_800C
 00008010 var_8010
 00008028 var_8028
@@ -10672,8 +10672,8 @@ Symbols by value:
 00008170 land4
 000081E0 gbuf1
 000081F4 GetLandscapeAltitude
-000082AC GetLandscapeBelowObject
-000082DC sub_82DC
+000082AC GetLandscapeBelowVertex
+000082DC GetLandscapeTileColour
 00008398 MoveAndDrawPlayer
 00008400 lab_8400
 00008408 lab_8408
