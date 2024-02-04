@@ -503,7 +503,10 @@ ENDIF
 \
 \   * For drawingTileRow = 0 to 10, do the following:
 \
-\     * Part 2: Draw landscape row drawingTileRow
+\     * Part 2: Draw landscape for row drawingTileRow, working through the tiles
+\               from left to right one corner coordinate at a time, and drawing
+\               each tile as a quadrilateral once we have four valid corner
+\               coordinates from the previous row and columns
 \
 \     * Part 3: If drawingTileRow >= 2, draw graphics buffer drawingTileRow - 2
 \
