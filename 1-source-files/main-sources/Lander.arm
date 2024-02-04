@@ -6865,62 +6865,15 @@ ENDIF
 
 .objectRockFaces
 
- EQUD    &00000000
- EQUD    &54DA5200
- EQUD    &54DA5200
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000444
- EQUD    &54DA5200
- EQUD    &00000000
- EQUD    &54DA5200
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000001
- EQUD    &00000444
- EQUD    &00000000
- EQUD    &AB25AE00
- EQUD    &54DA5200
- EQUD    &00000000
- EQUD    &00000004
- EQUD    &00000003
- EQUD    &00000444
- EQUD    &AB25AE00
- EQUD    &00000000
- EQUD    &54DA5200
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000004
- EQUD    &00000444
- EQUD    &00000000
- EQUD    &54DA5200
- EQUD    &AB25AE00
- EQUD    &00000005
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000444
- EQUD    &54DA5200
- EQUD    &00000000
- EQUD    &AB25AE00
- EQUD    &00000005
- EQUD    &00000003
- EQUD    &00000001
- EQUD    &00000444
- EQUD    &00000000
- EQUD    &AB25AE00
- EQUD    &AB25AE00
- EQUD    &00000005
- EQUD    &00000004
- EQUD    &00000003
- EQUD    &00000444
- EQUD    &AB25AE00
- EQUD    &00000000
- EQUD    &AB25AE00
- EQUD    &00000005
- EQUD    &00000002
- EQUD    &00000004
- EQUD    &00000444
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &54DA5200, &54DA5200,       0,       1,       2,   &444 \ 0
+ EQUD    &54DA5200, &00000000, &54DA5200,       0,       3,       1,   &444 \ 1
+ EQUD    &00000000, &AB25AE00, &54DA5200,       0,       4,       3,   &444 \ 2
+ EQUD    &AB25AE00, &00000000, &54DA5200,       0,       2,       4,   &444 \ 3
+ EQUD    &00000000, &54DA5200, &AB25AE00,       5,       1,       2,   &444 \ 4
+ EQUD    &54DA5200, &00000000, &AB25AE00,       5,       3,       1,   &444 \ 5
+ EQUD    &00000000, &AB25AE00, &AB25AE00,       5,       4,       3,   &444 \ 6
+ EQUD    &AB25AE00, &00000000, &AB25AE00,       5,       2,       4,   &444 \ 7
 
 \ ******************************************************************************
 \
@@ -6952,48 +6905,13 @@ ENDIF
 
 .objectPulsatingPyramidFaces
 
- EQUD    &00000000
- EQUD    &35AA66D2
- EQUD    &6B54CDA5
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000800
- EQUD    &6B54CDA5
- EQUD    &35AA66D2
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000001
- EQUD    &00000088
- EQUD    &00000000
- EQUD    &35AA66D2
- EQUD    &94AB325B
- EQUD    &00000000
- EQUD    &00000004
- EQUD    &00000003
- EQUD    &00000880
- EQUD    &94AB325B
- EQUD    &35AA66D2
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000004
- EQUD    &00000808
- EQUD    &00000000
- EQUD    &88000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000444
- EQUD    &00000000
- EQUD    &88000000
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000008
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &35AA66D2, &6B54CDA5,       0,       1,       2,   &800 \ 0
+ EQUD    &6B54CDA5, &35AA66D2, &00000000,       0,       3,       1,   &088 \ 1
+ EQUD    &00000000, &35AA66D2, &94AB325B,       0,       4,       3,   &880 \ 2
+ EQUD    &94AB325B, &35AA66D2, &00000000,       0,       2,       4,   &808 \ 3
+ EQUD    &00000000, &88000000, &00000000,       1,       2,       3,   &444 \ 4
+ EQUD    &00000000, &88000000, &00000000,       2,       3,       4,   &008 \ 5
 
 \ ******************************************************************************
 \
@@ -7030,69 +6948,16 @@ ENDIF
 
 .objectPlayerFaces
 
- EQUD    &457C441A
- EQUD    &9E2A1F4C
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000005
- EQUD    &00000080
- EQUD    &35F5D83B
- EQUD    &9BC03EC1
- EQUD    &DA12D71D
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000005
- EQUD    &00000040
- EQUD    &35F5D83B
- EQUD    &9BC03EC1
- EQUD    &25ED28E3
- EQUD    &00000000
- EQUD    &00000005
- EQUD    &00000004
- EQUD    &00000040
- EQUD    &B123D51C
- EQUD    &AF3F50EE
- EQUD    &D7417278
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000005
- EQUD    &00000040
- EQUD    &B123D51D
- EQUD    &AF3F50EE
- EQUD    &28BE8D88
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000005
- EQUD    &00000040
- EQUD    &F765D8CD
- EQUD    &73242236
- EQUD    &DF4FD176
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000088
- EQUD    &F765D8CD
- EQUD    &73242236
- EQUD    &20B02E8A
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000088
- EQUD    &00000000
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000003
- EQUD    &00000044
- EQUD    &00000000
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000006
- EQUD    &00000007
- EQUD    &00000008
- EQUD    &00000C80
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &457C441A, &9E2A1F4C, &00000000,       0,       1,       5,   &080 \ 0
+ EQUD    &35F5D83B, &9BC03EC1, &DA12D71D,       1,       2,       5,   &040 \ 1
+ EQUD    &35F5D83B, &9BC03EC1, &25ED28E3,       0,       5,       4,   &040 \ 2
+ EQUD    &B123D51C, &AF3F50EE, &D7417278,       2,       3,       5,   &040 \ 3
+ EQUD    &B123D51D, &AF3F50EE, &28BE8D88,       3,       4,       5,   &040 \ 4
+ EQUD    &F765D8CD, &73242236, &DF4FD176,       1,       2,       3,   &088 \ 5
+ EQUD    &F765D8CD, &73242236, &20B02E8A,       0,       3,       4,   &088 \ 6
+ EQUD    &00000000, &78000000, &00000000,       0,       1,       3,   &044 \ 7
+ EQUD    &00000000, &78000000, &00000000,       6,       7,       8,   &C80 \ 8
 
 \ ******************************************************************************
 \
@@ -7130,41 +6995,12 @@ ENDIF
 
 .objectSmallLeafyTreeFaces
 
- EQUD    &14A01873
- EQUD    &AF8F9F93
- EQUD    &56A0681E
- EQUD    &00000000
- EQUD    &00000009
- EQUD    &0000000A
- EQUD    &00000040
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000400
- EQUD    &499A254E
- EQUD    &B123FC2C
- EQUD    &CB6D5299
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000080
- EQUD    &E4D2EEBE
- EQUD    &8DC82837
- EQUD    &E72FE5E9
- EQUD    &00000000
- EQUD    &00000005
- EQUD    &00000006
- EQUD    &00000080
- EQUD    &D5710585
- EQUD    &B29EF364
- EQUD    &AEC07EB3
- EQUD    &00000000
- EQUD    &00000007
- EQUD    &00000008
- EQUD    &00000080
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &14A01873, &AF8F9F93, &56A0681E,       0,       9,      10,   &040 \ 0
+ EQUD    &00000000, &00000000, &00000000,       0,       1,       2,   &400 \ 1
+ EQUD    &499A254E, &B123FC2C, &CB6D5299,       0,       3,       4,   &080 \ 2
+ EQUD    &E4D2EEBE, &8DC82837, &E72FE5E9,       0,       5,       6,   &080 \ 3
+ EQUD    &D5710585, &B29EF364, &AEC07EB3,       0,       7,       8,   &080 \ 4
 
 \ ******************************************************************************
 \
@@ -7205,48 +7041,13 @@ ENDIF
 
 .objectTallLeafyTreeFaces
 
- EQUD    &FD3D01DD
- EQUD    &D2CB371E
- EQUD    &6F20024E
- EQUD    &00000000
- EQUD    &00000009
- EQUD    &0000000A
- EQUD    &00000040
- EQUD    &1E6F981A
- EQUD    &BB105ECE
- EQUD    &5D638B16
- EQUD    &0000000D
- EQUD    &0000000B
- EQUD    &0000000C
- EQUD    &00000080
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000400
- EQUD    &49D96509
- EQUD    &B8E72762
- EQUD    &C19E3A19
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000080
- EQUD    &AD213B74
- EQUD    &B641CA5D
- EQUD    &2DC40650
- EQUD    &00000000
- EQUD    &00000005
- EQUD    &00000006
- EQUD    &00000040
- EQUD    &C9102051
- EQUD    &AC846CAD
- EQUD    &BD92A8C1
- EQUD    &0000000D
- EQUD    &00000007
- EQUD    &00000008
- EQUD    &00000040
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &FD3D01DD, &D2CB371E, &6F20024E,       0,       9,      10,   &040 \ 0
+ EQUD    &1E6F981A, &BB105ECE, &5D638B16,      13,      11,      12,   &080 \ 1
+ EQUD    &00000000, &00000000, &00000000,       0,       1,       2,   &400 \ 2
+ EQUD    &49D96509, &B8E72762, &C19E3A19,       0,       3,       4,   &080 \ 3
+ EQUD    &AD213B74, &B641CA5D, &2DC40650,       0,       5,       6,   &040 \ 4
+ EQUD    &C9102051, &AC846CAD, &BD92A8C1,      13,       7,       8,   &040 \ 5
 
 \ ******************************************************************************
 \
@@ -7278,20 +7079,9 @@ ENDIF
 
 .objectSmokingRemainsLeftFaces
 
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000003
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000000
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &00000000, &00000000,       0,       1,       3,   &000 \ 0
+ EQUD    &00000000, &00000000, &00000000,       2,       3,       4,   &000 \ 1
 
 \ ******************************************************************************
 \
@@ -7323,20 +7113,9 @@ ENDIF
 
 .objectSmokingRemainsRightFaces
 
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000003
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000000
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &00000000, &00000000,       0,       1,       3,   &000 \ 0
+ EQUD    &00000000, &00000000, &00000000,       2,       3,       4,   &000 \ 1
 
 \ ******************************************************************************
 \
@@ -7368,20 +7147,9 @@ ENDIF
 
 .objectFirTreeFaces
 
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000400
- EQUD    &00000000
- EQUD    &E0B0E050
- EQUD    &8C280943
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000040
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &00000000, &00000000,       2,       3,       4,   &400 \ 0
+ EQUD    &00000000, &E0B0E050, &8C280943,       0,       1,       2,   &040 \ 1
 
 \ ******************************************************************************
 \
@@ -7421,62 +7189,15 @@ ENDIF
 
 .objectGazeboFaces
 
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &78000000
- EQUD    &00000001
- EQUD    &00000005
- EQUD    &00000009
- EQUD    &00000444
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &88000000
- EQUD    &00000002
- EQUD    &00000006
- EQUD    &0000000A
- EQUD    &00000444
- EQUD    &00000000
- EQUD    &94AB325B
- EQUD    &35AA66D2
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000004
- EQUD    &00000400
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &88000000
- EQUD    &00000003
- EQUD    &00000007
- EQUD    &0000000B
- EQUD    &00000444
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &78000000
- EQUD    &00000004
- EQUD    &00000008
- EQUD    &0000000C
- EQUD    &00000444
- EQUD    &CA55992E
- EQUD    &94AB325B
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000840
- EQUD    &35AA66D2
- EQUD    &94AB325B
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000004
- EQUD    &00000840
- EQUD    &00000000
- EQUD    &94AB325B
- EQUD    &CA55992E
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000400
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &00000000, &78000000,       1,       5,       9,   &444 \ 0
+ EQUD    &00000000, &00000000, &88000000,       2,       6,      10,   &444 \ 1
+ EQUD    &00000000, &94AB325B, &35AA66D2,       0,       1,       4,   &400 \ 2
+ EQUD    &00000000, &00000000, &88000000,       3,       7,      11,   &444 \ 3
+ EQUD    &00000000, &00000000, &78000000,       4,       8,      12,   &444 \ 4
+ EQUD    &CA55992E, &94AB325B, &00000000,       0,       1,       2,   &840 \ 5
+ EQUD    &35AA66D2, &94AB325B, &00000000,       0,       3,       4,   &840 \ 6
+ EQUD    &00000000, &94AB325B, &CA55992E,       0,       2,       3,   &400 \ 7
 
 \ ******************************************************************************
 \
@@ -7519,90 +7240,19 @@ ENDIF
 
 .objectBuildingFaces
 
- EQUD    &00000000
- EQUD    &99CD0E6D
- EQUD    &3EE445CC
- EQUD    &00000000
- EQUD    &00000004
- EQUD    &00000006
- EQUD    &00000400
- EQUD    &00000000
- EQUD    &99CD0E6D
- EQUD    &3EE445CC
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000006
- EQUD    &00000400
- EQUD    &88000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000008
- EQUD    &00000009
- EQUD    &00000DDD
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &0000000A
- EQUD    &0000000B
- EQUD    &00000555
- EQUD    &88000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000008
- EQUD    &0000000C
- EQUD    &0000000D
- EQUD    &00000FFF
- EQUD    &88000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000008
- EQUD    &00000009
- EQUD    &0000000D
- EQUD    &00000FFF
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &0000000A
- EQUD    &0000000E
- EQUD    &0000000F
- EQUD    &00000777
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &0000000A
- EQUD    &0000000B
- EQUD    &0000000F
- EQUD    &00000777
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &88000000
- EQUD    &00000009
- EQUD    &0000000D
- EQUD    &0000000F
- EQUD    &00000BBB
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &88000000
- EQUD    &00000009
- EQUD    &0000000B
- EQUD    &0000000F
- EQUD    &00000BBB
- EQUD    &00000000
- EQUD    &99CD0E6D
- EQUD    &C11BBA34
- EQUD    &00000000
- EQUD    &00000005
- EQUD    &00000007
- EQUD    &00000800
- EQUD    &00000000
- EQUD    &99CD0E6D
- EQUD    &C11BBA34
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000007
- EQUD    &00000800
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &99CD0E6D, &3EE445CC,       0,       4,       6,   &400 \ 0
+ EQUD    &00000000, &99CD0E6D, &3EE445CC,       0,       3,       6,   &400 \ 1
+ EQUD    &88000000, &00000000, &00000000,       1,       8,       9,   &DDD \ 2
+ EQUD    &78000000, &00000000, &00000000,       2,      10,      11,   &555 \ 3
+ EQUD    &88000000, &00000000, &00000000,       8,      12,      13,   &FFF \ 4
+ EQUD    &88000000, &00000000, &00000000,       8,       9,      13,   &FFF \ 5
+ EQUD    &78000000, &00000000, &00000000,      10,      14,      15,   &777 \ 6
+ EQUD    &78000000, &00000000, &00000000,      10,      11,      15,   &777 \ 7
+ EQUD    &00000000, &00000000, &88000000,       9,      13,      15,   &BBB \ 8
+ EQUD    &00000000, &00000000, &88000000,       9,      11,      15,   &BBB \ 9
+ EQUD    &00000000, &99CD0E6D, &C11BBA34,       0,       5,       7,   &800 \ 10
+ EQUD    &00000000, &99CD0E6D, &C11BBA34,       0,       3,       7,   &800 \ 11
 
 \ ******************************************************************************
 \
@@ -7635,48 +7285,13 @@ ENDIF
 
 .objectSmokingBuildingFaces
 
- EQUD    &00000000
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000004
- EQUD    &00000333
- EQUD    &88000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000004
- EQUD    &00000666
- EQUD    &78000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000003
- EQUD    &00000005
- EQUD    &00000555
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &88000001
- EQUD    &00000001
- EQUD    &00000003
- EQUD    &00000005
- EQUD    &00000777
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &78000000, &00000000,       0,       1,       2,   &000 \ 0
+ EQUD    &00000000, &78000000, &00000000,       1,       2,       3,   &000 \ 1
+ EQUD    &00000000, &00000000, &78000000,       0,       2,       4,   &333 \ 2
+ EQUD    &88000000, &00000000, &00000000,       0,       1,       4,   &666 \ 3
+ EQUD    &78000000, &00000000, &00000000,       2,       3,       5,   &555 \ 4
+ EQUD    &00000000, &00000000, &88000001,       1,       3,       5,   &777 \ 5
 
 \ ******************************************************************************
 \
@@ -7709,34 +7324,11 @@ ENDIF
 
 .objectSmokingGazeboFaces
 
- EQUD    &00000000
- EQUD    &A24BB5BE
- EQUD    &4AF6A1AD
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &A24BB5BE
- EQUD    &4AF6A1AD
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000003
- EQUD    &00000333
- EQUD    &00000000
- EQUD    &AC59C060
- EQUD    &A9F5EA98
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000004
- EQUD    &00000444
- EQUD    &00000000
- EQUD    &AC59C060
- EQUD    &A9F5EA98
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000005
- EQUD    &00000000
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &A24BB5BE, &4AF6A1AD,       0,       1,       2,   &000 \ 0
+ EQUD    &00000000, &A24BB5BE, &4AF6A1AD,       0,       1,       3,   &333 \ 1
+ EQUD    &00000000, &AC59C060, &A9F5EA98,       0,       1,       4,   &444 \ 2
+ EQUD    &00000000, &AC59C060, &A9F5EA98,       0,       1,       5,   &000 \ 3
 
 \ ******************************************************************************
 \
@@ -7776,62 +7368,15 @@ ENDIF
 
 .objectRocketFaces
 
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000009
- EQUD    &00000001
- EQUD    &00000005
- EQUD    &00000CC0
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &0000000B
- EQUD    &00000003
- EQUD    &00000007
- EQUD    &00000CC0
- EQUD    &00000000
- EQUD    &EFA75F67
- EQUD    &76E1A76B
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000003
- EQUD    &00000C00
- EQUD    &891E5895
- EQUD    &EFA75F67
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000001
- EQUD    &00000002
- EQUD    &00000800
- EQUD    &76E1A76B
- EQUD    &EFA75F67
- EQUD    &00000000
- EQUD    &00000003
- EQUD    &00000000
- EQUD    &00000004
- EQUD    &00000800
- EQUD    &00000000
- EQUD    &EFA75F67
- EQUD    &891E5895
- EQUD    &00000000
- EQUD    &00000002
- EQUD    &00000004
- EQUD    &00000C00
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &0000000A
- EQUD    &00000002
- EQUD    &00000006
- EQUD    &00000CC0
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &00000000
- EQUD    &0000000C
- EQUD    &00000004
- EQUD    &00000008
- EQUD    &00000CC0
+    \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
+ EQUD    &00000000, &00000000, &00000000,       9,       1,       5,   &CC0 \ 0
+ EQUD    &00000000, &00000000, &00000000,      11,       3,       7,   &CC0 \ 1
+ EQUD    &00000000, &EFA75F67, &76E1A76B,       0,       1,       3,   &C00 \ 2
+ EQUD    &891E5895, &EFA75F67, &00000000,       0,       1,       2,   &800 \ 3
+ EQUD    &76E1A76B, &EFA75F67, &00000000,       3,       0,       4,   &800 \ 4
+ EQUD    &00000000, &EFA75F67, &891E5895,       0,       2,       4,   &C00 \ 5
+ EQUD    &00000000, &00000000, &00000000,      10,       2,       6,   &CC0 \ 6
+ EQUD    &00000000, &00000000, &00000000,      12,       4,       8,   &CC0 \ 7
 
 \ ******************************************************************************
 \
