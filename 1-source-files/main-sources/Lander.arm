@@ -291,75 +291,9 @@
 
  var_71C = &71C                     \ Zeroed in sub_8AF4
 
- objectMap = &4400                  \ The object map contains one byte for each
-                                    \ tile on the landscape
-                                    \
-                                    \ This byte determines which object (if any)
-                                    \ appears on that tile, where objects are
+ objectMap = &4400                  \ The object map determines which objects
+                                    \ appear on the landscape, where objects are
                                     \ trees, buildings, rockets and so on
-                                    \
-                                    \ A byte of &FF indicates that there is no
-                                    \ object on that tile, while a value of 0 to
-                                    \ 24 indicates that the tile contains an
-                                    \ object of that type
-                                    \
-                                    \ There can be only one object on each tile
-                                    \
-                                    \ The object map covers an area of 256 x 256
-                                    \ tiles, and each object is positioned on
-                                    \ the front-left corner of the corresponding
-                                    \ tile
-                                    \
-                                    \ The object map shares the same coordinate
-                                    \ system as the rest of the game, so it uses
-                                    \ a left-hand coordinate system, with the
-                                    \ x-axis going from left to right, the
-                                    \ y-axis going up the screen, and the z-axis
-                                    \ going into the screen
-                                    \
-                                    \ Because the purpose of the object map is
-                                    \ to record object positions on the map, it
-                                    \ does not include altitude data, so the
-                                    \ y-axis is ignored (as the altitude of an
-                                    \ object on the landscape is determined by
-                                    \ the landscape altitude at that point); you
-                                    \ can think of the object map as a paper map
-                                    \ that is draped over the landscape, and
-                                    \ whose longitude and latitude values map to
-                                    \ the x-axis and z-axis respectively
-                                    \
-                                    \ The origin of the object map is at the
-                                    \ front-left corner of the launchpad, and we
-                                    \ can talk about coordinates on the map in
-                                    \ terms of tiles as (x, z) coordinates
-                                    \
-                                    \ So a map coordinate of (7, 1) is 7 tiles
-                                    \ to the right and 1 tile into the screen,
-                                    \ starting from the front-left corner of the
-                                    \ launchpad; in this example, that's the
-                                    \ coordinate of the front rocket of the
-                                    \ three alongside the launchpad when we
-                                    \ start the game
-                                    \
-                                    \ The object at coordinate (x, z) is stored
-                                    \ at offset &zzxx within objectMap, so the
-                                    \ rocket at (7, 1) is at objectMap + &0107
-                                    \
-                                    \ As the object map stores object locations
-                                    \ in terms of tile numbers, we can think of
-                                    \ the coordinates in the object map as
-                                    \ &xx000000 and &zz000000 (as coordinates
-                                    \ for the world are 32-bit), and that's why
-                                    \ we only need to store &xx and &zz
-                                    \
-                                    \ So to convert from 3D space coordinates to
-                                    \ object map coordinates, we can zero the
-                                    \ bottom three bytes of the 3D x-coordinate
-                                    \ and z-coordinate to snap the coordinates
-                                    \ to the relevant tile corner, or if we
-                                    \ only need to extract the object map data,
-                                    \ we can simply use the top two bytes in the
-                                    \ form &zzxx
 
 \ ******************************************************************************
 \
@@ -375,7 +309,7 @@
 \
 \       Name: var_8000
 \       Type: Variable
-\   Category: ???
+\   Category: Landscape
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -404,7 +338,7 @@ ENDIF
 \
 \       Name: var_800C
 \       Type: Variable
-\   Category: ???
+\   Category: Landscape
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -417,7 +351,7 @@ ENDIF
 \
 \       Name: var_8010
 \       Type: Variable
-\   Category: ???
+\   Category: Landscape
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -435,7 +369,7 @@ ENDIF
 \
 \       Name: var_8028
 \       Type: Variable
-\   Category: ???
+\   Category: Landscape
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -505,7 +439,9 @@ ENDIF
 
 .DrawLandscapeAndBuffers
 
- STMFD   R13!, {R5-R9, R14}         \ 
+ STMFD   R13!, {R5-R9, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
  LDR     R3, [R11, #zCamera]        \ 
  AND     R9, R3, #&FF000000         \ 
  SUB     R3, R3, R9                 \ 
@@ -590,7 +526,7 @@ ENDIF
  ADDS    R0, R0, #1                 \ 
 
  CMP     R0, #11                    \ 
- BEQ     gbuf1                      \ 
+ BEQ     land5                      \ 
 
  STRB    R0, [R11, #var_0E4]        \ 
  LDR     R0, [R11, #var_168]        \ 
@@ -608,7 +544,7 @@ ENDIF
  ADDNE   R7, R11, #var_500          \ 
  B       land1                      \ 
 
-.gbuf1
+.land5
 
  MOV     R0, #9                     \ Draw the contents of graphics buffer 9
  BL      DrawGraphicsBuffer
@@ -6914,6 +6850,54 @@ ENDIF
 \   Category: Main loop
 \    Summary: Randomly place a number of objects on the map, avoiding the sea
 \             and the launchpad
+\
+\ ------------------------------------------------------------------------------
+\
+\ The object map at objectMap contains one byte for each tile on the landscape.
+\
+\ This byte determines which object (if any) appears on that tile, where objects
+\ are trees, buildings, rockets and so on.
+\
+\ A byte of &FF indicates that there is no object on that tile, while a value of
+\ 0 to 24 indicates that the tile contains an object of that type.
+\
+\ There can be only one object on each tile.
+\
+\ The object map covers an area of 256 x 256 tiles, and each object is placed on
+\ the front-left corner of the corresponding tile.
+\
+\ The object map shares the same coordinate system as the rest of the game, so
+\ it uses a left-hand coordinate system, with the x-axis going from left to
+\ right, the y-axis going up the screen, and the z-axis going into the screen.
+\
+\ Because the purpose of the object map is to record object positions on the
+\ map, it does not include altitude data, so the y-axis is ignored (as the
+\ altitude of an object on the landscape is determined by the landscape altitude
+\ at that point). You can think of the object map as a paper map that is draped
+\ over the landscape, and whose longitude and latitude values map to the x-axis
+\ and z-axis respectively.
+\
+\ The origin of the object map is at the front-left corner of the launchpad, and
+\ we can talk about coordinates on the map in terms of tiles as (x, z)
+\ coordinates.
+\
+\ So a map coordinate of (7, 1) is 7 tiles to the right and 1 tile into the
+\ screen, starting from the front-left corner of the launchpad; in this example,
+\ that's the coordinate of the front rocket of the three alongside the launchpad
+\ when we start the game.
+\
+\ The object at coordinate (x, z) is stored at offset &zzxx within objectMap, so
+\ the rocket at (7, 1) is at objectMap + &0107.
+\
+\ As the object map stores object locations in terms of tile numbers, we can
+\ think of the coordinates in the object map as &xx000000 and &zz000000 (as
+\ coordinates for the game world are 32-bit), and that's why we only need to
+\ store &xx and &zz.
+\
+\ So to convert from 3D space coordinates to object map coordinates, we can zero
+\ the bottom three bytes of the 3D x-coordinate and z-coordinate to snap the
+\ coordinates to the relevant tile corner, or if we only need to extract the
+\ object map data, we can simply use the top two bytes in the form &zzxx.
 \
 \ ******************************************************************************
 

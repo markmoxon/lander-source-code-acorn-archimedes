@@ -202,7 +202,7 @@ land4:
  LDRB    R0, [R11, #var_0E4]
  ADDS    R0, R0, #1
  CMP     R0, #11
- BEQ     gbuf1
+ BEQ     land5
  STRB    R0, [R11, #var_0E4]
  LDR     R0, [R11, #var_168]
  SUB     R0, R0, #0x01000000
@@ -218,7 +218,7 @@ land4:
  ADDEQ   R7, R11, #var_400
  ADDNE   R7, R11, #var_500
  B       land1
-gbuf1:
+land5:
  MOV     R0, #9
  BL      DrawGraphicsBuffer
  MOV     R0, #10
