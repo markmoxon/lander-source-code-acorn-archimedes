@@ -90,38 +90,77 @@
  zObject = &08                      \ The z-coordinate of the object currently
                                     \ being drawn
 
+                                    \ &0C to &2C appear to be unused ???
+
  rotationMatrix = &30               \ The rotation matrix of the object
-                                    \ currently being drawn (i.e. the object's
-                                    \ three orientation vectors)
+                                    \ currently being drawn (i.e. the matrix
+                                    \ formed from the object's three orientation
+                                    \ vectors)
 
- xNoseV = &30                       \ The nose vector
- yNoseV = &34
- zNoseV = &38
+ xNoseV = &30                       \ The x-coordinate of the nose vector
 
- xRoofV = &3C                       \ The roof vector
- yRoofV = &40
- zRoofV = &44
+ yNoseV = &34                       \ The y-coordinate of the nose vector
 
- xSideV = &48                       \ The side vector
- ySideV = &4C
- zSideV = &50
+ zNoseV = &38                       \ The z-coordinate of the nose vector
+
+ xRoofV = &3C                       \ The x-coordinate of the roof vector
+
+ yRoofV = &40                       \ The y-coordinate of the roof vector
+
+ zRoofV = &44                       \ The z-coordinate of the roof vector
+
+ xSideV = &48                       \ The x-coordinate of the side vector
+
+ ySideV = &4C                       \ The y-coordinate of the side vector
+
+ zSideV = &50                       \ The z-coordinate of the side vector
 
  xVertex = &54                      \ The x-coordinate of the vertex being
-                                    \ processed
+                                    \ processed, relative to the object's origin
 
  yVertex = &58                      \ The y-coordinate of the vertex being
-                                    \ processed
+                                    \ processed, relative to the object's origin
 
- xVertexRotated = &64               \ The coordinates of the vertex after being
-                                    \ rotated by the object's orientation
-                                    \ vectors
+ zVertex = &5C                      \ The z-coordinate of the vertex being
+                                    \ processed, relative to the object's origin
 
- xCoord = &74                       \ Used to store a 3D coordinate
- yCoord = &78
- zCoord = &7C
+                                    \ &60 appears to be unused ???
+
+ xVertexRotated = &64               \ The x-coordinate of the vertex after being
+                                    \ rotated by the object's rotation matrix
+
+ yVertexRotated = &68               \ The y-coordinate of the vertex after being
+                                    \ rotated by the object's rotation matrix
+
+ zVertexRotated = &6C               \ The z-coordinate of the vertex after being
+                                    \ rotated by the object's rotation matrix
+
+                                    \ &70 appears to be unused ???
+
+ xCoord = &74                       \ The x-coordinate of the vertex being
+                                    \ processed, in the game's 3D coordinate
+                                    \ system
+
+ yCoord = &78                       \ The y-coordinate of the vertex being
+                                    \ processed, in the game's 3D coordinate
+                                    \ system
+
+ zCoord = &7C                       \ The z-coordinate of the vertex being
+                                    \ processed, in the game's 3D coordinate
+                                    \ system
+
+                                    \ &80 appears to be unused ???
 
  xObjectScaled = &84                \ The x-coordinate of the vertex being
                                     \ processed, scaled as high as possible
+
+ yObjectScaled = &88                \ The y-coordinate of the vertex being
+                                    \ processed, scaled as high as possible
+
+ zObjectScaled = &8C                \ The z-coordinate of the vertex being
+                                    \ processed, scaled as high as possible
+
+                                    \ &90 appears to be unused ???
 
  var_094 = &94                      \ 
 
@@ -211,7 +250,12 @@
  xLandscape = &148                  \ The 3D x-coordinate of the front-left
                                     \ corner of the on-screen landscape
 
- var_150 = &150                     \ 
+ yLandscape = &14C                  \ The 3D y-coordinate of the front-left
+                                    \ corner of the on-screen landscape (this is
+                                    \ always zero)
+
+ zLandscape = &150                  \ The 3D z-coordinate of the front-left
+                                    \ corner of the on-screen landscape
 
  var_154 = &154                     \ 
 
@@ -459,7 +503,7 @@ ENDIF
  LDR     R3, [R11, #zCamera]        \ 
  AND     R9, R3, #&FF000000         \ 
  SUB     R3, R3, R9                 \ 
- STR     R9, [R11, #var_150]        \ 
+ STR     R9, [R11, #zLandscape]     \ 
  LDR     R4, [R11, #xCamera]        \ 
  AND     R8, R4, #&FF000000         \ 
  SUB     R4, R4, R8                 \ 
@@ -2297,6 +2341,7 @@ ENDIF
 \ Arguments:
 \
 \   (R0, R1, R2)                    The 3D coordinate (x, y, z) of the object
+\                                   relative to the camera
 \
 \   R3                              The address of the object's rotation matrix
 \
@@ -2321,11 +2366,14 @@ ENDIF
  STMIA   R4, {R0-R2}                \ Store (R0, R1, R2) in the first three
                                     \ words of xObject, so we have:
                                     \
-                                    \   * xObject = x-coordinate of object
+                                    \   * xObject = x-coordinate of the object
+                                    \               relative to the camera
                                     \
-                                    \   * yObject = y-coordinate of object
+                                    \   * yObject = y-coordinate of the object
+                                    \               relative to the camera
                                     \
-                                    \   * zObject = z-coordinate of object
+                                    \   * zObject = z-coordinate of the object
+                                    \               relative to the camera
 
                                     \ We now scale up the coordinate (x, y, z)
                                     \ in (R0, R1, R2) as high as it can go while
@@ -2480,16 +2528,16 @@ ENDIF
                                     \ store the results at R1 (i.e. the rotated
                                     \ coordinates at xVertexRotated):
                                     \
-                                    \   xVertexRotated = rotationMatrix * R0
-                                    \
-                                    \                = rotationMatrix * xVertex
+                                    \   [xVertexRotated]               [xVertex]
+                                    \   [yVertexRotated] = rotMatrix . [yVertex]
+                                    \   [zVertexRotated]               [zVertex]
                                     \
                                     \ So this rotates the vertex coordinates by
                                     \ the object's rotation matrix
 
  ADD     R0, R11, #xObject          \ Set R0 to the address of xObject
 
- BL      AddVectors                 \ Call AddVectors to set:
+ BL      GetVertexCoordinate        \ Call GetVertexCoordinate to set:
                                     \
                                     \   [xCoord]   [xObject]   [xVertexRotated]
                                     \   [yCoord] = [yObject] + [yVertexRotated]
@@ -2583,8 +2631,10 @@ ENDIF
                                     \ data block, using R8 as a loop counter (as
                                     \ we just set it to the number of faces)
                                     \
-                                    \ As we iterate through the faces we draw
-                                    \ them
+                                    \ As we iterate through the faces we check
+                                    \ their visibility, and draw the visible
+                                    \ faces and (if applicable) their shadows
+                                    \ into the graphics buffers
 
 .dobj3
 
@@ -2595,7 +2645,7 @@ ENDIF
 
  ADD     R9, R9, #12                \ Add 12 to R9 so it points to the fourth
                                     \ word in the current face data, which is
-                                    \ where the vertex numbers is stored
+                                    \ where the vertex numbers are stored
 
  ADD     R1, R11, #xVertex          \ Set R1 to the address of xVertex, so we
                                     \ store the results of the following
@@ -2605,147 +2655,273 @@ ENDIF
                                     \ vector in R0 by the rotation matrix in
                                     \ rotationMatrix:
                                     \
-                                    \   xVertex = rotationMatrix * R0
-                                    \
-                                    \           = rotationMatrix * normal
+                                    \   [xVertex]                    [xNormal]
+                                    \   [yVertex] = rotationMatrix . [yNormal]
+                                    \   [zVertex]                    [zNormal]
                                     \
                                     \ So this rotates the normal vector in R0 by
-                                    \ the rotation matrix in rotationMatrix
+                                    \ the object's rotation matrix, so the
+                                    \ normal has now been rotated into the same
+                                    \ frame of reference as the object in the 3D
+                                    \ world, and we can check the orientation of
+                                    \ that rotated normal to see if the face is
+                                    \ visible
 
- LDR     R1, [R11, #yVertex]        \ Set R1 to yVertex
+ LDR     R1, [R11, #yVertex]        \ Set R1 to yVertex, the y-coordinate of the
+                                    \ rotated normal
 
- LDRB    R14, [R11, #objectFlags]   \ If bit 0 of objectFlags is zero, set both
- TST     R14, #%00000001            \ R1 and R3 to 0
- MVNEQ   R3, #0
- MVNEQ   R1, #0
+ LDRB    R14, [R11, #objectFlags]   \ If bit 0 of objectFlags is zero then this
+ TST     R14, #%00000001            \ object is configured to show all faces, so
+ MVNEQ   R3, #0                     \ set R1 and R3 to -1 so this face is always
+ MVNEQ   R1, #0                     \ visible (as R3 is negative) and always
+                                    \ casts a shadow in objects with shadows
+                                    \ as (R1 is negative)
 
  ADDNE   R2, R11, #xObjectScaled    \ Otherwise bit 0 of objectFlags is set, so
- ADDNE   R0, R11, #xVertex          \ set R2 to the address of xObjectScaled and
- BLNE    GetDotProduct              \ R0 to the address of xVertex, and call
-                                    \ GetDotProduct to calculate the dot product
-                                    \ of these two vectors, storing the result
-                                    \ in R3 (so if R3 is negative, the face is
-                                    \ facing away from us) ???
+ ADDNE   R0, R11, #xVertex          \ calculate the dot product of the vectors
+ BLNE    GetDotProduct              \ at xObjectScaled and xVertex, storing the
+                                    \ result in R3
+                                    \
+                                    \ The sign of the dot product depends on the
+                                    \ angle between the two vectors, so R3 is:
+                                    \
+                                    \   * Negative if angle < 90 degrees
+                                    \
+                                    \   * Positive if angle >= 90 degrees
+                                    \
+                                    \ The vector at xObjectScaled is the vector
+                                    \ from the camera to the object, so we can
+                                    \ see faces with normals that are less than
+                                    \ 90 degrees off this vector, as they point
+                                    \ towards the camera, while hidden faces
+                                    \ point away from the camera at angles of
+                                    \ more than 90 degrees
+                                    \
+                                    \ So if R3 is positive, the face is facing
+                                    \ away from us and is not visible, and if
+                                    \ it's negative, the opposite is true
 
  STMFD   R13!, {R8-R9, R11-R12}     \ Store the registers that we want to use on
                                     \ the stack so they can be retrieved at
                                     \ dobj5 after the face has been processed
 
- CMP     R1, #0                     \ If R1 is positive, jump to dobj4 to skip
- BPL     dobj4                      \ the following
+ CMP     R1, #0                     \ If R1 is positive, then the y-coordinate
+ BPL     dobj4                      \ of the rotated normal vector is positive,
+                                    \ which means it is pointing up, so jump to
+                                    \ dobj4 to skip drawing the shadow for this
+                                    \ face ???
 
- LDRB    R14, [R11, #objectFlags]   \ If bit 1 of objectFlags is zero, jump to
- TST     R14, #%00000010            \ dobj4 to skip the following
- BEQ     dobj4
+ LDRB    R14, [R11, #objectFlags]   \ If bit 1 of objectFlags is zero then this
+ TST     R14, #%00000010            \ object is configured not to have a shadow,
+ BEQ     dobj4                      \ so jump to dobj4 to skip the following
+
+                                    \ We now draw the object's shadow into the
+                                    \ graphics buffers
 
  STMFD   R13!, {R3, R9, R11}        \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
  LDMIA   R9, {R5-R7}                \ Set R5, R6, R7 to the fourth, fifth and
-                                    \ sixth words of face data
+                                    \ sixth words of the face data, which
+                                    \ contain the numbers of the vertices that
+                                    \ make up the face
 
- MOV     R8, #0                     \ Set R8 = 0
+ MOV     R8, #0                     \ Set R8 = 0, which we will pass to the
+                                    \ DrawTriangleIntoBuffer routine as the face
+                                    \ colour, so the shadow is drawn in black
 
  ADD     R10, R11, #vertexProjected \ Set R10 to the address of the third word
  ADD     R10, R10, #8               \ in vertexProjected
+                                    \
+                                    \ For each vertex we wrote two coordinates
+                                    \ to vertexProjected, with the second being
+                                    \ the shadow's projected coordinates, so
+                                    \ this sets R10 to the address of the second
+                                    \ projected coordinate's pixel x-coordinate,
+                                    \ i.e. the pixel coordinate for the shadow
+                                    \ of the first object vertex
 
  ADD     R5, R10, R5, LSL #4        \ Set (R0, R1) to the two words at offset
- LDMIA   R5, {R0-R1}                \ R5 * 16 from the table at R10 (vertexProjected+8)
+ LDMIA   R5, {R0-R1}                \ R5 * 16 from the table at R10, which is
+                                    \ the pixel coordinate of the shadow for the
+                                    \ vertex number in R5, i.e. the first vertex
+                                    \ in this face
+                                    \
+                                    \ We multiply the vertex number by 16 as
+                                    \ there are four words per vertex in
+                                    \ vertexProjected, which is 16 bytes per
+                                    \ face
 
  ADD     R6, R10, R6, LSL #4        \ Set (R2, R3) to the two words at offset
- LDMIA   R6, {R2-R3}                \ R6 * 16 from the table at R10 (vertexProjected+8)
+ LDMIA   R6, {R2-R3}                \ R6 * 16 from the table at R10, which is
+                                    \ the pixel coordinate of the shadow for the
+                                    \ vertex number in R6, i.e. the second
+                                    \ vertex in this face
 
  ADD     R7, R10, R7, LSL #4        \ Set (R4, R5) to the two words at offset
- LDMIA   R7, {R4-R5}                \ R7 * 16 from the table at R10 (vertexProjected+8)
+ LDMIA   R7, {R4-R5}                \ R7 * 16 from the table at R10, which is
+                                    \ the pixel coordinate of the shadow for the
+                                    \ vertex number in R7, i.e. the third vertex
+                                    \ in this face
 
- BL      DrawTriangleIntoBuffer     \ Draw triangle, so presumably the above are
-                                    \ three 2D coordinates, colour in R8 = 0 =
-                                    \ black so is this the shadow ???
+ BL      DrawTriangleIntoBuffer     \ Draw the triangle that shows the shadow
+                                    \ for this face, which uses the vertices of
+                                    \ the face, dropped directly down onto the
+                                    \ landscape, all drawn in black
 
  LDMFD   R13!, {R3, R9, R11}        \ Retrieve the registers that we stored on
                                     \ the stack
 
 .dobj4
 
- CMP     R3, #0                     \ If R3 is negative then the face is facing
- BPL     dobj5                      \ away from us and isn't visible, so jump to 
+ CMP     R3, #0                     \ If R3 is positive then the face is facing
+ BPL     dobj5                      \ away from us and isn't visible, so jump to
                                     \ dobj5 to skip drawing the face
 
+                                    \ We now calculate the colour of the face,
+                                    \ setting the brightness according to the
+                                    \ direction that the face is pointing (the
+                                    \ light source is directly above and
+                                    \ slightly to the left)
+
  LDMIA   R9, {R4-R7}                \ Set R4, R5, R6, R7 to the fourth, fifth,
-                                    \ sixth and seventh words of face data
+                                    \ sixth and seventh words of face data,
+                                    \ which contain the numbers of the vertices
+                                    \ that make up the face (in R4, R5 and R6),
+                                    \ and the face colour (in R7]
 
  ADD     R10, R11, #vertexProjected \ Set R10 to the address of vertexProjected
+                                    \
+                                    \ For each vertex we wrote two coordinates
+                                    \ to vertexProjected, with the first being
+                                    \ the face's projected coordinates, so this
+                                    \ sets R10 to the address of the first
+                                    \ projected coordinate's pixel x-coordinate,
+                                    \ i.e. the pixel coordinate for the first
+                                    \ object vertex
 
- LDR     R1, [R11, #yVertex]        \ Set R1 = yVertex
+ LDR     R1, [R11, #yVertex]        \ Set R1 to yVertex, the y-coordinate of the
+                                    \ rotated normal
 
- LDR     R0, [R11, #xVertex]        \ Set R0 = xVertex
+ LDR     R0, [R11, #xVertex]        \ Set R0 to xVertex, the x-coordinate of the
+                                    \ rotated normal
 
  RSB     R1, R1, #&80000000         \ Set R1 = (&80000000 - R1) >> 28
  MOV     R1, R1, LSR #28            \        = (&80000000 - yVertex) >> 28
+                                    \
+                                    \ So R1 is in the range 0 to 8 and is
+                                    \ bigger when the normal is pointing more
+                                    \ vertically (i.e. when the normal vector
+                                    \ has a smaller y-coordinate)
+                                    \
+                                    \ So a bigger R1 means brighter colours 
 
- CMP     R0, #0                     \ If R0 is negative, increment R1
- ADDMI   R1, R1, #1
+ CMP     R0, #0                     \ If R0 is negative then the normal is
+ ADDMI   R1, R1, #1                 \ pointing more towards the left then the
+                                    \ right, so increment R1 to make the face
+                                    \ slightly brighter (as the light source is
+                                    \ a little bit to the left)
 
- SUBS    R1, R1, #5                 \ Set R1 = R1 - 5
+ SUBS    R1, R1, #5                 \ Set R1 = max(0, R1 - 5)
+ MOVMI   R1, #0                     \
+                                    \ So R1 is now between 0 and 3, and can be
+                                    \ added to the colour numbers below to add
+                                    \ the correct level of brightness
 
- MOVMI   R1, #0                     \ If R1 < 0, set R1 = 0
+ MOV     R8, #%00001111             \ Set R0 = bits 8-11 of the colour in R7, so
+ AND     R0, R8, R7, LSR #8         \ if the face colour is &rgb, this is &r
 
- MOV     R8, #%00001111             \ Set R0 = bits 8-11 of R7
- AND     R0, R8, R7, LSR #8
+ AND     R2, R8, R7, LSR #4         \ Set R2 = bits 4-7 of the colour in R7, so
+                                    \ if the face colour is &rgb, this is &g
 
- AND     R2, R8, R7, LSR #4         \ Set R2 = bits 4-7 of R7
+ AND     R7, R7, R8                 \ Set R7 = bits 0-3 of the colour in R7, so
+                                    \ if the face colour is &rgb, this is &b
 
- AND     R7, R7, R8                 \ Set R7 = bits 0-3 of R7
+ ADD     R0, R0, R1                 \ Set R0 = R0 + R1 and clip to a maximum
+ CMP     R0, #%00010000             \ value of %00001111, so this adds the face
+ MOVHS   R0, #%00001111             \ brightness to the red channel
 
- ADD     R0, R0, R1                 \ Set R0 = R0 + R1
+ ADD     R2, R2, R1                 \ Set R2 = R2 + R1 and clip to a maximum
+ CMP     R2, #%00010000             \ value of %00001111, so this adds the face
+ MOVHS   R2, #%00001111             \ brightness to the green channel
 
- CMP     R0, #%00010000             \ If R0 >= %00010000, set R1 = %00001111
- MOVHS   R0, #%00001111
+ ADD     R7, R7, R1                 \ Set R7 = R7 + R1 and clip to a maximum
+ CMP     R7, #%00010000             \ value of %00001111, so this adds the face
+ MOVHS   R7, #%00001111             \ brightness to the blue channel
 
- ADD     R2, R2, R1                 \ Set R2 = R2 + R1
+                                    \ We now build a VIDC colour number in R8
+                                    \ by combining the three channels into one
+                                    \ byte, which we then replicate four times
+                                    \ to get a 32-bit colour number
+                                    \
+                                    \ The byte is of the form:
+                                    \
+                                    \   * Bit 7 = blue bit 3
+                                    \   * Bit 6 = green bit 3
+                                    \   * Bit 5 = green bit 2
+                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 3 = blue bit 2
+                                    \   * Bit 2 = red bit 2
+                                    \   * Bit 1 = sum of red/green/blue bit 1
+                                    \   * Bit 0 = sum of red/green/blue bit 0
+                                    \
+                                    \ We now build this colour number in R8 from
+                                    \ the red, green and blue values in R0, R2
+                                    \ and R7
 
- CMP     R2, #%00010000             \ If R2 >= %00010000, set R2 = %00001111
- MOVHS   R2, #%00001111
+ ORR     R8, R2, R7                 \ Set R8 to the bottom three bits of:
+ AND     R8, R8, #%00000011         \
+ ORR     R8, R8, R0                 \ (the bottom two bits of R2 OR R7) OR R0
+ AND     R8, R8, #%00000111         \
+                                    \ So this sets bits 0, 1 and 2 of R8 as
+                                    \ required
 
- ADD     R7, R7, R1                 \ Set R7 = R7 + R1
+ TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
+ ORRNE   R8, R8, #%00010000         \ set bit 4 of R8
 
- CMP     R7, #%00010000             \ If R7 >= %00010000, set R7 = %00001111
- MOVHS   R7, #%00001111
+ AND     R2, R2, #%00001100         \ Clear all bits of the green channel in R2
+                                    \ except bits 2-3
 
- ORR     R8, R2, R7                 \ R8 = bottom three bits of:
- AND     R8, R8, #%00000011         \      (bottom two bits of R2 OR R7) OR R0
- ORR     R8, R8, R0
- AND     R8, R8, #%00000111
+ ORR     R8, R8, R2, LSL #3         \ And stick them into bits 5-6 of R8
 
- TST     R0, #%00001000             \ If bit 3 of R0 is set, set bit 4 of R8
- ORRNE   R8, R8, #%00010000         \ 
+ TST     R7, #%00000100             \ If bit 2 of the blue channel in R7 is set,
+ ORRNE   R8, R8, #%00001000         \ set bit 3 of R8
 
- AND     R2, R2, #%00001100         \ Clear all bits of R2 except bits 2-3
-
- ORR     R8, R8, R2, LSL #3         \ Stick them into bits 5-6 of R8
-
- TST     R7, #%00000100             \ If bit 2 of R7 is set, set bit 3 of R8
- ORRNE   R8, R8, #%00001000
-
- TST     R7, #%00001000             \ If bit 3 of R7 is set, set bit 7 of R8
- ORRNE   R8, R8, #%10000000
+ TST     R7, #%00001000             \ If bit 3 of the blue channel in R7 is set,
+ ORRNE   R8, R8, #%10000000         \ set bit 7 of R8
 
  ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
- ORR     R8, R8, R8, LSL #16        \ other three bytes in the word (so is this
- ORR     R8, R8, R8, LSL #24        \ a colour byte) ???
+ ORR     R8, R8, R8, LSL #16        \ other three bytes in the word to produce
+ ORR     R8, R8, R8, LSL #24        \ a VIDC palette word
+
+                                    \ Finally we can draw the face, using the
+                                    \ colour in R8
 
  ADD     R4, R10, R4, LSL #4        \ Set (R0, R1) to the two words at offset
- LDMIA   R4, {R0-R1}                \ R4 * 16 from the table at R10 (vertexProjected)
+ LDMIA   R4, {R0-R1}                \ R4 * 16 from the table at R10, which is
+                                    \ the pixel coordinate of the vertex number
+                                    \ in R4, i.e. the first vertex in this face
+                                    \
+                                    \ We multiply the vertex number by 16 as
+                                    \ there are four words per vertex in
+                                    \ vertexProjected, which is 16 bytes per
+                                    \ face
 
  ADD     R5, R10, R5, LSL #4        \ Set (R2, R3) to the two words at offset
- LDMIA   R5, {R2-R3}                \ R5 * 16 from the table at R10 (vertexProjected)
+ LDMIA   R5, {R2-R3}                \ R5 * 16 from the table at R10, which is
+                                    \ the pixel coordinate of the vertex number
+                                    \ in R5, i.e. the second vertex in this face
 
  ADD     R6, R10, R6, LSL #4        \ Set (R4, R5) to the two words at offset
- LDMIA   R6, {R4-R5}                \ R6 * 16 from the table at R10 (vertexProjected)
+ LDMIA   R6, {R4-R5}                \ R6 * 16 from the table at R10, which is
+                                    \ the pixel coordinate of the vertex number
+                                    \ in R6, i.e. the third vertex in this face
 
- BL      DrawTriangleIntoNearBuffer \ Draw triangle, so presumably the above are
-                                    \ three 2D coordinates, with R8 the colour
-                                    \ ???
+ BL      DrawTriangleIntoNearBuffer \ Draw the triangle for this face using the
+                                    \ projected vertices for the face, drawn in
+                                    \ the colour in R8, and draw it one buffer
+                                    \ nearer the camera than the shadow, so the
+                                    \ shadow never overlaps the object
 
 .dobj5
 
@@ -3104,12 +3280,16 @@ ENDIF
 \ Multiply the vector at R0 by the rotation matrix at rotationMatrix and store
 \ the result at the address in R1:
 \
-\   [ R1   ]   [ xNoseV yNoseV zNoseV ]   [ R0   ]
-\   [ R1+4 ] = [ xRoofV yRoofV zRoofV ] . [ R0+4 ]
-\   [ R1+8 ]   [ xSideV ySideV zSideV ]   [ R0+8 ]
+\   [ R1   ]                    [ R0   ]
+\   [ R1+4 ] = rotationMatrix . [ R0+4 ]
+\   [ R1+8 ]                    [ R0+8 ]
 \
-\ So this rotates a coordinate by the orientation vectors (i.e. the object's
-\ rotation matrix).
+\              [ xNoseV yNoseV zNoseV ]   [ R0   ]
+\            = [ xRoofV yRoofV zRoofV ] . [ R0+4 ]
+\              [ xSideV ySideV zSideV ]   [ R0+8 ]
+\
+\ So this rotates a coordinate by the object's rotation matrix (i.e. by each
+\ of the object's orientation vectors).
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3817,38 +3997,44 @@ ENDIF
  ADD     R4, R11, #var_160          \ 
  STMFD   R13!, {R14}                \ 
  LDR     R1, sub_98EC               \ 
- STR     R1, AddVectors+28          \ 
+ STR     R1, GetVertexCoordinate+28 \ 
  LDMIA   R0, {R0-R2}                \ 
  MOV     R3, R12                    \ 
- BL      AddVectors+8               \ 
+ BL      GetVertexCoordinate+8      \ 
  LDR     R1, mod_98E8               \ 
- STR     R1, AddVectors+28          \ 
+ STR     R1, GetVertexCoordinate+28 \ 
  LDMFD   R13!, {PC}                 \ 
 
 \ ******************************************************************************
 \
-\       Name: AddVectors
+\       Name: GetVertexCoordinate
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: Add two vectors
+\    Summary: Add a vector to the rotated vertex coordinates to get the vertex
+\             coordinate in 3D space
 \
 \ ------------------------------------------------------------------------------
 \
 \ Calculate the following:
 \
-\   [ xCoord   ]   [ R0   ] + [ xVertexRotated ]
-\   [ xCoord+4 ] = [ R0+4 ] + [ yVertexRotated ]
-\   [ xCoord+8 ]   [ R0+8 ] + [ zVertexRotated ]
+\   [ xCoord ]   [ R0   ] + [ xVertexRotated ]
+\   [ yCoord ] = [ R0+4 ] + [ yVertexRotated ]
+\   [ zCoord ]   [ R0+8 ] + [ zVertexRotated ]
+\
+\ This routine is only ever called with R0 = xObject, so this adds the rotated
+\ vertex coordinate to the object's coordinate, giving the vertex's coordinate
+\ in the game's coordinate system.
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
-\   R0                              The address of a 3D vector
+\   R0                              The address of the 3D vector to add in the
+\                                   above calculation
 \
 \ ******************************************************************************
 
-.AddVectors
+.GetVertexCoordinate
 
  LDMIA   R0, {R0-R2}                \ Fetch the coordinate from R0 into
                                     \ (R0, R1, R2)
@@ -3859,15 +4045,20 @@ ENDIF
  STMFD   R13!, {R5-R6}              \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- LDMIA   R3, {R3-R5}                \ Fetch the vector at xVertexRotated
+ LDMIA   R3, {R3-R5}                \ Fetch the vector at xVertexRotated into
+                                    \ (R3, R4, R5)
 
- ADD     R0, R0, R3                 \ 
- ADD     R1, R1, R4                 \ 
- ADD     R2, R2, R5                 \ 
+ ADD     R0, R0, R3                 \ Set R0 = R0 + R3
+                                    \        = R0 + xVertexRotated
 
- ADD     R3, R11, #xCoord           \ 
+ ADD     R1, R1, R4                 \ Set R1 = R1 + R4
+                                    \        = R0+4 + yVertexRotated
 
- STMIA   R3, {R0-R2}                \ 
+ ADD     R2, R2, R5                 \ Set R2 = R2 + R5
+                                    \        = R0+8 + zVertexRotated
+
+ ADD     R3, R11, #xCoord           \ Store (R0, R1, R2) in (xCoord, yCoord,
+ STMIA   R3, {R0-R2}                \ zCoord)
 
  LDMFD   R13!, {R5-R6}              \ Retrieve the registers that we stored on
                                     \ the stack
@@ -4617,14 +4808,12 @@ ENDIF
 \
 \ ------------------------------------------------------------------------------
 \
-\ This command draws a triangle into the correct graphics buffer.
+\ This command draws a triangle into the correct graphics buffer, depending on
+\ the 
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
-\
-\   R9                              The address of the seven parameter words in
-\                                   the graphics buffer
 \
 \   R12                             The address of the table of containing the
 \                                   end addresses of the graphics buffers
@@ -4633,9 +4822,6 @@ ENDIF
 \ ------------------------------------------------------------------------------
 \
 \ Returns:
-\
-\   R9                              Updated to point to the next word in the
-\                                   graphics buffer
 \
 \   R12                             R12 is preserved
 \
@@ -4646,7 +4832,8 @@ ENDIF
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the triangle
+ LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the
+                                    \ triangle
 
  RSB     R14, R14, #&14000000       \ Set R14 = &14000000 - R14
                                     \

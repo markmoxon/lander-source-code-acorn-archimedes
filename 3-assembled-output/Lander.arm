@@ -26,11 +26,16 @@
 .set zSideV, 0x50
 .set xVertex, 0x54
 .set yVertex, 0x58
+.set zVertex, 0x5C
 .set xVertexRotated, 0x64
+.set yVertexRotated, 0x68
+.set zVertexRotated, 0x6C
 .set xCoord, 0x74
 .set yCoord, 0x78
 .set zCoord, 0x7C
 .set xObjectScaled, 0x84
+.set yObjectScaled, 0x88
+.set zObjectScaled, 0x8C
 .set var_094, 0x94
 .set var_098, 0x98
 .set var_09C, 0x9C
@@ -61,7 +66,8 @@
 .set yCamera, 0x140
 .set zCamera, 0x144
 .set xLandscape, 0x148
-.set var_150, 0x150
+.set yLandscape, 0x14C
+.set zLandscape, 0x150
 .set var_154, 0x154
 .set var_158, 0x158
 .set fuelBurnRate, 0x15C
@@ -127,7 +133,7 @@ DrawLandscape:
  LDR     R3, [R11, #zCamera]
  AND     R9, R3, #0xFF000000
  SUB     R3, R3, R9
- STR     R9, [R11, #var_150]
+ STR     R9, [R11, #zLandscape]
  LDR     R4, [R11, #xCamera]
  AND     R8, R4, #0xFF000000
  SUB     R4, R4, R8
@@ -1131,7 +1137,7 @@ dobj2:
  STMIA   R0, {R2-R4}
  BL      MultiplyVectorByMatrix
  ADD     R0, R11, #xObject
- BL      AddVectors
+ BL      GetVertexCoordinate
  ADD     R0, R11, #xCoord
  BL      ProjectVertexOntoScreen
  STMIA   R10!, {R0-R1}
@@ -1793,14 +1799,14 @@ sub_98EC:
  ADD     R4, R11, #var_160
  STMFD   R13!, {R14}
  LDR     R1, sub_98EC
- STR     R1, AddVectors+28
+ STR     R1, GetVertexCoordinate+28
  LDMIA   R0, {R0-R2}
  MOV     R3, R12
- BL      AddVectors+8
+ BL      GetVertexCoordinate+8
  LDR     R1, mod_98E8
- STR     R1, AddVectors+28
+ STR     R1, GetVertexCoordinate+28
  LDMFD   R13!, {PC}
-AddVectors:
+GetVertexCoordinate:
  LDMIA   R0, {R0-R2}
  ADD     R3, R11, #xVertexRotated
  STMFD   R13!, {R5-R6}
