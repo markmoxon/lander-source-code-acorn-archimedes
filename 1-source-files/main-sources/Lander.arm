@@ -1584,11 +1584,13 @@ ENDIF
                                     \ past values affecting the present values?
                                     \ Maybe try disabling and see what happens
                                     \ ???
+                                    \
+                                    \ If you disable the changes to var_158 etc
+                                    \ then it breaks the control system, so this
+                                    \ obviously important!
 
- BL      CalculateRotationMatrix    \ ??? Something with lots of sin lookups
-                                    \ based on polar coordinates in R0 and R1
-                                    \ that writes to the orientation vectors at
-                                    \ the end
+ BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
+                                    \ angles given in R0 and R1
 
  ADD     R14, R11, #xPlayer         \ 
  LDMIA   R14, {R0-R5}               \ 
@@ -1943,17 +1945,24 @@ ENDIF
 
                                     \ We now run a cut-down version of the main
                                     \ loop to display the crash animation (this
-                                    \ is like the main loop but there are no
-                                    \ calls to sub_8D40, MoveAndDrawPlayer or
-                                    \ DrawFuelLevel)
+                                    \ is like the main loop but without the
+                                    \ calls to drop rocks from the sky, draw the
+                                    \ player's ship or update the fuel level)
 
- LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24 ???
+                                    \ We start by setting up the rotation matrix
+                                    \ for the particle clouds, using the main
+                                    \ loopcounter to generate rotation angles
+                                    \ thatchange along with the main loop (so
+                                    \ the clouds rotate at a nice steady speed)
+
+ LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24
  MOV     R0, R0, LSL #24
 
- MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25 ???
+ MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25
 
- BL      CalculateRotationMatrix    \ Calculate the rotation matrix from R0 and
-                                    \ R1 ???
+ BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
+                                    \ "angles" given in R0 and R1, which we can
+                                    \ apply to the particle clouds
 
  BL      MoveAndDrawParticles       \ Move and draw all the particles, such as
                                     \ smoke clouds and bullets, into the
@@ -2337,7 +2346,16 @@ ENDIF
  STMFD   R13!, {R8, R14}            \ 
  B       lab_8AA0                   \ 
 
-.lab_8A94
+\ ******************************************************************************
+\
+\       Name: sub_8A94
+\       Type: Subroutine
+\   Category: ???
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.sub_8A94
 
  MOV     R4, #0                     \ 
 
@@ -2483,18 +2501,25 @@ ENDIF
  MOV     R9, #&1A                   \ 
  MOV     R8, #&A                    \ 
  MOV     R6, #&F                    \ 
- B       lab_8A94                   \ 
+ B       sub_8A94                   \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_8BD8
+\       Name: DropARockFromTheSky
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: Drop a rock from the specified coordinates
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    The 3D coordinate (x, y, z) where we spawn
+\                                   the rock
 \
 \ ******************************************************************************
 
-.sub_8BD8
+.DropARockFromTheSky
 
  STMFD   R13!, {R0-R2, R8, R14}     \ 
 
@@ -2523,7 +2548,7 @@ ENDIF
  MOV     R9, #&1B                   \ 
  MOV     R8, #&A                    \ 
  MOV     R6, #&AA                   \ 
- B       lab_8A94                   \ 
+ B       sub_8A94                   \ 
 
 \ ******************************************************************************
 \
@@ -2541,7 +2566,7 @@ ENDIF
  MOV     R9, #&1D                   \ 
  MOV     R8, #8                     \ 
  MOV     R6, #8                     \ 
- B       lab_8A94                   \ 
+ B       sub_8A94                   \ 
 
 \ ******************************************************************************
 \
@@ -2580,7 +2605,7 @@ ENDIF
  MOV     R9, #&1A                   \ 
  MOV     R8, #&A                    \ 
  MOV     R6, #&14                   \ 
- B       lab_8A94                   \ 
+ B       sub_8A94                   \ 
 
 \ ******************************************************************************
 \
@@ -2609,7 +2634,7 @@ ENDIF
 \
 \       Name: sub_8CDC
 \       Type: Subroutine
-\   Category: ???
+\   Category: Unused
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -2629,7 +2654,7 @@ ENDIF
 \
 \       Name: sub_8CFC
 \       Type: Subroutine
-\   Category: ???
+\   Category: Unused
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -2654,7 +2679,7 @@ ENDIF
 \
 \       Name: sub_8D24
 \       Type: Subroutine
-\   Category: ???
+\   Category: Unused
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -2666,19 +2691,19 @@ ENDIF
  MVN     R1, #&10000000             \ 
  LDR     R2, [R11, #zCamera]        \ 
  SUB     R2, R2, #&06000000         \ 
- BL      sub_8BD8                   \ 
+ BL      DropARockFromTheSky        \ 
  LDMFD   R13!, {R6-R9, PC}          \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_8D40
+\       Name: DropRocksFromTheSky
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: If the score is 800 or more, then randomly drop rocks from the sky
 \
 \ ******************************************************************************
 
-.sub_8D40
+.DropRocksFromTheSky
 
  LDR     R4, [R11, #currentScore]   \ Set R4 to the current score minus 800
  SUBS    R4, R4, #800
@@ -2688,25 +2713,34 @@ ENDIF
                                     \ from the subroutine
 
                                     \ If we get here then the current score is
-                                    \ greater than 800, so ???
+                                    \ greater than 800, so we randomly drop
+                                    \ rocks from the sky
 
  STMFD   R13!, {R14}                \ Store the return address on the stack
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- MOV     R0, R0, LSR #18            \ 
+ MOV     R0, R0, LSR #18            \ Scale R0 to the range 0 to 16383
 
- CMP     R0, R4                     \ 
- LDMHSIA R13!, {PC}                 \ 
+ CMP     R0, R4                     \ If R0 >= R4 then return from the
+ LDMHSIA R13!, {PC}                 \ subroutine without dropping a rock, so the
+                                    \ chances of rocks dropping from the sky
+                                    \ increases with higher scores
 
- LDR     R0, [R11, #xCamera]        \ 
+                                    \ If we get here then we drop a rock from
+                                    \ the sky, from the following coordinates
 
- MVN     R1, #&20000000             \ 
+ LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
- LDR     R2, [R11, #zCamera]        \ 
- SUB     R2, R2, #&06000000         \ 
+ MVN     R1, #&20000000             \ Set R1 = -&20000000
 
- BL      sub_8BD8                   \ 
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
+ SUB     R2, R2, #&06000000
+
+ BL      DropARockFromTheSky        \ Drop a rock from the coordinates in R0 to
+                                    \ R2, so that's:
+                                    \
+                                    \   (xCamera, -&20000000, zCamera - &06000000)
 
  LDMFD   R13!, {PC}                 \ Return from the subroutine
 
@@ -8119,15 +8153,23 @@ ENDIF
  BL      MoveAndDrawPlayer          \ Move the player's ship and draw it into
                                     \ the graphics buffers
 
- LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24 ???
+                                    \ We now set up the rotation matrix for the
+                                    \ particle clouds, using the main loop
+                                    \ counter to generate rotation angles that
+                                    \ change along with the main loop (so the
+                                    \ clouds rotate at a nice steady speed)
+
+ LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24
  MOV     R0, R0, LSL #24
 
- MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25 ???
+ MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25
 
- BL      CalculateRotationMatrix    \ Calculate the rotation matrix from R0 and
-                                    \ R1 ???
+ BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
+                                    \ "angles" given in R0 and R1, which we can
+                                    \ apply to the particle clouds
 
- BL      sub_8D40                   \ ???
+ BL      DropRocksFromTheSky        \ If the score is 800 or more, then randomly
+                                    \ drop rocks from the sky
 
  BL      MoveAndDrawParticles       \ Move and draw all the particles, such as
                                     \ smoke clouds and bullets, into the

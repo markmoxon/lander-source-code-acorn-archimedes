@@ -833,7 +833,7 @@ Source: "3-assembled-output/Lander.arm"
                             	   807: sub_8A8C:
 00:00008A8C 00412DE9        	   808:  STMFD   R13!, {R8, R14}
 00:00008A90 020000EA        	   809:  B       lab_8AA0
-                            	   810: lab_8A94:
+                            	   810: sub_8A94:
 00:00008A94 0040A0E3        	   811:  MOV     R4, #0
                             	   812: lab_8A98:
 00:00008A98 0030A0E3        	   813:  MOV     R3, #0
@@ -920,8 +920,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00008BC8 1A90A0E3        	   894:  MOV     R9, #0x1A
 00:00008BCC 0A80A0E3        	   895:  MOV     R8, #0xA
 00:00008BD0 0F60A0E3        	   896:  MOV     R6, #0xF
-00:00008BD4 AEFFFFEA        	   897:  B       lab_8A94
-                            	   898: sub_8BD8:
+00:00008BD4 AEFFFFEA        	   897:  B       sub_8A94
+                            	   898: DropARockFromTheSky:
 00:00008BD8 07412DE9        	   899:  STMFD   R13!, {R0-R2, R8, R14}
 00:00008BDC 970300EB        	   900:  BL      GetRandomNumbers
 00:00008BE0 A11EA0E1        	   901:  MOV     R1, R1, LSR #29
@@ -947,14 +947,14 @@ Source: "3-assembled-output/Lander.arm"
 00:00008C30 1B90A0E3        	   921:  MOV     R9, #0x1B
 00:00008C34 0A80A0E3        	   922:  MOV     R8, #0xA
 00:00008C38 AA60A0E3        	   923:  MOV     R6, #0xAA
-00:00008C3C 94FFFFEA        	   924:  B       lab_8A94
+00:00008C3C 94FFFFEA        	   924:  B       sub_8A94
                             	   925: sub_8C40:
 00:00008C40 00412DE9        	   926:  STMFD   R13!, {R8, R14}
 00:00008C44 1D78A0E3        	   927:  MOV     R7, #0x001D0000
 00:00008C48 1D90A0E3        	   928:  MOV     R9, #0x1D
 00:00008C4C 0880A0E3        	   929:  MOV     R8, #8
 00:00008C50 0860A0E3        	   930:  MOV     R6, #8
-00:00008C54 8EFFFFEA        	   931:  B       lab_8A94
+00:00008C54 8EFFFFEA        	   931:  B       sub_8A94
                             	   932: sub_8C58:
 00:00008C58 07412DE9        	   933:  STMFD   R13!, {R0-R2, R8, R14}
 00:00008C5C 770300EB        	   934:  BL      GetRandomNumbers
@@ -980,7 +980,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008CAC 1A90A0E3        	   954:  MOV     R9, #0x1A
 00:00008CB0 0A80A0E3        	   955:  MOV     R8, #0xA
 00:00008CB4 1460A0E3        	   956:  MOV     R6, #0x14
-00:00008CB8 75FFFFEA        	   957:  B       lab_8A94
+00:00008CB8 75FFFFEA        	   957:  B       sub_8A94
                             	   958: sub_8CBC:
 00:00008CBC F8432DE9        	   959:  STMFD   R13!, {R3-R9, R14}
                             	   960: lab_8CC0:
@@ -1018,9 +1018,9 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D2C 0112E0E3        	   992:  MVN     R1, #0x10000000
 00:00008D30 44219BE5        	   993:  LDR     R2, [R11, #zCamera]
 00:00008D34 062442E2        	   994:  SUB     R2, R2, #0x06000000
-00:00008D38 A6FFFFEB        	   995:  BL      sub_8BD8
+00:00008D38 A6FFFFEB        	   995:  BL      DropARockFromTheSky
 00:00008D3C C083BDE8        	   996:  LDMFD   R13!, {R6-R9, PC}
-                            	   997: sub_8D40:
+                            	   997: DropRocksFromTheSky:
 00:00008D40 24419BE5        	   998:  LDR     R4, [R11, #currentScore]
 00:00008D44 324E54E2        	   999:  SUBS    R4, R4, #800
 00:00008D48 0EF0A041        	  1000:  MOVMI   PC, R14
@@ -1033,7 +1033,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D64 0212E0E3        	  1007:  MVN     R1, #0x20000000
 00:00008D68 44219BE5        	  1008:  LDR     R2, [R11, #zCamera]
 00:00008D6C 062442E2        	  1009:  SUB     R2, R2, #0x06000000
-00:00008D70 98FFFFEB        	  1010:  BL      sub_8BD8
+00:00008D70 98FFFFEB        	  1010:  BL      DropARockFromTheSky
 00:00008D74 0080BDE8        	  1011:  LDMFD   R13!, {PC}
                             	  1012: objectTypes:
 00:00008D78 98AA0000        	  1013: .long    objectPulsatingPyramid
@@ -2924,7 +2924,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A870 000CA0E1        	  2882:  MOV     R0, R0, LSL #24
 00:0000A874 8010A0E1        	  2883:  MOV     R1, R0, LSL #1
 00:0000A878 D9FAFFEB        	  2884:  BL      CalculateRotationMatrix
-00:0000A87C 2FF9FFEB        	  2885:  BL      sub_8D40
+00:0000A87C 2FF9FFEB        	  2885:  BL      DropRocksFromTheSky
 00:0000A880 DBF7FFEB        	  2886:  BL      MoveAndDrawParticles
 00:0000A884 54F9FFEB        	  2887:  BL      DrawObjects
 00:0000A888 1BFDFFEB        	  2888:  BL      AddTerminatorsToBuffers
@@ -10277,6 +10277,8 @@ DrawTriangle                     A:00009DDC
 DrawTriangleFromBuffer           A:00009BA4
 DrawTriangleShadowToBuffer       A:00009C28
 DrawTriangleToBuffer             A:00009C58
+DropARockFromTheSky              A:00008BD8
+DropRocksFromTheSky              A:00008D40
 EndGame                          A:0000A8AC
 Entry                            A:0000A614
 FillTriangle                     A:0000A408
@@ -10372,7 +10374,6 @@ lab_8A28                         A:00008A28
 lab_8A34                         A:00008A34
 lab_8A4C                         A:00008A4C
 lab_8A58                         A:00008A58
-lab_8A94                         A:00008A94
 lab_8A98                         A:00008A98
 lab_8AA0                         A:00008AA0
 lab_8AC8                         A:00008AC8
@@ -10550,17 +10551,16 @@ sub_8998                         A:00008998
 sub_89C8                         A:000089C8
 sub_8A84                         A:00008A84
 sub_8A8C                         A:00008A8C
+sub_8A94                         A:00008A94
 sub_8AF4                         A:00008AF4
 sub_8B0C                         A:00008B0C
 sub_8B70                         A:00008B70
-sub_8BD8                         A:00008BD8
 sub_8C40                         A:00008C40
 sub_8C58                         A:00008C58
 sub_8CBC                         A:00008CBC
 sub_8CDC                         A:00008CDC
 sub_8CFC                         A:00008CFC
 sub_8D24                         A:00008D24
-sub_8D40                         A:00008D40
 sub_93B4                         A:000093B4
 sub_98EC                         A:000098EC
 sub_9948                         A:00009948
@@ -10614,8 +10614,8 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 OS_WriteC
 00000000 xObject
+00000000 OS_WriteC
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10624,8 +10624,8 @@ Symbols by value:
 00000009 OBJ_ROCKET
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 rotationMatrix
 00000030 xNoseV
+00000030 rotationMatrix
 00000034 yNoseV
 00000038 zNoseV
 0000003C xRoofV
@@ -10634,8 +10634,8 @@ Symbols by value:
 00000048 xSideV
 0000004C ySideV
 00000050 zSideV
-00000054 varOffset
 00000054 xVertex
+00000054 varOffset
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10686,8 +10686,8 @@ Symbols by value:
 00000600 vertexProjected
 00000700 var_700
 00004400 objectMap
-00008000 landscapeOrigin
 00008000 CODE
+00008000 landscapeOrigin
 0000800C landscapeOriginAddr
 00008010 landscapeConfig
 00008028 landscapeConfigAddr
@@ -10731,14 +10731,14 @@ Symbols by value:
 00008A58 lab_8A58
 00008A84 sub_8A84
 00008A8C sub_8A8C
-00008A94 lab_8A94
+00008A94 sub_8A94
 00008A98 lab_8A98
 00008AA0 lab_8AA0
 00008AC8 lab_8AC8
 00008AF4 sub_8AF4
 00008B0C sub_8B0C
 00008B70 sub_8B70
-00008BD8 sub_8BD8
+00008BD8 DropARockFromTheSky
 00008C40 sub_8C40
 00008C58 sub_8C58
 00008CBC sub_8CBC
@@ -10747,7 +10747,7 @@ Symbols by value:
 00008CFC sub_8CFC
 00008D14 lab_8D14
 00008D24 sub_8D24
-00008D40 sub_8D40
+00008D40 DropRocksFromTheSky
 00008D78 objectTypes
 00008DDC DrawObjects
 00008DFC dobs1
