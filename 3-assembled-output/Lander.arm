@@ -11,6 +11,8 @@
 .set LAUNCHPAD_Y, 0x02EC0000
 .set LAUNCHPAD_ALTITUDE, 0x03500000
 .set SEA_LEVEL, 0x05500000
+.set TILE_SIZE, 0x01000000
+.set TILE_SIZE_5_5, 0x05800000
 .set stack, 0x000121FC
 .set workspace, stack + 4
 .set xObject, 0x00
@@ -170,7 +172,7 @@ land1:
  ADD     R4, R11, #xLandscapeCol
  STMIA   R4, {R0-R2}
  LDR     R8, [R11, #xLandscape]
- SUB     R8, R8, #0x05800000
+ SUB     R8, R8, #TILE_SIZE_5_5
  MOV     R0, #0x80000000
  STR     R0, [R11, #previousColumn]
 land2:
@@ -201,9 +203,9 @@ land3:
 land4:
  SUBS    R10, R10, #1
  LDRNE   R0, [R11, #xLandscapeCol]
- ADDNE   R0, R0, #0x01000000
+ ADDNE   R0, R0, #TILE_SIZE
  STRNE   R0, [R11, #xLandscapeCol]
- ADDNE   R8, R8, #0x01000000
+ ADDNE   R8, R8, #TILE_SIZE
  BNE     land2
  LDRB    R0, [R11, #tileCornerRow]
  SUBS    R0, R0, #2
@@ -214,9 +216,9 @@ land4:
  BEQ     land5
  STRB    R0, [R11, #tileCornerRow]
  LDR     R0, [R11, #zLandscapeRow]
- SUB     R0, R0, #0x01000000
+ SUB     R0, R0, #TILE_SIZE
  STR     R0, [R11, #zLandscapeRow]
- SUB     R9, R9, #0x01000000
+ SUB     R9, R9, #TILE_SIZE
  MOV     R0, #0x80000000
  STR     R0, [R7]
  LDRB    R0, [R11, #tileRowOddEven]
@@ -678,15 +680,15 @@ lab_880C:
  RSBMI   R0, R0, #0
  SUBS    R2, R2, #0x0F000000
  RSBMI   R2, R2, #0
- CMP     R0, #0x01000000
- CMPLO   R2, #0x01000000
+ CMP     R0, #TILE_SIZE
+ CMPLO   R2, #TILE_SIZE
  BHS     lab_88E8
  LDR     R0, [R11, #yCamera]
  ADD     R1, R1, R0
  LDR     R0, [R11, #yPlayer]
  SUBS    R1, R1, R0
  RSBMI   R1, R1, #0
- CMP     R1, #0x01000000
+ CMP     R1, #TILE_SIZE
 lab_88E8:
  LDMFD   R13!, {R0-R2}
  BLO     sub_86C4
@@ -1039,7 +1041,7 @@ DrawObjects:
  AND     R8, R0, #0xFF000000
  LDR     R1, [R11, #zCamera]
  AND     R9, R1, #0xFF000000
- SUB     R8, R8, #0x05800000
+ SUB     R8, R8, #TILE_SIZE_5_5
  STR     R8, [R11, #xLandscape]
  MOV     R7, #11
 dobs1:
@@ -1053,10 +1055,10 @@ dobs2:
  CMP     R0, #0xFF
  BNE     dobs4
 dobs3:
- ADD     R8, R8, #0x01000000
+ ADD     R8, R8, #TILE_SIZE
  SUBS    R6, R6, #1
  BNE     dobs2
- SUB     R9, R9, #0x01000000
+ SUB     R9, R9, #TILE_SIZE
  SUBS    R7, R7, #1
  BNE     dobs1
  LDMFD   R13!, {R5-R12, PC}
@@ -2002,7 +2004,7 @@ DrawTriangleFromBuffer:
 DrawParticleToBuffer:
  STMFD   R13!, {R9, R14}
  RSB     R14, R8, #0x14000000
- ADD     R14, R14, #0x01000000
+ ADD     R14, R14, #TILE_SIZE
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R8, R8, LSR #25
@@ -2046,7 +2048,7 @@ DrawTriangleToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
  RSB     R14, R14, #0x14000000
- ADD     R14, R14, #0x01000000
+ ADD     R14, R14, #TILE_SIZE
  CMP     R14, #0x0B000000
  MOVHS   R14, #0x0A000000
  BIC     R14, R14, #0x00C00000

@@ -62,6 +62,13 @@
 
  SEA_LEVEL = &05500000              \ Sea level
 
+ TILE_SIZE = &01000000              \ The size of a landscape tile in 3D
+                                    \ coordinates
+
+ TILE_SIZE_5_5 = &05800000          \ The width of 5.5 tiles (which is half of
+                                    \ the landscape width once we have rounded
+                                    \ a coordinate down to the nearest tile)
+
 \ ******************************************************************************
 \
 \ Workspace variables
@@ -726,9 +733,13 @@ ENDIF
                                     \ yLandscapeCol with the landscape height as
                                     \ we go
 
- LDR     R8, [R11, #xLandscape]     \ Set R8 = xLandscape - &05800000, so R8 is
- SUB     R8, R8, #&05800000         \ now the coordinate of the tile corner at
-                                    \ the left end of the corner row
+ LDR     R8, [R11, #xLandscape]     \ Set R8 = xLandscape - TILE_SIZE_5_5, so
+ SUB     R8, R8, #TILE_SIZE_5_5     \ R8 is now the coordinate of the tile
+                                    \ corner at the left end of the corner row,
+                                    \ as after rounding down the x-coordinate to
+                                    \ the nearest tile, half of the remaining 11
+                                    \ tiles is 5.5 tile widths (as the landscape
+                                    \ is 12 tiles wide in total)
 
  MOV     R0, #&80000000             \ Set previousColumn = &80000000 to denote
  STR     R0, [R11, #previousColumn] \ that we don't have corner coordinates from
@@ -865,9 +876,9 @@ ENDIF
                                     \ row
 
  LDRNE   R0, [R11, #xLandscapeCol]  \ If we haven't yet processed all the tile
- ADDNE   R0, R0, #&01000000         \ corners in this row, add a tile's width to
+ ADDNE   R0, R0, #TILE_SIZE         \ corners in this row, add a tile's width to
  STRNE   R0, [R11, #xLandscapeCol]  \ xLandscapeCol and R8 to move them along
- ADDNE   R8, R8, #&01000000         \ the row to the next tile corner, and jump
+ ADDNE   R8, R8, #TILE_SIZE         \ the row to the next tile corner, and jump
  BNE     land2                      \ back to land2 to process the next corner
 
                                     \ By this point have drawn all the tiles in
@@ -910,10 +921,10 @@ ENDIF
                                     \ next corner row
 
  LDR     R0, [R11, #zLandscapeRow]  \ Subtract a tile's width from zLandscapeRow
- SUB     R0, R0, #&01000000         \ to move the coordinates of the current row
+ SUB     R0, R0, #TILE_SIZE         \ to move the coordinates of the current row
  STR     R0, [R11, #zLandscapeRow]  \ forward by one whole tile
 
- SUB     R9, R9, #&01000000         \ Subtract a tile's width from R9 to step
+ SUB     R9, R9, #TILE_SIZE         \ Subtract a tile's width from R9 to step
                                     \ along the z-axis by one whole tile, going
                                     \ from back to front
 
@@ -2022,15 +2033,15 @@ ENDIF
  RSBMI   R0, R0, #0                 \ 
  SUBS    R2, R2, #&0F000000         \ 
  RSBMI   R2, R2, #0                 \ 
- CMP     R0, #&01000000             \ 
- CMPLO   R2, #&01000000             \ 
+ CMP     R0, #TILE_SIZE             \ 
+ CMPLO   R2, #TILE_SIZE             \ 
  BHS     lab_88E8                   \ 
  LDR     R0, [R11, #yCamera]        \ 
  ADD     R1, R1, R0                 \ 
  LDR     R0, [R11, #yPlayer]        \ 
  SUBS    R1, R1, R0                 \ 
  RSBMI   R1, R1, #0                 \ 
- CMP     R1, #&01000000             \ 
+ CMP     R1, #TILE_SIZE             \ 
 
 .lab_88E8
 
@@ -2684,15 +2695,16 @@ ENDIF
                                     \ of the tile containing zCamera, i.e. the
                                     \ tile directly below our viewpoint
 
- SUB     R8, R8, #&05800000         \ Set xLandscape = R8 - &05800000
+ SUB     R8, R8, #TILE_SIZE_5_5     \ Set xLandscape = R8 - TILE_SIZE_5_5
  STR     R8, [R11, #xLandscape]     \
-                                    \ Each tile is &01000000 coordinates wide,
-                                    \ and the visible landscape is 12 tiles wide
-                                    \
                                     \ We already rounded xCamera down to the
-                                    \ nearest tile, so this subtracts exactly
-                                    \ 5.5 tiles' width from xCamera and
-                                    \ stores the result in xLandscape ???
+                                    \ nearest tile, so half of the remaining 11
+                                    \ tiles is 5.5 tile widths (as the landscape
+                                    \ is 12 tiles wide in total), so this
+                                    \ subtracts exactly half of the landscape's
+                                    \ width from xCamera and stores the result
+                                    \ in xLandscape, giving the x-coordinate of
+                                    \ the left end of the tile row
                                     \
                                     \ As we only take the top byte of the
                                     \ x-coordinate when reading the object map,
@@ -2753,7 +2765,7 @@ ENDIF
 
 .dobs3
 
- ADD     R8, R8, #&01000000         \ Step along the x-axis by one whole tile,
+ ADD     R8, R8, #TILE_SIZE         \ Step along the x-axis by one whole tile,
                                     \ going from left to right
 
  SUBS    R6, R6, #1                 \ Decrement the x-axis loop counter in R6
@@ -2761,7 +2773,7 @@ ENDIF
  BNE     dobs2                      \ Loop back to check the next tile until we
                                     \ have checked along the whole x-axis
 
- SUB     R9, R9, #&01000000         \ Step along the z-axis by one whole tile,
+ SUB     R9, R9, #TILE_SIZE         \ Step along the z-axis by one whole tile,
                                     \ going from back to front
 
  SUBS    R7, R7, #1                 \ Decrement the z-axis loop counter in R6
@@ -5399,7 +5411,7 @@ ENDIF
                                     \
                                     \ Why &14000000 (20 tiles)? ???
 
- ADD     R14, R14, #&01000000       \ Add the size of one tile to R14 so we draw
+ ADD     R14, R14, #TILE_SIZE       \ Add the size of one tile to R14 so we draw
                                     \ the particle one tile nearer than we would
                                     \ otherwise (i.e. one buffer nearer)
 
@@ -5756,7 +5768,7 @@ ENDIF
                                     \
                                     \ Why &14000000 (20 tiles)? ???
 
- ADD     R14, R14, #&01000000       \ Add the size of one tile to R14 so we draw
+ ADD     R14, R14, #TILE_SIZE       \ Add the size of one tile to R14 so we draw
                                     \ the triangle one tile nearer than we would
                                     \ otherwise (i.e. one buffer nearer)
 
