@@ -387,7 +387,7 @@ ship4:
  SUB     R1, R3, R4, ASR #1
  STR     R0, [R11, #var_158]
  STR     R1, [R11, #var_154]
- BL      sub_93E4
+ BL      CalculateRotationMatrix
  ADD     R14, R11, #xPlayer
  LDMIA   R14, {R0-R5}
  CMN     R1, #0x34000000
@@ -572,7 +572,7 @@ lose1:
  LDR     R0, [R11, #mainLoopCount]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
- BL      sub_93E4
+ BL      CalculateRotationMatrix
  BL      MoveAndDrawParticles
  BL      DrawObjects
  BL      AddTerminatorsToBuffers
@@ -1456,7 +1456,7 @@ sub_93B4:
  STMIA   R0, {R2-R4}
  STMIA   R1, {R5-R6, R14}
  LDMFD   R13!, {R5-R6, PC}
-sub_93E4:
+CalculateRotationMatrix:
  STMFD   R13!, {R0-R1, R14}
  ADD     R0, R0, #0x40000000
  LDR     R14, sinTableAddr
@@ -1484,11 +1484,11 @@ sub_93E4:
  AND     R2, R2, #0xFE000000
  ORR     R2, R2, #0x01000000
  MOV     R4, #0
-lab_9450:
+rmat1:
  MOV     R3, R3, LSR #1
  ADDHS   R4, R4, R3
  MOVS    R2, R2, LSL #1
- BNE     lab_9450
+ BNE     rmat1
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
@@ -2655,7 +2655,7 @@ DrawHorizontalLine:
  ADDLO   R0, PC, R10, LSL #2
  LDRLO   PC, [R0, #-varOffset]
  ADD     R10, R11, R10
- BIC     R0, R10, #3
+ BIC     R0, R10, #0x3
  TST     R11, #0x3
  STRNEB  R8, [R11], #1
  TSTNE   R11, #3
@@ -2881,7 +2881,7 @@ MainLoop:
  LDR     R0, [R11, #mainLoopCount]
  MOV     R0, R0, LSL #24
  MOV     R1, R0, LSL #1
- BL      sub_93E4
+ BL      CalculateRotationMatrix
  BL      sub_8D40
  BL      MoveAndDrawParticles
  BL      DrawObjects

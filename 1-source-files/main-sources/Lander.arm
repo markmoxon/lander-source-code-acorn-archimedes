@@ -1042,12 +1042,10 @@ ENDIF
  LDR     R2, sinTableAddr           \ Set R2 to the address of the sine lookup
                                     \ table
 
- BIC     R0, R0, #&00300000         \ R0 = R0 AND ~&00300000
-                                    \
-                                    \ So this clears bits 21 and 22 of R0, so
-                                    \ R0 >> 20 ends in two clear bits (so it's
-                                    \ a multiple of 4, i.e. on a word boundary,
-                                    \ so the following lookup works)
+ BIC     R0, R0, #&00300000         \ Clear bits 21 and 22 of R0 so when we
+                                    \ shift R0 to the right by 20 places in the
+                                    \ following lookup, the address is aligned
+                                    \ to the words in the lookup table
 
  LDR     R0, [R2, R0, LSR #20]      \ Set
                                     \
@@ -1587,7 +1585,7 @@ ENDIF
                                     \ Maybe try disabling and see what happens
                                     \ ???
 
- BL      sub_93E4                   \ ??? Something with lots of sin lookups
+ BL      CalculateRotationMatrix    \ ??? Something with lots of sin lookups
                                     \ based on polar coordinates in R0 and R1
                                     \ that writes to the orientation vectors at
                                     \ the end
@@ -1954,9 +1952,8 @@ ENDIF
 
  MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25 ???
 
- BL      sub_93E4                   \ ???
-
-                                    \ BL sub_8D40 is missing from main loop
+ BL      CalculateRotationMatrix    \ Calculate the rotation matrix from R0 and
+                                    \ R1 ???
 
  BL      MoveAndDrawParticles       \ Move and draw all the particles, such as
                                     \ smoke clouds and bullets, into the
@@ -2693,19 +2690,25 @@ ENDIF
                                     \ If we get here then the current score is
                                     \ greater than 800, so ???
 
- STMFD   R13!, {R14}                \ 
+ STMFD   R13!, {R14}                \ Store the return address on the stack
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
  MOV     R0, R0, LSR #18            \ 
+
  CMP     R0, R4                     \ 
  LDMHSIA R13!, {PC}                 \ 
+
  LDR     R0, [R11, #xCamera]        \ 
+
  MVN     R1, #&20000000             \ 
+
  LDR     R2, [R11, #zCamera]        \ 
  SUB     R2, R2, #&06000000         \ 
+
  BL      sub_8BD8                   \ 
- LDMFD   R13!, {PC}                 \ 
+
+ LDMFD   R13!, {PC}                 \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -4249,127 +4252,257 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_93E4
+\       Name: CalculateRotationMatrix
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Geometry)
+\    Summary: Calculate the rotation matrix
+\
+\ ------------------------------------------------------------------------------
+\
+\ The rotation matrix is of the form:
+\
+\   [ xNoseV yNoseV zNoseV ]
+\   [ xRoofV yRoofV zRoofV ]
+\   [ xSideV ySideV zSideV ]
+\
+\ where the nose, roof and side vectors are the orientation vectors.
+\
+\ This routine sets the rotation matrix to the following:
+\
+\   [  cos(a) * cos(b)   -sin(a) * cos(b)   sin(b) ]
+\   [       sin(a)             cos(a)          0   ]
+\   [ -cos(a) * sin(b)    sin(a) * sin(b)   cos(b) ]
+\
+\ This matrix represents a combination of two rotations, one with angle a and
+\ the other with angle b.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The first rotation angle, a
+\
+\   R1                              The second rotation angle, b
 \
 \ ******************************************************************************
 
-.sub_93E4
+.CalculateRotationMatrix
 
- STMFD   R13!, {R0-R1, R14}         \ 
- ADD     R0, R0, #&40000000         \ 
- LDR     R14, sinTableAddr          \ 
- BIC     R0, R0, #&00300000         \ 
- LDR     R2, [R14, R0, LSR #20]     \ 
- ADD     R1, R1, #&40000000         \ 
- LDR     R14, sinTableAddr          \ 
- BIC     R1, R1, #&00300000         \ 
- LDR     R3, [R14, R1, LSR #20]     \ 
- LDMFD   R13!, {R4-R5}              \ 
- LDR     R14, sinTableAddr          \ 
- BIC     R4, R4, #&00300000         \ 
- LDR     R0, [R14, R4, LSR #20]     \ 
- LDR     R14, sinTableAddr          \ 
- BIC     R5, R5, #&00300000         \ 
- LDR     R1, [R14, R5, LSR #20]     \ 
- STMFD   R13!, {R0-R3}              \ 
- EOR     R14, R2, R3                \ 
- TEQ     R2, #0                     \ 
- RSBMI   R2, R2, #0                 \ 
- MOVS    R2, R2, LSL #2             \ 
- TEQ     R3, #0                     \ 
- RSBMI   R3, R3, #0                 \ 
- MOV     R3, R3, LSL #1             \ 
- AND     R2, R2, #&FE000000         \ 
- ORR     R2, R2, #&01000000         \ 
- MOV     R4, #0                     \ 
+ STMFD   R13!, {R0-R1, R14}         \ Store the arguments and the return address
+                                    \ on the stack
 
-.lab_9450
+ ADD     R0, R0, #&40000000         \ Set R0 = R0 + &40000000
+                                    \        = a + &40000000
+                                    \
+                                    \ As we shift R0 to the right by 20 places
+                                    \ in the sine lookup below, this is the same
+                                    \ as adding a value of &40000000 >> 20 to
+                                    \ the index
+                                    \
+                                    \ &40000000 >> 20 = 1024, so when we add
+                                    \ this to the index, it skips 256 four-byte
+                                    \ words compared to looking up R0 without
+                                    \ the addition
+                                    \
+                                    \ The sine table contains 1024 entries that
+                                    \ cover the whole circle, so adding 256 to
+                                    \ the index changes the lookup from sine to
+                                    \ cosine, as it is effectively adding an
+                                    \ extra 90-degrees to the lookup index
 
- MOV     R3, R3, LSR #1             \ 
- ADDHS   R4, R4, R3                 \ 
- MOVS    R2, R2, LSL #1             \ 
- BNE     lab_9450                   \ 
- MOV     R4, R4, LSR #1             \ 
- TEQ     R14, #0                    \ 
- RSBMI   R4, R4, #0                 \ 
- STR     R4, [R11, #xNoseV]         \ 
- EOR     R14, R0, R1                \ 
- TEQ     R0, #0                     \ 
- RSBMI   R0, R0, #0                 \ 
- MOVS    R0, R0, LSL #2             \ 
- TEQ     R1, #0                     \ 
- RSBMI   R1, R1, #0                 \ 
- MOV     R1, R1, LSL #1             \ 
- AND     R0, R0, #&FE000000         \ 
- ORR     R0, R0, #&01000000         \ 
- MOV     R4, #0                     \ 
+ LDR     R14, sinTableAddr          \ Set R14 to the address of the sine lookup
+                                    \ table
+
+ BIC     R0, R0, #&00300000         \ Clear bits 21 and 22 of R0 so when we
+                                    \ shift R0 to the right by 20 places in the
+                                    \ following lookup, the address is aligned
+                                    \ to the words in the lookup table
+
+ LDR     R2, [R14, R0, LSR #20]     \ Set
+                                    \
+                                    \   R2 =   (2^31 - 1)
+                                    \        * SIN(2 * PI * ((R0 >> 20) / 1024))
+                                    \
+                                    \ So R2 = sin(a + &40000000)
+                                    \       = cos(a)
+
+ ADD     R1, R1, #&40000000         \ Using the same approach as above, set:
+ LDR     R14, sinTableAddr          \
+ BIC     R1, R1, #&00300000         \   R3 = sin(b + &40000000)
+ LDR     R3, [R14, R1, LSR #20]     \      = cos(b) 
+
+ LDMFD   R13!, {R4-R5}              \ Set R4 and R5 to the original arguments in
+                                    \ R0 and R1, so R4 = a and R5 = b
+
+ LDR     R14, sinTableAddr          \ Using the same approach as above, set:
+ BIC     R4, R4, #&00300000         \
+ LDR     R0, [R14, R4, LSR #20]     \   R0 = sin(R4)
+                                    \      = sin(a)
+
+ LDR     R14, sinTableAddr          \ Using the same approach as above, set:
+ BIC     R5, R5, #&00300000         \
+ LDR     R1, [R14, R5, LSR #20]     \   R1 = sin(R4)
+                                    \      = sin(b)
+
+ STMFD   R13!, {R0-R3}              \ Store R0 to R3 on the stack, so the stack
+                                    \ contains:
+                                    \
+                                    \   R0 = sin(a)
+                                    \   R1 = sin(b)
+                                    \   R2 = cos(a)
+                                    \   R3 = cos(b)
+
+                                    \ We now calculate R4 = R2 * R3 using the
+                                    \ shift-and-add multiplication algorithm
+
+ EOR     R14, R2, R3                \ Set the sign of the result in R14
+
+ TEQ     R2, #0                     \ Set R2 = 4 * |R2|
+ RSBMI   R2, R2, #0
+ MOVS    R2, R2, LSL #2
+
+ TEQ     R3, #0                     \ Set R3 = 2 * |R3|
+ RSBMI   R3, R3, #0
+ MOV     R3, R3, LSL #1
+
+ AND     R2, R2, #&FE000000         \ Zero all but the top byte of R2, ensuring
+ ORR     R2, R2, #&01000000         \ that bit 0 of the top byte is set so the
+                                    \ value of the top byte is at least 1
+
+ MOV     R4, #0                     \ Set R4 = 0 to use for building the sum in
+                                    \ our shift-and-add multiplication result
+
+.rmat1
+
+ MOV     R3, R3, LSR #1             \ If bit 0 of R3 is set, add R3 to the
+ ADDHS   R4, R4, R3                 \ result in R4, shifting R3 to the right
+
+ MOVS    R2, R2, LSL #1             \ Shift R2 left by one place
+
+ BNE     rmat1                      \ Loop back if R4 is non-zero
+
+ MOV     R4, R4, LSR #1             \ Set R4 = R4 / 2
+
+ TEQ     R14, #0                    \ Apply the sign from R14 to R4 to get the
+ RSBMI   R4, R4, #0                 \ final result, so:
+                                    \
+                                    \   R4 = R2 * R3
+                                    \      = cos(a) * cos(b)
+
+ STR     R4, [R11, #xNoseV]         \ Store the result in xNoseV, so:
+                                    \
+                                    \   xNoseV = cos(a) * cos(b)
+
+ EOR     R14, R0, R1                \ Set R4 = R0 * R1 using the same algorithm
+ TEQ     R0, #0                     \ as above
+ RSBMI   R0, R0, #0                 \
+ MOVS    R0, R0, LSL #2             \ This is the first part of the algorithm
+ TEQ     R1, #0
+ RSBMI   R1, R1, #0
+ MOV     R1, R1, LSL #1
+ AND     R0, R0, #&FE000000
+ ORR     R0, R0, #&01000000
+ MOV     R4, #0
 
 .lab_9498
 
- MOV     R1, R1, LSR #1             \ 
- ADDHS   R4, R4, R1                 \ 
- MOVS    R0, R0, LSL #1             \ 
- BNE     lab_9498                   \ 
- MOV     R4, R4, LSR #1             \ 
- TEQ     R14, #0                    \ 
- RSBMI   R4, R4, #0                 \ 
- STR     R4, [R11, #ySideV]         \ 
- LDMFD   R13, {R0-R3}               \ 
- EOR     R14, R1, R2                \ 
- TEQ     R1, #0                     \ 
- RSBMI   R1, R1, #0                 \ 
- MOVS    R1, R1, LSL #2             \ 
- TEQ     R2, #0                     \ 
- RSBMI   R2, R2, #0                 \ 
- MOV     R2, R2, LSL #1             \ 
- AND     R1, R1, #&FE000000         \ 
- ORR     R1, R1, #&01000000         \ 
- MOV     R4, #0                     \ 
+ MOV     R1, R1, LSR #1             \ This is the second part of the algorithm,
+ ADDHS   R4, R4, R1                 \ so we now have:
+ MOVS    R0, R0, LSL #1             \
+ BNE     lab_9498                   \    R4 = R0 * R1
+ MOV     R4, R4, LSR #1             \       = sin(a) * sin(b)
+ TEQ     R14, #0
+ RSBMI   R4, R4, #0
+
+ STR     R4, [R11, #ySideV]         \ Store the result in ySideV, so:
+                                    \
+                                    \   ySideV = sin(a) * sin(b)
+
+ LDMFD   R13, {R0-R3}               \ Retrieve R0 to R3 from the stack, leaving
+                                    \ the stack pointer alone so we can repeat
+                                    \ the process later, so R0 to R3 once again
+                                    \ contain the following:
+                                    \
+                                    \   R0 = sin(a)
+                                    \   R1 = sin(b)
+                                    \   R2 = cos(a)
+                                    \   R3 = cos(b)
+
+ EOR     R14, R1, R2                \ Set R4 = R1 * R2 using the same algorithm
+ TEQ     R1, #0                     \ as above
+ RSBMI   R1, R1, #0                 \
+ MOVS    R1, R1, LSL #2             \ This is the first part of the algorithm
+ TEQ     R2, #0
+ RSBMI   R2, R2, #0
+ MOV     R2, R2, LSL #1
+ AND     R1, R1, #&FE000000
+ ORR     R1, R1, #&01000000
+ MOV     R4, #0
 
 .lab_94E4
 
- MOV     R2, R2, LSR #1             \ 
- ADDHS   R4, R4, R2                 \ 
- MOVS    R1, R1, LSL #1             \ 
- BNE     lab_94E4                   \ 
- MOV     R4, R4, LSR #1             \ 
- TEQ     R14, #0                    \ 
- RSBMI   R4, R4, #0                 \ 
- RSB     R4, R4, #0                 \ 
- STR     R4, [R11, #xSideV]         \ 
- EOR     R14, R0, R3                \ 
- TEQ     R0, #0                     \ 
- RSBMI   R0, R0, #0                 \ 
- MOVS    R0, R0, LSL #2             \ 
- TEQ     R3, #0                     \ 
- RSBMI   R3, R3, #0                 \ 
- MOV     R3, R3, LSL #1             \ 
- AND     R0, R0, #&FE000000         \ 
- ORR     R0, R0, #&01000000         \ 
- MOV     R4, #0                     \ 
+ MOV     R2, R2, LSR #1             \ This is the second part of the algorithm,
+ ADDHS   R4, R4, R2                 \ so we now have:
+ MOVS    R1, R1, LSL #1             \
+ BNE     lab_94E4                   \   R4 = R1 * R2
+ MOV     R4, R4, LSR #1             \      = sin(b) * cos(a)
+ TEQ     R14, #0                    \      = cos(a) * sin(b)
+ RSBMI   R4, R4, #0
+
+ RSB     R4, R4, #0                 \ Negate the result and store it in xSideV,
+ STR     R4, [R11, #xSideV]         \ so:
+                                    \
+                                    \   xSideV = -cos(a) * sin(b)
+
+ EOR     R14, R0, R3                \ Set R4 = R0 * R3 using the same algorithm
+ TEQ     R0, #0                     \ as above
+ RSBMI   R0, R0, #0                 \
+ MOVS    R0, R0, LSL #2             \ This is the first part of the algorithm
+ TEQ     R3, #0
+ RSBMI   R3, R3, #0
+ MOV     R3, R3, LSL #1
+ AND     R0, R0, #&FE000000
+ ORR     R0, R0, #&01000000
+ MOV     R4, #0
 
 .lab_9530
 
- MOV     R3, R3, LSR #1             \ 
- ADDHS   R4, R4, R3                 \ 
- MOVS    R0, R0, LSL #1             \ 
- BNE     lab_9530                   \ 
- MOV     R4, R4, LSR #1             \ 
- TEQ     R14, #0                    \ 
- RSBMI   R4, R4, #0                 \ 
- RSB     R4, R4, #0                 \ 
- STR     R4, [R11, #yNoseV]         \ 
- LDMFD   R13!, {R0-R3, R14}         \ 
- STR     R0, [R11, #xRoofV]         \ 
- STR     R1, [R11, #zNoseV]         \ 
- STR     R2, [R11, #yRoofV]         \ 
- STR     R3, [R11, #zSideV]         \ 
- MOV     R0, #0                     \ 
- STR     R0, [R11, #zRoofV]         \ 
- MOV     PC, R14                    \ 
+ MOV     R3, R3, LSR #1             \ This is the second part of the algorithm,
+ ADDHS   R4, R4, R3                 \ so we now have:
+ MOVS    R0, R0, LSL #1             \
+ BNE     lab_9530                   \   R4 = R0 * R3
+ MOV     R4, R4, LSR #1             \      = sin(a) * cos(b)
+ TEQ     R14, #0
+ RSBMI   R4, R4, #0
+
+ RSB     R4, R4, #0                 \ Negate the result and store it in yNoseV,
+ STR     R4, [R11, #yNoseV]         \ so:
+                                    \
+                                    \   yNoseV = -sin(a) * cos(b)
+
+ LDMFD   R13!, {R0-R3, R14}         \ Retrieve R0 to R3 from the stack, so R0 to
+                                    \ R3 once again contain the following:
+                                    \
+                                    \   R0 = sin(a)
+                                    \   R1 = sin(b)
+                                    \   R2 = cos(a)
+                                    \   R3 = cos(b)
+                                    \
+                                    \ We also retrieve the subroutine return
+                                    \ address into R14
+
+ STR     R0, [R11, #xRoofV]         \ Set xRoofV = sin(a)
+
+ STR     R1, [R11, #zNoseV]         \ Set zNoseV = sin(b)
+
+ STR     R2, [R11, #yRoofV]         \ Set yRoofV = cos(a)
+
+ STR     R3, [R11, #zSideV]         \ Set zSideV = cos(b)
+
+ MOV     R0, #0                     \ Set zRoofV = 0
+ STR     R0, [R11, #zRoofV]
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -4670,7 +4803,6 @@ ENDIF
                                     \ to the words in the lookup table
 
  LDR     R0, [R14, R2, LSR #20]     \ Set R0 = SQRT(R2)
-                                    \
                                     \        = SQRT(|xMouse| ^ 2 + |yMouse| ^ 2)
                                     \
                                     \ which is the length of the hypoteneuse and
@@ -7217,7 +7349,7 @@ ENDIF
                                     \ end of the line (i.e. the address of the
                                     \ left end in R11 plus the width in R10)
 
- BIC     R0, R10, #3                \ Set R0 to the screen address with bits 0
+ BIC     R0, R10, #%00000011        \ Set R0 to the screen address with bits 0
                                     \ and 1 cleared, so R0 points to the word in
                                     \ screen memory that contains the right end
                                     \ of the line (the "right cap")
@@ -7992,7 +8124,8 @@ ENDIF
 
  MOV     R1, R0, LSL #1             \ Set R1 = mainLoopCount << 25 ???
 
- BL      sub_93E4                   \ ???
+ BL      CalculateRotationMatrix    \ Calculate the rotation matrix from R0 and
+                                    \ R1 ???
 
  BL      sub_8D40                   \ ???
 

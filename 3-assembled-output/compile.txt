@@ -405,7 +405,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008428 C41043E0        	   387:  SUB     R1, R3, R4, ASR #1
 00:0000842C 58018BE5        	   388:  STR     R0, [R11, #var_158]
 00:00008430 54118BE5        	   389:  STR     R1, [R11, #var_154]
-00:00008434 EA0300EB        	   390:  BL      sub_93E4
+00:00008434 EA0300EB        	   390:  BL      CalculateRotationMatrix
 00:00008438 94E08BE2        	   391:  ADD     R14, R11, #xPlayer
 00:0000843C 3F009EE8        	   392:  LDMIA   R14, {R0-R5}
 00:00008440 0D0371E3        	   393:  CMN     R1, #0x34000000
@@ -590,7 +590,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000086EC 18019BE5        	   572:  LDR     R0, [R11, #mainLoopCount]
 00:000086F0 000CA0E1        	   573:  MOV     R0, R0, LSL #24
 00:000086F4 8010A0E1        	   574:  MOV     R1, R0, LSL #1
-00:000086F8 390300EB        	   575:  BL      sub_93E4
+00:000086F8 390300EB        	   575:  BL      CalculateRotationMatrix
 00:000086FC 3C0000EB        	   576:  BL      MoveAndDrawParticles
 00:00008700 B50100EB        	   577:  BL      DrawObjects
 00:00008704 7C0500EB        	   578:  BL      AddTerminatorsToBuffers
@@ -1482,7 +1482,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000093D8 1C0080E8        	  1456:  STMIA   R0, {R2-R4}
 00:000093DC 604081E8        	  1457:  STMIA   R1, {R5-R6, R14}
 00:000093E0 6080BDE8        	  1458:  LDMFD   R13!, {R5-R6, PC}
-                            	  1459: sub_93E4:
+                            	  1459: CalculateRotationMatrix:
 00:000093E4 03402DE9        	  1460:  STMFD   R13!, {R0-R1, R14}
 00:000093E8 010180E2        	  1461:  ADD     R0, R0, #0x40000000
 00:000093EC 04E21FE5        	  1462:  LDR     R14, sinTableAddr
@@ -1510,11 +1510,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00009444 FE2402E2        	  1484:  AND     R2, R2, #0xFE000000
 00:00009448 012482E3        	  1485:  ORR     R2, R2, #0x01000000
 00:0000944C 0040A0E3        	  1486:  MOV     R4, #0
-                            	  1487: lab_9450:
+                            	  1487: rmat1:
 00:00009450 A330A0E1        	  1488:  MOV     R3, R3, LSR #1
 00:00009454 03408420        	  1489:  ADDHS   R4, R4, R3
 00:00009458 8220B0E1        	  1490:  MOVS    R2, R2, LSL #1
-00:0000945C FBFFFF1A        	  1491:  BNE     lab_9450
+00:0000945C FBFFFF1A        	  1491:  BNE     rmat1
 00:00009460 A440A0E1        	  1492:  MOV     R4, R4, LSR #1
 00:00009464 00003EE3        	  1493:  TEQ     R14, #0
 00:00009468 00406442        	  1494:  RSBMI   R4, R4, #0
@@ -2681,7 +2681,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A4CC 0A018F30        	  2655:  ADDLO   R0, PC, R10, LSL #2
 00:0000A4D0 54F01035        	  2656:  LDRLO   PC, [R0, #-varOffset]
 00:0000A4D4 0AA08BE0        	  2657:  ADD     R10, R11, R10
-00:0000A4D8 0300CAE3        	  2658:  BIC     R0, R10, #3
+00:0000A4D8 0300CAE3        	  2658:  BIC     R0, R10, #0x3
 00:0000A4DC 03001BE3        	  2659:  TST     R11, #0x3
 00:0000A4E0 0180CB14        	  2660:  STRNEB  R8, [R11], #1
 00:0000A4E4 03001B13        	  2661:  TSTNE   R11, #3
@@ -2923,7 +2923,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A86C 18019BE5        	  2881:  LDR     R0, [R11, #mainLoopCount]
 00:0000A870 000CA0E1        	  2882:  MOV     R0, R0, LSL #24
 00:0000A874 8010A0E1        	  2883:  MOV     R1, R0, LSL #1
-00:0000A878 D9FAFFEB        	  2884:  BL      sub_93E4
+00:0000A878 D9FAFFEB        	  2884:  BL      CalculateRotationMatrix
 00:0000A87C 2FF9FFEB        	  2885:  BL      sub_8D40
 00:0000A880 DBF7FFEB        	  2886:  BL      MoveAndDrawParticles
 00:0000A884 54F9FFEB        	  2887:  BL      DrawObjects
@@ -10255,6 +10255,7 @@ Symbols by name:
 AbortWithMemoryError             A:0000A5A4
 AddTerminatorsToBuffers          A:00009CFC
 CODE                             S:00008000
+CalculateRotationMatrix          A:000093E4
 DecryptGameBinary                A:00011A10
 Draw1x1ParticleFromBuffer        A:00009AC4
 Draw2x1ParticleFromBuffer        A:00009AE8
@@ -10377,7 +10378,6 @@ lab_8AA0                         A:00008AA0
 lab_8AC8                         A:00008AC8
 lab_8CC0                         A:00008CC0
 lab_8D14                         A:00008D14
-lab_9450                         A:00009450
 lab_9498                         A:00009498
 lab_94E4                         A:000094E4
 lab_9530                         A:00009530
@@ -10519,6 +10519,7 @@ prsc1                            A:00009140
 randomSeed1                      A:00009A38
 randomSeed2                      A:00009A3C
 remainingLives                   S:00000134
+rmat1                            A:00009450
 rotationMatrix                   S:00000030
 screenAddr                       A:00009A6C
 screenBank1Addr                  A:00009D30
@@ -10561,7 +10562,6 @@ sub_8CFC                         A:00008CFC
 sub_8D24                         A:00008D24
 sub_8D40                         A:00008D40
 sub_93B4                         A:000093B4
-sub_93E4                         A:000093E4
 sub_98EC                         A:000098EC
 sub_9948                         A:00009948
 term1                            A:00009D10
@@ -10783,8 +10783,8 @@ Symbols by value:
 00009358 dotp3
 0000937C TransposeRotationMatrix
 000093B4 sub_93B4
-000093E4 sub_93E4
-00009450 lab_9450
+000093E4 CalculateRotationMatrix
+00009450 rmat1
 00009498 lab_9498
 000094E4 lab_94E4
 00009530 lab_9530
