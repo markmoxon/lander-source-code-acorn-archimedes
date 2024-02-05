@@ -1520,98 +1520,155 @@ ENDIF
                                     \ go)
 
  BL      GetMouseInPolarCoordinates \ Convert the mouse coordinates into polar
-                                    \ coordinates, returning the angle in R1 and
-                                    \ the distance in R0
+                                    \ coordinates, returning the polar angle in
+                                    \ R1 and the polar distance in R0
 
- CMP     R0, #&40000000             \ 
- MOVHS   R0, #&40000000             \ 
- SUBHS   R0, R0, #1                 \ 
- MOV     R0, R0, LSL #1             \ 
- LDR     R2, [R11, #var_158]        \ 
- LDR     R3, [R11, #var_154]        \ 
- SUBS    R4, R3, R1                 \ 
- BMI     ship1                      \ 
- CMP     R4, #&30000000             \ 
- MOVHS   R4, #&30000000             \ 
- B       ship2                      \ 
+ CMP     R0, #&40000000             \ Cap the polar distance in R0 so it's in
+ MOVHS   R0, #&40000000             \ the range 0 to &3FFFFFFF
+ SUBHS   R0, R0, #1
+
+ MOV     R0, R0, LSL #1             \ Scale R0 to the range 0 to &7FFFFFFE
+
+ LDR     R2, [R11, #var_158]        \ Set R2 = var_158
+
+ LDR     R3, [R11, #var_154]        \ Set R3 = var_154
+
+ SUBS    R4, R3, R1                 \ Set R4 = R3 - R1
+                                    \        = var_154 - polar angle
+
+ BMI     ship1                      \ If the result is negative, jump to ship1
+                                    \ so we cap R4 against negative values
+
+ CMP     R4, #&30000000             \ Cap the value in R4 to a maximum magnitude
+ MOVHS   R4, #&30000000             \ of &30000000
+
+ B       ship2                      \ Jump to ship2 to skip the following and
+                                    \ keep going
 
 .ship1
 
- CMN     R4, #&30000000             \ 
- MVNLO   R4, #&30000000             \ 
+ CMN     R4, #&30000000             \ Cap the value in R4 to a maximum magnitude
+ MVNLO   R4, #&30000000             \ of -&30000000
 
 .ship2
 
- SUBS    R5, R2, R0                 \ 
- BLE     ship3                      \ 
- CMP     R5, #&30000000             \ 
- MOVHS   R5, #&30000000             \ 
- B       ship4                      \ 
+ SUBS    R5, R2, R0                 \ Set R5 = R2 - R0
+                                    \        = var_158 - polar distance
+
+ BLE     ship3                      \ If the result is zero or negative, jump to
+                                    \ ship3 so we cap R5 against negative values
+
+ CMP     R5, #&30000000             \ Cap the value in R5 to a maximum magnitude
+ MOVHS   R5, #&30000000             \ of &30000000
+
+ B       ship4                      \ Jump to ship4 to skip the following and
+                                    \ keep going
 
 .ship3
 
- CMN     R5, #&30000000             \ 
- MVNLO   R5, #&30000000             \ 
+ CMN     R5, #&30000000             \ Cap the value in R5 to a maximum magnitude
+ MVNLO   R5, #&30000000             \ of -&30000000
 
 .ship4
 
- SUB     R0, R2, R5, ASR #1         \ 
- SUB     R1, R3, R4, ASR #1         \ 
- STR     R0, [R11, #var_158]        \ 
- STR     R1, [R11, #var_154]        \ 
- BL      sub_93E4                   \ 
+ SUB     R0, R2, R5, ASR #1         \ Set R0 = R2 - R5 / 2
+                                    \        = var_158 - (var_158 - distance)/2
+
+ SUB     R1, R3, R4, ASR #1         \ Set R1 = R3 - R4 / 2
+                                    \        = var_154 - (var_154 - angle) / 2
+
+ STR     R0, [R11, #var_158]        \ Store the updated value in var_158
+
+ STR     R1, [R11, #var_154]        \ Store the updated value in var_154
+
+                                    \ So this is some kind of feedback loop into
+                                    \ the polar coordinates in R0 and R1, with
+                                    \ past values affecting the present values?
+                                    \ Maybe try disabling and see what happens
+                                    \ ???
+
+ BL      sub_93E4                   \ ??? Something with lots of sin lookups
+                                    \ based on polar coordinates in R0 and R1
+                                    \ that writes to the orientation vectors at
+                                    \ the end
+
  ADD     R14, R11, #xPlayer         \ 
  LDMIA   R14, {R0-R5}               \ 
+
  CMN     R1, #&34000000             \ 
  LDRLTB  R9, [R11, #fuelBurnRate]   \ 
  BICLT   R9, R9, #6                 \ 
  STRLTB  R9, [R11, #fuelBurnRate]   \ 
+
  LDR     R6, [R11, #yNoseV]         \ 
  LDR     R7, [R11, #yRoofV]         \ 
  LDR     R8, [R11, #ySideV]         \ 
+
  LDRB    R9, [R11, #fuelBurnRate]   \ 
+
  TST     R9, #4                     \ 
  SUB     R3, R3, R3, ASR #6         \ 
  SUBNE   R3, R3, R6, ASR #11        \ 
+
  ADD     R0, R0, R3                 \ 
  SUB     R4, R4, R4, ASR #6         \ 
  SUBNE   R4, R4, R7, ASR #11        \ 
+
  ADD     R1, R1, R4                 \ 
  SUB     R5, R5, R5, ASR #6         \ 
  SUBNE   R5, R5, R8, ASR #11        \ 
+
  ADD     R2, R2, R5                 \ 
+
  TST     R9, #2                     \ 
  SUBNE   R3, R3, R6, ASR #13        \ 
  SUBNE   R4, R4, R7, ASR #13        \ 
  SUBNE   R5, R5, R8, ASR #13        \ 
+
  LDR     R9, [R11, #gravity]        \ 
  ADD     R4, R4, R9                 \ 
+
  STMIA   R14, {R0-R8}               \ 
+
  CMP     R1, #0                     \ 
  MOVPL   R1, #0                     \ 
+
  ADD     R2, R2, #&05000000         \ 
+
  ADD     R14, R11, #xCamera         \ 
  STMIA   R14, {R0-R2}               \ 
+
  MOV     R8, R0                     \ 
+
  MOV     R9, R2                     \ 
+
  SUB     R9, R9, #&05000000         \ 
 
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9)
 
  SUB     R0, R0, #&00640000         \ 
+
  LDR     R1, [R11, #yPlayer]        \ 
+
  SUB     R14, R0, R1                \ 
+
  CMP     R14, #&01800000            \ 
+
  BHS     ship6                      \ 
+
  STMFD   R13!, {R0}                 \ 
+
  ADD     R14, R11, #objectMap       \ 
+
  AND     R9, R9, #&FF000000         \ 
  ADD     R14, R14, R8, LSR #24      \ 
  ADD     R14, R14, R9, LSR #16      \ 
+
  LDRB    R0, [R14]                  \ 
  CMP     R0, #0                     \ 
  BEQ     ship5                      \ 
+
  CMP     R0, #&C                    \ 
  ADDLO   R13, R13, #4               \ 
  BLO     LoseLife                   \ 
@@ -1627,59 +1684,88 @@ ENDIF
 
  CMP     R1, #0                     \ 
  MOVMI   R1, #0                     \ 
+
  ADD     R3, R11, #rotationMatrix   \ 
  LDR     R14, objectPlayerAddr      \ 
  STR     R14, [R11, #objectData]    \ 
+
  MOV     R0, #0                     \ 
+
  MOV     R2, #&0F000000             \ 
+
  BL      DrawObject                 \ 
+
  LDRB    R10, [R11, #crashedFlag]   \ 
+
  CMP     R10, #0                    \ 
  BLNE    LoseLife                   \ 
+
  LDRB    R10, [R11, #fuelBurnRate]  \ 
  TST     R10, #6                    \ 
  BEQ     ship7                      \ 
+
  ADD     R14, R11, #xVelocity       \ 
+
  LDMIA   R14, {R0-R2, R6-R8}        \ 
+
  ADD     R3, R0, R6, ASR #7         \ 
  ADD     R4, R1, R7, ASR #7         \ 
  ADD     R5, R2, R8, ASR #7         \ 
+
  MOV     R3, R3, ASR #1             \ 
  MOV     R4, R4, ASR #1             \ 
  MOV     R5, R5, ASR #1             \ 
+
  ADD     R0, R11, #xPlayer          \ 
+
  LDMIA   R0, {R0-R2}                \ 
+
  SUB     R0, R0, R3                 \ 
  SUB     R1, R1, R4                 \ 
  SUB     R2, R2, R5                 \ 
+
  ADD     R0, R0, R6, ASR #7         \ 
  ADD     R1, R1, R7, ASR #7         \ 
  ADD     R2, R2, R8, ASR #7         \ 
+
  MOV     R7, #&001D0000             \ 
+
  MOV     R6, #8                     \ 
+
  MOV     R8, #&A                    \ 
+
  MOV     R9, #&1D                   \ 
+
  STMFD   R13!, {R0-R9}              \ 
+
  BL      sub_8A8C                   \ 
+
  TST     R10, #4                    \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
+
  TST     R10, #4                    \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
+
  TST     R10, #4                    \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
+
  TST     R10, #4                    \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
+
  TST     R10, #4                    \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
+
  TST     R10, #4                    \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
+
  LDMFD   R13!, {R0-R9}              \ 
+
  BL      sub_8A8C                   \ 
 
 .ship7
@@ -1692,22 +1778,30 @@ ENDIF
  STR     R8, [R11, #currentScore]
 
  ADD     R14, R11, #xPlayer         \ 
+
  LDMIA   R14, {R0-R5}               \ 
+
  LDR     R6, [R11, #xNoseV]         \ 
  LDR     R7, [R11, #xRoofV]         \ 
  LDR     R8, [R11, #xSideV]         \ 
+
  ADD     R3, R3, R6, ASR #8         \ 
  ADD     R4, R4, R7, ASR #8         \ 
  ADD     R5, R5, R8, ASR #8         \ 
+
  SUB     R0, R0, R3                 \ 
  SUB     R1, R1, R4                 \ 
  SUB     R2, R2, R5                 \ 
+
  ADD     R0, R0, R6, ASR #7         \ 
  ADD     R1, R1, R7, ASR #7         \ 
  ADD     R2, R2, R8, ASR #7         \ 
+
  MOV     R6, #&14                   \ 
+
  MOV     R7, #&01BC0000             \ 
  ORR     R7, R7, #&FF               \ 
+
  BL      sub_8A84                   \ 
 
 .ship8
