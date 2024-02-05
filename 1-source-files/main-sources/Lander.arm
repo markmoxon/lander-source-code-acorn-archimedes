@@ -192,9 +192,9 @@
  tileCornerRow = &E4                \ The number of the landscape tile corner
                                     \ row that is currently being processed
 
- unusedRowData = &F0                \ Storage for the first data byte in the
-                                    \ rowConfig table, which is stored but never
-                                    \ used
+ unusedConfig = &F0                 \ Storage for the first configuration value
+                                    \ in the landscapeConfig table, which is
+                                    \ stored but not used
 
  objectType = &F4                   \ The type of the object currently being
                                     \ drawn
@@ -396,7 +396,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: rowConfig
+\       Name: landscapeConfig
 \       Type: Variable
 \   Category: Landscape
 \    Summary: The configuration data for each tile row in the landscape
@@ -415,7 +415,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.rowConfig
+.landscapeConfig
 
  EQUB    &3A, 13                    \ Tile row 0
  EQUB    &E3, 13                    \ Tile row 1
@@ -432,16 +432,16 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: rowConfigAddr
+\       Name: landscapeConfigAddr
 \       Type: Variable
 \   Category: Landscape
-\    Summary: The address of the rowConfig table
+\    Summary: The address of the landscapeConfig table
 \
 \ ******************************************************************************
 
-.rowConfigAddr
+.landscapeConfigAddr
 
- EQUD    rowConfig
+ EQUD    landscapeConfig
 
 \ ******************************************************************************
 \
@@ -703,21 +703,21 @@ ENDIF
  LDRB    R1, [R11, #tileCornerRow]  \ Set R1 to the number of the tile corner
                                     \ row we are currently processing
 
- LDR     R0, rowConfigAddr          \ Set R0 to the address of the pair of
- ADD     R0, R0, R1, LSL #1         \ bytes in the rowConfig table for the tile
-                                    \ row number in R1
+ LDR     R0, landscapeConfigAddr    \ Set R0 to the address of the pair of
+ ADD     R0, R0, R1, LSL #1         \ bytes in the landscapeConfig table for the
+                                    \ tile row number in R1
 
  LDRB    R10, [R0, #1]              \ Set R10 to the second byte from the pair
-                                    \ in rowConfig, which is the number of tile
-                                    \ corners in the row
+                                    \ in landscapeConfig, which is the number
+                                    \ of tile corners in the row
                                     \
                                     \ We now use R10 as a loop counter when
                                     \ working our way along the row, counting
                                     \ tile corners as we progress
 
- LDRB    R0, [R0]                   \ Set unusedRowData to the first byte from
- STRB    R0, [R11, #unusedRowData]  \ the pair in rowConfig, though this value
-                                    \ is not used, so this has no effect
+ LDRB    R0, [R0]                   \ Set unusedConfig to the first byte from
+ STRB    R0, [R11, #unusedConfig]   \ the pair in landscapeConfig, though this
+                                    \ value is not used, so this has no effect
 
  ADD     R0, R11, #xLandscapeRow    \ Fetch the coordinate from (xLandscapeRow,
  LDMIA   R0, {R0-R2}                \ yLandscapeRow, zLandscapeRow) into
@@ -7320,7 +7320,7 @@ ENDIF
 \
 \       Name: initialScore
 \       Type: Variable
-\   Category: Start and end
+\   Category: Score bar
 \    Summary: The score at the start of each game
 \
 \ ******************************************************************************
@@ -7333,7 +7333,7 @@ ENDIF
 \
 \       Name: initialHighScore
 \       Type: Variable
-\   Category: Start and end
+\   Category: Score bar
 \    Summary: The high score when we first load the game
 \
 \ ******************************************************************************
@@ -7346,7 +7346,7 @@ ENDIF
 \
 \       Name: initialFuelLevel
 \       Type: Variable
-\   Category: Start and end
+\   Category: Score bar
 \    Summary: The fuel level at the start of each new game
 \
 \ ******************************************************************************
@@ -7372,7 +7372,7 @@ ENDIF
 \
 \       Name: mouseParameters
 \       Type: Variable
-\   Category: Start and end
+\   Category: Player
 \    Summary: The parameters for OS_Word 21,3 for resetting the mouse position
 \
 \ ******************************************************************************
@@ -7392,7 +7392,7 @@ ENDIF
 \
 \       Name: mouseParametersAddr
 \       Type: Variable
-\   Category: Start and end
+\   Category: Player
 \    Summary: The address of the OS_Word block for resetting the mouse position
 \
 \ ******************************************************************************
@@ -7405,7 +7405,7 @@ ENDIF
 \
 \       Name: ResetMousePosition
 \       Type: Subroutine
-\   Category: Start and end
+\   Category: Player
 \    Summary: Reset the mouse position to (511, 511), ready for the game
 \
 \ ******************************************************************************
@@ -7623,7 +7623,7 @@ ENDIF
 \
 \       Name: PlaceObjectsOnMap
 \       Type: Subroutine
-\   Category: Main loop
+\   Category: 3D objects
 \    Summary: Randomly place a number of objects on the map, avoiding the sea
 \             and the launchpad
 \
@@ -7817,7 +7817,7 @@ ENDIF
 \
 \       Name: PlacePlayerOnLaunchpad
 \       Type: Subroutine
-\   Category: Main loop
+\   Category: Player
 \    Summary: The main entry point for the game
 \
 \ ******************************************************************************

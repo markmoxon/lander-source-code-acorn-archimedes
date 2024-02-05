@@ -53,7 +53,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    48: .set zVelocity, 0xA8
                             	    49: .set previousColumn, 0xC4
                             	    50: .set tileCornerRow, 0xE4
-                            	    51: .set unusedRowData, 0xF0
+                            	    51: .set unusedConfig, 0xF0
                             	    52: .set objectType, 0xF4
                             	    53: .set tileRowOddEven, 0xF8
                             	    54: .set altitude, 0x100
@@ -104,7 +104,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    98: .endif
                             	    99: landscapeOriginAddr:
 00:0000800C 00800000        	   100: .long    landscapeOrigin
-                            	   101: rowConfig:
+                            	   101: landscapeConfig:
 00:00008010 3A              	   102: .byte    0x3A, 13
 00:00008011 0D
 00:00008012 E3              	   103: .byte    0xE3, 13
@@ -129,8 +129,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00008025 0D
 00:00008026 E3              	   113: .byte    0xE3, 13
 00:00008027 0D
-                            	   114: rowConfigAddr:
-00:00008028 10800000        	   115: .long    rowConfig
+                            	   114: landscapeConfigAddr:
+00:00008028 10800000        	   115: .long    landscapeConfig
                             	   116: graphicsBuffers:
 00:0000802C 00660200        	   117: .long    0x00026600
 00:00008030 D4760200        	   118: .long    0x000276D4
@@ -180,11 +180,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000080D8 F860CBE5        	   162:  STRB    R6, [R11, #tileRowOddEven]
                             	   163: land1:
 00:000080DC E410DBE5        	   164:  LDRB    R1, [R11, #tileCornerRow]
-00:000080E0 C0001FE5        	   165:  LDR     R0, rowConfigAddr
+00:000080E0 C0001FE5        	   165:  LDR     R0, landscapeConfigAddr
 00:000080E4 810080E0        	   166:  ADD     R0, R0, R1, LSL #1
 00:000080E8 01A0D0E5        	   167:  LDRB    R10, [R0, #1]
 00:000080EC 0000D0E5        	   168:  LDRB    R0, [R0]
-00:000080F0 F000CBE5        	   169:  STRB    R0, [R11, #unusedRowData]
+00:000080F0 F000CBE5        	   169:  STRB    R0, [R11, #unusedConfig]
 00:000080F4 160E8BE2        	   170:  ADD     R0, R11, #xLandscapeRow
 00:000080F8 070090E8        	   171:  LDMIA   R0, {R0-R2}
 00:000080FC 174E8BE2        	   172:  ADD     R4, R11, #xLandscapeCol
@@ -10447,6 +10447,8 @@ land2                            A:00008114
 land3                            A:0000816C
 land4                            A:00008170
 land5                            A:000081E0
+landscapeConfig                  A:00008010
+landscapeConfigAddr              A:00008028
 landscapeOrigin                  A:00008000
 landscapeOriginAddr              A:0000800C
 lineJump                         A:0000A480
@@ -10518,8 +10520,6 @@ randomSeed1                      A:00009A38
 randomSeed2                      A:00009A3C
 remainingLives                   S:00000134
 rotationMatrix                   S:00000030
-rowConfig                        A:00008010
-rowConfigAddr                    A:00008028
 screenAddr                       A:00009A6C
 screenBank1Addr                  A:00009D30
 screenBank2Addr                  A:00009D2C
@@ -10568,7 +10568,7 @@ term1                            A:00009D10
 tileCornerRow                    S:000000E4
 tileRowOddEven                   S:000000F8
 typeOffset                       S:000000CC
-unusedRowData                    S:000000F0
+unusedConfig                     S:000000F0
 varOffset                        S:00000054
 var_108                          S:00000108
 var_10C                          S:0000010C
@@ -10634,8 +10634,8 @@ Symbols by value:
 00000048 xSideV
 0000004C ySideV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10650,7 +10650,7 @@ Symbols by value:
 000000C4 previousColumn
 000000CC typeOffset
 000000E4 tileCornerRow
-000000F0 unusedRowData
+000000F0 unusedConfig
 000000F4 objectType
 000000F8 tileRowOddEven
 00000100 altitude
@@ -10686,11 +10686,11 @@ Symbols by value:
 00000600 vertexProjected
 00000700 var_700
 00004400 objectMap
-00008000 CODE
 00008000 landscapeOrigin
+00008000 CODE
 0000800C landscapeOriginAddr
-00008010 rowConfig
-00008028 rowConfigAddr
+00008010 landscapeConfig
+00008028 landscapeConfigAddr
 0000802C graphicsBuffers
 0000805C graphicsBuffersEnd
 0000808C DrawLandscapeAndBuffers

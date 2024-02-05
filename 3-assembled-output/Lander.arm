@@ -48,7 +48,7 @@
 .set zVelocity, 0xA8
 .set previousColumn, 0xC4
 .set tileCornerRow, 0xE4
-.set unusedRowData, 0xF0
+.set unusedConfig, 0xF0
 .set objectType, 0xF4
 .set tileRowOddEven, 0xF8
 .set altitude, 0x100
@@ -98,7 +98,7 @@ landscapeOrigin:
 .endif
 landscapeOriginAddr:
 .long    landscapeOrigin
-rowConfig:
+landscapeConfig:
 .byte    0x3A, 13
 .byte    0xE3, 13
 .byte    0xE4, 13
@@ -111,8 +111,8 @@ rowConfig:
 .byte    0xE3, 13
 .byte    0xE4, 13
 .byte    0xE3, 13
-rowConfigAddr:
-.long    rowConfig
+landscapeConfigAddr:
+.long    landscapeConfig
 graphicsBuffers:
 .long    0x00026600
 .long    0x000276D4
@@ -162,11 +162,11 @@ DrawLandscapeAndBuffers:
  STRB    R6, [R11, #tileRowOddEven]
 land1:
  LDRB    R1, [R11, #tileCornerRow]
- LDR     R0, rowConfigAddr
+ LDR     R0, landscapeConfigAddr
  ADD     R0, R0, R1, LSL #1
  LDRB    R10, [R0, #1]
  LDRB    R0, [R0]
- STRB    R0, [R11, #unusedRowData]
+ STRB    R0, [R11, #unusedConfig]
  ADD     R0, R11, #xLandscapeRow
  LDMIA   R0, {R0-R2}
  ADD     R4, R11, #xLandscapeCol
