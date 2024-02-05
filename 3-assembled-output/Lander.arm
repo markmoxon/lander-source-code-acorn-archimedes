@@ -72,8 +72,8 @@
 .set xLandscape, 0x148
 .set yLandscape, 0x14C
 .set zLandscape, 0x150
-.set var_154, 0x154
-.set var_158, 0x158
+.set rotationB, 0x154
+.set rotationA, 0x158
 .set fuelBurnRate, 0x15C
 .set xLandscapeRow, 0x160
 .set yLandscapeRow, 0x164
@@ -363,8 +363,8 @@ MoveAndDrawPlayer:
  MOVHS   R0, #0x40000000
  SUBHS   R0, R0, #1
  MOV     R0, R0, LSL #1
- LDR     R2, [R11, #var_158]
- LDR     R3, [R11, #var_154]
+ LDR     R2, [R11, #rotationA]
+ LDR     R3, [R11, #rotationB]
  SUBS    R4, R3, R1
  BMI     ship1
  CMP     R4, #0x30000000
@@ -385,20 +385,20 @@ ship3:
 ship4:
  SUB     R0, R2, R5, ASR #1
  SUB     R1, R3, R4, ASR #1
- STR     R0, [R11, #var_158]
- STR     R1, [R11, #var_154]
+ STR     R0, [R11, #rotationA]
+ STR     R1, [R11, #rotationB]
  BL      CalculateRotationMatrix
  ADD     R14, R11, #xPlayer
  LDMIA   R14, {R0-R5}
  CMN     R1, #0x34000000
  LDRLTB  R9, [R11, #fuelBurnRate]
- BICLT   R9, R9, #6
+ BICLT   R9, R9, #0x6
  STRLTB  R9, [R11, #fuelBurnRate]
  LDR     R6, [R11, #yNoseV]
  LDR     R7, [R11, #yRoofV]
  LDR     R8, [R11, #ySideV]
  LDRB    R9, [R11, #fuelBurnRate]
- TST     R9, #4
+ TST     R9, #0x4
  SUB     R3, R3, R3, ASR #6
  SUBNE   R3, R3, R6, ASR #11
  ADD     R0, R0, R3
@@ -2857,9 +2857,9 @@ PlacePlayerOnLaunchpad:
  MOV     R0, #0
  STR     R0, [R11, #xCamera]
  STR     R0, [R11, #zCamera]
- STR     R0, [R11, #var_154]
+ STR     R0, [R11, #rotationB]
  MOV     R0, #1
- STR     R0, [R11, #var_158]
+ STR     R0, [R11, #rotationA]
  MOV     R0, #LAUNCHPAD_SIZE/2
  MOV     R2, R0
  ADD     R3, R11, #xPlayer

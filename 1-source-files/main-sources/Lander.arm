@@ -282,9 +282,9 @@
  zLandscape = &150                  \ The 3D z-coordinate of the front-left
                                     \ corner of the on-screen landscape
 
- var_154 = &154                     \ 
+ rotationB = &154                   \ Player angle b in the rotation matrix
 
- var_158 = &158                     \ 
+ rotationA = &158                   \ Player angle a in the rotation matrix
 
  fuelBurnRate = &15C                \ The current fuel burn rate (bit 0 is
                                     \ ignored)
@@ -1456,7 +1456,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawPlayer
+\       Name: MoveAndDrawPlayer (Part 1 of ???)
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Process player movement and draw the player's ship into the
@@ -1467,6 +1467,11 @@ ENDIF
 .MoveAndDrawPlayer
 
  STMFD   R13!, {R14}                \ Store the return address on the stack
+
+                                    \ We start by reading the position of the
+                                    \ mouse and generating a rotation matrix for
+                                    \ the player's ship, based on its new
+                                    \ orientation
 
  SWI     OS_Mouse                   \ Read the mouse coordinates, returning:
                                     \
@@ -1527,12 +1532,12 @@ ENDIF
 
  MOV     R0, R0, LSL #1             \ Scale R0 to the range 0 to &7FFFFFFE
 
- LDR     R2, [R11, #var_158]        \ Set R2 = var_158
+ LDR     R2, [R11, #rotationA]      \ Set R2 = rotationA
 
- LDR     R3, [R11, #var_154]        \ Set R3 = var_154
+ LDR     R3, [R11, #rotationB]      \ Set R3 = rotationB
 
  SUBS    R4, R3, R1                 \ Set R4 = R3 - R1
-                                    \        = var_154 - polar angle
+                                    \        = rotationB - polar angle
 
  BMI     ship1                      \ If the result is negative, jump to ship1
                                     \ so we cap R4 against negative values
@@ -1551,7 +1556,7 @@ ENDIF
 .ship2
 
  SUBS    R5, R2, R0                 \ Set R5 = R2 - R0
-                                    \        = var_158 - polar distance
+                                    \        = rotationA - polar distance
 
  BLE     ship3                      \ If the result is zero or negative, jump to
                                     \ ship3 so we cap R5 against negative values
@@ -1569,45 +1574,74 @@ ENDIF
 
 .ship4
 
+                                    \ We now update the rotation angles with the
+                                    \ latest mouse values (in the form of the
+                                    \ distance and angle)
+                                    \
+                                    \ We do this by adding half of the new value
+                                    \ and half of the old value, which seems to
+                                    \ apply some kind of damping to the controls
+
  SUB     R0, R2, R5, ASR #1         \ Set R0 = R2 - R5 / 2
-                                    \        = var_158 - (var_158 - distance)/2
+                                    \        = rotationA
+                                    \          - (rotationA - distance) / 2
 
  SUB     R1, R3, R4, ASR #1         \ Set R1 = R3 - R4 / 2
-                                    \        = var_154 - (var_154 - angle) / 2
+                                    \        = rotationB
+                                    \          - (rotationB - angle) / 2
 
- STR     R0, [R11, #var_158]        \ Store the updated value in var_158
+ STR     R0, [R11, #rotationA]      \ Store the updated value in rotationA
 
- STR     R1, [R11, #var_154]        \ Store the updated value in var_154
-
-                                    \ So this is some kind of feedback loop into
-                                    \ the polar coordinates in R0 and R1, with
-                                    \ past values affecting the present values?
-                                    \ Maybe try disabling and see what happens
-                                    \ ???
-                                    \
-                                    \ If you disable the changes to var_158 etc
-                                    \ then it breaks the control system, so this
-                                    \ obviously important!
+ STR     R1, [R11, #rotationB]      \ Store the updated value in rotationB
 
  BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
-                                    \ angles given in R0 and R1
+                                    \ updated angles given in R0 and R1, so
+                                    \ this sets the rotation matrix for the
+                                    \ player's ship
 
- ADD     R14, R11, #xPlayer         \ 
- LDMIA   R14, {R0-R5}               \ 
+                                    \ Now that we have the player's rotation
+                                    \ matrix, we can move on to the ship's
+                                    \ movement in space
 
- CMN     R1, #&34000000             \ 
- LDRLTB  R9, [R11, #fuelBurnRate]   \ 
- BICLT   R9, R9, #6                 \ 
- STRLTB  R9, [R11, #fuelBurnRate]   \ 
+\ ******************************************************************************
+\
+\       Name: MoveAndDrawPlayer (Part 2 of ???)
+\       Type: Subroutine
+\   Category: Player
+\    Summary: Process player movement and draw the player's ship into the
+\             graphics buffers
+\
+\ ******************************************************************************
 
- LDR     R6, [R11, #yNoseV]         \ 
- LDR     R7, [R11, #yRoofV]         \ 
- LDR     R8, [R11, #ySideV]         \ 
+ ADD     R14, R11, #xPlayer         \ Set R0 to R5 as follows:
+ LDMIA   R14, {R0-R5}               \
+                                    \   R0 = xPlayer
+                                    \   R1 = yPlayer
+                                    \   R2 = zPlayer
+                                    \
+                                    \   R3 = xVelocity
+                                    \   R4 = yVelocity
+                                    \   R5 = zVelocity
+                                    \
+                                    \ So (R0, R1, R2) is the player's coordinate
+                                    \ and (R3, R4, R5) is the player's velocity
+                                    \ vector
 
- LDRB    R9, [R11, #fuelBurnRate]   \ 
+ CMN     R1, #&34000000             \ If R1 < -&34000000, clear bits 2 and 3 of
+ LDRLTB  R9, [R11, #fuelBurnRate]   \ the fuel burn rate ???
+ BICLT   R9, R9, #%00000110
+ STRLTB  R9, [R11, #fuelBurnRate]
 
- TST     R9, #4                     \ 
- SUB     R3, R3, R3, ASR #6         \ 
+ LDR     R6, [R11, #yNoseV]         \ Set (R6, R7, R8) to the y-axis of the
+ LDR     R7, [R11, #yRoofV]         \ rotation matrix
+ LDR     R8, [R11, #ySideV]
+
+ LDRB    R9, [R11, #fuelBurnRate]   \ Set R9 to the fuel burn rate
+
+ TST     R9, #%00000100             \ Set the flags according to bit 2 of the
+                                    \ fuel burn rate
+
+ SUB     R3, R3, R3, ASR #6         \ Set R3 = R3 - R3 >> 6
  SUBNE   R3, R3, R6, ASR #11        \ 
 
  ADD     R0, R0, R3                 \ 
@@ -8104,10 +8138,10 @@ ENDIF
                                     \ yCamera is never changed from its
                                     \ initial zero
 
- STR     R0, [R11, #var_154]        \ Set var_154 = 0 ???
+ STR     R0, [R11, #rotationB]      \ Set rotationB = 0 ???
 
- MOV     R0, #1                     \ Set var_158 = 1 ???
- STR     R0, [R11, #var_158]        \ 
+ MOV     R0, #1                     \ Set rotationA = 1 ???
+ STR     R0, [R11, #rotationA]
 
  MOV     R0, #LAUNCHPAD_SIZE/2      \ Set the starting coordinates of the
  MOV     R2, R0                     \ player's ship as follows:
