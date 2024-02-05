@@ -368,15 +368,15 @@ Source: "3-assembled-output/Lander.arm"
 00:000083A4 28E19BE5        	   350:  LDR     R14, [R11, #fuelLevel]
 00:000083A8 00005EE3        	   351:  CMP     R14, #0
 00:000083AC 5CE1CB05        	   352:  STREQB  R14, [R11, #fuelBurnRate]
-00:000083B0 010B50E3        	   353:  CMP     R0, #0x400
-00:000083B4 010BA023        	   354:  MOVHS   R0, #0x400
+00:000083B0 010B50E3        	   353:  CMP     R0, #1024
+00:000083B4 010BA023        	   354:  MOVHS   R0, #1024
 00:000083B8 01004022        	   355:  SUBHS   R0, R0, #1
-00:000083BC 020C40E2        	   356:  SUB     R0, R0, #0x200
-00:000083C0 011B61E2        	   357:  RSB     R1, R1, #0x400
-00:000083C4 021C41E2        	   358:  SUB     R1, R1, #0x200
+00:000083BC 020C40E2        	   356:  SUB     R0, R0, #512
+00:000083C0 011B61E2        	   357:  RSB     R1, R1, #1024
+00:000083C4 021C41E2        	   358:  SUB     R1, R1, #512
 00:000083C8 000BA0E1        	   359:  MOV     R0, R0, LSL #22
 00:000083CC 011BA0E1        	   360:  MOV     R1, R1, LSL #22
-00:000083D0 670400EB        	   361:  BL      sub_9574
+00:000083D0 670400EB        	   361:  BL      GetMouseInPolarCoordinates
 00:000083D4 010150E3        	   362:  CMP     R0, #0x40000000
 00:000083D8 0101A023        	   363:  MOVHS   R0, #0x40000000
 00:000083DC 01004022        	   364:  SUBHS   R0, R0, #1
@@ -384,23 +384,23 @@ Source: "3-assembled-output/Lander.arm"
 00:000083E4 58219BE5        	   366:  LDR     R2, [R11, #var_158]
 00:000083E8 54319BE5        	   367:  LDR     R3, [R11, #var_154]
 00:000083EC 014053E0        	   368:  SUBS    R4, R3, R1
-00:000083F0 0200004A        	   369:  BMI     lab_8400
+00:000083F0 0200004A        	   369:  BMI     ship1
 00:000083F4 030254E3        	   370:  CMP     R4, #0x30000000
 00:000083F8 0342A023        	   371:  MOVHS   R4, #0x30000000
-00:000083FC 010000EA        	   372:  B       lab_8408
-                            	   373: lab_8400:
+00:000083FC 010000EA        	   372:  B       ship2
+                            	   373: ship1:
 00:00008400 030274E3        	   374:  CMN     R4, #0x30000000
 00:00008404 0342E033        	   375:  MVNLO   R4, #0x30000000
-                            	   376: lab_8408:
+                            	   376: ship2:
 00:00008408 005052E0        	   377:  SUBS    R5, R2, R0
-00:0000840C 020000DA        	   378:  BLE     lab_841C
+00:0000840C 020000DA        	   378:  BLE     ship3
 00:00008410 030255E3        	   379:  CMP     R5, #0x30000000
 00:00008414 0352A023        	   380:  MOVHS   R5, #0x30000000
-00:00008418 010000EA        	   381:  B       lab_8424
-                            	   382: lab_841C:
+00:00008418 010000EA        	   381:  B       ship4
+                            	   382: ship3:
 00:0000841C 030275E3        	   383:  CMN     R5, #0x30000000
 00:00008420 0352E033        	   384:  MVNLO   R5, #0x30000000
-                            	   385: lab_8424:
+                            	   385: ship4:
 00:00008424 C50042E0        	   386:  SUB     R0, R2, R5, ASR #1
 00:00008428 C41043E0        	   387:  SUB     R1, R3, R4, ASR #1
 00:0000842C 58018BE5        	   388:  STR     R0, [R11, #var_158]
@@ -446,7 +446,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000084CC 98109BE5        	   428:  LDR     R1, [R11, #yPlayer]
 00:000084D0 01E040E0        	   429:  SUB     R14, R0, R1
 00:000084D4 06055EE3        	   430:  CMP     R14, #0x01800000
-00:000084D8 0B00002A        	   431:  BHS     lab_850C
+00:000084D8 0B00002A        	   431:  BHS     ship6
 00:000084DC 01002DE9        	   432:  STMFD   R13!, {R0}
 00:000084E0 11EB8BE2        	   433:  ADD     R14, R11, #objectMap
 00:000084E4 FF9409E2        	   434:  AND     R9, R9, #0xFF000000
@@ -454,13 +454,13 @@ Source: "3-assembled-output/Lander.arm"
 00:000084EC 29E88EE0        	   436:  ADD     R14, R14, R9, LSR #16
 00:000084F0 0000DEE5        	   437:  LDRB    R0, [R14]
 00:000084F4 000050E3        	   438:  CMP     R0, #0
-00:000084F8 0200000A        	   439:  BEQ     lab_8508
+00:000084F8 0200000A        	   439:  BEQ     ship5
 00:000084FC 0C0050E3        	   440:  CMP     R0, #0xC
 00:00008500 04D08D32        	   441:  ADDLO   R13, R13, #4
 00:00008504 6F00003A        	   442:  BLO     LoseLife
-                            	   443: lab_8508:
+                            	   443: ship5:
 00:00008508 0100BDE8        	   444:  LDMFD   R13!, {R0}
-                            	   445: lab_850C:
+                            	   445: ship6:
 00:0000850C 000051E1        	   446:  CMP     R1, R0
 00:00008510 4F0000CB        	   447:  BLGT    LandOnLaunchpad
 00:00008514 000051E3        	   448:  CMP     R1, #0
@@ -476,7 +476,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000853C 6100001B        	   458:  BLNE    LoseLife
 00:00008540 5CA1DBE5        	   459:  LDRB    R10, [R11, #fuelBurnRate]
 00:00008544 06001AE3        	   460:  TST     R10, #6
-00:00008548 2900000A        	   461:  BEQ     lab_85F4
+00:00008548 2900000A        	   461:  BEQ     ship7
 00:0000854C A0E08BE2        	   462:  ADD     R14, R11, #xVelocity
 00:00008550 C7019EE8        	   463:  LDMIA   R14, {R0-R2, R6-R8}
 00:00008554 C63380E0        	   464:  ADD     R3, R0, R6, ASR #7
@@ -519,9 +519,9 @@ Source: "3-assembled-output/Lander.arm"
 00:000085E8 2701001B        	   501:  BLNE    sub_8A8C
 00:000085EC FF03BDE8        	   502:  LDMFD   R13!, {R0-R9}
 00:000085F0 250100EB        	   503:  BL      sub_8A8C
-                            	   504: lab_85F4:
+                            	   504: ship7:
 00:000085F4 01001AE3        	   505:  TST     R10, #1
-00:000085F8 1400000A        	   506:  BEQ     lab_8650
+00:000085F8 1400000A        	   506:  BEQ     ship8
 00:000085FC 24819BE5        	   507:  LDR     R8, [R11, #currentScore]
 00:00008600 018048E2        	   508:  SUB     R8, R8, #1
 00:00008604 24818BE5        	   509:  STR     R8, [R11, #currentScore]
@@ -543,7 +543,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008644 6F77A0E3        	   525:  MOV     R7, #0x01BC0000
 00:00008648 FF7087E3        	   526:  ORR     R7, R7, #0xFF
 00:0000864C 0C0100EB        	   527:  BL      sub_8A84
-                            	   528: lab_8650:
+                            	   528: ship8:
 00:00008650 0080BDE8        	   529:  LDMFD   R13!, {PC}
                             	   530: LandOnLaunchpad:
 00:00008654 94308BE2        	   531:  ADD     R3, R11, #xPlayer
@@ -1114,7 +1114,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008E88 E3FFFFEA        	  1088:  B       dobs3
                             	  1089: dobs6:
 00:00008E8C 18E19BE5        	  1090:  LDR     R14, [R11, #mainLoopCount]
-00:00008E90 03001EE3        	  1091:  TST     R14, #3
+00:00008E90 03001EE3        	  1091:  TST     R14, #0x3
 00:00008E94 F9FFFF1A        	  1092:  BNE     dobs5
 00:00008E98 FF022DE9        	  1093:  STMFD   R13!, {R0-R7, R9}
 00:00008E9C 40E19BE5        	  1094:  LDR     R14, [R11, #yCamera]
@@ -1587,31 +1587,31 @@ Source: "3-assembled-output/Lander.arm"
 00:00009568 0000A0E3        	  1561:  MOV     R0, #0
 00:0000956C 44008BE5        	  1562:  STR     R0, [R11, #zRoofV]
 00:00009570 0EF0A0E1        	  1563:  MOV     PC, R14
-                            	  1564: sub_9574:
+                            	  1564: GetMouseInPolarCoordinates:
 00:00009574 00402DE9        	  1565:  STMFD   R13!, {R14}
 00:00009578 0030A0E3        	  1566:  MOV     R3, #0
 00:0000957C 000050E3        	  1567:  CMP     R0, #0
-00:00009580 03302342        	  1568:  EORMI   R3, R3, #3
+00:00009580 03302342        	  1568:  EORMI   R3, R3, #0x3
 00:00009584 00006042        	  1569:  RSBMI   R0, R0, #0
 00:00009588 000051E3        	  1570:  CMP     R1, #0
-00:0000958C 07302342        	  1571:  EORMI   R3, R3, #7
+00:0000958C 07302342        	  1571:  EORMI   R3, R3, #0x7
 00:00009590 00106142        	  1572:  RSBMI   R1, R1, #0
 00:00009594 03002DE9        	  1573:  STMFD   R13!, {R0-R1}
 00:00009598 010050E1        	  1574:  CMP     R0, R1
-00:0000959C 01302332        	  1575:  EORLO   R3, R3, #1
-00:000095A0 0900002A        	  1576:  BHS     lab_95CC
+00:0000959C 01302332        	  1575:  EORLO   R3, R3, #0x1
+00:000095A0 0900002A        	  1576:  BHS     pole2
 00:000095A4 0020A0E3        	  1577:  MOV     R2, #0
 00:000095A8 80E0A0E3        	  1578:  MOV     R14, #0x80
-                            	  1579: lab_95AC:
+                            	  1579: pole1:
 00:000095AC 8000B0E1        	  1580:  MOVS    R0, R0, LSL #1
-00:000095B0 01005031        	  1581:  CMPLO   R0, R1
-00:000095B4 01004020        	  1582:  SUBHS   R0, R0, R1
-00:000095B8 0E208221        	  1583:  ORRHS   R2, R2, R14
+00:000095B0 01005031        	  1581:  CMPCC   R0, R1
+00:000095B4 01004020        	  1582:  SUBCS   R0, R0, R1
+00:000095B8 0E208221        	  1583:  ORRCS   R2, R2, R14
 00:000095BC AEE0B0E1        	  1584:  MOVS    R14, R14, LSR #1
-00:000095C0 F9FFFF3A        	  1585:  BLO     lab_95AC
+00:000095C0 F9FFFF3A        	  1585:  BCC     pole1
 00:000095C4 022CB0E1        	  1586:  MOVS    R2, R2, LSL #24
-00:000095C8 080000EA        	  1587:  B       lab_95F0
-                            	  1588: lab_95CC:
+00:000095C8 080000EA        	  1587:  B       pole3
+                            	  1588: pole2:
 00:000095CC 0020A0E3        	  1589:  MOV     R2, #0
 00:000095D0 80E0A0E3        	  1590:  MOV     R14, #0x80
                             	  1591: lab_95D4:
@@ -1622,11 +1622,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000095E4 AEE0B0E1        	  1596:  MOVS    R14, R14, LSR #1
 00:000095E8 F9FFFF3A        	  1597:  BLO     lab_95D4
 00:000095EC 022CB0E1        	  1598:  MOVS    R2, R2, LSL #24
-                            	  1599: lab_95F0:
+                            	  1599: pole3:
 00:000095F0 04E41FE5        	  1600:  LDR     R14, arctanTableAddr
 00:000095F4 0625C2E3        	  1601:  BIC     R2, R2, #0x01800000
 00:000095F8 A21B9EE7        	  1602:  LDR     R1, [R14, R2, LSR #23]
-00:000095FC 010013E3        	  1603:  TST     R3, #1
+00:000095FC 010013E3        	  1603:  TST     R3, #0x1
 00:00009600 831E8100        	  1604:  ADDEQ   R1, R1, R3, LSL #29
 00:00009604 01308312        	  1605:  ADDNE   R3, R3, #1
 00:00009608 831E6110        	  1606:  RSBNE   R1, R1, R3, LSL #29
@@ -1636,21 +1636,21 @@ Source: "3-assembled-output/Lander.arm"
 00:00009618 FE3403E2        	  1610:  AND     R3, R3, #0xFE000000
 00:0000961C 013483E3        	  1611:  ORR     R3, R3, #0x01000000
 00:00009620 0040A0E3        	  1612:  MOV     R4, #0
-                            	  1613: lab_9624:
+                            	  1613: pole4:
 00:00009624 A000A0E1        	  1614:  MOV     R0, R0, LSR #1
 00:00009628 00408420        	  1615:  ADDHS   R4, R4, R0
 00:0000962C 8330B0E1        	  1616:  MOVS    R3, R3, LSL #1
-00:00009630 FBFFFF1A        	  1617:  BNE     lab_9624
+00:00009630 FBFFFF1A        	  1617:  BNE     pole4
 00:00009634 0230A0E1        	  1618:  MOV     R3, R2
 00:00009638 8330B0E1        	  1619:  MOVS    R3, R3, LSL #1
 00:0000963C FE3403E2        	  1620:  AND     R3, R3, #0xFE000000
 00:00009640 013483E3        	  1621:  ORR     R3, R3, #0x01000000
 00:00009644 00E0A0E3        	  1622:  MOV     R14, #0
-                            	  1623: lab_9648:
+                            	  1623: pole5:
 00:00009648 A220A0E1        	  1624:  MOV     R2, R2, LSR #1
 00:0000964C 02E08E20        	  1625:  ADDHS   R14, R14, R2
 00:00009650 8330B0E1        	  1626:  MOVS    R3, R3, LSL #1
-00:00009654 FBFFFF1A        	  1627:  BNE     lab_9648
+00:00009654 FBFFFF1A        	  1627:  BNE     pole5
 00:00009658 04208EE0        	  1628:  ADD     R2, R14, R4
 00:0000965C 6CE41FE5        	  1629:  LDR     R14, squareRootTableAddr
 00:00009660 0326C2E3        	  1630:  BIC     R2, R2, #0x00300000
@@ -2682,7 +2682,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A4D0 54F01035        	  2656:  LDRLO   PC, [R0, #-varOffset]
 00:0000A4D4 0AA08BE0        	  2657:  ADD     R10, R11, R10
 00:0000A4D8 0300CAE3        	  2658:  BIC     R0, R10, #3
-00:0000A4DC 03001BE3        	  2659:  TST     R11, #3
+00:0000A4DC 03001BE3        	  2659:  TST     R11, #0x3
 00:0000A4E0 0180CB14        	  2660:  STRNEB  R8, [R11], #1
 00:0000A4E4 03001B13        	  2661:  TSTNE   R11, #3
 00:0000A4E8 0180CB14        	  2662:  STRNEB  R8, [R11], #1
@@ -10284,6 +10284,7 @@ GetDotProduct                    A:0000928C
 GetLandscapeAltitude             A:000081F4
 GetLandscapeBelowVertex          A:000082AC
 GetLandscapeTileColour           A:000082DC
+GetMouseInPolarCoordinates       A:00009574
 GetRandomNumbers                 A:00009A40
 GetVertexCoordinate              A:0000991C
 LAUNCHPAD_ALTITUDE               S:03500000
@@ -10362,14 +10363,6 @@ initialFuelLevel                 A:0000A580
 initialHighScore                 A:0000A57C
 initialScore                     A:0000A578
 labOffset                        S:0000006C
-lab_8400                         A:00008400
-lab_8408                         A:00008408
-lab_841C                         A:0000841C
-lab_8424                         A:00008424
-lab_8508                         A:00008508
-lab_850C                         A:0000850C
-lab_85F4                         A:000085F4
-lab_8650                         A:00008650
 lab_8800                         A:00008800
 lab_880C                         A:0000880C
 lab_88E8                         A:000088E8
@@ -10388,12 +10381,7 @@ lab_9450                         A:00009450
 lab_9498                         A:00009498
 lab_94E4                         A:000094E4
 lab_9530                         A:00009530
-lab_95AC                         A:000095AC
-lab_95CC                         A:000095CC
 lab_95D4                         A:000095D4
-lab_95F0                         A:000095F0
-lab_9624                         A:00009624
-lab_9648                         A:00009648
 lab_96A8                         A:000096A8
 lab_96DC                         A:000096DC
 lab_9700                         A:00009700
@@ -10516,6 +10504,11 @@ objectTallLeafyTreeVertices      A:0000AE34
 objectType                       S:000000F4
 objectTypes                      A:00008D78
 playingGame                      S:00000130
+pole1                            A:000095AC
+pole2                            A:000095CC
+pole3                            A:000095F0
+pole4                            A:00009624
+pole5                            A:00009648
 prevAltitude                     S:00000104
 previousColumn                   S:000000C4
 prsb1                            A:000091A0
@@ -10531,6 +10524,14 @@ screenAddr                       A:00009A6C
 screenBank1Addr                  A:00009D30
 screenBank2Addr                  A:00009D2C
 screenBankNumber                 A:00009D34
+ship1                            A:00008400
+ship2                            A:00008408
+ship3                            A:0000841C
+ship4                            A:00008424
+ship5                            A:00008508
+ship6                            A:0000850C
+ship7                            A:000085F4
+ship8                            A:00008650
 sinTable                         A:0000B810
 sinTableAddr                     A:000091F0
 snew1                            A:0000A78C
@@ -10561,7 +10562,6 @@ sub_8D24                         A:00008D24
 sub_8D40                         A:00008D40
 sub_93B4                         A:000093B4
 sub_93E4                         A:000093E4
-sub_9574                         A:00009574
 sub_98EC                         A:000098EC
 sub_9948                         A:00009948
 term1                            A:00009D10
@@ -10614,8 +10614,8 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 xObject
 00000000 OS_WriteC
+00000000 xObject
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10686,8 +10686,8 @@ Symbols by value:
 00000600 vertexProjected
 00000700 var_700
 00004400 objectMap
-00008000 landscapeOrigin
 00008000 CODE
+00008000 landscapeOrigin
 0000800C landscapeOriginAddr
 00008010 rowConfig
 00008028 rowConfigAddr
@@ -10703,14 +10703,14 @@ Symbols by value:
 000082AC GetLandscapeBelowVertex
 000082DC GetLandscapeTileColour
 00008398 MoveAndDrawPlayer
-00008400 lab_8400
-00008408 lab_8408
-0000841C lab_841C
-00008424 lab_8424
-00008508 lab_8508
-0000850C lab_850C
-000085F4 lab_85F4
-00008650 lab_8650
+00008400 ship1
+00008408 ship2
+0000841C ship3
+00008424 ship4
+00008508 ship5
+0000850C ship6
+000085F4 ship7
+00008650 ship8
 00008654 LandOnLaunchpad
 000086C4 sub_86C4
 000086C8 LoseLife
@@ -10788,13 +10788,13 @@ Symbols by value:
 00009498 lab_9498
 000094E4 lab_94E4
 00009530 lab_9530
-00009574 sub_9574
-000095AC lab_95AC
-000095CC lab_95CC
+00009574 GetMouseInPolarCoordinates
+000095AC pole1
+000095CC pole2
 000095D4 lab_95D4
-000095F0 lab_95F0
-00009624 lab_9624
-00009648 lab_9648
+000095F0 pole3
+00009624 pole4
+00009648 pole5
 00009670 ProjectParticleOntoScreen
 000096A8 lab_96A8
 000096DC lab_96DC

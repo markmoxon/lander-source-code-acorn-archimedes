@@ -350,15 +350,15 @@ MoveAndDrawPlayer:
  LDR     R14, [R11, #fuelLevel]
  CMP     R14, #0
  STREQB  R14, [R11, #fuelBurnRate]
- CMP     R0, #0x400
- MOVHS   R0, #0x400
+ CMP     R0, #1024
+ MOVHS   R0, #1024
  SUBHS   R0, R0, #1
- SUB     R0, R0, #0x200
- RSB     R1, R1, #0x400
- SUB     R1, R1, #0x200
+ SUB     R0, R0, #512
+ RSB     R1, R1, #1024
+ SUB     R1, R1, #512
  MOV     R0, R0, LSL #22
  MOV     R1, R1, LSL #22
- BL      sub_9574
+ BL      GetMouseInPolarCoordinates
  CMP     R0, #0x40000000
  MOVHS   R0, #0x40000000
  SUBHS   R0, R0, #1
@@ -366,23 +366,23 @@ MoveAndDrawPlayer:
  LDR     R2, [R11, #var_158]
  LDR     R3, [R11, #var_154]
  SUBS    R4, R3, R1
- BMI     lab_8400
+ BMI     ship1
  CMP     R4, #0x30000000
  MOVHS   R4, #0x30000000
- B       lab_8408
-lab_8400:
+ B       ship2
+ship1:
  CMN     R4, #0x30000000
  MVNLO   R4, #0x30000000
-lab_8408:
+ship2:
  SUBS    R5, R2, R0
- BLE     lab_841C
+ BLE     ship3
  CMP     R5, #0x30000000
  MOVHS   R5, #0x30000000
- B       lab_8424
-lab_841C:
+ B       ship4
+ship3:
  CMN     R5, #0x30000000
  MVNLO   R5, #0x30000000
-lab_8424:
+ship4:
  SUB     R0, R2, R5, ASR #1
  SUB     R1, R3, R4, ASR #1
  STR     R0, [R11, #var_158]
@@ -428,7 +428,7 @@ lab_8424:
  LDR     R1, [R11, #yPlayer]
  SUB     R14, R0, R1
  CMP     R14, #0x01800000
- BHS     lab_850C
+ BHS     ship6
  STMFD   R13!, {R0}
  ADD     R14, R11, #objectMap
  AND     R9, R9, #0xFF000000
@@ -436,13 +436,13 @@ lab_8424:
  ADD     R14, R14, R9, LSR #16
  LDRB    R0, [R14]
  CMP     R0, #0
- BEQ     lab_8508
+ BEQ     ship5
  CMP     R0, #0xC
  ADDLO   R13, R13, #4
  BLO     LoseLife
-lab_8508:
+ship5:
  LDMFD   R13!, {R0}
-lab_850C:
+ship6:
  CMP     R1, R0
  BLGT    LandOnLaunchpad
  CMP     R1, #0
@@ -458,7 +458,7 @@ lab_850C:
  BLNE    LoseLife
  LDRB    R10, [R11, #fuelBurnRate]
  TST     R10, #6
- BEQ     lab_85F4
+ BEQ     ship7
  ADD     R14, R11, #xVelocity
  LDMIA   R14, {R0-R2, R6-R8}
  ADD     R3, R0, R6, ASR #7
@@ -501,9 +501,9 @@ lab_850C:
  BLNE    sub_8A8C
  LDMFD   R13!, {R0-R9}
  BL      sub_8A8C
-lab_85F4:
+ship7:
  TST     R10, #1
- BEQ     lab_8650
+ BEQ     ship8
  LDR     R8, [R11, #currentScore]
  SUB     R8, R8, #1
  STR     R8, [R11, #currentScore]
@@ -525,7 +525,7 @@ lab_85F4:
  MOV     R7, #0x01BC0000
  ORR     R7, R7, #0xFF
  BL      sub_8A84
-lab_8650:
+ship8:
  LDMFD   R13!, {PC}
 LandOnLaunchpad:
  ADD     R3, R11, #xPlayer
@@ -1088,7 +1088,7 @@ dobs5:
  B       dobs3
 dobs6:
  LDR     R14, [R11, #mainLoopCount]
- TST     R14, #3
+ TST     R14, #0x3
  BNE     dobs5
  STMFD   R13!, {R0-R7, R9}
  LDR     R14, [R11, #yCamera]
@@ -1561,31 +1561,31 @@ lab_9530:
  MOV     R0, #0
  STR     R0, [R11, #zRoofV]
  MOV     PC, R14
-sub_9574:
+GetMouseInPolarCoordinates:
  STMFD   R13!, {R14}
  MOV     R3, #0
  CMP     R0, #0
- EORMI   R3, R3, #3
+ EORMI   R3, R3, #0x3
  RSBMI   R0, R0, #0
  CMP     R1, #0
- EORMI   R3, R3, #7
+ EORMI   R3, R3, #0x7
  RSBMI   R1, R1, #0
  STMFD   R13!, {R0-R1}
  CMP     R0, R1
- EORLO   R3, R3, #1
- BHS     lab_95CC
+ EORLO   R3, R3, #0x1
+ BHS     pole2
  MOV     R2, #0
  MOV     R14, #0x80
-lab_95AC:
+pole1:
  MOVS    R0, R0, LSL #1
- CMPLO   R0, R1
- SUBHS   R0, R0, R1
- ORRHS   R2, R2, R14
+ CMPCC   R0, R1
+ SUBCS   R0, R0, R1
+ ORRCS   R2, R2, R14
  MOVS    R14, R14, LSR #1
- BLO     lab_95AC
+ BCC     pole1
  MOVS    R2, R2, LSL #24
- B       lab_95F0
-lab_95CC:
+ B       pole3
+pole2:
  MOV     R2, #0
  MOV     R14, #0x80
 lab_95D4:
@@ -1596,11 +1596,11 @@ lab_95D4:
  MOVS    R14, R14, LSR #1
  BLO     lab_95D4
  MOVS    R2, R2, LSL #24
-lab_95F0:
+pole3:
  LDR     R14, arctanTableAddr
  BIC     R2, R2, #0x01800000
  LDR     R1, [R14, R2, LSR #23]
- TST     R3, #1
+ TST     R3, #0x1
  ADDEQ   R1, R1, R3, LSL #29
  ADDNE   R3, R3, #1
  RSBNE   R1, R1, R3, LSL #29
@@ -1610,21 +1610,21 @@ lab_95F0:
  AND     R3, R3, #0xFE000000
  ORR     R3, R3, #0x01000000
  MOV     R4, #0
-lab_9624:
+pole4:
  MOV     R0, R0, LSR #1
  ADDHS   R4, R4, R0
  MOVS    R3, R3, LSL #1
- BNE     lab_9624
+ BNE     pole4
  MOV     R3, R2
  MOVS    R3, R3, LSL #1
  AND     R3, R3, #0xFE000000
  ORR     R3, R3, #0x01000000
  MOV     R14, #0
-lab_9648:
+pole5:
  MOV     R2, R2, LSR #1
  ADDHS   R14, R14, R2
  MOVS    R3, R3, LSL #1
- BNE     lab_9648
+ BNE     pole5
  ADD     R2, R14, R4
  LDR     R14, squareRootTableAddr
  BIC     R2, R2, #0x00300000
@@ -2656,7 +2656,7 @@ DrawHorizontalLine:
  LDRLO   PC, [R0, #-varOffset]
  ADD     R10, R11, R10
  BIC     R0, R10, #3
- TST     R11, #3
+ TST     R11, #0x3
  STRNEB  R8, [R11], #1
  TSTNE   R11, #3
  STRNEB  R8, [R11], #1

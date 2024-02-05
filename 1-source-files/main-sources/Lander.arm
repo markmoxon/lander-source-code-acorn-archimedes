@@ -1461,13 +1461,14 @@ ENDIF
 \       Name: MoveAndDrawPlayer
 \       Type: Subroutine
 \   Category: Player
-\    Summary: ???
+\    Summary: Process player movement and draw the player's ship into the
+\             graphics buffers
 \
 \ ******************************************************************************
 
 .MoveAndDrawPlayer
 
- STMFD   R13!, {R14}                \ 
+ STMFD   R13!, {R14}                \ Store the return address on the stack
 
  SWI     OS_Mouse                   \ Read the mouse coordinates, returning:
                                     \
@@ -1494,19 +1495,34 @@ ENDIF
                                     \ not burn fuel, even though fuelBurnRate is
                                     \ set to a non-zero value
 
- LDR     R14, [R11, #fuelLevel]     \ 
- CMP     R14, #0                    \ 
- STREQB  R14, [R11, #fuelBurnRate]  \ 
+ LDR     R14, [R11, #fuelLevel]     \ If the fuel level is zero, also zero the
+ CMP     R14, #0                    \ fuel burn rate, as we can't burn fuel that
+ STREQB  R14, [R11, #fuelBurnRate]  \ we don't have
 
- CMP     R0, #&400                  \ 
- MOVHS   R0, #&400                  \ 
- SUBHS   R0, R0, #1                 \ 
- SUB     R0, R0, #&200              \ 
- RSB     R1, R1, #&400              \ 
- SUB     R1, R1, #&200              \ 
- MOV     R0, R0, LSL #22            \ 
- MOV     R1, R1, LSL #22            \ 
- BL      sub_9574                   \ 
+                                    \ At the start of each new life, the mouse
+                                    \ is initalised to coordinates (511, 511)
+
+ CMP     R0, #1024                  \ Cap the mouse x-coordinate in R0 so it's
+ MOVHS   R0, #1024                  \ in the range 0 to 1023
+ SUBHS   R0, R0, #1
+
+ SUB     R0, R0, #512               \ Convert R0 into the range -512 to +511
+
+ RSB     R1, R1, #1024              \ Set R1 = 1024 - R1 - 512
+ SUB     R1, R1, #512               \        = 512 - R1
+                                    \
+                                    \ So the mouse y-coordinate in R1 is now in
+                                    \ the range -512 to +512
+
+ MOV     R0, R0, LSL #22            \ Scale both mouse coordinates up as far as
+ MOV     R1, R1, LSL #22            \ possible without losing data (512 << 22 is
+                                    \ &80000000, so this is as high as we can
+                                    \ go)
+
+ BL      GetMouseInPolarCoordinates \ Convert the mouse coordinates into polar
+                                    \ coordinates, returning the angle in R1 and
+                                    \ the distance in R0
+
  CMP     R0, #&40000000             \ 
  MOVHS   R0, #&40000000             \ 
  SUBHS   R0, R0, #1                 \ 
@@ -1514,30 +1530,30 @@ ENDIF
  LDR     R2, [R11, #var_158]        \ 
  LDR     R3, [R11, #var_154]        \ 
  SUBS    R4, R3, R1                 \ 
- BMI     lab_8400                   \ 
+ BMI     ship1                      \ 
  CMP     R4, #&30000000             \ 
  MOVHS   R4, #&30000000             \ 
- B       lab_8408                   \ 
+ B       ship2                      \ 
 
-.lab_8400
+.ship1
 
  CMN     R4, #&30000000             \ 
  MVNLO   R4, #&30000000             \ 
 
-.lab_8408
+.ship2
 
  SUBS    R5, R2, R0                 \ 
- BLE     lab_841C                   \ 
+ BLE     ship3                      \ 
  CMP     R5, #&30000000             \ 
  MOVHS   R5, #&30000000             \ 
- B       lab_8424                   \ 
+ B       ship4                      \ 
 
-.lab_841C
+.ship3
 
  CMN     R5, #&30000000             \ 
  MVNLO   R5, #&30000000             \ 
 
-.lab_8424
+.ship4
 
  SUB     R0, R2, R5, ASR #1         \ 
  SUB     R1, R3, R4, ASR #1         \ 
@@ -1587,7 +1603,7 @@ ENDIF
  LDR     R1, [R11, #yPlayer]        \ 
  SUB     R14, R0, R1                \ 
  CMP     R14, #&01800000            \ 
- BHS     lab_850C                   \ 
+ BHS     ship6                      \ 
  STMFD   R13!, {R0}                 \ 
  ADD     R14, R11, #objectMap       \ 
  AND     R9, R9, #&FF000000         \ 
@@ -1595,16 +1611,16 @@ ENDIF
  ADD     R14, R14, R9, LSR #16      \ 
  LDRB    R0, [R14]                  \ 
  CMP     R0, #0                     \ 
- BEQ     lab_8508                   \ 
+ BEQ     ship5                      \ 
  CMP     R0, #&C                    \ 
  ADDLO   R13, R13, #4               \ 
  BLO     LoseLife                   \ 
 
-.lab_8508
+.ship5
 
  LDMFD   R13!, {R0}                 \ 
 
-.lab_850C
+.ship6
 
  CMP     R1, R0                     \ If R1 >= R0, call LandOnLaunchpad to check
  BLGT    LandOnLaunchpad            \ whether we have landed on the launchpad
@@ -1622,7 +1638,7 @@ ENDIF
  BLNE    LoseLife                   \ 
  LDRB    R10, [R11, #fuelBurnRate]  \ 
  TST     R10, #6                    \ 
- BEQ     lab_85F4                   \ 
+ BEQ     ship7                      \ 
  ADD     R14, R11, #xVelocity       \ 
  LDMIA   R14, {R0-R2, R6-R8}        \ 
  ADD     R3, R0, R6, ASR #7         \ 
@@ -1666,10 +1682,10 @@ ENDIF
  LDMFD   R13!, {R0-R9}              \ 
  BL      sub_8A8C                   \ 
 
-.lab_85F4
+.ship7
 
  TST     R10, #1                    \ 
- BEQ     lab_8650                   \ 
+ BEQ     ship8                      \ 
 
  LDR     R8, [R11, #currentScore]   \ Decrement the current score by one
  SUB     R8, R8, #1
@@ -1694,9 +1710,9 @@ ENDIF
  ORR     R7, R7, #&FF               \ 
  BL      sub_8A84                   \ 
 
-.lab_8650
+.ship8
 
- LDMFD   R13!, {PC}                 \ 
+ LDMFD   R13!, {PC}                 \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -2860,7 +2876,7 @@ ENDIF
                                     \ object
 
  LDR     R14, [R11, #mainLoopCount] \ If either bit 0 or 1 of mainLoopCount are
- TST     R14, #3                    \ set, jump to dobs5 to draw the object and
+ TST     R14, #%00000011            \ set, jump to dobs5 to draw the object and
  BNE     dobs5                      \ skip the following
 
                                     \ We only get here on one out of every four
@@ -3978,8 +3994,8 @@ ENDIF
  LDR     R5, [R0]                   \ Set R5 to the x-coordinate of R0 (let's
                                     \ call it xR0)
 
-                                    \ Set R3 = R4 * R5 using the shift-and-add
-                                    \ multiplication algorithm
+                                    \ We now calculate R3 = R4 * R5 using the
+                                    \ shift-and-add multiplication algorithm
 
  EOR     R7, R4, R5                 \ Set the sign of the result in R7
 
@@ -4022,10 +4038,10 @@ ENDIF
  LDR     R5, [R0, #4]               \ Set R5 to the y-coordinate at R0+4 (let's
                                     \ call it yR0)
 
- EOR     R7, R4, R5                 \ Set R6 = R4 * R5 using the shift-and-add
- TEQ     R4, #0                     \ algorithm again (see above)
+ EOR     R7, R4, R5                 \ Set R6 = R4 * R5 using the same algorithm
+ TEQ     R4, #0                     \ as above
  RSBMI   R4, R4, #0                 \
- MOVS    R4, R4, LSL #2             \ This is the first part of the calculation
+ MOVS    R4, R4, LSL #2             \ This is the first part of the algorithm
  TEQ     R5, #0
  RSBMI   R5, R5, #0
  MOV     R5, R5, LSL #1
@@ -4035,7 +4051,7 @@ ENDIF
 
 .dotp2
 
- MOV     R5, R5, LSR #1             \ This is the second part of the calculation
+ MOV     R5, R5, LSR #1             \ This is the second part of the algorithm,
  ADDHS   R6, R6, R5                 \ so we now have:
  MOVS    R4, R4, LSL #1             \
  BNE     dotp2                      \   R6 = R4 * R5
@@ -4053,10 +4069,10 @@ ENDIF
  LDR     R5, [R0, #8]               \ Set R5 to the z-coordinate at R0+8 (let's
                                     \ call it zR0)
 
- EOR     R7, R4, R5                 \ Set R6 = R4 * R5 using the shift-and-add
- TEQ     R4, #0                     \ algorithm again (see above)
+ EOR     R7, R4, R5                 \ Set R6 = R4 * R5 using the same algorithm
+ TEQ     R4, #0                     \ as above
  RSBMI   R4, R4, #0                 \
- MOVS    R4, R4, LSL #2             \ This is the first part of the calculation
+ MOVS    R4, R4, LSL #2             \ This is the first part of the algorithm
  TEQ     R5, #0
  RSBMI   R5, R5, #0
  MOV     R5, R5, LSL #1
@@ -4066,7 +4082,7 @@ ENDIF
 
 .dotp3
 
- MOV     R5, R5, LSR #1             \ This is the second part of the calculation
+ MOV     R5, R5, LSR #1             \ This is the second part of the algorithm,
  ADDHS   R6, R6, R5                 \ so we now have:
  MOVS    R4, R4, LSL #1             \
  BNE     dotp3                      \   R6 = R4 * R5
@@ -4263,96 +4279,312 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9574
+\       Name: GetMouseInPolarCoordinates
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Geometry)
+\    Summary: Convert the mouse x- and y-coordinates into polar coordinates
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine converts mouse coordinates (x, y) into polar coordinates, as in
+\ this example:
+\
+\           .|
+\      R0 .´ |
+\       .´   | y
+\     .´R1   |
+\   +´-------+
+\        x
+\
+\ R1 is the angle and R0 is the distance.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The scaled-up mouse x-coordinate
+\
+\   R1                              The scaled-up mouse y-coordinate
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R0                              The distance of the polar coordinate
+\
+\   R1                              The angle of the polar coordinate
 \
 \ ******************************************************************************
 
-.sub_9574
+.GetMouseInPolarCoordinates
 
- STMFD   R13!, {R14}                \ 
- MOV     R3, #0                     \ 
- CMP     R0, #0                     \ 
- EORMI   R3, R3, #3                 \ 
- RSBMI   R0, R0, #0                 \ 
- CMP     R1, #0                     \ 
- EORMI   R3, R3, #7                 \ 
- RSBMI   R1, R1, #0                 \ 
- STMFD   R13!, {R0-R1}              \ 
- CMP     R0, R1                     \ 
- EORLO   R3, R3, #1                 \ 
- BHS     lab_95CC                   \ 
- MOV     R2, #0                     \ 
- MOV     R14, #&80                  \ 
+                                    \ In the following, let's call the mouse
+                                    \ x- and y-coordinates xMouse and yMouse
 
-.lab_95AC
+ STMFD   R13!, {R14}                \ Store the return address on the stack
 
- MOVS    R0, R0, LSL #1             \ 
- CMPLO   R0, R1                     \ 
- SUBHS   R0, R0, R1                 \ 
- ORRHS   R2, R2, R14                \ 
- MOVS    R14, R14, LSR #1           \ 
- BLO     lab_95AC                   \ 
- MOVS    R2, R2, LSL #24            \ 
- B       lab_95F0                   \ 
+ MOV     R3, #0                     \ Set R3 = 0
 
-.lab_95CC
+ CMP     R0, #0                     \ If the mouse x-coordinate in R0 is
+ EORMI   R3, R3, #%00000011         \ negative, negate R0 to get |xMouse| and
+ RSBMI   R0, R0, #0                 \ flip bits 0 and 1 of R3
 
- MOV     R2, #0                     \ 
- MOV     R14, #&80                  \ 
+ CMP     R1, #0                     \ If the mouse y-coordinate in R1 is
+ EORMI   R3, R3, #%00000111         \ negative, negate R1 to get |yMouse| and
+ RSBMI   R1, R1, #0                 \ flip bits 0, 1 and 2 of R3
+
+ STMFD   R13!, {R0-R1}              \ Store |xMouse| and |yMouse| on the stack
+
+                                    \ We now divide one coordinate by the other,
+                                    \ with the smaller value as the numerator,
+                                    \ so the result is between 0 and 1
+                                    \
+                                    \ We do this so we can take the arctan of
+                                    \ the result to calculate the angle in our
+                                    \ polar coordinate
+
+ CMP     R0, R1                     \ If |xMouse| < |yMouse|, flip bit 0 of R3
+ EORLO   R3, R3, #%00000001         \ so we can make sure the angle is in the
+                                    \ correct quadrant later
+
+ BHS     pole2                      \ If |xMouse| >= |yMouse|, jump to pole2 to
+                                    \ calculate the division with |yMouse| as
+                                    \ the numerator
+
+                                    \ If we get here then |xMouse| < |yMouse|
+                                    \ so we calculate the division with |xMouse|
+                                    \ as the numerator
+
+                                    \ We now calculate R2 = R0 / R1 using the
+                                    \ shift-and-subtract division algorithm
+
+ MOV     R2, #0                     \ Set R2 = 0 to contain the result
+
+ MOV     R14, #%10000000            \ Set bit 7 of R14 so we can shift it to the
+                                    \ right in each iteration, using it as a
+                                    \ counter
+
+.pole1
+
+ MOVS    R0, R0, LSL #1             \ Shift R0 left, moving the top bit into the
+                                    \ C flag
+
+ CMPCC   R0, R1                     \ If we shifted a 0 out of the top of R0,
+                                    \ test for a possible subtraction
+
+ SUBCS   R0, R0, R1                 \ If we shifted a 1 out of the top of R0 or
+ ORRCS   R2, R2, R14                \ R0 >= R1, then do the subtraction:
+                                    \
+                                    \   R0 = R0 - R1
+                                    \
+                                    \ and set the relevant bit in the result
+                                    \ (i.e. apply the set bit in R14 to the
+                                    \ result in R2)
+
+ MOVS    R14, R14, LSR #1           \ Shift R14 to the right, moving bit 0 into
+                                    \ the C flag
+
+ BCC     pole1                      \ Loop back until we shift the 1 out of the
+                                    \ right end of R14 (after eight shifts)
+
+ MOVS    R2, R2, LSL #24            \ Scale up the result, so now we have:
+                                    \
+                                    \   R2 = 2^24 * (|xMouse| / |yMouse|)
+
+ B       pole3                      \ Jump to pole3 to skip the following
+
+.pole2
+
+                                    \ If we get here then |xMouse| >= |yMouse|
+                                    \ so we calculate the division with |yMouse|
+                                    \ as the numerator
+
+ MOV     R2, #0                     \ Set R2 = R1 / R0 using the same algorithm
+ MOV     R14, #&80                  \ as above
+                                    \
+                                    \ This is the first part of the algorithm
 
 .lab_95D4
 
- MOVS    R1, R1, LSL #1             \ 
- CMPLO   R1, R0                     \ 
- SUBHS   R1, R1, R0                 \ 
- ORRHS   R2, R2, R14                \ 
- MOVS    R14, R14, LSR #1           \ 
- BLO     lab_95D4                   \ 
- MOVS    R2, R2, LSL #24            \ 
+ MOVS    R1, R1, LSL #1             \ This is the second part of the algorithm,
+ CMPLO   R1, R0                     \ so now we have:
+ SUBHS   R1, R1, R0                 \
+ ORRHS   R2, R2, R14                \   R2 = 2^24 * (|yMouse| / |xMouse|)
+ MOVS    R14, R14, LSR #1
+ BLO     lab_95D4
+ MOVS    R2, R2, LSL #24
 
-.lab_95F0
+.pole3
 
- LDR     R14, arctanTableAddr       \ 
- BIC     R2, R2, #&01800000         \ 
- LDR     R1, [R14, R2, LSR #23]     \ 
- TST     R3, #1                     \ 
- ADDEQ   R1, R1, R3, LSL #29        \ 
- ADDNE   R3, R3, #1                 \ 
- RSBNE   R1, R1, R3, LSL #29        \ 
- LDMFD   R13!, {R0, R2}             \ 
- MOV     R3, R0                     \ 
- MOVS    R3, R3, LSL #1             \ 
- AND     R3, R3, #&FE000000         \ 
- ORR     R3, R3, #&01000000         \ 
- MOV     R4, #0                     \ 
+                                    \ At this point we have calculated one of
+                                    \ the following, with the smaller coordinate
+                                    \ on the top of the division:
+                                    \
+                                    \   R2 = 2^24 * (|xMouse| / |yMouse|)
+                                    \
+                                    \ or:
+                                    \
+                                    \   R2 = 2^24 * (|yMouse| / |xMouse|)
+                                    \
+                                    \ So R2 is in the range 0 to 2^24
 
-.lab_9624
+ LDR     R14, arctanTableAddr       \ Set R14 to the address of the arctan
+                                    \ lookup table
 
- MOV     R0, R0, LSR #1             \ 
- ADDHS   R4, R4, R0                 \ 
- MOVS    R3, R3, LSL #1             \ 
- BNE     lab_9624                   \ 
- MOV     R3, R2                     \ 
- MOVS    R3, R3, LSL #1             \ 
- AND     R3, R3, #&FE000000         \ 
- ORR     R3, R3, #&01000000         \ 
- MOV     R14, #0                    \ 
+ BIC     R2, R2, #&01800000         \ Clear bits 23 and 24 of R2 so when we
+                                    \ shift R2 to the right by 23 places in the
+                                    \ following lookup, the address is aligned
+                                    \ to the words in the lookup table
 
-.lab_9648
+ LDR     R1, [R14, R2, LSR #23]     \ Look up the arctan to get the following:
+                                    \
+                                    \   R1 = ((2^31 - 1) / PI) * ATAN(R2 / 128)
+                                    \
+                                    \ So R1 contains the smaller of the two
+                                    \ angles in the triangle formed by xMouse
+                                    \ and yMouse, like this (in this example,
+                                    \ xMouse >= yMouse, though the ASCII art
+                                    \ might not make that obvious):
+                                    \
+                                    \           .|
+                                    \         .´ |
+                                    \       .´   | y
+                                    \     .´R1   |
+                                    \   +´-------+
+                                    \        x
+                                    \
+                                    \ So we now have:
+                                    \
+                                    \   R1 = arctan(|xMouse| / |yMouse|)
+                                    \
+                                    \ or:
+                                    \
+                                    \   R1 = arctan(|yMouse| / |xMouse|)
 
- MOV     R2, R2, LSR #1             \ 
- ADDHS   R14, R14, R2               \ 
- MOVS    R3, R3, LSL #1             \ 
- BNE     lab_9648                   \ 
- ADD     R2, R14, R4                \ 
- LDR     R14, squareRootTableAddr   \ 
- BIC     R2, R2, #&00300000         \ 
- LDR     R0, [R14, R2, LSR #20]     \ 
- LDMFD   R13!, {PC}                 \ 
- LDMIA   R0, {R0-R2}                \ 
+ TST     R3, #%00000001             \ If bit 0 of R3 is set then:
+ ADDEQ   R1, R1, R3, LSL #29        \
+ ADDNE   R3, R3, #1                 \    R1 = R1 + R3 << 29
+ RSBNE   R1, R1, R3, LSL #29        \
+                                    \ otherwise bit 0 of R3 is clear, so:
+                                    \
+                                    \    R1 = (R3 + 1) << 29 - R1
+                                    \
+                                    \ So this moves the arctan angle into the
+                                    \ correct circle quadrant, depending on the
+                                    \ relative sizes and signs of xMouse and
+                                    \ yMouse
+
+                                    \ We now have the angle for our polar
+                                    \ coordinate in R1, so now we need to
+                                    \ calculate the distance
+
+ LDMFD   R13!, {R0, R2}             \ Retrieve the values we put on the stack
+                                    \ earlier, so:
+                                    \
+                                    \   R0 = |xMouse|
+                                    \
+                                    \   R2 = |yMouse|
+
+                                    \ We now calculate R4 = R0 * R0 using the
+                                    \ shift-and-add multiplication algorithm,
+                                    \ which calculates:
+                                    \
+                                    \   R4 = R0 ^ 2
+                                    \      = |xMouse| ^ 2
+
+ MOV     R3, R0                     \ Set R3 = 2 * R0
+ MOVS    R3, R3, LSL #1             \        = 2 * |xMouse|
+                                    \
+                                    \ So now we calculate R4 = R3 * R0 to get
+                                    \ our result
+
+ AND     R3, R3, #&FE000000         \ Zero all but the top byte of R3, ensuring
+ ORR     R3, R3, #&01000000         \ that bit 0 of the top byte is set so the
+                                    \ value of the top byte is at least 1
+
+ MOV     R4, #0                     \ Set R4 = 0 to use for building the sum in
+                                    \ our shift-and-add multiplication result
+
+.pole4
+
+ MOV     R0, R0, LSR #1             \ If bit 0 of R0 is set, add R0 to the
+ ADDHS   R4, R4, R0                 \ result in R4, shifting R0 to the right
+
+ MOVS    R3, R3, LSL #1             \ Shift R3 left by one place
+
+ BNE     pole4                      \ Loop back if R3 is non-zero
+
+                                    \ Next we calculate R14 = R2 * R2 using the
+                                    \ shift-and-add multiplication algorithm,
+                                    \ which calculates:
+                                    \
+                                    \   R14 = R2 ^ 2
+                                    \       = |yMouse| ^ 2
+
+ MOV     R3, R2                     \ Set R3 = 2 * R2
+ MOVS    R3, R3, LSL #1             \        = 2 * |yMouse|
+                                    \
+                                    \ So now we calculate R14 = R3 * R2 to get
+                                    \ our result
+
+ AND     R3, R3, #&FE000000         \ Zero all but the top byte of R3, ensuring
+ ORR     R3, R3, #&01000000         \ that bit 0 of the top byte is set so the
+                                    \ value of the top byte is at least 1
+
+ MOV     R14, #0                    \ Set R14 = 0 to use for building the sum in
+                                    \ our shift-and-add multiplication result
+
+.pole5
+
+ MOV     R2, R2, LSR #1             \ If bit 0 of R2 is set, add R2 to the
+ ADDHS   R14, R14, R2               \ result in R14, shifting R2 to the right
+
+ MOVS    R3, R3, LSL #1             \ Shift R3 left by one place
+
+ BNE     pole5                      \ Loop back if R3 is non-zero
+
+                                    \ So by this point we have the following:
+                                    \
+                                    \   R4 = |xMouse| ^ 2
+                                    \
+                                    \   R14 = |yMouse| ^ 2
+                                    \
+                                    \ So now we can apply Pythagoras to find the
+                                    \ length of the hypoteneuse, which is the
+                                    \ distance in our polar coordinate, as in
+                                    \ the example where x >= y:
+                                    \
+                                    \           .|
+                                    \      R0 .´ |
+                                    \       .´   | y
+                                    \     .´R1   |
+                                    \   +´-------+
+                                    \        x
+                                    \
+                                    \ We calculate the distance in R0
+
+ ADD     R2, R14, R4                \ Set R2 = R14 + R4
+                                    \
+                                    \        = |xMouse| ^ 2 + |yMouse| ^ 2
+
+ LDR     R14, squareRootTableAddr   \ Set R14 to the address of the square root
+                                    \ lookup table
+
+ BIC     R2, R2, #&00300000         \ Clear bits 20 and 21 of R2 so when we
+                                    \ shift R2 to the right by 20 places in the
+                                    \ following lookup, the address is aligned
+                                    \ to the words in the lookup table
+
+ LDR     R0, [R14, R2, LSR #20]     \ Set R0 = SQRT(R2)
+                                    \
+                                    \        = SQRT(|xMouse| ^ 2 + |yMouse| ^ 2)
+                                    \
+                                    \ which is the length of the hypoteneuse and
+                                    \ the distance in our polar coordinate
+
+ LDMFD   R13!, {PC}                 \ Return from the subroutine
+
+ LDMIA   R0, {R0-R2}                \ This instruction appears to be unused
 
 \ ******************************************************************************
 \
@@ -4391,6 +4623,7 @@ ENDIF
  CMP     R3, R2                     \ 
  CMPLO   R4, R2                     \ 
  MOVHS   PC, R14                    \ 
+
  STMFD   R13!, {R7, R14}            \ 
  MOV     R7, R2                     \ 
  MOV     R6, #0                     \ 
@@ -6923,7 +7156,7 @@ ENDIF
                                     \ We start with the left cap at screen
                                     \ address R11
 
- TST     R11, #3                    \ If R11 is not a multiple of 4 then one or
+ TST     R11, #%00000011            \ If R11 is not a multiple of 4 then one or
  STRNEB  R8, [R11], #1              \ both of bits 0 and 1 will be non-zero, so
                                     \ set the pixel at R11 to the colour in R8
                                     \ and increment R11
