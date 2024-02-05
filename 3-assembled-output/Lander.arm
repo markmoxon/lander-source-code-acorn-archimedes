@@ -7,6 +7,8 @@
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
 .set OBJ_ROCKET, 9
+.set LAUNCHPAD_SIZE, 0x08000000
+.set LAUNCHPAD_Y, 0x02EC0000
 .set LAUNCHPAD_ALTITUDE, 0x03500000
 .set SEA_LEVEL, 0x05500000
 .set stack, 0x000121FC
@@ -36,12 +38,12 @@
 .set xObjectScaled, 0x84
 .set yObjectScaled, 0x88
 .set zObjectScaled, 0x8C
-.set var_094, 0x94
-.set var_098, 0x98
-.set var_09C, 0x9C
-.set var_0A0, 0xA0
-.set var_0A4, 0xA4
-.set var_0A8, 0xA8
+.set xPlayer, 0x94
+.set yPlayer, 0x98
+.set zPlayer, 0x9C
+.set xVelocity, 0xA0
+.set yVelocity, 0xA4
+.set zVelocity, 0xA8
 .set previousColumn, 0xC4
 .set tileCornerRow, 0xE4
 .set unusedRowData, 0xF0
@@ -273,8 +275,8 @@ GetLandscapeAltitude:
  RSB     R0, R0, #0x05000000
  CMP     R0, #SEA_LEVEL
  MOVGT   R0, #SEA_LEVEL
- CMP     R8, #0x08000000
- CMPLO   R9, #0x08000000
+ CMP     R8, #LAUNCHPAD_SIZE
+ CMPLO   R9, #LAUNCHPAD_SIZE
  MOVLO   R0, #LAUNCHPAD_ALTITUDE
  STR     R0, [R11, #altitude]
  MOV     PC, R14
@@ -384,7 +386,7 @@ lab_8424:
  STR     R0, [R11, #var_158]
  STR     R1, [R11, #var_154]
  BL      sub_93E4
- ADD     R14, R11, #var_094
+ ADD     R14, R11, #xPlayer
  LDMIA   R14, {R0-R5}
  CMN     R1, #0x34000000
  LDRLTB  R9, [R11, #fuelBurnRate]
@@ -421,7 +423,7 @@ lab_8424:
  SUB     R9, R9, #0x05000000
  BL      GetLandscapeAltitude
  SUB     R0, R0, #0x00640000
- LDR     R1, [R11, #var_098]
+ LDR     R1, [R11, #yPlayer]
  SUB     R14, R0, R1
  CMP     R14, #0x01800000
  BHS     lab_850C
@@ -455,7 +457,7 @@ lab_850C:
  LDRB    R10, [R11, #fuelBurnRate]
  TST     R10, #6
  BEQ     lab_85F4
- ADD     R14, R11, #var_0A0
+ ADD     R14, R11, #xVelocity
  LDMIA   R14, {R0-R2, R6-R8}
  ADD     R3, R0, R6, ASR #7
  ADD     R4, R1, R7, ASR #7
@@ -463,7 +465,7 @@ lab_850C:
  MOV     R3, R3, ASR #1
  MOV     R4, R4, ASR #1
  MOV     R5, R5, ASR #1
- ADD     R0, R11, #var_094
+ ADD     R0, R11, #xPlayer
  LDMIA   R0, {R0-R2}
  SUB     R0, R0, R3
  SUB     R1, R1, R4
@@ -503,7 +505,7 @@ lab_85F4:
  LDR     R8, [R11, #currentScore]
  SUB     R8, R8, #1
  STR     R8, [R11, #currentScore]
- ADD     R14, R11, #var_094
+ ADD     R14, R11, #xPlayer
  LDMIA   R14, {R0-R5}
  LDR     R6, [R11, #xNoseV]
  LDR     R7, [R11, #xRoofV]
@@ -524,10 +526,10 @@ lab_85F4:
 lab_8650:
  LDMFD   R13!, {PC}
 LandOnLaunchpad:
- ADD     R3, R11, #var_094
+ ADD     R3, R11, #xPlayer
  LDMIA   R3, {R0-R5}
- CMP     R0, #0x08000000
- CMPLO   R2, #0x08000000
+ CMP     R0, #LAUNCHPAD_SIZE
+ CMPLO   R2, #LAUNCHPAD_SIZE
  BHS     LoseLife
  CMP     R3, #0
  RSBMI   R3, R3, #0
@@ -539,7 +541,7 @@ LandOnLaunchpad:
  ADD     R3, R3, R5
  CMP     R3, #0x00200000
  MOVHS   PC, R14
- MOV     R1, #0x02EC0000
+ MOV     R1, #LAUNCHPAD_Y
  LDR     R3, [R11, #fuelLevel]
  ADD     R3, R3, #0x20
  CMP     R3, #0x1400
@@ -547,10 +549,10 @@ LandOnLaunchpad:
  MOV     R3, #0
  MOV     R4, #0
  MOV     R5, #0
- STR     R3, [R11, #var_0A0]
- STR     R4, [R11, #var_0A4]
- STR     R5, [R11, #var_0A8]
- STR     R1, [R11, #var_098]
+ STR     R3, [R11, #xVelocity]
+ STR     R4, [R11, #yVelocity]
+ STR     R5, [R11, #zVelocity]
+ STR     R1, [R11, #yPlayer]
  MOV     PC, R14
 sub_86C4:
  LDMFD   R13!, {R10, R12}
@@ -560,7 +562,7 @@ LoseLife:
  MOV     R0, #30
  STR     R0, [R11, #crashLoopCount]
  MOV     R8, #81
- ADD     R0, R11, #var_094
+ ADD     R0, R11, #xPlayer
  LDMIA   R0, {R0-R2}
  SUB     R1, R1, #0x00500000
  BL      sub_8CBC
@@ -681,7 +683,7 @@ lab_880C:
  BHS     lab_88E8
  LDR     R0, [R11, #yCamera]
  ADD     R1, R1, R0
- LDR     R0, [R11, #var_098]
+ LDR     R0, [R11, #yPlayer]
  SUBS    R1, R1, R0
  RSBMI   R1, R1, #0
  CMP     R1, #0x01000000
@@ -2856,10 +2858,10 @@ PlacePlayerOnLaunchpad:
  STR     R0, [R11, #var_154]
  MOV     R0, #1
  STR     R0, [R11, #var_158]
- MOV     R0, #0x04000000
+ MOV     R0, #LAUNCHPAD_SIZE/2
  MOV     R2, R0
- ADD     R3, R11, #var_094
- MOV     R1, #0x02EC0000
+ ADD     R3, R11, #xPlayer
+ MOV     R1, #LAUNCHPAD_Y
  STMIA   R3!, {R0-R2}
  MOV     R0, #0
  MOV     R1, #0

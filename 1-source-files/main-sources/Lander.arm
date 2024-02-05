@@ -54,6 +54,10 @@
  OBJ_ROCKET = 9                     \ The object type of the three rockets
                                     \ along the edge of the launchpad
 
+ LAUNCHPAD_SIZE = &08000000         \ Size of the launchpad
+
+ LAUNCHPAD_Y = &02EC0000            \ The y-coordinate of the launchpad
+
  LAUNCHPAD_ALTITUDE = &03500000     \ Altitude of the launchpad
 
  SEA_LEVEL = &05500000              \ Sea level
@@ -162,17 +166,17 @@
 
                                     \ &90 appears to be unused ???
 
- var_094 = &94                      \ 
+ xPlayer = &94                      \ The x-coordinate of the player's ship
 
- var_098 = &98                      \ 
+ yPlayer = &98                      \ The y-coordinate of the player's ship
 
- var_09C = &9C                      \ 
+ zPlayer = &9C                      \ The z-coordinate of the player's ship
 
- var_0A0 = &A0                      \ 
+ xVelocity = &A0                    \ The player's velocity in the x-axis
 
- var_0A4 = &A4                      \ 
+ yVelocity = &A4                    \ The player's velocity in the y-axis
 
- var_0A8 = &A8                      \ 
+ zVelocity = &A8                    \ The player's velocity in the z-axis
 
  previousColumn = &C4               \ The corner coordinates of the previous
                                     \ column while working along a row from left
@@ -992,8 +996,9 @@ ENDIF
 \
 \ The altitude is capped to a maximum value of SEA_LEVEL, and the altitude on
 \ the launchpad is set to LAUNCHPAD_ALTITUDE. The launchpad is defined as (x, z)
-\ where 0 <= x < &08000000 and 0 <= z < &08000000, so that's tiles 0 to 7 along
-\ each axis (with the origin being at the front-left corner of the launchpad).
+\ where 0 <= x < LAUNCHPAD_SIZE and 0 <= z < LAUNCHPAD_SIZE, so that's tiles 0
+\ to 7 along each axis (with the origin being at the front-left corner of the
+\ launchpad).
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1187,9 +1192,9 @@ ENDIF
  MOVGT   R0, #SEA_LEVEL             \ we don't create landscapes lower then sea
                                     \ level
 
- CMP     R8, #&08000000             \ If R8 and R9 are both < &08000000, then
- CMPLO   R9, #&08000000             \ this coordinate is on the launchpad, so
- MOVLO   R0, #LAUNCHPAD_ALTITUDE    \ set R0 = LAUNCHPAD_ALTITUDE
+ CMP     R8, #LAUNCHPAD_SIZE        \ If R8 and R9 are both < LAUNCHPAD_SIZE,
+ CMPLO   R9, #LAUNCHPAD_SIZE        \ then this coordinate is on the launchpad,
+ MOVLO   R0, #LAUNCHPAD_ALTITUDE    \ so set R0 = LAUNCHPAD_ALTITUDE
 
  STR     R0, [R11, #altitude]       \ Set altitude = R0, so we return the result
                                     \ in R0 and set the altitude variable
@@ -1528,7 +1533,7 @@ ENDIF
  STR     R0, [R11, #var_158]        \ 
  STR     R1, [R11, #var_154]        \ 
  BL      sub_93E4                   \ 
- ADD     R14, R11, #var_094         \ 
+ ADD     R14, R11, #xPlayer         \ 
  LDMIA   R14, {R0-R5}               \ 
  CMN     R1, #&34000000             \ 
  LDRLTB  R9, [R11, #fuelBurnRate]   \ 
@@ -1568,7 +1573,7 @@ ENDIF
                                     \ coordinates (x, z) = (R8, R9)
 
  SUB     R0, R0, #&00640000         \ 
- LDR     R1, [R11, #var_098]        \ 
+ LDR     R1, [R11, #yPlayer]        \ 
  SUB     R14, R0, R1                \ 
  CMP     R14, #&01800000            \ 
  BHS     lab_850C                   \ 
@@ -1590,8 +1595,9 @@ ENDIF
 
 .lab_850C
 
- CMP     R1, R0                     \ 
- BLGT    LandOnLaunchpad            \ 
+ CMP     R1, R0                     \ If R1 >= R0, call LandOnLaunchpad to check
+ BLGT    LandOnLaunchpad            \ whether we have landed on the launchpad
+
  CMP     R1, #0                     \ 
  MOVMI   R1, #0                     \ 
  ADD     R3, R11, #rotationMatrix   \ 
@@ -1606,7 +1612,7 @@ ENDIF
  LDRB    R10, [R11, #fuelBurnRate]  \ 
  TST     R10, #6                    \ 
  BEQ     lab_85F4                   \ 
- ADD     R14, R11, #var_0A0         \ 
+ ADD     R14, R11, #xVelocity       \ 
  LDMIA   R14, {R0-R2, R6-R8}        \ 
  ADD     R3, R0, R6, ASR #7         \ 
  ADD     R4, R1, R7, ASR #7         \ 
@@ -1614,7 +1620,7 @@ ENDIF
  MOV     R3, R3, ASR #1             \ 
  MOV     R4, R4, ASR #1             \ 
  MOV     R5, R5, ASR #1             \ 
- ADD     R0, R11, #var_094          \ 
+ ADD     R0, R11, #xPlayer          \ 
  LDMIA   R0, {R0-R2}                \ 
  SUB     R0, R0, R3                 \ 
  SUB     R1, R1, R4                 \ 
@@ -1658,7 +1664,7 @@ ENDIF
  SUB     R8, R8, #1
  STR     R8, [R11, #currentScore]
 
- ADD     R14, R11, #var_094         \ 
+ ADD     R14, R11, #xPlayer         \ 
  LDMIA   R14, {R0-R5}               \ 
  LDR     R6, [R11, #xNoseV]         \ 
  LDR     R7, [R11, #xRoofV]         \ 
@@ -1686,40 +1692,92 @@ ENDIF
 \       Name: LandOnLaunchpad
 \       Type: Subroutine
 \   Category: Player
-\    Summary: ???
+\    Summary: Check to see if the player has landed on the launchpad
+\
+\ ------------------------------------------------------------------------------
+\
+\ We call this routine from MoveAndDrawPlayer when the player's altitude matches
+\ that of the launchpad, so this performs additional checks to see if the player
+\ just landed.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R1                              The y-coordinate of the player's ship
 \
 \ ******************************************************************************
 
 .LandOnLaunchpad
 
- ADD     R3, R11, #var_094          \ 
- LDMIA   R3, {R0-R5}                \ 
- CMP     R0, #&08000000             \ 
- CMPLO   R2, #&08000000             \ 
- BHS     LoseLife                   \ 
- CMP     R3, #0                     \ 
- RSBMI   R3, R3, #0                 \ 
- CMP     R4, #0                     \ 
- RSBMI   R4, R4, #0                 \ 
- CMP     R5, #0                     \ 
- RSBMI   R5, R5, #0                 \ 
- ADD     R3, R3, R4                 \ 
+ ADD     R3, R11, #xPlayer          \ Fetch the six words at xPlayer as follows:
+ LDMIA   R3, {R0-R5}                \
+                                    \  (R0, R1, R2) = the player's coordinates
+                                    \           from (xPlayer, yPlayer, zPlayer)
+                                    \
+                                    \  (R3, R4, R5) = the player's velocity
+                                    \     from (xVelocity, yVelocity, zVelocity)
+
+ CMP     R0, #LAUNCHPAD_SIZE        \ If either of xPlayer or zPlayer is >=
+ CMPLO   R2, #LAUNCHPAD_SIZE        \ LAUNCHPAD_SIZE then we are not over the
+ BHS     LoseLife                   \ launchpad, as the launchpad is defined as
+                                    \ this part of the map:
+                                    \
+                                    \   0 <= x <LAUNCHPAD_SIZE
+                                    \
+                                    \ and:
+                                    \
+                                    \   0 <= z <LAUNCHPAD_SIZE
+                                    \
+                                    \ So we just crashed into the ground rather
+                                    \ than the launchpad, so jump to LoseLife to
+                                    \ process the crash
+
+ CMP     R3, #0                     \ Set R3 = |R3|
+ RSBMI   R3, R3, #0                 \        = |xVelocity|
+
+ CMP     R4, #0                     \ Set R4 = |R4|
+ RSBMI   R4, R4, #0                 \        = |yVelocity|
+
+ CMP     R5, #0                     \ Set R5 = |R5|
+ RSBMI   R5, R5, #0                 \        = |zVelocity|
+
+ ADD     R3, R3, R4                 \ If R3 + R4 + R5 >= &00200000, then:
  ADD     R3, R3, R5                 \ 
- CMP     R3, #&00200000             \ 
- MOVHS   PC, R14                    \ 
- MOV     R1, #&02EC0000             \ 
- LDR     R3, [R11, #fuelLevel]      \ 
- ADD     R3, R3, #&20               \ 
- CMP     R3, #&1400                 \ 
- STRLO   R3, [R11, #fuelLevel]      \ 
- MOV     R3, #0                     \ 
- MOV     R4, #0                     \ 
- MOV     R5, #0                     \ 
- STR     R3, [R11, #var_0A0]        \ 
- STR     R4, [R11, #var_0A4]        \ 
- STR     R5, [R11, #var_0A8]        \ 
- STR     R1, [R11, #var_098]        \ 
- MOV     PC, R14                    \ 
+ CMP     R3, #&00200000             \   |xVelocity| + |yVelocity| + |zVelocity|
+ MOVHS   PC, R14                    \
+                                    \ is greater than the safe landing speed, so
+                                    \ we can't be performing a safe landing, so
+                                    \ return from the subroutine
+
+                                    \ If we get here then we have landed, as the
+                                    \ altitude checks were made before this
+                                    \ routine was called, we know we are above
+                                    \ the launchpad, and our speed is slow
+                                    \ enough to land
+                                    \
+                                    \ So now we start refuelling
+
+ MOV     R1, #LAUNCHPAD_Y           \ Set R1 to the y-coordinate of the launchpad
+
+ LDR     R3, [R11, #fuelLevel]      \ Bump up the fuel level by 1/160 of a full
+ ADD     R3, R3, #&20               \ tank
+ CMP     R3, #&1400
+ STRLO   R3, [R11, #fuelLevel]
+
+ MOV     R3, #0                     \ Zero the player's velocity
+ MOV     R4, #0
+ MOV     R5, #0
+ STR     R3, [R11, #xVelocity]
+ STR     R4, [R11, #yVelocity]
+ STR     R5, [R11, #zVelocity]
+
+ STR     R1, [R11, #yPlayer]        \ Set the y-coordinate of the player to the
+                                    \ y-coordinate of the launchpad, so the
+                                    \ player's ship is resting correctly on the
+                                    \ pad
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -1755,8 +1813,8 @@ ENDIF
 
  MOV     R8, #81                    \ Set R8 = 8 to use as a counter in sub_8CBC
 
- ADD     R0, R11, #var_094          \ Set (R0, R1, R2) to the coordinate in
- LDMIA   R0, {R0-R2}                \ var_094
+ ADD     R0, R11, #xPlayer          \ Set (R0, R1, R2) to the coordinate in
+ LDMIA   R0, {R0-R2}                \ xPlayer
 
  SUB     R1, R1, #&00500000         \ Subtract &00500000 from the y-coordinate
 
@@ -1969,7 +2027,7 @@ ENDIF
  BHS     lab_88E8                   \ 
  LDR     R0, [R11, #yCamera]        \ 
  ADD     R1, R1, R0                 \ 
- LDR     R0, [R11, #var_098]        \ 
+ LDR     R0, [R11, #yPlayer]        \ 
  SUBS    R1, R1, R0                 \ 
  RSBMI   R1, R1, #0                 \ 
  CMP     R1, #&01000000             \ 
@@ -7546,16 +7604,21 @@ ENDIF
  MOV     R0, #1                     \ Set var_158 = 1 ???
  STR     R0, [R11, #var_158]        \ 
 
- MOV     R0, #&04000000             \ Set var_094 = &04000000 ???
- MOV     R2, R0                     \     var_098 = &02EC0000 ???
- ADD     R3, R11, #var_094          \     var_09C = &04000000 ???
- MOV     R1, #&02EC0000
- STMIA   R3!, {R0-R2}
+ MOV     R0, #LAUNCHPAD_SIZE/2      \ Set the starting coordinates of the
+ MOV     R2, R0                     \ player's ship as follows:
+ ADD     R3, R11, #xPlayer          \
+ MOV     R1, #LAUNCHPAD_Y           \   xPlayer = LAUNCHPAD_SIZE / 2
+ STMIA   R3!, {R0-R2}               \   yPlayer = LAUNCHPAD_Y
+                                    \   zPlayer = LAUNCHPAD_SIZE / 2
+                                    \
+                                    \ which is in the middle of the launchpad
 
- MOV     R0, #0                     \ Set var_0A0 = 0 ???
- MOV     R1, #0                     \     var_0A4 = 0 ???
- MOV     R2, #0                     \     var_0A8 = 0 ???
- STMIA   R3!, {R0-R2}               \ 
+ MOV     R0, #0                     \ Set the player's velocity to zero as
+ MOV     R1, #0                     \ follows:
+ MOV     R2, #0                     \
+ STMIA   R3!, {R0-R2}               \  xVelocity = 0
+                                    \  yVelocity = 0
+                                    \  zVelocity = 0
 
  BL      ResetMousePosition         \ Reset the mouse position to (511, 511),
                                     \ ready for the game
