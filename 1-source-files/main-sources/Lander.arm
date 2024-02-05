@@ -1002,8 +1002,12 @@ ENDIF
 \ the map is laid out on the landscape (as the 3D z-axis goes into the screen).
 \ When talking about the map, we are talking about (x, z) coordinates that are
 \ a bit like longitude and latitude, and this routine returns the y-coordinate
-\ of the point on the landscape (as the y-axis goes up the screen and determines
-\ the altitude).
+\ of the point on the landscape (as the y-axis goes down the screen and
+\ determines the altitude).
+\
+\ Note that more negative values denote lower altitudes, as the y-axis goes down
+\ the screen, working down from zero at the very highest altitude in space. This
+\ is the opposite to conventional altitudes in the real world.
 \
 \ The altitude is capped to a maximum value of SEA_LEVEL, and the altitude on
 \ the launchpad is set to LAUNCHPAD_ALTITUDE. The launchpad is defined as (x, z)
@@ -1024,7 +1028,9 @@ ENDIF
 \ Returns:
 \
 \   R0                              The altitude (y-coordinate) of the landscape
-\                                   at these coordinates
+\                                   at these coordinates, with more negative
+\                                   values denoting lower altitudes, as the
+\                                   y-axis points downwards
 \
 \ ******************************************************************************
 
@@ -1476,22 +1482,25 @@ ENDIF
  SWI     OS_Mouse                   \ Read the mouse coordinates, returning:
                                     \
                                     \   R0 = x-coordinate
+                                    \
                                     \   R1 = y-coordinate
+                                    \
                                     \   R2 = mouse buttons (%lmr)
 
  STRB    R2, [R11, #fuelBurnRate]   \ Set the fuel burn rate to the mouse button
                                     \ result, so it's set to:
                                     \
-                                    \   * 0 if no buttons are being pressed
+                                    \   * %000 (0) if no buttons are being
+                                    \     pressed
                                     \
-                                    \   * 1 if the right button is being pressed
-                                    \     (i.e. fire bullets)
+                                    \   * %001 (1) if the right button is being
+                                    \     pressed (i.e. fire bullets)
                                     \
-                                    \   * 2 if the middle button is being
+                                    \   * %010 (2) if the middle button is being
                                     \     pressed (i.e. hover)
                                     \
-                                    \   * 4 if the left button is being pressed
-                                    \     (i.e. full engine)
+                                    \   * %100 (4) if the left button is being
+                                    \     pressed (i.e. full thrust)
                                     \
                                     \ Bit 0 of the fuel rate is ignored in the
                                     \ fuel calculations, so firing bullets does
@@ -1628,33 +1637,54 @@ ENDIF
                                     \ vector
 
  CMN     R1, #&34000000             \ If R1 < -&34000000, clear bits 2 and 3 of
- LDRLTB  R9, [R11, #fuelBurnRate]   \ the fuel burn rate ???
- BICLT   R9, R9, #%00000110
+ LDRLTB  R9, [R11, #fuelBurnRate]   \ the fuel burn rate, as the ship's altitude
+ BICLT   R9, R9, #%00000110         \ is too high for the engines to work
  STRLTB  R9, [R11, #fuelBurnRate]
 
  LDR     R6, [R11, #yNoseV]         \ Set (R6, R7, R8) to the y-axis of the
- LDR     R7, [R11, #yRoofV]         \ rotation matrix
- LDR     R8, [R11, #ySideV]
+ LDR     R7, [R11, #yRoofV]         \ rotation matrix, which is the vector that
+ LDR     R8, [R11, #ySideV]         \ points directly down through the ship's
+                                    \ floor after being rotated (so it's in the
+                                    \ direction of thrust, as the thrusters are
+                                    \ on the bottom of the ship)
 
  LDRB    R9, [R11, #fuelBurnRate]   \ Set R9 to the fuel burn rate
 
  TST     R9, #%00000100             \ Set the flags according to bit 2 of the
-                                    \ fuel burn rate
+                                    \ fuel burn rate, which is set if the left
+                                    \ button is being pressed (i.e. full thrust)
 
  SUB     R3, R3, R3, ASR #6         \ Set R3 = R3 - R3 >> 6
- SUBNE   R3, R3, R6, ASR #11        \ 
+                                    \        = xVelocity - (xVelocity / 64)
 
- ADD     R0, R0, R3                 \ 
- SUB     R4, R4, R4, ASR #6         \ 
- SUBNE   R4, R4, R7, ASR #11        \ 
+ SUBNE   R3, R3, R6, ASR #11        \ Reduce R3 by a further yNoseV / 2048 if
+                                    \ full thrust is being pressed
 
- ADD     R1, R1, R4                 \ 
- SUB     R5, R5, R5, ASR #6         \ 
- SUBNE   R5, R5, R8, ASR #11        \ 
+ ADD     R0, R0, R3                 \ Set R0 = R0 + R3
+                                    \        = xPlayer + R3
 
- ADD     R2, R2, R5                 \ 
+ SUB     R4, R4, R4, ASR #6         \ Set R4 = R4 - R4 >> 6
+                                    \        = yVelocity - (yVelocity >> 6)
 
- TST     R9, #2                     \ 
+ SUBNE   R4, R4, R7, ASR #11        \ Reduce R4 by a further yRoofV / 2048 if
+                                    \ full thrust is being pressed
+
+ ADD     R1, R1, R4                 \ Set R1 = R1 + R4
+                                    \        = yPlayer + R4
+
+ SUB     R5, R5, R5, ASR #6         \ Set R5 = R5 - R5 >> 6
+                                    \        = zVelocity - (zVelocity >> 6)
+
+ SUBNE   R5, R5, R8, ASR #11        \ Reduce R5 by a further ySideV / 2048 if
+                                    \ full thrust is being pressed
+
+ ADD     R2, R2, R5                 \ Set R2 = R2 + R5
+                                    \        = zPlayer + R5
+
+ TST     R9, #%00000010             \ Set the flags according to bit 1 of the
+                                    \ fuel burn rate, which is set if the middle
+                                    \ button is being pressed (i.e. hover)
+
  SUBNE   R3, R3, R6, ASR #13        \ 
  SUBNE   R4, R4, R7, ASR #13        \ 
  SUBNE   R5, R5, R8, ASR #13        \ 
@@ -1913,7 +1943,8 @@ ENDIF
                                     \
                                     \ So now we start refuelling
 
- MOV     R1, #LAUNCHPAD_Y           \ Set R1 to the y-coordinate of the launchpad
+ MOV     R1, #LAUNCHPAD_Y           \ Set R1 to the y-coordinate of the
+                                    \ launchpad
 
  LDR     R3, [R11, #fuelLevel]      \ Bump up the fuel level by 1/160 of a full
  ADD     R3, R3, #&20               \ tank
@@ -2309,7 +2340,7 @@ ENDIF
  STRB    R8, [R14]                  \ 
  TST     R7, #&00020000             \ 
 
- LDREQ   R8, [R11, #currentScore]   \ If ???, increment the current score by 20
+ LDREQ   R8, [R11, #currentScore]   \ If xxx, increment the current score by 20
  ADDEQ   R8, R8, #20
  STREQ   R8, [R11, #currentScore]
 
@@ -3058,10 +3089,11 @@ ENDIF
 
  MOV     R0, R8                     \ Set (R0, R1, R2) to (x, y - &C00000, z)
  MOV     R2, R9                     \
- SUB     R1, R1, #&00C00000         \ So this is a coordinate towards the
-                                    \ bottom of the object ???
+ SUB     R1, R1, #&00C00000         \ So this is the coordinate that's &C00000
+                                    \ above the base of the object (as the
+                                    \ y-axis points downwards)
 
- BL      sub_8B0C                   \ Call sub_8B0C to draw the smoke particles
+ BL      sub_8B0C                   \ Call sub_8B0C to draw smoke particles
                                     \ rising from the destroyed object ???
 
  LDMFD   R13!, {R0-R7, R9}          \ Retrieve the registers that we stored on
@@ -3350,16 +3382,18 @@ ENDIF
 
  LDR     R14, [R10, #-12]           \ Set R14 to the second coordinate from the
                                     \ previous projection, i.e. the y-coordinate
-                                    \ of the projected vertex
+                                    \ of the projected vertex (so that's the
+                                    \ object rather than the shadow)
 
  CMP     R14, R1                    \ If R14 >= R1 then the y-coordinate of the
- MVNHS   R14, #0                    \ shadow is bigger than the y-coordinate of
- STRHSB  R14, [R11, #crashedFlag]   \ the object, which means the shadow is at a
-                                    \ higher altitude than the object
+ MVNHS   R14, #0                    \ object is bigger than the y-coordinate of
+ STRHSB  R14, [R11, #crashedFlag]   \ the shadow, which means the object is
+                                    \ lower down the screen than its shadow
                                     \
-                                    \ This can only happen if the object has hit
-                                    \ the ground, so set crashedFlag = &FF to
-                                    \ indicate that the object has crashed
+                                    \ This can only happen if the object has
+                                    \ "passed through" the ground, so set
+                                    \ crashedFlag to &FF to indicate that the
+                                    \ object has crashed
 
  SUBS    R8, R8, #1                 \ Decrement the loop counter, which keeps
                                     \ track of the number of vertices we have
@@ -3437,7 +3471,7 @@ ENDIF
                                     \ rotated normal
 
  LDRB    R14, [R11, #objectFlags]   \ If bit 0 of objectFlags is zero then this
- TST     R14, #%00000001            \ object is configured to show all faces, so
+ TST     R14, #%00000001            \ object is static and does not rotate, so
  MVNEQ   R3, #0                     \ set R1 and R3 to -1 so this face is always
  MVNEQ   R1, #0                     \ visible (as R3 is negative) and always
                                     \ casts a shadow in objects with shadows
@@ -3473,9 +3507,11 @@ ENDIF
 
  CMP     R1, #0                     \ If R1 is positive, then the y-coordinate
  BPL     dobj4                      \ of the rotated normal vector is positive,
-                                    \ which means it is pointing up, so jump to
-                                    \ dobj4 to skip drawing the shadow for this
-                                    \ face ???
+                                    \ which means it is pointing down, so jump
+                                    \ to dobj4 to skip drawing the shadow for
+                                    \ this face, as we only draw shadows for
+                                    \ faces that point up, like the roof of the
+                                    \ gazebo
 
  LDRB    R14, [R11, #objectFlags]   \ If bit 1 of objectFlags is zero then this
  TST     R14, #%00000010            \ object is configured not to have a shadow,
@@ -3579,9 +3615,12 @@ ENDIF
                                     \ So R1 is in the range 0 to 8 and is
                                     \ bigger when the normal is pointing more
                                     \ vertically (i.e. when the normal vector
-                                    \ has a smaller y-coordinate)
+                                    \ has a negative y-coordinate with a larger
+                                    \ magnitude, as the y-axis points down the
+                                    \ screen)
                                     \
-                                    \ So a bigger R1 means brighter colours 
+                                    \ So a bigger, more negative R1 means
+                                    \ brighter colours 
 
  CMP     R0, #0                     \ If R0 is negative then the normal is
  ADDMI   R1, R1, #1                 \ pointing more towards the left then the
@@ -4079,13 +4118,16 @@ ENDIF
 
 .MultiplyVectorByMatrix
 
- LDRB    R2, [R11, #objectFlags]    \ If bit 0 of objectFlags is clear, set:
- TST     R2, #%00000001             \ 
- LDMEQIA R0, {R2-R4}                \   [ R1   ]   [ R0   ]
- STMEQIA R1, {R2-R4}                \   [ R1+4 ] = [ R0+4 ]
- MOVEQ   PC, R14                    \   [ R1+8 ]   [ R0+8 ]
+ LDRB    R2, [R11, #objectFlags]    \ If bit 0 of objectFlags is clear then this
+ TST     R2, #%00000001             \ object is static and does not rotate, so
+ LDMEQIA R0, {R2-R4}                \ simply set the following so we do not
+ STMEQIA R1, {R2-R4}                \ apply the rotation matrix:
+ MOVEQ   PC, R14                    \
+                                    \   [ R1   ]   [ R0   ]
+                                    \   [ R1+4 ] = [ R0+4 ]
+                                    \   [ R1+8 ]   [ R0+8 ]
                                     \
-                                    \ and return from the subroutine ???
+                                    \ and return from the subroutine
  
  STMFD   R13!, {R6-R7, R14}         \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
@@ -4116,9 +4158,9 @@ ENDIF
 \
 \ Calculate the dot product of the 3D vectors at R0 and R2 as follows:
 \
-\   [ R0   ]   [ R2   ]   [ R0   * R2 ]
+\   [ R0   ]   [ R2   ]   [ R0   * R2   ]
 \   [ R0+4 ] . [ R2+4 ] = [ R0+4 * R2+4 ]
-\   [ R0+8x]   [ R2+8 ]   [ R0+8 * R2*8 ]
+\   [ R0+8 ]   [ R2+8 ]   [ R0+8 * R2*8 ]
 \
 \ and set the flags according to the result. R2 is updated to the next vector in
 \ memory, so repeated calls will work through the following multiplication,
@@ -6183,7 +6225,7 @@ ENDIF
 
  CMP     R14, #&0B000000            \ Cap R14 to a maximum value of &0A000000,
  MOVHS   R14, #&0A000000            \ so the maximum buffer number we draw into
-                                    \ is 10 (why not 11?) ???
+                                    \ is 10 (as buffer 11 is not used)
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
                                     \ the buffer number, and we're going to look
@@ -6301,7 +6343,7 @@ ENDIF
 
  CMP     R14, #&0B000000            \ Cap R14 to a maximum value of &0A000000,
  MOVHS   R14, #&0A000000            \ so the maximum buffer number we draw into
-                                    \ is 10 (why not 11?) ???
+                                    \ is 10 (as buffer 11 is not used)
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
                                     \ the buffer number, and we're going to look
@@ -7937,8 +7979,8 @@ ENDIF
 \ the front-left corner of the corresponding tile.
 \
 \ The object map shares the same coordinate system as the rest of the game, so
-\ it uses a left-hand coordinate system, with the x-axis going from left to
-\ right, the y-axis going up the screen, and the z-axis going into the screen.
+\ it uses a right-hand coordinate system, with the x-axis going from left to
+\ right, the y-axis going down the screen, and the z-axis going into the screen.
 \
 \ Because the purpose of the object map is to record object positions on the
 \ map, it does not include altitude data, so the y-axis is ignored (as the
@@ -8404,8 +8446,8 @@ ENDIF
 
  EQUD    objectRockFaces - objectRock
 
- EQUD    %00000011                  \ Flags: Bit 0 = 1 = only draw visible faces
-                                    \        Bit 1 = 1 = draw a shadow
+ EQUD    %00000011                  \ Flags: Bit 0 = 1 = object rotates
+                                    \        Bit 1 = 0 = object has a shadow
 
 .objectRockVertices
 
@@ -8446,8 +8488,8 @@ ENDIF
 
  EQUD    objectPulsatingPyramidFaces - objectPulsatingPyramid
 
- EQUD    %00000001                  \ Flags: Bit 0 = 1 = only draw visible faces
-                                    \        Bit 1 = 0 = do not draw a shadow
+ EQUD    %00000001                  \ Flags: Bit 0 = 1 = object rotates
+                                    \        Bit 1 = 0 = object has no shadow
 
 .objectPulsatingPyramidVertices
 
@@ -8485,8 +8527,8 @@ ENDIF
 
  EQUD    objectPlayerFaces - objectPlayer
 
- EQUD    %00000011                  \ Flags: Bit 0 = 1 = only draw visible faces
-                                    \        Bit 1 = 1 = draw a shadow
+ EQUD    %00000011                  \ Flags: Bit 0 = 1 = object rotates
+                                    \        Bit 1 = 0 = object has a shadow
 
 .objectPlayerVertices
 
@@ -8532,8 +8574,8 @@ ENDIF
 
  EQUD    objectSmallLeafyTreeFaces - objectSmallLeafyTree
 
- EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 1 = draw a shadow
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has a shadow
 
 .objectSmallLeafyTreeVertices
 
@@ -8576,8 +8618,8 @@ ENDIF
 
  EQUD    objectTallLeafyTreeFaces - objectTallLeafyTree
 
- EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 1 = draw a shadow
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has a shadow
 
 .objectTallLeafyTreeVertices
 
@@ -8624,8 +8666,8 @@ ENDIF
 
  EQUD    objectSmokingRemainsLeftFaces - objectSmokingRemainsLeft
 
- EQUD    %00000000                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 0 = do not draw a shadow
+ EQUD    %00000000                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has no shadow
 
 .objectSmokingRemainsLeftVertices
 
@@ -8659,8 +8701,8 @@ ENDIF
 
  EQUD    objectSmokingRemainsRightFaces - objectSmokingRemainsRight
 
- EQUD    %00000000                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 0 = do not draw a shadow
+ EQUD    %00000000                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has no shadow
 
 .objectSmokingRemainsRightVertices
 
@@ -8694,8 +8736,8 @@ ENDIF
 
  EQUD    objectFirTreeFaces - objectFirTree
 
- EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 1 = draw a shadow
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has a shadow
 
 .objectFirTreeVertices
 
@@ -8729,8 +8771,8 @@ ENDIF
 
  EQUD    objectGazeboFaces - objectGazebo
 
- EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 1 = draw a shadow
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has a shadow
 
 .objectGazeboVertices
 
@@ -8778,8 +8820,8 @@ ENDIF
 
  EQUD    objectBuildingFaces - objectBuilding
 
- EQUD    %00000000                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 0 = do not draw a shadow
+ EQUD    %00000000                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has no shadow
 
 .objectBuildingVertices
 
@@ -8834,8 +8876,8 @@ ENDIF
 
  EQUD    objectSmokingBuildingFaces - objectSmokingBuilding
 
- EQUD    %00000000                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 0 = do not draw a shadow
+ EQUD    %00000000                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has no shadow
 
 .objectSmokingBuildingVertices
 
@@ -8874,8 +8916,8 @@ ENDIF
 
  EQUD    objectSmokingGazeboFaces - objectSmokingGazebo
 
- EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 1 = draw a shadow
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has a shadow
 
 .objectSmokingGazeboVertices
 
@@ -8912,8 +8954,8 @@ ENDIF
 
  EQUD    objectRocketFaces - objectRocket
 
- EQUD    %00000010                  \ Flags: Bit 0 = 0 = always draw all faces
-                                    \        Bit 1 = 1 = draw a shadow
+ EQUD    %00000010                  \ Flags: Bit 0 = 0 = object is static
+                                    \        Bit 1 = 0 = object has a shadow
 
 .objectRocketVertices
 
