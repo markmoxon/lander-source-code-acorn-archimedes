@@ -11,7 +11,7 @@ Source: "3-assembled-output/Lander.arm"
                             	     6: .set OS_Word, 0x07
                             	     7: .set OS_Mouse, 0x1C
                             	     8: .set OS_BinaryToDecimal, 0x28
-                            	     9: .set OBJ_ROCKET, 9
+                            	     9: .set LAUNCHPAD_OBJECT, 9
                             	    10: .set LAUNCHPAD_SIZE, 0x08000000
                             	    11: .set LAUNCHPAD_Y, 0x02EC0000
                             	    12: .set LAUNCHPAD_ALTITUDE, 0x03500000
@@ -77,8 +77,8 @@ Source: "3-assembled-output/Lander.arm"
                             	    72: .set xLandscape, 0x148
                             	    73: .set yLandscape, 0x14C
                             	    74: .set zLandscape, 0x150
-                            	    75: .set rotationB, 0x154
-                            	    76: .set rotationA, 0x158
+                            	    75: .set shipDirection, 0x154
+                            	    76: .set shipPitch, 0x158
                             	    77: .set fuelBurnRate, 0x15C
                             	    78: .set xLandscapeRow, 0x160
                             	    79: .set yLandscapeRow, 0x164
@@ -381,8 +381,8 @@ Source: "3-assembled-output/Lander.arm"
 00:000083D8 0101A023        	   363:  MOVHS   R0, #0x40000000
 00:000083DC 01004022        	   364:  SUBHS   R0, R0, #1
 00:000083E0 8000A0E1        	   365:  MOV     R0, R0, LSL #1
-00:000083E4 58219BE5        	   366:  LDR     R2, [R11, #rotationA]
-00:000083E8 54319BE5        	   367:  LDR     R3, [R11, #rotationB]
+00:000083E4 58219BE5        	   366:  LDR     R2, [R11, #shipPitch]
+00:000083E8 54319BE5        	   367:  LDR     R3, [R11, #shipDirection]
 00:000083EC 014053E0        	   368:  SUBS    R4, R3, R1
 00:000083F0 0200004A        	   369:  BMI     ship1
 00:000083F4 030254E3        	   370:  CMP     R4, #0x30000000
@@ -403,8 +403,8 @@ Source: "3-assembled-output/Lander.arm"
                             	   385: ship4:
 00:00008424 C50042E0        	   386:  SUB     R0, R2, R5, ASR #1
 00:00008428 C41043E0        	   387:  SUB     R1, R3, R4, ASR #1
-00:0000842C 58018BE5        	   388:  STR     R0, [R11, #rotationA]
-00:00008430 54118BE5        	   389:  STR     R1, [R11, #rotationB]
+00:0000842C 58018BE5        	   388:  STR     R0, [R11, #shipPitch]
+00:00008430 54118BE5        	   389:  STR     R1, [R11, #shipDirection]
 00:00008434 EA0300EB        	   390:  BL      CalculateRotationMatrix
 00:00008438 94E08BE2        	   391:  ADD     R14, R11, #xPlayer
 00:0000843C 3F009EE8        	   392:  LDMIA   R14, {R0-R5}
@@ -1036,7 +1036,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D70 98FFFFEB        	  1010:  BL      DropARockFromTheSky
 00:00008D74 0080BDE8        	  1011:  LDMFD   R13!, {PC}
                             	  1012: objectTypes:
-00:00008D78 98AA0000        	  1013: .long    objectPulsatingPyramid
+00:00008D78 98AA0000        	  1013: .long    objectPyramid
 00:00008D7C 04AD0000        	  1014: .long    objectSmallLeafyTree
 00:00008D80 24AE0000        	  1015: .long    objectTallLeafyTree
 00:00008D84 04AD0000        	  1016: .long    objectSmallLeafyTree
@@ -2885,7 +2885,7 @@ Source: "3-assembled-output/Lander.arm"
                             	  2843: snew3:
 00:0000A7E0 015055E2        	  2844:  SUBS    R5, R5, #1
 00:0000A7E4 EDFFFF5A        	  2845:  BPL     snew2
-00:0000A7E8 0900A0E3        	  2846:  MOV     R0, #OBJ_ROCKET
+00:0000A7E8 0900A0E3        	  2846:  MOV     R0, #LAUNCHPAD_OBJECT
 00:0000A7EC 0701C6E5        	  2847:  STRB    R0, [R6, #0x0107]
 00:0000A7F0 0703C6E5        	  2848:  STRB    R0, [R6, #0x0307]
 00:0000A7F4 0705C6E5        	  2849:  STRB    R0, [R6, #0x0507]
@@ -2899,9 +2899,9 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A810 0000A0E3        	  2857:  MOV     R0, #0
 00:0000A814 3C018BE5        	  2858:  STR     R0, [R11, #xCamera]
 00:0000A818 44018BE5        	  2859:  STR     R0, [R11, #zCamera]
-00:0000A81C 54018BE5        	  2860:  STR     R0, [R11, #rotationB]
+00:0000A81C 54018BE5        	  2860:  STR     R0, [R11, #shipDirection]
 00:0000A820 0100A0E3        	  2861:  MOV     R0, #1
-00:0000A824 58018BE5        	  2862:  STR     R0, [R11, #rotationA]
+00:0000A824 58018BE5        	  2862:  STR     R0, [R11, #shipPitch]
 00:0000A828 0103A0E3        	  2863:  MOV     R0, #LAUNCHPAD_SIZE/2
 00:0000A82C 0020A0E1        	  2864:  MOV     R2, R0
 00:0000A830 94308BE2        	  2865:  ADD     R3, R11, #xPlayer
@@ -3066,12 +3066,12 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AA8C 02000000
 00:0000AA90 04000000
 00:0000AA94 44040000
-                            	  2967: objectPulsatingPyramid:
+                            	  2967: objectPyramid:
 00:0000AA98 05000000        	  2968: .long    5
 00:0000AA9C 06000000        	  2969: .long    6
-00:0000AAA0 4C000000        	  2970: .long    objectPulsatingPyramidFaces - objectPulsatingPyramid
+00:0000AAA0 4C000000        	  2970: .long    objectPyramidFaces - objectPyramid
 00:0000AAA4 01000000        	  2971: .long    0x1
-                            	  2972: objectPulsatingPyramidVertices:
+                            	  2972: objectPyramidVertices:
 00:0000AAA8 00000000        	  2973: .long    0x00000000, 0x01000000, 0x00000000
 00:0000AAAC 00000001
 00:0000AAB0 00000000
@@ -3087,7 +3087,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000AAD8 000040FF        	  2977: .long    0xFF400000, 0xFF800000, 0xFF400000
 00:0000AADC 000080FF
 00:0000AAE0 000040FF
-                            	  2978: objectPulsatingPyramidFaces:
+                            	  2978: objectPyramidFaces:
 00:0000AAE4 00000000        	  2979: .long    0x00000000, 0x35AA66D2, 0x6B54CDA5,       0,       1,       2,   0x800
 00:0000AAE8 D266AA35
 00:0000AAEC A5CD546B
@@ -10291,6 +10291,7 @@ GetMouseInPolarCoordinates       A:00009574
 GetRandomNumbers                 A:00009A40
 GetVertexCoordinate              A:0000991C
 LAUNCHPAD_ALTITUDE               S:03500000
+LAUNCHPAD_OBJECT                 S:00000009
 LAUNCHPAD_SIZE                   S:08000000
 LAUNCHPAD_Y                      S:02EC0000
 LandOnLaunchpad                  A:00008654
@@ -10299,7 +10300,6 @@ MainLoop                         A:0000A850
 MoveAndDrawParticles             A:000087F4
 MoveAndDrawPlayer                A:00008398
 MultiplyVectorByMatrix           A:00009254
-OBJ_ROCKET                       S:00000009
 OS_BinaryToDecimal               S:00000028
 OS_Byte                          S:00000006
 OS_Mouse                         S:0000001C
@@ -10476,9 +10476,9 @@ objectPlayer                     A:0000AB8C
 objectPlayerAddr                 A:00008EBC
 objectPlayerFaces                A:0000AC08
 objectPlayerVertices             A:0000AB9C
-objectPulsatingPyramid           A:0000AA98
-objectPulsatingPyramidFaces      A:0000AAE4
-objectPulsatingPyramidVertices   A:0000AAA8
+objectPyramid                    A:0000AA98
+objectPyramidFaces               A:0000AAE4
+objectPyramidVertices            A:0000AAA8
 objectRock                       A:0000A960
 objectRockAddr                   A:00008EC0
 objectRockFaces                  A:0000A9B8
@@ -10521,8 +10521,6 @@ randomSeed1                      A:00009A38
 randomSeed2                      A:00009A3C
 remainingLives                   S:00000134
 rmat1                            A:00009450
-rotationA                        S:00000158
-rotationB                        S:00000154
 rotationMatrix                   S:00000030
 screenAddr                       A:00009A6C
 screenBank1Addr                  A:00009D30
@@ -10536,6 +10534,8 @@ ship5                            A:00008508
 ship6                            A:0000850C
 ship7                            A:000085F4
 ship8                            A:00008650
+shipDirection                    S:00000154
+shipPitch                        S:00000158
 sinTable                         A:0000B810
 sinTableAddr                     A:000091F0
 snew1                            A:0000A78C
@@ -10614,18 +10614,18 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 xObject
 00000000 OS_WriteC
+00000000 xObject
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
 00000007 OS_Word
 00000008 zObject
-00000009 OBJ_ROCKET
+00000009 LAUNCHPAD_OBJECT
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 rotationMatrix
 00000030 xNoseV
+00000030 rotationMatrix
 00000034 yNoseV
 00000038 zNoseV
 0000003C xRoofV
@@ -10634,8 +10634,8 @@ Symbols by value:
 00000048 xSideV
 0000004C ySideV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10673,8 +10673,8 @@ Symbols by value:
 00000144 zCamera
 00000148 xLandscape
 00000150 zLandscape
-00000154 rotationB
-00000158 rotationA
+00000154 shipDirection
+00000158 shipPitch
 0000015C fuelBurnRate
 00000160 xLandscapeRow
 00000168 zLandscapeRow
@@ -10924,9 +10924,9 @@ Symbols by value:
 0000A960 objectRock
 0000A970 objectRockVertices
 0000A9B8 objectRockFaces
-0000AA98 objectPulsatingPyramid
-0000AAA8 objectPulsatingPyramidVertices
-0000AAE4 objectPulsatingPyramidFaces
+0000AA98 objectPyramid
+0000AAA8 objectPyramidVertices
+0000AAE4 objectPyramidFaces
 0000AB8C objectPlayer
 0000AB9C objectPlayerVertices
 0000AC08 objectPlayerFaces

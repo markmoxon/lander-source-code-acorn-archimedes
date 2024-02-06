@@ -6,7 +6,7 @@
 .set OS_Word, 0x07
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
-.set OBJ_ROCKET, 9
+.set LAUNCHPAD_OBJECT, 9
 .set LAUNCHPAD_SIZE, 0x08000000
 .set LAUNCHPAD_Y, 0x02EC0000
 .set LAUNCHPAD_ALTITUDE, 0x03500000
@@ -72,8 +72,8 @@
 .set xLandscape, 0x148
 .set yLandscape, 0x14C
 .set zLandscape, 0x150
-.set rotationB, 0x154
-.set rotationA, 0x158
+.set shipDirection, 0x154
+.set shipPitch, 0x158
 .set fuelBurnRate, 0x15C
 .set xLandscapeRow, 0x160
 .set yLandscapeRow, 0x164
@@ -363,8 +363,8 @@ MoveAndDrawPlayer:
  MOVHS   R0, #0x40000000
  SUBHS   R0, R0, #1
  MOV     R0, R0, LSL #1
- LDR     R2, [R11, #rotationA]
- LDR     R3, [R11, #rotationB]
+ LDR     R2, [R11, #shipPitch]
+ LDR     R3, [R11, #shipDirection]
  SUBS    R4, R3, R1
  BMI     ship1
  CMP     R4, #0x30000000
@@ -385,8 +385,8 @@ ship3:
 ship4:
  SUB     R0, R2, R5, ASR #1
  SUB     R1, R3, R4, ASR #1
- STR     R0, [R11, #rotationA]
- STR     R1, [R11, #rotationB]
+ STR     R0, [R11, #shipPitch]
+ STR     R1, [R11, #shipDirection]
  BL      CalculateRotationMatrix
  ADD     R14, R11, #xPlayer
  LDMIA   R14, {R0-R5}
@@ -1010,7 +1010,7 @@ DropRocksFromTheSky:
  BL      DropARockFromTheSky
  LDMFD   R13!, {PC}
 objectTypes:
-.long    objectPulsatingPyramid
+.long    objectPyramid
 .long    objectSmallLeafyTree
 .long    objectTallLeafyTree
 .long    objectSmallLeafyTree
@@ -2843,7 +2843,7 @@ snew2:
 snew3:
  SUBS    R5, R5, #1
  BPL     snew2
- MOV     R0, #OBJ_ROCKET
+ MOV     R0, #LAUNCHPAD_OBJECT
  STRB    R0, [R6, #0x0107]
  STRB    R0, [R6, #0x0307]
  STRB    R0, [R6, #0x0507]
@@ -2857,9 +2857,9 @@ PlacePlayerOnLaunchpad:
  MOV     R0, #0
  STR     R0, [R11, #xCamera]
  STR     R0, [R11, #zCamera]
- STR     R0, [R11, #rotationB]
+ STR     R0, [R11, #shipDirection]
  MOV     R0, #1
- STR     R0, [R11, #rotationA]
+ STR     R0, [R11, #shipPitch]
  MOV     R0, #LAUNCHPAD_SIZE/2
  MOV     R2, R0
  ADD     R3, R11, #xPlayer
@@ -2964,18 +2964,18 @@ objectRockFaces:
 .long    0x54DA5200, 0x00000000, 0xAB25AE00,       5,       3,       1,   0x444
 .long    0x00000000, 0xAB25AE00, 0xAB25AE00,       5,       4,       3,   0x444
 .long    0xAB25AE00, 0x00000000, 0xAB25AE00,       5,       2,       4,   0x444
-objectPulsatingPyramid:
+objectPyramid:
 .long    5
 .long    6
-.long    objectPulsatingPyramidFaces - objectPulsatingPyramid
+.long    objectPyramidFaces - objectPyramid
 .long    0x1
-objectPulsatingPyramidVertices:
+objectPyramidVertices:
 .long    0x00000000, 0x01000000, 0x00000000
 .long    0x00C00000, 0xFF800000, 0x00C00000
 .long    0xFF400000, 0xFF800000, 0x00C00000
 .long    0x00C00000, 0xFF800000, 0xFF400000
 .long    0xFF400000, 0xFF800000, 0xFF400000
-objectPulsatingPyramidFaces:
+objectPyramidFaces:
 .long    0x00000000, 0x35AA66D2, 0x6B54CDA5,       0,       1,       2,   0x800
 .long    0x6B54CDA5, 0x35AA66D2, 0x00000000,       0,       3,       1,   0x088
 .long    0x00000000, 0x35AA66D2, 0x94AB325B,       0,       4,       3,   0x880

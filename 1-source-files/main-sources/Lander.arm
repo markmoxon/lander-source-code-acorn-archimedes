@@ -51,8 +51,8 @@
  OS_BinaryToDecimal = &28           \ The operating system call to convert a
                                     \ number into a string
 
- OBJ_ROCKET = 9                     \ The object type of the three rockets
-                                    \ along the edge of the launchpad
+ LAUNCHPAD_OBJECT = 9               \ The type of object along the right edge of
+                                    \ the launchpad (i.e. the three rockets)
 
  LAUNCHPAD_SIZE = &08000000         \ Size of the launchpad
 
@@ -282,9 +282,16 @@
  zLandscape = &150                  \ The 3D z-coordinate of the front-left
                                     \ corner of the on-screen landscape
 
- rotationB = &154                   \ Player angle b in the rotation matrix
+ shipDirection = &154               \ The direction in which the player's ship
+                                    \ faces, which is angle b in the rotation
+                                    \ matrix, and which is determined by the
+                                    \ angle of the mouse from the centre point
 
- rotationA = &158                   \ Player angle a in the rotation matrix
+
+ shipPitch = &158                   \ The pitch of the player's ship, which is
+                                    \ angle a in the rotation matrix, and which
+                                    \ is determined by the distance of the mouse
+                                    \ from the centre point
 
  fuelBurnRate = &15C                \ The current fuel burn rate (bit 0 is
                                     \ ignored)
@@ -1466,7 +1473,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Process player movement and draw the player's ship into the
-\             graphics buffers
+\             graphics buffers, starting with reading the mouse position
 \
 \ ******************************************************************************
 
@@ -1541,12 +1548,12 @@ ENDIF
 
  MOV     R0, R0, LSL #1             \ Scale R0 to the range 0 to &7FFFFFFE
 
- LDR     R2, [R11, #rotationA]      \ Set R2 = rotationA
+ LDR     R2, [R11, #shipPitch]      \ Set R2 = shipPitch
 
- LDR     R3, [R11, #rotationB]      \ Set R3 = rotationB
+ LDR     R3, [R11, #shipDirection]  \ Set R3 = shipDirection
 
  SUBS    R4, R3, R1                 \ Set R4 = R3 - R1
-                                    \        = rotationB - polar angle
+                                    \        = shipDirection - polar angle
 
  BMI     ship1                      \ If the result is negative, jump to ship1
                                     \ so we cap R4 against negative values
@@ -1565,7 +1572,7 @@ ENDIF
 .ship2
 
  SUBS    R5, R2, R0                 \ Set R5 = R2 - R0
-                                    \        = rotationA - polar distance
+                                    \        = shipPitch - polar distance
 
  BLE     ship3                      \ If the result is zero or negative, jump to
                                     \ ship3 so we cap R5 against negative values
@@ -1592,16 +1599,16 @@ ENDIF
                                     \ apply some kind of damping to the controls
 
  SUB     R0, R2, R5, ASR #1         \ Set R0 = R2 - R5 / 2
-                                    \        = rotationA
-                                    \          - (rotationA - distance) / 2
+                                    \        = shipPitch
+                                    \          - (shipPitch - distance) / 2
 
  SUB     R1, R3, R4, ASR #1         \ Set R1 = R3 - R4 / 2
-                                    \        = rotationB
-                                    \          - (rotationB - angle) / 2
+                                    \        = shipDirection
+                                    \          - (shipDirection - angle) / 2
 
- STR     R0, [R11, #rotationA]      \ Store the updated value in rotationA
+ STR     R0, [R11, #shipPitch]      \ Store the updated value in shipPitch
 
- STR     R1, [R11, #rotationB]      \ Store the updated value in rotationB
+ STR     R1, [R11, #shipDirection]  \ Store the updated value in shipDirection
 
  BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
                                     \ updated angles given in R0 and R1, so
@@ -1617,8 +1624,7 @@ ENDIF
 \       Name: MoveAndDrawPlayer (Part 2 of ???)
 \       Type: Subroutine
 \   Category: Player
-\    Summary: Process player movement and draw the player's ship into the
-\             graphics buffers
+\    Summary: Update the player's velocity and coordinates
 \
 \ ******************************************************************************
 
@@ -1635,6 +1641,10 @@ ENDIF
                                     \ So (R0, R1, R2) is the player's coordinate
                                     \ and (R3, R4, R5) is the player's velocity
                                     \ vector
+                                    \
+                                    \ We now update the velocity by adding in
+                                    \ various factors such as friction, thrust
+                                    \ and gravity
 
  CMN     R1, #&34000000             \ If R1 < -&34000000, clear bits 2 and 3 of
  LDRLTB  R9, [R11, #fuelBurnRate]   \ the fuel burn rate, as the ship's altitude
@@ -1654,50 +1664,139 @@ ENDIF
                                     \ fuel burn rate, which is set if the left
                                     \ button is being pressed (i.e. full thrust)
 
+                                    \ We start by updating xVelocity in R3
+
  SUB     R3, R3, R3, ASR #6         \ Set R3 = R3 - R3 >> 6
                                     \        = xVelocity - (xVelocity / 64)
+                                    \
+                                    \ This reduces the velocity along the x-axis
+                                    \ by 1/64, so this applies a deceleration in
+                                    \ this direction (due to friction)
 
- SUBNE   R3, R3, R6, ASR #11        \ Reduce R3 by a further yNoseV / 2048 if
-                                    \ full thrust is being pressed
+ SUBNE   R3, R3, R6, ASR #11        \ Increase R3 by a further yNoseV / 2048 if
+                                    \ full thrust is being pressed, so this
+                                    \ applies the engine thrust
+                                    \
+                                    \ We subtract the thrust rather than adding
+                                    \ it because the direction of the y-axis is
+                                    \ reversed (positive is down rather than up)
+                                    \ so we add downward forces and subtract
+                                    \ upward forces
 
  ADD     R0, R0, R3                 \ Set R0 = R0 + R3
                                     \        = xPlayer + R3
+                                    \
+                                    \ This applies the newly calculated velocity
+                                    \ to the player's x-coordinate, which moves
+                                    \ the player in 3D space
+
+                                    \ Next we update yVelocity in R4
 
  SUB     R4, R4, R4, ASR #6         \ Set R4 = R4 - R4 >> 6
-                                    \        = yVelocity - (yVelocity >> 6)
+                                    \        = yVelocity - (yVelocity / 64)
+                                    \
+                                    \ This reduces the velocity along the y-axis
+                                    \ by 1/64, so this applies a deceleration in
+                                    \ this direction (due to friction)
 
- SUBNE   R4, R4, R7, ASR #11        \ Reduce R4 by a further yRoofV / 2048 if
-                                    \ full thrust is being pressed
+ SUBNE   R4, R4, R7, ASR #11        \ Increase R3 by a further yRoofV / 2048 if
+                                    \ full thrust is being pressed, so this
+                                    \ applies the engine thrust
+                                    \
+                                    \ We subtract the thrust rather than adding
+                                    \ it because the direction of the y-axis is
+                                    \ reversed (positive is down rather than up)
+                                    \ so we add downward forces and subtract
+                                    \ upward forces
 
  ADD     R1, R1, R4                 \ Set R1 = R1 + R4
                                     \        = yPlayer + R4
+                                    \
+                                    \ This applies the newly calculated velocity
+                                    \ to the player's y-coordinate, which moves
+                                    \ the player in 3D space
+
+                                    \ And finally we update zVelocity in R4
 
  SUB     R5, R5, R5, ASR #6         \ Set R5 = R5 - R5 >> 6
-                                    \        = zVelocity - (zVelocity >> 6)
+                                    \        = zVelocity - (zVelocity / 64)
+                                    \
+                                    \ This reduces the velocity along the z-axis
+                                    \ by 1/64, so this applies a deceleration in
+                                    \ this direction (due to friction)
 
- SUBNE   R5, R5, R8, ASR #11        \ Reduce R5 by a further ySideV / 2048 if
-                                    \ full thrust is being pressed
+ SUBNE   R5, R5, R8, ASR #11        \ Increase R3 by a further ySideV / 2048 if
+                                    \ full thrust is being pressed, so this
+                                    \ applies the engine thrust
+                                    \
+                                    \ We subtract the thrust rather than adding
+                                    \ it because the direction of the y-axis is
+                                    \ reversed (positive is down rather than up)
+                                    \ so we add downward forces and subtract
+                                    \ upward forces
 
  ADD     R2, R2, R5                 \ Set R2 = R2 + R5
                                     \        = zPlayer + R5
+                                    \
+                                    \ This applies the newly calculated velocity
+                                    \ to the player's z-coordinate, which moves
+                                    \ the player in 3D space
+
+                                    \ By this point we have updated the player's
+                                    \ coordinates in (R0, R1, R2) by the new
+                                    \ velocity in (R3, R4, R5)
 
  TST     R9, #%00000010             \ Set the flags according to bit 1 of the
                                     \ fuel burn rate, which is set if the middle
                                     \ button is being pressed (i.e. hover)
 
- SUBNE   R3, R3, R6, ASR #13        \ 
- SUBNE   R4, R4, R7, ASR #13        \ 
- SUBNE   R5, R5, R8, ASR #13        \ 
+ SUBNE   R3, R3, R6, ASR #13        \ If the middle button is being pressed, for
+ SUBNE   R4, R4, R7, ASR #13        \ hovering mode, then apply a quarter of the
+ SUBNE   R5, R5, R8, ASR #13        \ full thrust vector to the velocity, rather
+                                    \ than the full thrust vector we apply for
+                                    \ the left button
+                                    \
+                                    \ Note that the hover thrust is applied
+                                    \ after we applied the velocity vector to
+                                    \ the player's coordinates, so hovering has
+                                    \ a slightly delayed impact on the ship, to
+                                    \ simulate the effects of inertia
 
- LDR     R9, [R11, #gravity]        \ 
- ADD     R4, R4, R9                 \ 
+ LDR     R9, [R11, #gravity]        \ Add the effect of gravity to yVelocity in
+ ADD     R4, R4, R9                 \ R4, adding it to R4 as it is a downwards
+                                    \ force along the z-axis
 
- STMIA   R14, {R0-R8}               \ 
+ STMIA   R14, {R0-R8}               \ Store the updated player coordinates and
+                                    \ velocity as follows:
+                                    \
+                                    \   xPlayer = R0
+                                    \   yPlayer = R1
+                                    \   zPlayer = R2
+                                    \
+                                    \   xVelocity = R3
+                                    \   yVelocity = R4
+                                    \   zVelocity = R5
+                                    \
+                                    \ We also store the the y-axis of the
+                                    \ rotation matrix in (R6, R7, R8) into the
+                                    \ three words after zVelocity, though these
+                                    \ don't appear to be used
 
- CMP     R1, #0                     \ 
- MOVPL   R1, #0                     \ 
+\ ******************************************************************************
+\
+\       Name: MoveAndDrawPlayer (Part 3 of ???)
+\       Type: Subroutine
+\   Category: Player
+\    Summary: ???
+\
+\ ******************************************************************************
 
- ADD     R2, R2, #&05000000         \ 
+ CMP     R1, #0                     \ If R1 (i.e. yPlayer) is positive, then set
+ MOVPL   R1, #0                     \ it to zero as the player can't fly that
+                                    \ high
+
+ ADD     R2, R2, #&05000000         \ Set R2 to the y-coordinate that's five
+                                    \ tiles directly below the player
 
  ADD     R14, R11, #xCamera         \ 
  STMIA   R14, {R0-R2}               \ 
@@ -2826,7 +2925,8 @@ ENDIF
 \ Objects 0, 12 and 24 do not appear to be used anywhere. There are two
 \ additional objects - the player's ship and the rock - which are defined in
 \ the objectPlayer and objectRock tables, but which do not have assigned types,
-\ so they can't be placed on the object map.
+\ so they can't be placed on the object map, but instead are spawned above
+\ ground level.
 \
 \ This table links to the data for each object. Object data is shared, so types
 \ 1, 3 and 4 are all identical small leafy trees, for example. However, when
@@ -2837,7 +2937,7 @@ ENDIF
 
 .objectTypes
 
- EQUD    objectPulsatingPyramid     \ 0  = pulsating, rotating pyramid
+ EQUD    objectPyramid              \ 0  = rotating pyramid (unused)
  EQUD    objectSmallLeafyTree       \ 1  = small leafy tree
  EQUD    objectTallLeafyTree        \ 2  = tall leafy tree
  EQUD    objectSmallLeafyTree       \ 3  = small leafy tree
@@ -2850,7 +2950,7 @@ ENDIF
  EQUD    objectRocket               \ 10 = rocket
  EQUD    objectRocket               \ 11 = rocket
 
- EQUD    objectRocket               \ 12 = intact rocket with smoke cloud
+ EQUD    objectRocket               \ 12 = smoking but intact rocket (unused)
  EQUD    objectSmokingRemainsRight  \ 13 = smoking remains (bends to the right)
  EQUD    objectSmokingRemainsLeft   \ 14 = smoking remains (bends to the left)
  EQUD    objectSmokingRemainsLeft   \ 15 = smoking remains (bends to the left)
@@ -2863,7 +2963,7 @@ ENDIF
  EQUD    objectSmokingRemainsLeft   \ 22 = smoking remains (bends to the left)
  EQUD    objectSmokingRemainsLeft   \ 23 = smoking remains (bends to the left)
 
- EQUD    objectSmokingRemainsLeft   \ 24 = smoking remains (bends to the left)
+ EQUD    objectSmokingRemainsLeft   \ 24 = smoking remains (unused)
 
 \ ******************************************************************************
 \
@@ -3772,13 +3872,13 @@ ENDIF
  MOV     R2, #19                    \ Set R2 = 19, to use as the size of the
                                     \ string buffer in the following call
 
- CMP     R0, #1024                  \ If R0 >= 1024, set gravity = &50000
- MOVHS   R4, #&50000                \ 
- STRHS   R4, [R11, #gravity]        \ 
+ CMP     R0, #1024                  \ If R0 >= 1024, set gravity = &50000, so
+ MOVHS   R4, #&50000                \ gravity increases from the starting value
+ STRHS   R4, [R11, #gravity]        \ of &30000 when we reach a score of 1024
 
- CMP     R0, #1488                  \ If R0 >= 1488, set gravity = &70000
- MOVHS   R4, #&70000
- STRHS   R4, [R11, #gravity]
+ CMP     R0, #1488                  \ If R0 >= 1488, set gravity = &70000, so
+ MOVHS   R4, #&70000                \ gravity increases again when we reach a
+ STRHS   R4, [R11, #gravity]        \ score of 1488
 
  SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
                                     \ string and store it in the buffer at R1
@@ -8141,7 +8241,9 @@ ENDIF
                                     \ z-axis, and with each one having an
                                     \ x-coordinate of 7
 
- MOV     R0, #OBJ_ROCKET            \ Set R0 to the object type for the rocket
+ MOV     R0, #LAUNCHPAD_OBJECT      \ Set R0 to the type of object along the
+                                    \ right edge of the launchpad, which is a
+                                    \ rocket of type 9
 
  STRB    R0, [R6, #&0107]           \ Add the front rocket to coordinate (7, 1)
 
@@ -8180,10 +8282,10 @@ ENDIF
                                     \ yCamera is never changed from its
                                     \ initial zero
 
- STR     R0, [R11, #rotationB]      \ Set rotationB = 0 ???
+ STR     R0, [R11, #shipDirection]  \ Set shipDirection = 0 ???
 
- MOV     R0, #1                     \ Set rotationA = 1 ???
- STR     R0, [R11, #rotationA]
+ MOV     R0, #1                     \ Set shipPitch = 1 ???
+ STR     R0, [R11, #shipPitch]
 
  MOV     R0, #LAUNCHPAD_SIZE/2      \ Set the starting coordinates of the
  MOV     R2, R0                     \ player's ship as follows:
@@ -8473,25 +8575,25 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: objectPulsatingPyramid
+\       Name: objectPyramid
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for a rotating pyramid with pulsating colours
+\    Summary: Object data for a rotating pyramid
 \
 \ ******************************************************************************
 
-.objectPulsatingPyramid
+.objectPyramid
 
  EQUD    5                          \ Number of vertices
 
  EQUD    6                          \ Number of faces
 
- EQUD    objectPulsatingPyramidFaces - objectPulsatingPyramid
+ EQUD    objectPyramidFaces - objectPyramid
 
  EQUD    %00000001                  \ Flags: Bit 0 = 1 = object rotates
                                     \        Bit 1 = 0 = object has no shadow
 
-.objectPulsatingPyramidVertices
+.objectPyramidVertices
 
     \      xObject,   yObject,   zObject
  EQUD    &00000000, &01000000, &00000000        \ Vertex 0
@@ -8500,7 +8602,7 @@ ENDIF
  EQUD    &00C00000, &FF800000, &FF400000        \ Vertex 3
  EQUD    &FF400000, &FF800000, &FF400000        \ Vertex 4
 
-.objectPulsatingPyramidFaces
+.objectPyramidFaces
 
     \      xNormal,   yNormal,   zNormal, vertex1, vertex2, vertex3, colour
  EQUD    &00000000, &35AA66D2, &6B54CDA5,       0,       1,       2,   &800 \ 0
