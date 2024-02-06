@@ -1584,19 +1584,19 @@ pole1:
  MOVS    R14, R14, LSR #1
  BCC     pole1
  MOVS    R2, R2, LSL #24
- B       pole3
+ B       pole4
 pole2:
  MOV     R2, #0
  MOV     R14, #0x80
-lab_95D4:
+pole3:
  MOVS    R1, R1, LSL #1
  CMPLO   R1, R0
  SUBHS   R1, R1, R0
  ORRHS   R2, R2, R14
  MOVS    R14, R14, LSR #1
- BLO     lab_95D4
+ BLO     pole3
  MOVS    R2, R2, LSL #24
-pole3:
+pole4:
  LDR     R14, arctanTableAddr
  BIC     R2, R2, #0x01800000
  LDR     R1, [R14, R2, LSR #23]
@@ -1610,21 +1610,21 @@ pole3:
  AND     R3, R3, #0xFE000000
  ORR     R3, R3, #0x01000000
  MOV     R4, #0
-pole4:
+pole5:
  MOV     R0, R0, LSR #1
  ADDHS   R4, R4, R0
  MOVS    R3, R3, LSL #1
- BNE     pole4
+ BNE     pole5
  MOV     R3, R2
  MOVS    R3, R3, LSL #1
  AND     R3, R3, #0xFE000000
  ORR     R3, R3, #0x01000000
  MOV     R14, #0
-pole5:
+pole6:
  MOV     R2, R2, LSR #1
  ADDHS   R14, R14, R2
  MOVS    R3, R3, LSL #1
- BNE     pole5
+ BNE     pole6
  ADD     R2, R14, R4
  LDR     R14, squareRootTableAddr
  BIC     R2, R2, #0x00300000

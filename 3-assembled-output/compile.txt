@@ -1610,19 +1610,19 @@ Source: "3-assembled-output/Lander.arm"
 00:000095BC AEE0B0E1        	  1584:  MOVS    R14, R14, LSR #1
 00:000095C0 F9FFFF3A        	  1585:  BCC     pole1
 00:000095C4 022CB0E1        	  1586:  MOVS    R2, R2, LSL #24
-00:000095C8 080000EA        	  1587:  B       pole3
+00:000095C8 080000EA        	  1587:  B       pole4
                             	  1588: pole2:
 00:000095CC 0020A0E3        	  1589:  MOV     R2, #0
 00:000095D0 80E0A0E3        	  1590:  MOV     R14, #0x80
-                            	  1591: lab_95D4:
+                            	  1591: pole3:
 00:000095D4 8110B0E1        	  1592:  MOVS    R1, R1, LSL #1
 00:000095D8 00005131        	  1593:  CMPLO   R1, R0
 00:000095DC 00104120        	  1594:  SUBHS   R1, R1, R0
 00:000095E0 0E208221        	  1595:  ORRHS   R2, R2, R14
 00:000095E4 AEE0B0E1        	  1596:  MOVS    R14, R14, LSR #1
-00:000095E8 F9FFFF3A        	  1597:  BLO     lab_95D4
+00:000095E8 F9FFFF3A        	  1597:  BLO     pole3
 00:000095EC 022CB0E1        	  1598:  MOVS    R2, R2, LSL #24
-                            	  1599: pole3:
+                            	  1599: pole4:
 00:000095F0 04E41FE5        	  1600:  LDR     R14, arctanTableAddr
 00:000095F4 0625C2E3        	  1601:  BIC     R2, R2, #0x01800000
 00:000095F8 A21B9EE7        	  1602:  LDR     R1, [R14, R2, LSR #23]
@@ -1636,21 +1636,21 @@ Source: "3-assembled-output/Lander.arm"
 00:00009618 FE3403E2        	  1610:  AND     R3, R3, #0xFE000000
 00:0000961C 013483E3        	  1611:  ORR     R3, R3, #0x01000000
 00:00009620 0040A0E3        	  1612:  MOV     R4, #0
-                            	  1613: pole4:
+                            	  1613: pole5:
 00:00009624 A000A0E1        	  1614:  MOV     R0, R0, LSR #1
 00:00009628 00408420        	  1615:  ADDHS   R4, R4, R0
 00:0000962C 8330B0E1        	  1616:  MOVS    R3, R3, LSL #1
-00:00009630 FBFFFF1A        	  1617:  BNE     pole4
+00:00009630 FBFFFF1A        	  1617:  BNE     pole5
 00:00009634 0230A0E1        	  1618:  MOV     R3, R2
 00:00009638 8330B0E1        	  1619:  MOVS    R3, R3, LSL #1
 00:0000963C FE3403E2        	  1620:  AND     R3, R3, #0xFE000000
 00:00009640 013483E3        	  1621:  ORR     R3, R3, #0x01000000
 00:00009644 00E0A0E3        	  1622:  MOV     R14, #0
-                            	  1623: pole5:
+                            	  1623: pole6:
 00:00009648 A220A0E1        	  1624:  MOV     R2, R2, LSR #1
 00:0000964C 02E08E20        	  1625:  ADDHS   R14, R14, R2
 00:00009650 8330B0E1        	  1626:  MOVS    R3, R3, LSL #1
-00:00009654 FBFFFF1A        	  1627:  BNE     pole5
+00:00009654 FBFFFF1A        	  1627:  BNE     pole6
 00:00009658 04208EE0        	  1628:  ADD     R2, R14, R4
 00:0000965C 6CE41FE5        	  1629:  LDR     R14, squareRootTableAddr
 00:00009660 0326C2E3        	  1630:  BIC     R2, R2, #0x00300000
@@ -10382,7 +10382,6 @@ lab_8D14                         A:00008D14
 lab_9498                         A:00009498
 lab_94E4                         A:000094E4
 lab_9530                         A:00009530
-lab_95D4                         A:000095D4
 lab_96A8                         A:000096A8
 lab_96DC                         A:000096DC
 lab_9700                         A:00009700
@@ -10509,9 +10508,10 @@ objectTypes                      A:00008D78
 playingGame                      S:00000130
 pole1                            A:000095AC
 pole2                            A:000095CC
-pole3                            A:000095F0
-pole4                            A:00009624
-pole5                            A:00009648
+pole3                            A:000095D4
+pole4                            A:000095F0
+pole5                            A:00009624
+pole6                            A:00009648
 prevAltitude                     S:00000104
 previousColumn                   S:000000C4
 prsb1                            A:000091A0
@@ -10791,10 +10791,10 @@ Symbols by value:
 00009574 GetMouseInPolarCoordinates
 000095AC pole1
 000095CC pole2
-000095D4 lab_95D4
-000095F0 pole3
-00009624 pole4
-00009648 pole5
+000095D4 pole3
+000095F0 pole4
+00009624 pole5
+00009648 pole6
 00009670 ProjectParticleOntoScreen
 000096A8 lab_96A8
 000096DC lab_96DC

@@ -1469,7 +1469,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawPlayer (Part 1 of ???)
+\       Name: MoveAndDrawPlayer (Part 1 of 5)
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Process player movement and draw the player's ship into the
@@ -1621,7 +1621,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawPlayer (Part 2 of ???)
+\       Name: MoveAndDrawPlayer (Part 2 of 5)
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Update the player's velocity and coordinates
@@ -1784,28 +1784,30 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawPlayer (Part 3 of ???)
+\       Name: MoveAndDrawPlayer (Part 3 of 5)
 \       Type: Subroutine
 \   Category: Player
-\    Summary: ???
+\    Summary: Check for collisions and draw the ship
 \
 \ ******************************************************************************
 
- CMP     R1, #0                     \ If R1 (i.e. yPlayer) is positive, then set
- MOVPL   R1, #0                     \ it to zero as the player can't fly that
-                                    \ high
+ CMP     R1, #0                     \ If R1 (i.e. the y-coordinate of the ship)
+ MOVPL   R1, #0                     \ is positive, then set it to zero
 
- ADD     R2, R2, #&05000000         \ Set R2 to the y-coordinate that's five
-                                    \ tiles directly below the player
+ ADD     R2, R2, #&05000000         \ Set R2 to the z-coordinate that's five
+                                    \ tiles into the screen from the player
 
- ADD     R14, R11, #xCamera         \ 
- STMIA   R14, {R0-R2}               \ 
+ ADD     R14, R11, #xCamera         \ Set (xCamera, yCamera, zCamera) to the
+ STMIA   R14, {R0-R2}               \ coordinates in (R0, R1, R2), which is
+                                    \ for the point that's five tiles into the
+                                    \ screen from the player
+                                    \
+                                    \ This sets the camera so that it follows
+                                    \ the player's ship as it flies around
 
- MOV     R8, R0                     \ 
-
- MOV     R9, R2                     \ 
-
- SUB     R9, R9, #&05000000         \ 
+ MOV     R8, R0                     \ Set (R8, R9) to the point on the landscape
+ MOV     R9, R2                     \ that's directly below the player
+ SUB     R9, R9, #&05000000
 
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9)
@@ -1862,6 +1864,15 @@ ENDIF
 
  CMP     R10, #0                    \ 
  BLNE    LoseLife                   \ 
+
+\ ******************************************************************************
+\
+\       Name: MoveAndDrawPlayer (Part 4 of 5)
+\       Type: Subroutine
+\   Category: Player
+\    Summary: Draw the exhaust plume
+\
+\ ******************************************************************************
 
  LDRB    R10, [R11, #fuelBurnRate]  \ 
  TST     R10, #6                    \ 
@@ -1930,6 +1941,15 @@ ENDIF
  LDMFD   R13!, {R0-R9}              \ 
 
  BL      sub_8A8C                   \ 
+
+\ ******************************************************************************
+\
+\       Name: MoveAndDrawPlayer (Part 5 of 5)
+\       Type: Subroutine
+\   Category: Player
+\    Summary: Calculate bullet trajectories
+\
+\ ******************************************************************************
 
 .ship7
 
@@ -4828,7 +4848,7 @@ ENDIF
                                     \
                                     \   R2 = 2^24 * (|xMouse| / |yMouse|)
 
- B       pole3                      \ Jump to pole3 to skip the following
+ B       pole4                      \ Jump to pole4 to skip the following
 
 .pole2
 
@@ -4841,17 +4861,17 @@ ENDIF
                                     \
                                     \ This is the first part of the algorithm
 
-.lab_95D4
+.pole3
 
  MOVS    R1, R1, LSL #1             \ This is the second part of the algorithm,
  CMPLO   R1, R0                     \ so now we have:
  SUBHS   R1, R1, R0                 \
  ORRHS   R2, R2, R14                \   R2 = 2^24 * (|yMouse| / |xMouse|)
  MOVS    R14, R14, LSR #1
- BLO     lab_95D4
+ BLO     pole3
  MOVS    R2, R2, LSL #24
 
-.pole3
+.pole4
 
                                     \ At this point we have calculated one of
                                     \ the following, with the smaller coordinate
@@ -4942,14 +4962,14 @@ ENDIF
  MOV     R4, #0                     \ Set R4 = 0 to use for building the sum in
                                     \ our shift-and-add multiplication result
 
-.pole4
+.pole5
 
  MOV     R0, R0, LSR #1             \ If bit 0 of R0 is set, add R0 to the
  ADDHS   R4, R4, R0                 \ result in R4, shifting R0 to the right
 
  MOVS    R3, R3, LSL #1             \ Shift R3 left by one place
 
- BNE     pole4                      \ Loop back if R3 is non-zero
+ BNE     pole5                      \ Loop back if R3 is non-zero
 
                                     \ Next we calculate R14 = R2 * R2 using the
                                     \ shift-and-add multiplication algorithm,
@@ -4971,14 +4991,14 @@ ENDIF
  MOV     R14, #0                    \ Set R14 = 0 to use for building the sum in
                                     \ our shift-and-add multiplication result
 
-.pole5
+.pole6
 
  MOV     R2, R2, LSR #1             \ If bit 0 of R2 is set, add R2 to the
  ADDHS   R14, R14, R2               \ result in R14, shifting R2 to the right
 
  MOVS    R3, R3, LSL #1             \ Shift R3 left by one place
 
- BNE     pole5                      \ Loop back if R3 is non-zero
+ BNE     pole6                      \ Loop back if R3 is non-zero
 
                                     \ So by this point we have the following:
                                     \
@@ -8278,9 +8298,10 @@ ENDIF
 
  MOV     R0, #0                     \ Set xCamera = 0 and zCamera = 0
  STR     R0, [R11, #xCamera]        \
- STR     R0, [R11, #zCamera]        \ This sets the camera at (0, 0, 0), as
-                                    \ yCamera is never changed from its
-                                    \ initial zero
+ STR     R0, [R11, #zCamera]        \ This doesn't have any effect as the camera
+                                    \ position is set at the start of the main
+                                    \ loop by the call to MoveAndDrawPlayer,
+                                    \ which overwrites these values
 
  STR     R0, [R11, #shipDirection]  \ Set shipDirection = 0 ???
 
