@@ -661,7 +661,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008808 0094BD08        	   635:  LDMEQFD R13!, {R10, R12, PC}
                             	   636: lab_880C:
 00:0000880C 016056E2        	   637:  SUBS    R6, R6, #1
-00:00008810 9000000A        	   638:  BEQ     lab_8A58
+00:00008810 9000000A        	   638:  BEQ     sub_8A58
 00:00008814 030080E0        	   639:  ADD     R0, R0, R3
 00:00008818 041081E0        	   640:  ADD     R1, R1, R4
 00:0000881C 052082E0        	   641:  ADD     R2, R2, R5
@@ -765,11 +765,11 @@ Source: "3-assembled-output/Lander.arm"
                             	   739: sub_8998:
 00:00008998 0910A0E1        	   740:  MOV     R1, R9
 00:0000899C 550659E3        	   741:  CMP     R9, #SEA_LEVEL
-00:000089A0 2300000A        	   742:  BEQ     lab_8A34
+00:000089A0 2300000A        	   742:  BEQ     sub_8A34
 00:000089A4 020717E3        	   743:  TST     R7, #0x00080000
-00:000089A8 2A00000A        	   744:  BEQ     lab_8A58
+00:000089A8 2A00000A        	   744:  BEQ     sub_8A58
 00:000089AC 010417E3        	   745:  TST     R7, #0x01000000
-00:000089B0 1C00001A        	   746:  BNE     lab_8A28
+00:000089B0 1C00001A        	   746:  BNE     sub_8A28
 00:000089B4 C330A0E1        	   747:  MOV     R3, R3, ASR #1
 00:000089B8 C440A0E1        	   748:  MOV     R4, R4, ASR #1
 00:000089BC C550A0E1        	   749:  MOV     R5, R5, ASR #1
@@ -790,7 +790,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000089F4 FF0058E3        	   764:  CMP     R8, #0xFF
 00:000089F8 F4F09B05        	   765:  LDREQ   PC, [R11, #objectType]
 00:000089FC 0C0058E3        	   766:  CMP     R8, #0xC
-00:00008A00 0800002A        	   767:  BHS     lab_8A28
+00:00008A00 0800002A        	   767:  BHS     sub_8A28
 00:00008A04 0C8088E2        	   768:  ADD     R8, R8, #0xC
 00:00008A08 0080CEE5        	   769:  STRB    R8, [R14]
 00:00008A0C 020817E3        	   770:  TST     R7, #0x00020000
@@ -799,14 +799,14 @@ Source: "3-assembled-output/Lander.arm"
 00:00008A18 24818B05        	   773:  STREQ   R8, [R11, #currentScore]
 00:00008A1C 1480A0E3        	   774:  MOV     R8, #0x14
 00:00008A20 A50000EB        	   775:  BL      sub_8CBC
-00:00008A24 0B0000EA        	   776:  B       lab_8A58
-                            	   777: lab_8A28:
+00:00008A24 0B0000EA        	   776:  B       sub_8A58
+                            	   777: sub_8A28:
 00:00008A28 0380A0E3        	   778:  MOV     R8, #3
 00:00008A2C A20000EB        	   779:  BL      sub_8CBC
-00:00008A30 080000EA        	   780:  B       lab_8A58
-                            	   781: lab_8A34:
+00:00008A30 080000EA        	   780:  B       sub_8A58
+                            	   781: sub_8A34:
 00:00008A34 010717E3        	   782:  TST     R7, #0x00040000
-00:00008A38 0600000A        	   783:  BEQ     lab_8A58
+00:00008A38 0600000A        	   783:  BEQ     sub_8A58
 00:00008A3C 020517E3        	   784:  TST     R7, #0x00800000
 00:00008A40 4180A013        	   785:  MOVNE   R8, #0x41
 00:00008A44 0480A003        	   786:  MOVEQ   R8, #4
@@ -815,7 +815,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008A4C 810000EB        	   789:  BL      sub_8C58
 00:00008A50 018058E2        	   790:  SUBS    R8, R8, #1
 00:00008A54 FCFFFF1A        	   791:  BNE     lab_8A4C
-                            	   792: lab_8A58:
+                            	   792: sub_8A58:
 00:00008A58 08819BE5        	   793:  LDR     R8, [R11, #var_108]
 00:00008A5C 208048E2        	   794:  SUB     R8, R8, #0x20
 00:00008A60 08818BE5        	   795:  STR     R8, [R11, #var_108]
@@ -10370,10 +10370,7 @@ lab_8800                         A:00008800
 lab_880C                         A:0000880C
 lab_88E8                         A:000088E8
 lab_8904                         A:00008904
-lab_8A28                         A:00008A28
-lab_8A34                         A:00008A34
 lab_8A4C                         A:00008A4C
-lab_8A58                         A:00008A58
 lab_8A98                         A:00008A98
 lab_8AA0                         A:00008AA0
 lab_8AC8                         A:00008AC8
@@ -10551,6 +10548,9 @@ sub_86C4                         A:000086C4
 sub_893C                         A:0000893C
 sub_8998                         A:00008998
 sub_89C8                         A:000089C8
+sub_8A28                         A:00008A28
+sub_8A34                         A:00008A34
+sub_8A58                         A:00008A58
 sub_8A84                         A:00008A84
 sub_8A8C                         A:00008A8C
 sub_8A94                         A:00008A94
@@ -10614,8 +10614,8 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 OS_WriteC
 00000000 xObject
+00000000 OS_WriteC
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10634,8 +10634,8 @@ Symbols by value:
 00000048 xSideV
 0000004C ySideV
 00000050 zSideV
-00000054 varOffset
 00000054 xVertex
+00000054 varOffset
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10686,8 +10686,8 @@ Symbols by value:
 00000600 vertexProjected
 00000700 var_700
 00004400 objectMap
-00008000 CODE
 00008000 landscapeOrigin
+00008000 CODE
 0000800C landscapeOriginAddr
 00008010 landscapeConfig
 00008028 landscapeConfigAddr
@@ -10725,10 +10725,10 @@ Symbols by value:
 0000893C sub_893C
 00008998 sub_8998
 000089C8 sub_89C8
-00008A28 lab_8A28
-00008A34 lab_8A34
+00008A28 sub_8A28
+00008A34 sub_8A34
 00008A4C lab_8A4C
-00008A58 lab_8A58
+00008A58 sub_8A58
 00008A84 sub_8A84
 00008A8C sub_8A8C
 00008A94 sub_8A94

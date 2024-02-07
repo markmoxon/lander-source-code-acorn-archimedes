@@ -635,7 +635,7 @@ lab_8800:
  LDMEQFD R13!, {R10, R12, PC}
 lab_880C:
  SUBS    R6, R6, #1
- BEQ     lab_8A58
+ BEQ     sub_8A58
  ADD     R0, R0, R3
  ADD     R1, R1, R4
  ADD     R2, R2, R5
@@ -739,11 +739,11 @@ sub_893C:
 sub_8998:
  MOV     R1, R9
  CMP     R9, #SEA_LEVEL
- BEQ     lab_8A34
+ BEQ     sub_8A34
  TST     R7, #0x00080000
- BEQ     lab_8A58
+ BEQ     sub_8A58
  TST     R7, #0x01000000
- BNE     lab_8A28
+ BNE     sub_8A28
  MOV     R3, R3, ASR #1
  MOV     R4, R4, ASR #1
  MOV     R5, R5, ASR #1
@@ -764,7 +764,7 @@ sub_89C8:
  CMP     R8, #0xFF
  LDREQ   PC, [R11, #objectType]
  CMP     R8, #0xC
- BHS     lab_8A28
+ BHS     sub_8A28
  ADD     R8, R8, #0xC
  STRB    R8, [R14]
  TST     R7, #0x00020000
@@ -773,14 +773,14 @@ sub_89C8:
  STREQ   R8, [R11, #currentScore]
  MOV     R8, #0x14
  BL      sub_8CBC
- B       lab_8A58
-lab_8A28:
+ B       sub_8A58
+sub_8A28:
  MOV     R8, #3
  BL      sub_8CBC
- B       lab_8A58
-lab_8A34:
+ B       sub_8A58
+sub_8A34:
  TST     R7, #0x00040000
- BEQ     lab_8A58
+ BEQ     sub_8A58
  TST     R7, #0x00800000
  MOVNE   R8, #0x41
  MOVEQ   R8, #4
@@ -789,7 +789,7 @@ lab_8A4C:
  BL      sub_8C58
  SUBS    R8, R8, #1
  BNE     lab_8A4C
-lab_8A58:
+sub_8A58:
  LDR     R8, [R11, #var_108]
  SUB     R8, R8, #0x20
  STR     R8, [R11, #var_108]
