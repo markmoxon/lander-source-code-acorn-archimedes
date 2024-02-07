@@ -455,7 +455,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000084F0 0000DEE5        	   437:  LDRB    R0, [R14]
 00:000084F4 000050E3        	   438:  CMP     R0, #0
 00:000084F8 0200000A        	   439:  BEQ     ship5
-00:000084FC 0C0050E3        	   440:  CMP     R0, #0xC
+00:000084FC 0C0050E3        	   440:  CMP     R0, #12
 00:00008500 04D08D32        	   441:  ADDLO   R13, R13, #4
 00:00008504 6F00003A        	   442:  BLO     LoseLife
                             	   443: ship5:

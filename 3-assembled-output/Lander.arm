@@ -437,7 +437,7 @@ ship4:
  LDRB    R0, [R14]
  CMP     R0, #0
  BEQ     ship5
- CMP     R0, #0xC
+ CMP     R0, #12
  ADDLO   R13, R13, #4
  BLO     LoseLife
 ship5:

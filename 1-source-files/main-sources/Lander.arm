@@ -1811,11 +1811,13 @@ ENDIF
 
  ADD     R14, R11, #xCamera         \ Set (xCamera, yCamera, zCamera) to the
  STMIA   R14, {R0-R2}               \ coordinates in (R0, R1, R2), which is
-                                    \ for the point that's five tiles into the
+                                    \ the point that's five tiles into the
                                     \ screen from the player
                                     \
                                     \ This sets the camera so that it follows
-                                    \ the player's ship as it flies around
+                                    \ the player's ship as it flies around,
+                                    \ and is positioned at the back of the
+                                    \ visible screen
 
  MOV     R8, R0                     \ Set (R8, R9) to the point on the landscape
  MOV     R9, R2                     \ that's directly below the player
@@ -1824,39 +1826,76 @@ ENDIF
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9)
 
- SUB     R0, R0, #&00640000         \ 
+ SUB     R0, R0, #&00640000         \ Set R0 to the altitude of a point that's
+                                    \ 0.625 tile sizes above the point on the
+                                    \ landscape beneath the player, which is the
+                                    \ lowest altitude the player can be at
+                                    \ without hitting the ground
 
- LDR     R1, [R11, #yPlayer]        \ 
+ LDR     R1, [R11, #yPlayer]        \ Set R14 to the y-coordinate of the player
+                                    \ in yPlayer
 
- SUB     R14, R0, R1                \ 
+ SUB     R14, R0, R1                \ If R0 - yPlayer >= 1.5 tile sizes then
+ CMP     R14, #&01800000            \ jump to ship6 to skip the following set of
+ BHS     ship6                      \ collision checks, so this means the player
+                                    \ is safely clear of objects on the ground
+                                    \ if they are at least 1.5 tiles above the
+                                    \ coordinates of those objects (and that's
+                                    \ on top of the 0.625-tile gap that they
+                                    \ need below them)
+                                    \
+                                    \ To put it another way, objects can be up
+                                    \ to 1.5 tiles tall, and the ship height is
+                                    \ 2 * 0.625 = 1.25 tiles (as the ship's
+                                    \ coordinates are in the centre of the ship)
 
- CMP     R14, #&01800000            \ 
+ STMFD   R13!, {R0}                 \ Store R0 on the stack so we can retrieve
+                                    \ it below
 
- BHS     ship6                      \ 
+ ADD     R14, R11, #objectMap       \ Set R14 to the address of the object map
 
- STMFD   R13!, {R0}                 \ 
+ AND     R9, R9, #&FF000000         \ Clip R9 down to the nearest tile
 
- ADD     R14, R11, #objectMap       \ 
+ ADD     R14, R14, R8, LSR #24      \ Set R14 = R6 + (R8 >> 24) + (R9 >> 16)
+ ADD     R14, R14, R9, LSR #16      \
+                                    \ R8 is shifted into the bottom byte of R14,
+                                    \ so that's the x-coordinate, and R9 is
+                                    \ shifted into the second byte of R14, so
+                                    \ that's the z-coordinate, so R14 points to
+                                    \ the object map entry for coordinate
+                                    \ (R8, R9)
 
- AND     R9, R9, #&FF000000         \ 
- ADD     R14, R14, R8, LSR #24      \ 
- ADD     R14, R14, R9, LSR #16      \ 
+ LDRB    R0, [R14]                  \ Set R0 to the byte in the object map at
+                                    \ the coordinate (R8, R9)
 
- LDRB    R0, [R14]                  \ 
- CMP     R0, #0                     \ 
- BEQ     ship5                      \ 
+ CMP     R0, #0                     \ If the object map entry is zero, jump to
+ BEQ     ship5                      \ ship5 to skip the following (though this
+                                    \ shouldn't ever happen, as an object type
+                                    \ of zero is never added to the object map)
 
- CMP     R0, #&C                    \ 
- ADDLO   R13, R13, #4               \ 
- BLO     LoseLife                   \ 
+ CMP     R0, #12                    \ If R0 < 12 then the object map entry is a
+ ADDLO   R13, R13, #4               \ valid object number in the range 1 to 11,
+ BLO     LoseLife                   \ so the player's ship just hit the object
+                                    \ below it on the ground, so jump to
+                                    \ LoseLife to show the explosion animation
+                                    \ and lose a life
 
 .ship5
 
- LDMFD   R13!, {R0}                 \ 
+ LDMFD   R13!, {R0}                 \ Retrive R0 from above, so it is once again
+                                    \ the altitude of a point that's 0.625 tile
+                                    \ sizes above the point on the landscape
+                                    \ beneath the player
 
 .ship6
 
- CMP     R1, R0                     \ If R1 >= R0, call LandOnLaunchpad to check
+                                    \ If we get here then R0 is the altitude of
+                                    \ a point that's 0.625 tile sizes above the
+                                    \ point on the landscape beneath the player,
+                                    \ and R1 is the y-coordinate of the player
+                                    \ in yPlayer
+
+ CMP     R1, R0                     \ If R1 > R0, call LandOnLaunchpad to check
  BLGT    LandOnLaunchpad            \ whether we have landed on the launchpad
 
  CMP     R1, #0                     \ 
