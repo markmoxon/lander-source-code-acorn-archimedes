@@ -69,9 +69,9 @@
 .set xCamera, 0x13C
 .set yCamera, 0x140
 .set zCamera, 0x144
-.set xLandscape, 0x148
-.set yLandscape, 0x14C
-.set zLandscape, 0x150
+.set xCameraTile, 0x148
+.set yCameraTile, 0x14C
+.set zCameraTile, 0x150
 .set shipDirection, 0x154
 .set shipPitch, 0x158
 .set fuelBurnRate, 0x15C
@@ -89,15 +89,15 @@
 .set var_71C, 0x71C
 .set objectMap, 0x4400
 .org     CODE
-landscapeOrigin:
+landscapeOffset:
 .ifdef _RISCOS
  B       DecryptGameBinary
 .long    0x00000000, 0x14000000
 .else
-.long    0xFA800000, 0x00000000,  0x14000000
+.long    0xFA800000, 0x00000000, 0x14000000
 .endif
-landscapeOriginAddr:
-.long    landscapeOrigin
+landscapeOffsetAddr:
+.long    landscapeOffset
 landscapeConfig:
 .byte    0x3A, 13
 .byte    0xE3, 13
@@ -144,13 +144,13 @@ DrawLandscapeAndBuffers:
  LDR     R3, [R11, #zCamera]
  AND     R9, R3, #0xFF000000
  SUB     R3, R3, R9
- STR     R9, [R11, #zLandscape]
+ STR     R9, [R11, #zCameraTile]
  LDR     R4, [R11, #xCamera]
  AND     R8, R4, #0xFF000000
  SUB     R4, R4, R8
- STR     R8, [R11, #xLandscape]
+ STR     R8, [R11, #xCameraTile]
  ADD     R5, R11, #xLandscapeRow
- LDR     R0, landscapeOriginAddr
+ LDR     R0, landscapeOffsetAddr
  LDMFD   R0, {R0-R2}
  SUB     R0, R0, R4
  SUB     R2, R2, R3
@@ -171,7 +171,7 @@ land1:
  LDMIA   R0, {R0-R2}
  ADD     R4, R11, #xLandscapeCol
  STMIA   R4, {R0-R2}
- LDR     R8, [R11, #xLandscape]
+ LDR     R8, [R11, #xCameraTile]
  SUB     R8, R8, #TILE_SIZE_5_5
  MOV     R0, #0x80000000
  STR     R0, [R11, #previousColumn]
@@ -1042,11 +1042,11 @@ DrawObjects:
  LDR     R1, [R11, #zCamera]
  AND     R9, R1, #0xFF000000
  SUB     R8, R8, #TILE_SIZE_5_5
- STR     R8, [R11, #xLandscape]
+ STR     R8, [R11, #xCameraTile]
  MOV     R7, #11
 dobs1:
  MOV     R6, #13
- LDR     R8, [R11, #xLandscape]
+ LDR     R8, [R11, #xCameraTile]
 dobs2:
  ADD     R14, R11, #objectMap
  ADD     R14, R14, R8, LSR #24
@@ -4801,7 +4801,7 @@ divisionTable:
 .ifdef _RISCOS
 DecryptGameBinary:
  MOV     R0, #0xFA800000
- MOV     R1, #landscapeOrigin
+ MOV     R1, #landscapeOffset
  STR     R0, [R1]
  B       Entry
 .endif

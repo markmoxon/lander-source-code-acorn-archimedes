@@ -263,24 +263,25 @@
                                     \ It is initialised to initialHighScore when
                                     \ the game is loaded
 
- xCamera = &13C                     \ The 3D x-coordinate of the camera (this is
-                                    \ always zero)
+ xCamera = &13C                     \ The 3D x-coordinate of the camera position
 
- yCamera = &140                     \ The 3D y-coordinate of the camera (this is
-                                    \ always zero)
+ yCamera = &140                     \ The 3D y-coordinate of the camera position
 
- zCamera = &144                     \ The 3D z-coordinate of the camera (this is
-                                    \ always zero)
+ zCamera = &144                     \ The 3D z-coordinate of the camera position
+                                    \ (though note that the camera position is
+                                    \ actually at the back of the on-screen
+                                    \ landscape, not the front, so the camera's
+                                    \ z-coordinate is larger than it would be
+                                    \ for a more traditional camera position)
 
- xLandscape = &148                  \ The 3D x-coordinate of the front-left
-                                    \ corner of the on-screen landscape
+ xCameraTile = &148                 \ The 3D x-coordinate of the camera, clipped
+                                    \ to the nearest tile
 
- yLandscape = &14C                  \ The 3D y-coordinate of the front-left
-                                    \ corner of the on-screen landscape (this is
-                                    \ always zero)
+ yCameraTile = &14C                 \ The 3D y-coordinate of the camera, clipped
+                                    \ to the nearest tile
 
- zLandscape = &150                  \ The 3D z-coordinate of the front-left
-                                    \ corner of the on-screen landscape
+ zCameraTile = &150                 \ The 3D z-coordinate of the camera, clipped
+                                    \ to the nearest tile
 
  shipDirection = &154               \ The direction in which the player's ship
                                     \ faces, which is angle b in the rotation
@@ -299,17 +300,17 @@
  xLandscapeRow = &160               \ The x-coordinate of the far-left corner
                                     \ of the landscape row that we are drawing,
                                     \ where rows run from left to right across
-                                    \ the screen
+                                    \ the screen (this is a relative coordinate)
 
  yLandscapeRow = &164               \ The y-coordinate of the far-left corner
                                     \ of the landscape row that we are drawing,
                                     \ where rows run from left to right across
-                                    \ the screen
+                                    \ the screen (this is a relative coordinate)
  
  zLandscapeRow = &168               \ The z-coordinate of the far-left corner
                                     \ of the landscape row that we are drawing,
                                     \ where rows run from left to right across
-                                    \ the screen
+                                    \ the screen (this is a relative coordinate)
 
                                     \ &16C appears to be unused ???
 
@@ -317,16 +318,19 @@
                                     \ of the column (i.e. tile) that we are
                                     \ drawing in the current landscape row,
                                     \ where columns run in and out of the screen
+                                    \ (this is a relative coordinate)
 
  yLandscapeCol = &174               \ The y-coordinate of the far-left corner
                                     \ of the column (i.e. tile) that we are
                                     \ drawing in the current landscape row,
                                     \ where columns run in and out of the screen
+                                    \ (this is a relative coordinate)
 
  zLandscapeCol = &178               \ The z-coordinate of the far-left corner
                                     \ of the column (i.e. tile) that we are
                                     \ drawing in the current landscape row,
                                     \ where columns run in and out of the screen
+                                    \ (this is a relative coordinate)
 
                                     \ &17C to &1FC appear to be unused ???
 
@@ -361,15 +365,15 @@
 
 \ ******************************************************************************
 \
-\       Name: landscapeOrigin
+\       Name: landscapeOffset
 \       Type: Variable
 \   Category: Landscape
-\    Summary: The vector from the camera position to the far-left corner of the
-\             landscape 
+\    Summary: The offset we apply to the on-screen landscape to push it away
+\             from us and to the left, so the visible tiles fit nicely on-screen
 \
 \ ******************************************************************************
 
-.landscapeOrigin
+.landscapeOffset
 
 IF _RISCOS
 
@@ -384,22 +388,22 @@ IF _RISCOS
 
 ELSE
 
- EQUD    &FA800000, &00000000,  &14000000
+ EQUD    &FA800000, &00000000, &14000000
 
 ENDIF
 
 \ ******************************************************************************
 \
-\       Name: landscapeOriginAddr
+\       Name: landscapeOffsetAddr
 \       Type: Variable
 \   Category: Landscape
-\    Summary: The address of the landscape origin
+\    Summary: The address of the landscape offset
 \
 \ ******************************************************************************
 
-.landscapeOriginAddr
+.landscapeOffsetAddr
 
- EQUD    landscapeOrigin
+ EQUD    landscapeOffset
 
 \ ******************************************************************************
 \
@@ -557,10 +561,14 @@ ENDIF
  STMFD   R13!, {R5-R9, R14}         \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- LDR     R3, [R11, #zCamera]        \ Set R3 to the z-coordinate of the camera
+ LDR     R3, [R11, #zCamera]        \ Set R3 to the z-coordinate of the camera,
+                                    \ which is the 3D coordinate in the game
+                                    \ world at the middle-back of the on-screen
+                                    \ view
 
  AND     R9, R3, #&FF000000         \ Set R9 to the z-coordinate of the tile
-                                    \ containing the camera
+                                    \ containing the camera, as this rounds the
+                                    \ coordinate down to the nearest tile
 
  SUB     R3, R3, R9                 \ Set R3 = R3 - R9
                                     \        = zCamera - tile containing zCamera
@@ -568,15 +576,19 @@ ENDIF
                                     \ So R3 contains the fractional element of
                                     \ zCamera in terms of whole tiles
 
- STR     R9, [R11, #zLandscape]     \ Set zLandscape to the z-coordinate of the
+ STR     R9, [R11, #zCameraTile]    \ Set zCameraTile to the z-coordinate of the
                                     \ tile containing the camera (though this
                                     \ isn't actually used - the value of R9 is
-                                    \ used, though)
+                                    \ used below, though)
 
- LDR     R4, [R11, #xCamera]        \ Set R4 to the x-coordinate of the camera
+ LDR     R4, [R11, #xCamera]        \ Set R4 to the x-coordinate of the camera,
+                                    \ which is the 3D coordinate in the game
+                                    \ world at the middle-back of the on-screen
+                                    \ view
 
  AND     R8, R4, #&FF000000         \ Set R8 to the x-coordinate of the tile
-                                    \ containing the camera
+                                    \ containing the camera, as this rounds the
+                                    \ coordinate down to the nearest tile
 
  SUB     R4, R4, R8                 \ Set R4 = R4 - R8
                                     \        = xCamera - tile containing xCamera
@@ -584,22 +596,23 @@ ENDIF
                                     \ So R4 contains the fractional element of
                                     \ xCamera in terms of whole tiles
 
- STR     R8, [R11, #xLandscape]     \ Set xLandscape to the x-coordinate of the
+ STR     R8, [R11, #xCameraTile]    \ Set xCameraTile to the x-coordinate of the
                                     \ tile containing the camera
 
  ADD     R5, R11, #xLandscapeRow    \ Set R5 to the address of xLandscapeRow
 
- LDR     R0, landscapeOriginAddr    \ Fetch the landscape origin vector into
- LDMFD   R0, {R0-R2}                \ (R0, R1, R2), which defines the offset of
-                                    \ the far-left corner of the landscape from
-                                    \ the camera position
+ LDR     R0, landscapeOffsetAddr    \ Fetch the landscape offset vector into
+ LDMFD   R0, {R0-R2}                \ (R0, R1, R2), which defines the offset
+                                    \ that we apply to the on-screen landscape
+                                    \ to move it away from the viewer so it
+                                    \ fits nicely on-screen
 
  SUB     R0, R0, R4                 \ Subtract the fractional element of xCamera
-                                    \ from the landscape origin x-coordinate in
+                                    \ from the landscape offset x-coordinate in
                                     \ R0
 
  SUB     R2, R2, R3                 \ Subtract the fractional element of zCamera
-                                    \ from the landscape origin z-coordinate in
+                                    \ from the landscape offset z-coordinate in
                                     \ R2
 
  STMIA   R5, {R0-R2}                \ (R0, R1, R2) now contains the coordinate
@@ -653,10 +666,10 @@ ENDIF
                                     \
                                     \     So (x, R9) is the coordinate of each
                                     \     corner on the corner row we're working
-                                    \     along from left to right (though this
-                                    \     does not seem to be right, as isn't R9
-                                    \     the z-coord of the front of the
-                                    \     landscape not the back ???)
+                                    \     along, starting from the far-left
+                                    \     corner (as the camera position is
+                                    \     actually at the back of the on-screen
+                                    \     landscape)
                                     \
                                     \   * zLandscapeRow = the z-coordinate of
                                     \     the back corner row of the landscape
@@ -681,13 +694,12 @@ ENDIF
                                     \     currently processing, which increments
                                     \     on each iteration as we move forwards
                                     \
-                                    \  * xLandscape is the x-coordinate of the
+                                    \  * xCameraTile is the x-coordinate of the
                                     \    tile containing the camera
                                     \
                                     \    This is the same as the x-coordinate of
-                                    \    the left end of each tile corner row,
-                                    \    which is the only use for this variable
-                                    \    in the following
+                                    \    the middle of each tile corner row,
+                                    \    rounded down to the nearest tile
                                     \
                                     \ We now fall through into part 2
 
@@ -740,7 +752,7 @@ ENDIF
                                     \ yLandscapeCol with the landscape height as
                                     \ we go
 
- LDR     R8, [R11, #xLandscape]     \ Set R8 = xLandscape - TILE_SIZE_5_5, so
+ LDR     R8, [R11, #xCameraTile]    \ Set R8 = xCameraTile - TILE_SIZE_5_5, so
  SUB     R8, R8, #TILE_SIZE_5_5     \ R8 is now the coordinate of the tile
                                     \ corner at the left end of the corner row,
                                     \ as after rounding down the x-coordinate to
@@ -763,16 +775,15 @@ ENDIF
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9), which is
                                     \ the current corner on this row
-                                    \
-                                    \ (R9 feels wrong, as it's set to the
-                                    \ z-coord at the front of the landscape, not
-                                    \ the back, isn't it ???)
 
  LDR     R14, [R11, #yCamera]       \ Set yLandscapeCol = R0 - yCamera
  SUB     R0, R0, R14                \                   = altitude - yCamera
  STR     R0, [R11, #yLandscapeCol]  \
-                                    \ So this stores the landscape height in the
-                                    \ yLandscapeCol coordinate
+                                    \ So this stores the y-coordinate of the
+                                    \ landscape at this point, as we're seeing
+                                    \ it from the point of view of the camera
+                                    \ (so this will move it down the screen if
+                                    \ the player is flying high, for example)
 
  ADD     R0, R11, #xLandscapeCol    \ Set R0 to the address of xLandscapeCol
 
@@ -1234,9 +1245,8 @@ ENDIF
 \
 \ Arguments:
 \
-\   R0                              The address of an object's vertex (x, y, z),
-\                                   relative to the back of the landscape and in
-\                                   front of the camera
+\   R0                              The address containing the object's vertex
+\                                   (x, y, z), relative to the camera position
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1252,13 +1262,13 @@ ENDIF
  STMFD   R13!, {R8-R9, R14}         \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- LDR     R8, [R0]                   \ Add xCamera to the x-coordinate in R8
- LDR     R1, [R11, #xCamera]
- ADD     R8, R8, R1
+ LDR     R8, [R0]                   \ Add xCamera to the x-coordinate in R8 to
+ LDR     R1, [R11, #xCamera]        \ get the vertex position in the game's
+ ADD     R8, R8, R1                 \ coordinate system
 
- LDR     R9, [R0, #8]               \ Add zCamera to the z-coordinate in R8
- LDR     R1, [R11, #zCamera]
- ADD     R9, R9, R1
+ LDR     R9, [R0, #8]               \ Add zCamera to the z-coordinate in R8 to
+ LDR     R1, [R11, #zCamera]        \ get the vertex position in the game's
+ ADD     R9, R9, R1                 \ coordinate system
 
  SUB     R9, R9, #&14000000         \ Move the coordinate forward by 14 tiles,
                                     \ as DrawObjects moves objects back by 14
@@ -1270,7 +1280,9 @@ ENDIF
                                     \ The (x, z) coordinate in (R8, R9) is now
                                     \ relative to the game's coordinate system,
                                     \ rather than the camera or the back of the
-                                    \ landscape
+                                    \ landscape, which is what we need in order
+                                    \ to calculate the altitude of the landscape
+                                    \ at this point
 
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9), which is
@@ -3054,15 +3066,15 @@ ENDIF
                                     \ of the tile containing zCamera, i.e. the
                                     \ tile directly below our viewpoint
 
- SUB     R8, R8, #TILE_SIZE_5_5     \ Set xLandscape = R8 - TILE_SIZE_5_5
- STR     R8, [R11, #xLandscape]     \
+ SUB     R8, R8, #TILE_SIZE_5_5     \ Set xCameraTile = R8 - TILE_SIZE_5_5
+ STR     R8, [R11, #xCameraTile]    \
                                     \ We already rounded xCamera down to the
                                     \ nearest tile, so half of the remaining 11
                                     \ tiles is 5.5 tile widths (as the landscape
                                     \ is 12 tiles wide in total), so this
                                     \ subtracts exactly half of the landscape's
                                     \ width from xCamera and stores the result
-                                    \ in xLandscape, giving the x-coordinate of
+                                    \ in xCameraTile, giving the x-coordinate of
                                     \ the left end of the tile row
                                     \
                                     \ As we only take the top byte of the
@@ -3092,7 +3104,7 @@ ENDIF
                                     \ x-axis (i.e. from left to right on the
                                     \ screen)
 
- LDR     R8, [R11, #xLandscape]     \ Set R8 = xLandscape, so R8 contains the
+ LDR     R8, [R11, #xCameraTile]    \ Set R8 = xCameraTile, so R8 contains the
                                     \ x-coordinate of the leftmost tile of the
                                     \ visible landscape
 
@@ -10864,7 +10876,7 @@ IF _RISCOS
 .DecryptGameBinary
 
  MOV     R0, #&FA800000             \ Restore the first word of the game to the
- MOV     R1, #landscapeOrigin       \ value it had before we replaced it with a
+ MOV     R1, #landscapeOffset       \ value it had before we replaced it with a
  STR     R0, [R1]                   \ jump command to this routine
 
  B       Entry                      \ Start the game

@@ -74,9 +74,9 @@ Source: "3-assembled-output/Lander.arm"
                             	    69: .set xCamera, 0x13C
                             	    70: .set yCamera, 0x140
                             	    71: .set zCamera, 0x144
-                            	    72: .set xLandscape, 0x148
-                            	    73: .set yLandscape, 0x14C
-                            	    74: .set zLandscape, 0x150
+                            	    72: .set xCameraTile, 0x148
+                            	    73: .set yCameraTile, 0x14C
+                            	    74: .set zCameraTile, 0x150
                             	    75: .set shipDirection, 0x154
                             	    76: .set shipPitch, 0x158
                             	    77: .set fuelBurnRate, 0x15C
@@ -94,16 +94,16 @@ Source: "3-assembled-output/Lander.arm"
                             	    89: .set var_71C, 0x71C
                             	    90: .set objectMap, 0x4400
                             	    91: .org     CODE
-                            	    92: landscapeOrigin:
+                            	    92: landscapeOffset:
                             	    93: .ifdef _RISCOS
 00:00008000 822600EA        	    94:  B       DecryptGameBinary
 00:00008004 00000000        	    95: .long    0x00000000, 0x14000000
 00:00008008 00000014
                             	    96: .else
-                            	    97: .long    0xFA800000, 0x00000000,  0x14000000
+                            	    97: .long    0xFA800000, 0x00000000, 0x14000000
                             	    98: .endif
-                            	    99: landscapeOriginAddr:
-00:0000800C 00800000        	   100: .long    landscapeOrigin
+                            	    99: landscapeOffsetAddr:
+00:0000800C 00800000        	   100: .long    landscapeOffset
                             	   101: landscapeConfig:
 00:00008010 3A              	   102: .byte    0x3A, 13
 00:00008011 0D
@@ -162,13 +162,13 @@ Source: "3-assembled-output/Lander.arm"
 00:00008090 44319BE5        	   144:  LDR     R3, [R11, #zCamera]
 00:00008094 FF9403E2        	   145:  AND     R9, R3, #0xFF000000
 00:00008098 093043E0        	   146:  SUB     R3, R3, R9
-00:0000809C 50918BE5        	   147:  STR     R9, [R11, #zLandscape]
+00:0000809C 50918BE5        	   147:  STR     R9, [R11, #zCameraTile]
 00:000080A0 3C419BE5        	   148:  LDR     R4, [R11, #xCamera]
 00:000080A4 FF8404E2        	   149:  AND     R8, R4, #0xFF000000
 00:000080A8 084044E0        	   150:  SUB     R4, R4, R8
-00:000080AC 48818BE5        	   151:  STR     R8, [R11, #xLandscape]
+00:000080AC 48818BE5        	   151:  STR     R8, [R11, #xCameraTile]
 00:000080B0 165E8BE2        	   152:  ADD     R5, R11, #xLandscapeRow
-00:000080B4 B0001FE5        	   153:  LDR     R0, landscapeOriginAddr
+00:000080B4 B0001FE5        	   153:  LDR     R0, landscapeOffsetAddr
 00:000080B8 070090E8        	   154:  LDMFD   R0, {R0-R2}
 00:000080BC 040040E0        	   155:  SUB     R0, R0, R4
 00:000080C0 032042E0        	   156:  SUB     R2, R2, R3
@@ -189,7 +189,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000080F8 070090E8        	   171:  LDMIA   R0, {R0-R2}
 00:000080FC 174E8BE2        	   172:  ADD     R4, R11, #xLandscapeCol
 00:00008100 070084E8        	   173:  STMIA   R4, {R0-R2}
-00:00008104 48819BE5        	   174:  LDR     R8, [R11, #xLandscape]
+00:00008104 48819BE5        	   174:  LDR     R8, [R11, #xCameraTile]
 00:00008108 168548E2        	   175:  SUB     R8, R8, #TILE_SIZE_5_5
 00:0000810C 0201A0E3        	   176:  MOV     R0, #0x80000000
 00:00008110 C4008BE5        	   177:  STR     R0, [R11, #previousColumn]
@@ -1068,11 +1068,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00008DE8 44119BE5        	  1042:  LDR     R1, [R11, #zCamera]
 00:00008DEC FF9401E2        	  1043:  AND     R9, R1, #0xFF000000
 00:00008DF0 168548E2        	  1044:  SUB     R8, R8, #TILE_SIZE_5_5
-00:00008DF4 48818BE5        	  1045:  STR     R8, [R11, #xLandscape]
+00:00008DF4 48818BE5        	  1045:  STR     R8, [R11, #xCameraTile]
 00:00008DF8 0B70A0E3        	  1046:  MOV     R7, #11
                             	  1047: dobs1:
 00:00008DFC 0D60A0E3        	  1048:  MOV     R6, #13
-00:00008E00 48819BE5        	  1049:  LDR     R8, [R11, #xLandscape]
+00:00008E00 48819BE5        	  1049:  LDR     R8, [R11, #xCameraTile]
                             	  1050: dobs2:
 00:00008E04 11EB8BE2        	  1051:  ADD     R14, R11, #objectMap
 00:00008E08 28EC8EE0        	  1052:  ADD     R14, R14, R8, LSR #24
@@ -10243,7 +10243,7 @@ Source: "3-assembled-output/Lander.arm"
                             	  4801: .ifdef _RISCOS
                             	  4802: DecryptGameBinary:
 00:00011A10 EA05A0E3030180E3	  4803:  MOV     R0, #0xFA800000
-00:00011A18 0219A0E3        	  4804:  MOV     R1, #landscapeOrigin
+00:00011A18 0219A0E3        	  4804:  MOV     R1, #landscapeOffset
 00:00011A1C 000081E5        	  4805:  STR     R0, [R1]
 00:00011A20 FBE2FFEA        	  4806:  B       Entry
                             	  4807: .endif
@@ -10446,8 +10446,8 @@ land4                            A:00008170
 land5                            A:000081E0
 landscapeConfig                  A:00008010
 landscapeConfigAddr              A:00008028
-landscapeOrigin                  A:00008000
-landscapeOriginAddr              A:0000800C
+landscapeOffset                  A:00008000
+landscapeOffsetAddr              A:0000800C
 lineJump                         A:0000A480
 lose1                            A:000086EC
 mainLoopCount                    S:00000118
@@ -10582,8 +10582,8 @@ vertexProjected                  S:00000600
 workspace                        S:00012200
 workspaceAddr                    A:0000A56C
 xCamera                          S:0000013C
+xCameraTile                      S:00000148
 xCoord                           S:00000074
-xLandscape                       S:00000148
 xLandscapeCol                    S:00000170
 xLandscapeRow                    S:00000160
 xNoseV                           S:00000030
@@ -10605,7 +10605,7 @@ ySideV                           S:0000004C
 yVelocity                        S:000000A4
 yVertex                          S:00000058
 zCamera                          S:00000144
-zLandscape                       S:00000150
+zCameraTile                      S:00000150
 zLandscapeRow                    S:00000168
 zNoseV                           S:00000038
 zObject                          S:00000008
@@ -10671,8 +10671,8 @@ Symbols by value:
 0000013C xCamera
 00000140 yCamera
 00000144 zCamera
-00000148 xLandscape
-00000150 zLandscape
+00000148 xCameraTile
+00000150 zCameraTile
 00000154 shipDirection
 00000158 shipPitch
 0000015C fuelBurnRate
@@ -10686,9 +10686,9 @@ Symbols by value:
 00000600 vertexProjected
 00000700 var_700
 00004400 objectMap
-00008000 landscapeOrigin
+00008000 landscapeOffset
 00008000 CODE
-0000800C landscapeOriginAddr
+0000800C landscapeOffsetAddr
 00008010 landscapeConfig
 00008028 landscapeConfigAddr
 0000802C graphicsBuffers
