@@ -1805,6 +1805,14 @@ ENDIF
 
  CMP     R1, #0                     \ If R1 (i.e. the y-coordinate of the ship)
  MOVPL   R1, #0                     \ is positive, then set it to zero
+                                    \
+                                    \ As we store this value as the camera's
+                                    \ y-coordinate below, this ensures that the
+                                    \ camera doesn't drop down all the way with
+                                    \ the ship in last few moments before it
+                                    \ lands, and similarly it doesn't start
+                                    \ rising up with the ship as it takes off
+                                    \ until the ship is at a reasonable height
 
  ADD     R2, R2, #&05000000         \ Set R2 to the z-coordinate that's five
                                     \ tiles into the screen from the player
@@ -1829,8 +1837,8 @@ ENDIF
  SUB     R0, R0, #&00640000         \ Set R0 to the altitude of a point that's
                                     \ 0.625 tile sizes above the point on the
                                     \ landscape beneath the player, which is the
-                                    \ lowest altitude the player can be at
-                                    \ without hitting the ground
+                                    \ lowest altitude the player can be without
+                                    \ being in danger of hitting the ground
 
  LDR     R1, [R11, #yPlayer]        \ Set R14 to the y-coordinate of the player
                                     \ in yPlayer
@@ -1882,39 +1890,69 @@ ENDIF
 
 .ship5
 
- LDMFD   R13!, {R0}                 \ Retrive R0 from above, so it is once again
-                                    \ the altitude of a point that's 0.625 tile
-                                    \ sizes above the point on the landscape
-                                    \ beneath the player
+ LDMFD   R13!, {R0}                 \ Retrieve R0 from the stack, so it is once
+                                    \ again the lowest altitude the player can
+                                    \ be without being in danger of hitting the
+                                    \ ground
 
 .ship6
 
-                                    \ If we get here then R0 is the altitude of
-                                    \ a point that's 0.625 tile sizes above the
-                                    \ point on the landscape beneath the player,
-                                    \ and R1 is the y-coordinate of the player
-                                    \ in yPlayer
+                                    \ If we get here then R0 is the lowest
+                                    \ altitude the player can be without being
+                                    \ in danger of hitting the ground, and R1 is
+                                    \ the y-coordinate of the player, i.e. the
+                                    \ player's altitude
 
- CMP     R1, R0                     \ If R1 > R0, call LandOnLaunchpad to check
- BLGT    LandOnLaunchpad            \ whether we have landed on the launchpad
+ CMP     R1, R0                     \ If R1 > R0 then the player is lower down
+ BLGT    LandOnLaunchpad            \ then the safe altitude, so call
+                                    \ LandOnLaunchpad to check whether we have
+                                    \ landed on the launchpad (as we need to be
+                                    \ within the danger zone in order to land)
 
- CMP     R1, #0                     \ 
- MOVMI   R1, #0                     \ 
+ CMP     R1, #0                     \ If R1 (i.e. the y-coordinate of the ship)
+ MOVMI   R1, #0                     \ is negative, then set it to zero
+                                    \
+                                    \ This is the converse of the test we did at
+                                    \ the start of this part, as it sets R1 to
+                                    \ zero only when the altitude of the player
+                                    \ is higher than zero, so this only keeps
+                                    \ R1 set to the player's y-coordinate when
+                                    \ they are really close to the ground
+                                    \
+                                    \ As we pass this value to DrawObject below,
+                                    \ this means we draw the player's ship in
+                                    \ the middle of the screen most of the time
+                                    \ (by passing an R1 of zero to DrawObject),
+                                    \ but when the ship is close to the ground,
+                                    \ we draw the ship lower down the screen
 
- ADD     R3, R11, #rotationMatrix   \ 
- LDR     R14, objectPlayerAddr      \ 
- STR     R14, [R11, #objectData]    \ 
+ ADD     R3, R11, #rotationMatrix   \ Set R3 to the address of the ship's
+                                    \ rotation matrix to pass to DrawObject
 
- MOV     R0, #0                     \ 
+ LDR     R14, objectPlayerAddr      \ Set objectData to the object data block
+ STR     R14, [R11, #objectData]    \ for the player's ship
 
- MOV     R2, #&0F000000             \ 
+ MOV     R0, #0                     \ Set the coordinates in (R0, R1, R2) so
+ MOV     R2, #&0F000000             \ the ship gets drawn in the middle of the
+                                    \ screen or slightly below if the ship is
+                                    \ near the ground (as R0 = 0 and R1 is set
+                                    \ as described above), at a position into
+                                    \ the screen of 15 tile sizes, which places
+                                    \ it above the middle of the landscape
+                                    \
+                                    \ This works because the landscape offset
+                                    \ pushes the far edge of the landscape 20
+                                    \ tiles into the screen, and the landscape
+                                    \ is ten tiles deep, so the centre is 15
+                                    \ tiles into the screen
 
- BL      DrawObject                 \ 
+ BL      DrawObject                 \ Draw the player's ship with the correct
+                                    \ orientation and position
 
- LDRB    R10, [R11, #crashedFlag]   \ 
-
- CMP     R10, #0                    \ 
- BLNE    LoseLife                   \ 
+ LDRB    R10, [R11, #crashedFlag]   \ DrawObject sets crashedFlag to -1 if the
+ CMP     R10, #0                    \ ship is lower down than its shadow, to
+ BLNE    LoseLife                   \ indicate that it has crashed, so jump to
+                                    \ LoseLife is this is the case
 
 \ ******************************************************************************
 \
@@ -2970,9 +3008,9 @@ ENDIF
  LDR     R4, [R11, #currentScore]   \ Set R4 to the current score minus 800
  SUBS    R4, R4, #800
 
- MOVMI   PC, R14                    \ If the result is negative, then the
-                                    \ current score is 800 or less, so return
-                                    \ from the subroutine
+ MOVMI   PC, R14                    \ If the result is negative then the current
+                                    \ score is 800 or less, so return from the
+                                    \ subroutine without dropping any rocks
 
                                     \ If we get here then the current score is
                                     \ greater than 800, so we randomly drop
@@ -2986,11 +3024,17 @@ ENDIF
 
  CMP     R0, R4                     \ If R0 >= R4 then return from the
  LDMHSIA R13!, {PC}                 \ subroutine without dropping a rock, so the
-                                    \ chances of rocks dropping from the sky
-                                    \ increases with higher scores
+                                    \ chances of a rock dropping from the sky on
+                                    \ each iteration of the main loop increases
+                                    \ with higher scores
 
                                     \ If we get here then we drop a rock from
-                                    \ the sky, from the following coordinates
+                                    \ the sky, spawning the rock at coordinates
+                                    \ (R0, R1, R2), which are set to 32 tiles
+                                    \ above and 6 tiles back from the camera
+                                    \ coordinates, which is very high in the sky
+                                    \ above the ship's current position and one
+                                    \ tile in front of ship
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
@@ -2999,10 +3043,8 @@ ENDIF
  LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
  SUB     R2, R2, #&06000000
 
- BL      DropARockFromTheSky        \ Drop a rock from the coordinates in R0 to
-                                    \ R2, so that's:
-                                    \
-                                    \   (xCamera, -&20000000, zCamera - &06000000)
+ BL      DropARockFromTheSky        \ Drop a rock from the coordinates in
+                                    \ (R0, R1, R2)
 
  LDMFD   R13!, {PC}                 \ Return from the subroutine
 
