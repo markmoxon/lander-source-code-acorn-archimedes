@@ -1677,9 +1677,10 @@ ENDIF
  LDR     R6, [R11, #xRoofV]         \ Set (R6, R7, R8) to the roof vector from
  LDR     R7, [R11, #yRoofV]         \ the rotation matrix, which is the vector
  LDR     R8, [R11, #zRoofV]         \ that points directly down through the
-                                    \ ship's floor after being rotated (so it's
-                                    \ in the direction of thrust, as the
-                                    \ thrusters are on the bottom of the ship)
+                                    \ ship's floor as the y-axis is inverted
+                                    \ (so it's in the direction of thrust, as
+                                    \ the thrusters are on the bottom of the
+                                    \ ship)
                                     \
                                     \ Let's refer to this thrust vector as
                                     \ follows:
@@ -2421,7 +2422,7 @@ ENDIF
 \       Type: Variable
 \   Category: Graphics buffers
 \    Summary: The addresses of the tables containing the graphics buffer
-\             addresses (copies of graphicsBufferEndAddr and graphicsBufferAddr)
+\             addresses (same as graphicsBufferEndAddr and graphicsBufferAddr)
 \
 \ ******************************************************************************
 
@@ -2550,7 +2551,7 @@ ENDIF
 \       Name: MoveAndDrawParticles (Part 2 of 2)
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: Draw particles into the graphics buffers
+\    Summary: Draw particles (including rocks) into the graphics buffers
 \
 \ ******************************************************************************
 
@@ -3121,8 +3122,9 @@ ENDIF
 \
 \       Name: DropARockFromTheSky
 \       Type: Subroutine
-\   Category: 3D objects
-\    Summary: Drop a rock from the specified coordinates
+\   Category: Particles
+\    Summary: Drop a rock from the specified coordinates by spawning it as a
+\             particle, albeit a very big particle with an associated 3D object
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3293,7 +3295,7 @@ ENDIF
 \
 \       Name: SpawnRock
 \       Type: Subroutine
-\   Category: 3D objects
+\   Category: Particles
 \    Summary: An unused routine that spawns a rock in the sky, but not as high
 \             as the rocks in the DropRocksFromTheSky routine
 \
@@ -3329,8 +3331,9 @@ ENDIF
 \
 \       Name: DropRocksFromTheSky
 \       Type: Subroutine
-\   Category: 3D objects
+\   Category: Particles
 \    Summary: If the score is 800 or more, then randomly drop rocks from the sky
+\             by spawning them as particles
 \
 \ ******************************************************************************
 
@@ -3375,7 +3378,9 @@ ENDIF
  SUB     R2, R2, #&06000000
 
  BL      DropARockFromTheSky        \ Drop a rock from the coordinates in
-                                    \ (R0, R1, R2)
+                                    \ (R0, R1, R2) by spawning it as a
+                                    \ particle, albeit a very big particle with
+                                    \ an associated 3D object
 
  LDMFD   R13!, {PC}                 \ Return from the subroutine
 
@@ -6026,14 +6031,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_9A70
+\       Name: greyColourWords
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing the screen
+\    Summary: An unused table of grey colour words
 \
 \ ******************************************************************************
 
-.var_9A70
+.greyColourWords
 
  EQUD    &00000000
  EQUD    &01010101
@@ -6058,16 +6063,16 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_9AC0
+\       Name: greyColourWordsAddr
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Drawing the screen
+\    Summary: The unused address of the unused table of grey colour words
 \
 \ ******************************************************************************
 
-.var_9AC0
+.greyColourWordsAddr
 
- EQUD    var_9A70
+ EQUD    greyColourWords
 
 \ ******************************************************************************
 \
@@ -8799,10 +8804,14 @@ ENDIF
                                     \ loop by the call to MoveAndDrawPlayer,
                                     \ which overwrites these values
 
- STR     R0, [R11, #shipDirection]  \ Set shipDirection = 0 ???
+ STR     R0, [R11, #shipDirection]  \ Set shipDirection = 0 so the ship faces
+                                    \ right when the game starts (though this is
+                                    \ quickly corrected when the game uses the
+                                    \ mouse coordinates to calculate the
+                                    \ direction)
 
- MOV     R0, #1                     \ Set shipPitch = 1 ???
- STR     R0, [R11, #shipPitch]
+ MOV     R0, #1                     \ Set shipPitch = 1 so the ship is very
+ STR     R0, [R11, #shipPitch]      \ slightly pitched up for take-off
 
  MOV     R0, #LAUNCHPAD_SIZE/2      \ Set the starting coordinates of the
  MOV     R2, R0                     \ player's ship as follows:

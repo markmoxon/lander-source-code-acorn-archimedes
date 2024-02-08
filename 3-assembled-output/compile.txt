@@ -1939,7 +1939,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009A68 0080BDE8        	  1913:  LDMFD   R13!, {PC}
                             	  1914: screenAddr:
 00:00009A6C 0094FD01        	  1915: .long    0x01FD8000 + 16 * 320
-                            	  1916: var_9A70:
+                            	  1916: greyColourWords:
 00:00009A70 00000000        	  1917: .long    0x00000000
 00:00009A74 01010101        	  1918: .long    0x01010101
 00:00009A78 02020202        	  1919: .long    0x02020202
@@ -1960,8 +1960,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00009AB4 FFFFFFFF        	  1934: .long    0xFFFFFFFF
 00:00009AB8 FFFFFFFF        	  1935: .long    0xFFFFFFFF
 00:00009ABC FFFFFFFF        	  1936: .long    0xFFFFFFFF
-                            	  1937: var_9AC0:
-00:00009AC0 709A0000        	  1938: .long    var_9A70
+                            	  1937: greyColourWordsAddr:
+00:00009AC0 709A0000        	  1938: .long    greyColourWords
                             	  1939: Draw1x1ParticleFromBuffer:
 00:00009AC4 041099E4        	  1940:  LDR     R1, [R9], #4
 00:00009AC8 210AA0E1        	  1941:  MOV     R0, R1, LSR #20
@@ -10373,6 +10373,8 @@ graphicsBufferEndAddr            A:0000924C
 graphicsBuffers                  A:0000802C
 graphicsBuffersEnd               A:0000805C
 gravity                          S:0000012C
+greyColourWords                  A:00009A70
+greyColourWordsAddr              A:00009AC0
 highScore                        S:00000138
 hlin1                            A:0000A4F4
 initialFuelLevel                 A:0000A580
@@ -10575,8 +10577,6 @@ tileRowOddEven                   S:000000F8
 typeOffset                       S:000000CC
 unusedConfig                     S:000000F0
 varOffset                        S:00000054
-var_9A70                         A:00009A70
-var_9AC0                         A:00009AC0
 vcon1                            A:0000997C
 vcon2                            A:000099C4
 vcon3                            A:00009A0C
@@ -10616,8 +10616,8 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 xObject
 00000000 OS_WriteC
+00000000 xObject
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10626,8 +10626,8 @@ Symbols by value:
 00000009 LAUNCHPAD_OBJECT
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 rotationMatrix
 00000030 xNoseV
+00000030 rotationMatrix
 00000034 xRoofV
 00000038 xSideV
 0000003C yNoseV
@@ -10688,8 +10688,8 @@ Symbols by value:
 00000600 vertexProjected
 00000700 particleData
 00004400 objectMap
-00008000 CODE
 00008000 landscapeOffset
+00008000 CODE
 0000800C landscapeOffsetAddr
 00008010 landscapeConfig
 00008028 landscapeConfigAddr
@@ -10821,8 +10821,8 @@ Symbols by value:
 00009A3C randomSeed2
 00009A40 GetRandomNumbers
 00009A6C screenAddr
-00009A70 var_9A70
-00009AC0 var_9AC0
+00009A70 greyColourWords
+00009AC0 greyColourWordsAddr
 00009AC4 Draw1x1ParticleFromBuffer
 00009AE8 Draw2x1ParticleFromBuffer
 00009B10 Draw2x2ParticleFromBuffer

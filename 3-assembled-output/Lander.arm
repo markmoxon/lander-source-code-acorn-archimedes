@@ -1913,7 +1913,7 @@ GetRandomNumbers:
  LDMFD   R13!, {PC}
 screenAddr:
 .long    0x01FD8000 + 16 * 320
-var_9A70:
+greyColourWords:
 .long    0x00000000
 .long    0x01010101
 .long    0x02020202
@@ -1934,8 +1934,8 @@ var_9A70:
 .long    0xFFFFFFFF
 .long    0xFFFFFFFF
 .long    0xFFFFFFFF
-var_9AC0:
-.long    var_9A70
+greyColourWordsAddr:
+.long    greyColourWords
 Draw1x1ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
