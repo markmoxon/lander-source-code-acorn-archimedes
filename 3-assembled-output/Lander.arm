@@ -457,7 +457,7 @@ ship6:
  CMP     R10, #0
  BLNE    LoseLife
  LDRB    R10, [R11, #fuelBurnRate]
- TST     R10, #6
+ TST     R10, #0x6
  BEQ     ship7
  ADD     R14, R11, #xVelocity
  LDMIA   R14, {R0-R2, R6-R8}
@@ -481,7 +481,7 @@ ship6:
  MOV     R9, #0x1D
  STMFD   R13!, {R0-R9}
  BL      sub_8A8C
- TST     R10, #4
+ TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
  BLNE    sub_8A8C
  TST     R10, #4

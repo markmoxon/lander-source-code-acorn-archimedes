@@ -475,7 +475,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008538 00005AE3        	   457:  CMP     R10, #0
 00:0000853C 6100001B        	   458:  BLNE    LoseLife
 00:00008540 5CA1DBE5        	   459:  LDRB    R10, [R11, #fuelBurnRate]
-00:00008544 06001AE3        	   460:  TST     R10, #6
+00:00008544 06001AE3        	   460:  TST     R10, #0x6
 00:00008548 2900000A        	   461:  BEQ     ship7
 00:0000854C A0E08BE2        	   462:  ADD     R14, R11, #xVelocity
 00:00008550 C7019EE8        	   463:  LDMIA   R14, {R0-R2, R6-R8}
@@ -499,7 +499,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008598 1D90A0E3        	   481:  MOV     R9, #0x1D
 00:0000859C FF032DE9        	   482:  STMFD   R13!, {R0-R9}
 00:000085A0 390100EB        	   483:  BL      sub_8A8C
-00:000085A4 04001AE3        	   484:  TST     R10, #4
+00:000085A4 04001AE3        	   484:  TST     R10, #0x4
 00:000085A8 FF039D18        	   485:  LDMNEIA R13, {R0-R9}
 00:000085AC 3601001B        	   486:  BLNE    sub_8A8C
 00:000085B0 04001AE3        	   487:  TST     R10, #4

@@ -185,6 +185,15 @@
 
  zVelocity = &A8                    \ The player's velocity in the z-axis
 
+ xThrust = &AC                      \ The x-coordinate of the ship's thrust
+                                    \ vector
+
+ yThrust = &B0                      \ The y-coordinate of the ship's thrust
+                                    \ vector
+
+ zThrust = &B4                      \ The z-coordinate of the ship's thrust
+                                    \ vector
+
  previousColumn = &C4               \ The corner coordinates of the previous
                                     \ column while working along a row from left
                                     \ to right
@@ -1669,6 +1678,16 @@ ENDIF
                                     \ floor after being rotated (so it's in the
                                     \ direction of thrust, as the thrusters are
                                     \ on the bottom of the ship)
+                                    \
+                                    \ ??? Why not just use roofV, or is the
+                                    \ rotmat transposed from that of Elite?
+                                    \
+                                    \ Let's refer to this thrust vector as
+                                    \ follows:
+                                    \
+                                    \   R6 = xThrust
+                                    \   R7 = yThrust
+                                    \   R8 = zThrust
 
  LDRB    R9, [R11, #fuelBurnRate]   \ Set R9 to the fuel burn rate
 
@@ -1685,7 +1704,7 @@ ENDIF
                                     \ by 1/64, so this applies a deceleration in
                                     \ this direction (due to friction)
 
- SUBNE   R3, R3, R6, ASR #11        \ Increase R3 by a further yNoseV / 2048 if
+ SUBNE   R3, R3, R6, ASR #11        \ Increase R3 by a further xThrust / 2048 if
                                     \ full thrust is being pressed, so this
                                     \ applies the engine thrust
                                     \
@@ -1711,7 +1730,7 @@ ENDIF
                                     \ by 1/64, so this applies a deceleration in
                                     \ this direction (due to friction)
 
- SUBNE   R4, R4, R7, ASR #11        \ Increase R3 by a further yRoofV / 2048 if
+ SUBNE   R4, R4, R7, ASR #11        \ Increase R3 by a further yThrust / 2048 if
                                     \ full thrust is being pressed, so this
                                     \ applies the engine thrust
                                     \
@@ -1737,7 +1756,7 @@ ENDIF
                                     \ by 1/64, so this applies a deceleration in
                                     \ this direction (due to friction)
 
- SUBNE   R5, R5, R8, ASR #11        \ Increase R3 by a further ySideV / 2048 if
+ SUBNE   R5, R5, R8, ASR #11        \ Increase R3 by a further zThrust / 2048 if
                                     \ full thrust is being pressed, so this
                                     \ applies the engine thrust
                                     \
@@ -1778,8 +1797,8 @@ ENDIF
  ADD     R4, R4, R9                 \ R4, adding it to R4 as it is a downwards
                                     \ force along the z-axis
 
- STMIA   R14, {R0-R8}               \ Store the updated player coordinates and
-                                    \ velocity as follows:
+ STMIA   R14, {R0-R8}               \ Store the updated player coordinates, ship
+                                    \ velocity and thrust vector as follows:
                                     \
                                     \   xPlayer = R0
                                     \   yPlayer = R1
@@ -1789,10 +1808,11 @@ ENDIF
                                     \   yVelocity = R4
                                     \   zVelocity = R5
                                     \
-                                    \ We also store the the y-axis of the
-                                    \ rotation matrix in (R6, R7, R8) into the
-                                    \ three words after zVelocity, though these
-                                    \ don't appear to be used
+                                    \   xThrust = R6
+                                    \   yThrust = R7
+                                    \   zThrust = R8
+                                    \
+                                    \ We use these values in part 4
 
 \ ******************************************************************************
 \
@@ -1963,21 +1983,32 @@ ENDIF
 \
 \ ******************************************************************************
 
- LDRB    R10, [R11, #fuelBurnRate]  \ 
- TST     R10, #6                    \ 
- BEQ     ship7                      \ 
+ LDRB    R10, [R11, #fuelBurnRate]  \ If both bits 1 and 2 of the fuel burn rate
+ TST     R10, #%00000110            \ are clear then the engine is not running,
+ BEQ     ship7                      \ so jump to ship7 to skip generating an
+                                    \ exhaust plume
 
- ADD     R14, R11, #xVelocity       \ 
+ ADD     R14, R11, #xVelocity       \ Set R0 to R2 and R6 to R8 as follows by
+ LDMIA   R14, {R0-R2, R6-R8}        \ fetching the values we stored in part 2:
+                                    \
+                                    \   R0 = xVelocity
+                                    \   R1 = yVelocity
+                                    \   R2 = zVelocity
+                                    \
+                                    \   R6 = xThrust
+                                    \   R7 = yThrust
+                                    \   R8 = zThrust
+                                    \
+                                    \ So (R0, R1, R2) is the player's coordinate
+                                    \ and (R6, R7, R8) is the player's velocity
+                                    \ vector
 
- LDMIA   R14, {R0-R2, R6-R8}        \ 
-
- ADD     R3, R0, R6, ASR #7         \ 
- ADD     R4, R1, R7, ASR #7         \ 
- ADD     R5, R2, R8, ASR #7         \ 
-
- MOV     R3, R3, ASR #1             \ 
- MOV     R4, R4, ASR #1             \ 
- MOV     R5, R5, ASR #1             \ 
+ ADD     R3, R0, R6, ASR #7         \ Set (R3, R4, R5) as follows:
+ ADD     R4, R1, R7, ASR #7         \
+ ADD     R5, R2, R8, ASR #7         \   [ (xPlayer + xVelocity / 128) / 2 ]
+ MOV     R3, R3, ASR #1             \   [ (yPlayer + yVelocity / 128) / 2 ]
+ MOV     R4, R4, ASR #1             \   [ (zPlayer + zVelocity / 128) / 2 ]
+ MOV     R5, R5, ASR #1
 
  ADD     R0, R11, #xPlayer          \ 
 
@@ -2003,7 +2034,7 @@ ENDIF
 
  BL      sub_8A8C                   \ 
 
- TST     R10, #4                    \ 
+ TST     R10, #%00000100            \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
 
