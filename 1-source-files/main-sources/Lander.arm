@@ -110,19 +110,19 @@
 
  xNoseV = &30                       \ The x-coordinate of the nose vector
 
- yNoseV = &34                       \ The y-coordinate of the nose vector
+ xRoofV = &34                       \ The x-coordinate of the roof vector
 
- zNoseV = &38                       \ The z-coordinate of the nose vector
+ xSideV = &38                       \ The x-coordinate of the side vector
 
- xRoofV = &3C                       \ The x-coordinate of the roof vector
+ yNoseV = &3C                       \ The y-coordinate of the nose vector
 
  yRoofV = &40                       \ The y-coordinate of the roof vector
 
- zRoofV = &44                       \ The z-coordinate of the roof vector
+ ySideV = &44                       \ The y-coordinate of the side vector
 
- xSideV = &48                       \ The x-coordinate of the side vector
+ zNoseV = &48                       \ The z-coordinate of the nose vector
 
- ySideV = &4C                       \ The y-coordinate of the side vector
+ zRoofV = &4C                       \ The z-coordinate of the side vector
 
  zSideV = &50                       \ The z-coordinate of the side vector
 
@@ -1672,15 +1672,12 @@ ENDIF
  BICLT   R9, R9, #%00000110         \ is too high for the engines to work
  STRLTB  R9, [R11, #fuelBurnRate]
 
- LDR     R6, [R11, #yNoseV]         \ Set (R6, R7, R8) to the y-axis of the
- LDR     R7, [R11, #yRoofV]         \ rotation matrix, which is the vector that
- LDR     R8, [R11, #ySideV]         \ points directly down through the ship's
-                                    \ floor after being rotated (so it's in the
-                                    \ direction of thrust, as the thrusters are
-                                    \ on the bottom of the ship)
-                                    \
-                                    \ ??? Why not just use roofV, or is the
-                                    \ rotmat transposed from that of Elite?
+ LDR     R6, [R11, #xRoofV]         \ Set (R6, R7, R8) to the roof vector from
+ LDR     R7, [R11, #yRoofV]         \ the rotation matrix, which is the vector
+ LDR     R8, [R11, #zRoofV]         \ that points directly down through the
+                                    \ ship's floor after being rotated (so it's
+                                    \ in the direction of thrust, as the
+                                    \ thrusters are on the bottom of the ship)
                                     \
                                     \ Let's refer to this thrust vector as
                                     \ follows:
@@ -2038,23 +2035,23 @@ ENDIF
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
 
- TST     R10, #4                    \ 
+ TST     R10, #%00000100            \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
 
- TST     R10, #4                    \ 
+ TST     R10, #%00000100            \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
 
- TST     R10, #4                    \ 
+ TST     R10, #%00000100            \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
 
- TST     R10, #4                    \ 
+ TST     R10, #%00000100            \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
 
- TST     R10, #4                    \ 
+ TST     R10, #%00000100            \ 
  LDMNEIA R13, {R0-R9}               \ 
  BLNE    sub_8A8C                   \ 
 
@@ -2073,7 +2070,7 @@ ENDIF
 
 .ship7
 
- TST     R10, #1                    \ 
+ TST     R10, #%00000001            \ 
  BEQ     ship8                      \ 
 
  LDR     R8, [R11, #currentScore]   \ Decrement the current score by one
@@ -2085,8 +2082,8 @@ ENDIF
  LDMIA   R14, {R0-R5}               \ 
 
  LDR     R6, [R11, #xNoseV]         \ 
- LDR     R7, [R11, #xRoofV]         \ 
- LDR     R8, [R11, #xSideV]         \ 
+ LDR     R7, [R11, #yNoseV]         \ 
+ LDR     R8, [R11, #zNoseV]         \ 
 
  ADD     R3, R3, R6, ASR #8         \ 
  ADD     R4, R4, R7, ASR #8         \ 
@@ -3508,9 +3505,9 @@ ENDIF
  STMNEIA R4!, {R0-R2}               \ matrix, which is made up of the three
  LDMNEIA R3!, {R0-R2}               \ orientation vectors in:
  STMNEIA R4!, {R0-R2}               \
-                                    \   (xNoseV, yNoseV, zNoseV)
-                                    \   (xRoofV, yRoofV, zRoofV)
-                                    \   (xSideV, ySideV, zSideV)
+                                    \   (xNoseV, xRoofV, xSideV)
+                                    \   (yNoseV, yRoofV, ySideV)
+                                    \   (zNoseV, zRoofV, zSideV)
 
                                     \ So by this point we have:
                                     \
@@ -3527,9 +3524,9 @@ ENDIF
                                     \     rotationMatrix, which is made up of
                                     \     the orientataion vectors as follows:
                                     \
-                                    \     (xNoseV, yNoseV, zNoseV)
-                                    \     (xRoofV, yRoofV, zRoofV)
-                                    \     (xSideV, ySideV, zSideV)
+                                    \     (xNoseV, xRoofV, xSideV)
+                                    \     (yNoseV, yRoofV, ySideV)
+                                    \     (zNoseV, zRoofV, zSideV)
                                     \
                                     \   * crashedFlag = 0
                                     \
@@ -4364,9 +4361,9 @@ ENDIF
 \   [ R1+4 ] = rotationMatrix . [ R0+4 ]
 \   [ R1+8 ]                    [ R0+8 ]
 \
-\              [ xNoseV yNoseV zNoseV ]   [ R0   ]
-\            = [ xRoofV yRoofV zRoofV ] . [ R0+4 ]
-\              [ xSideV ySideV zSideV ]   [ R0+8 ]
+\              [ xNoseV xRoofV xSideV ]   [ R0   ]
+\            = [ yNoseV yRoofV ySideV ] . [ R0+4 ]
+\              [ zNoseV zRoofV zSideV ]   [ R0+8 ]
 \
 \ So this rotates a coordinate by the object's rotation matrix (i.e. by each
 \ of the object's orientation vectors).
@@ -4642,9 +4639,9 @@ ENDIF
 \
 \ The rotation matrix is of the form:
 \
-\   [ xNoseV yNoseV zNoseV ]
-\   [ xRoofV yRoofV zRoofV ]
-\   [ xSideV ySideV zSideV ]
+\   [ xNoseV xRoofV xSideV ]
+\   [ yNoseV yRoofV ySideV ]
+\   [ zNoseV zRoofV zSideV ]
 \
 \ where the nose, roof and side vectors are the orientation vectors.
 \
@@ -4795,9 +4792,9 @@ ENDIF
  TEQ     R14, #0
  RSBMI   R4, R4, #0
 
- STR     R4, [R11, #ySideV]         \ Store the result in ySideV, so:
+ STR     R4, [R11, #zRoofV]         \ Store the result in zRoofV, so:
                                     \
-                                    \   ySideV = sin(a) * sin(b)
+                                    \   zRoofV = sin(a) * sin(b)
 
  LDMFD   R13, {R0-R3}               \ Retrieve R0 to R3 from the stack, leaving
                                     \ the stack pointer alone so we can repeat
@@ -4830,10 +4827,10 @@ ENDIF
  TEQ     R14, #0                    \      = cos(a) * sin(b)
  RSBMI   R4, R4, #0
 
- RSB     R4, R4, #0                 \ Negate the result and store it in xSideV,
- STR     R4, [R11, #xSideV]         \ so:
+ RSB     R4, R4, #0                 \ Negate the result and store it in zNoseV,
+ STR     R4, [R11, #zNoseV]         \ so:
                                     \
-                                    \   xSideV = -cos(a) * sin(b)
+                                    \   zNoseV = -cos(a) * sin(b)
 
  EOR     R14, R0, R3                \ Set R4 = R0 * R3 using the same algorithm
  TEQ     R0, #0                     \ as above
@@ -4856,10 +4853,10 @@ ENDIF
  TEQ     R14, #0
  RSBMI   R4, R4, #0
 
- RSB     R4, R4, #0                 \ Negate the result and store it in yNoseV,
- STR     R4, [R11, #yNoseV]         \ so:
+ RSB     R4, R4, #0                 \ Negate the result and store it in xRoofV,
+ STR     R4, [R11, #xRoofV]         \ so:
                                     \
-                                    \   yNoseV = -sin(a) * cos(b)
+                                    \   xRoofV = -sin(a) * cos(b)
 
  LDMFD   R13!, {R0-R3, R14}         \ Retrieve R0 to R3 from the stack, so R0 to
                                     \ R3 once again contain the following:
@@ -4872,16 +4869,16 @@ ENDIF
                                     \ We also retrieve the subroutine return
                                     \ address into R14
 
- STR     R0, [R11, #xRoofV]         \ Set xRoofV = sin(a)
+ STR     R0, [R11, #yNoseV]         \ Set yNoseV = sin(a)
 
- STR     R1, [R11, #zNoseV]         \ Set zNoseV = sin(b)
+ STR     R1, [R11, #xSideV]         \ Set xSideV = sin(b)
 
  STR     R2, [R11, #yRoofV]         \ Set yRoofV = cos(a)
 
  STR     R3, [R11, #zSideV]         \ Set zSideV = cos(b)
 
- MOV     R0, #0                     \ Set zRoofV = 0
- STR     R0, [R11, #zRoofV]
+ MOV     R0, #0                     \ Set ySideV = 0
+ STR     R0, [R11, #ySideV]
 
  MOV     PC, R14                    \ Return from the subroutine
 

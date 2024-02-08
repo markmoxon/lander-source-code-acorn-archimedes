@@ -20,13 +20,13 @@
 .set zObject, 0x08
 .set rotationMatrix, 0x30
 .set xNoseV, 0x30
-.set yNoseV, 0x34
-.set zNoseV, 0x38
-.set xRoofV, 0x3C
+.set xRoofV, 0x34
+.set xSideV, 0x38
+.set yNoseV, 0x3C
 .set yRoofV, 0x40
-.set zRoofV, 0x44
-.set xSideV, 0x48
-.set ySideV, 0x4C
+.set ySideV, 0x44
+.set zNoseV, 0x48
+.set zRoofV, 0x4C
 .set zSideV, 0x50
 .set xVertex, 0x54
 .set yVertex, 0x58
@@ -46,6 +46,9 @@
 .set xVelocity, 0xA0
 .set yVelocity, 0xA4
 .set zVelocity, 0xA8
+.set xThrust, 0xAC
+.set yThrust, 0xB0
+.set zThrust, 0xB4
 .set previousColumn, 0xC4
 .set tileCornerRow, 0xE4
 .set unusedConfig, 0xF0
@@ -394,9 +397,9 @@ ship4:
  LDRLTB  R9, [R11, #fuelBurnRate]
  BICLT   R9, R9, #0x6
  STRLTB  R9, [R11, #fuelBurnRate]
- LDR     R6, [R11, #yNoseV]
+ LDR     R6, [R11, #xRoofV]
  LDR     R7, [R11, #yRoofV]
- LDR     R8, [R11, #ySideV]
+ LDR     R8, [R11, #zRoofV]
  LDRB    R9, [R11, #fuelBurnRate]
  TST     R9, #0x4
  SUB     R3, R3, R3, ASR #6
@@ -484,25 +487,25 @@ ship6:
  TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
  BLNE    sub_8A8C
- TST     R10, #4
+ TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
  BLNE    sub_8A8C
- TST     R10, #4
+ TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
  BLNE    sub_8A8C
- TST     R10, #4
+ TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
  BLNE    sub_8A8C
- TST     R10, #4
+ TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
  BLNE    sub_8A8C
- TST     R10, #4
+ TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
  BLNE    sub_8A8C
  LDMFD   R13!, {R0-R9}
  BL      sub_8A8C
 ship7:
- TST     R10, #1
+ TST     R10, #0x1
  BEQ     ship8
  LDR     R8, [R11, #currentScore]
  SUB     R8, R8, #1
@@ -510,8 +513,8 @@ ship7:
  ADD     R14, R11, #xPlayer
  LDMIA   R14, {R0-R5}
  LDR     R6, [R11, #xNoseV]
- LDR     R7, [R11, #xRoofV]
- LDR     R8, [R11, #xSideV]
+ LDR     R7, [R11, #yNoseV]
+ LDR     R8, [R11, #zNoseV]
  ADD     R3, R3, R6, ASR #8
  ADD     R4, R4, R7, ASR #8
  ADD     R5, R5, R8, ASR #8
@@ -1511,7 +1514,7 @@ lab_9498:
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
- STR     R4, [R11, #ySideV]
+ STR     R4, [R11, #zRoofV]
  LDMFD   R13, {R0-R3}
  EOR     R14, R1, R2
  TEQ     R1, #0
@@ -1532,7 +1535,7 @@ lab_94E4:
  TEQ     R14, #0
  RSBMI   R4, R4, #0
  RSB     R4, R4, #0
- STR     R4, [R11, #xSideV]
+ STR     R4, [R11, #zNoseV]
  EOR     R14, R0, R3
  TEQ     R0, #0
  RSBMI   R0, R0, #0
@@ -1552,14 +1555,14 @@ lab_9530:
  TEQ     R14, #0
  RSBMI   R4, R4, #0
  RSB     R4, R4, #0
- STR     R4, [R11, #yNoseV]
+ STR     R4, [R11, #xRoofV]
  LDMFD   R13!, {R0-R3, R14}
- STR     R0, [R11, #xRoofV]
- STR     R1, [R11, #zNoseV]
+ STR     R0, [R11, #yNoseV]
+ STR     R1, [R11, #xSideV]
  STR     R2, [R11, #yRoofV]
  STR     R3, [R11, #zSideV]
  MOV     R0, #0
- STR     R0, [R11, #zRoofV]
+ STR     R0, [R11, #ySideV]
  MOV     PC, R14
 GetMouseInPolarCoordinates:
  STMFD   R13!, {R14}
