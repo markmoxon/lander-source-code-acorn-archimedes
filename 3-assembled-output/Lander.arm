@@ -56,8 +56,8 @@
 .set tileRowOddEven, 0xF8
 .set altitude, 0x100
 .set prevAltitude, 0x104
-.set var_108, 0x108
-.set var_10C, 0x10C
+.set particleEnd, 0x108
+.set particleCount, 0x10C
 .set objectData, 0x110
 .set objectFlags, 0x114
 .set mainLoopCount, 0x118
@@ -88,8 +88,7 @@
 .set cornerStore1, 0x400
 .set cornerStore2, 0x500
 .set vertexProjected, 0x600
-.set var_700, 0x700
-.set var_71C, 0x71C
+.set particleData, 0x700
 .set objectMap, 0x4400
 .org     CODE
 landscapeOffset:
@@ -483,27 +482,27 @@ ship6:
  MOV     R8, #0xA
  MOV     R9, #0x1D
  STMFD   R13!, {R0-R9}
- BL      sub_8A8C
+ BL      DrawExhaustParticles
  TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
- BLNE    sub_8A8C
+ BLNE    DrawExhaustParticles
  TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
- BLNE    sub_8A8C
+ BLNE    DrawExhaustParticles
  TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
- BLNE    sub_8A8C
+ BLNE    DrawExhaustParticles
  TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
- BLNE    sub_8A8C
+ BLNE    DrawExhaustParticles
  TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
- BLNE    sub_8A8C
+ BLNE    DrawExhaustParticles
  TST     R10, #0x4
  LDMNEIA R13, {R0-R9}
- BLNE    sub_8A8C
+ BLNE    DrawExhaustParticles
  LDMFD   R13!, {R0-R9}
- BL      sub_8A8C
+ BL      DrawExhaustParticles
 ship7:
  TST     R10, #0x1
  BEQ     ship8
@@ -527,7 +526,7 @@ ship7:
  MOV     R6, #0x14
  MOV     R7, #0x01BC0000
  ORR     R7, R7, #0xFF
- BL      sub_8A84
+ BL      DrawBulletParticle
 ship8:
  LDMFD   R13!, {PC}
 LandOnLaunchpad:
@@ -630,15 +629,15 @@ var_87EC:
 .long    graphicsBuffers
 MoveAndDrawParticles:
  STMFD   R13!, {R10, R12, R14}
- ADD     R10, R11, #var_700
+ ADD     R10, R11, #particleData
  LDR     R12, var_87EC
-lab_8800:
+part1:
  LDMIA   R10, {R0-R7}
  CMP     R7, #0
  LDMEQFD R13!, {R10, R12, PC}
 lab_880C:
  SUBS    R6, R6, #1
- BEQ     sub_8A58
+ BEQ     DeleteParticle
  ADD     R0, R0, R3
  ADD     R1, R1, R4
  ADD     R2, R2, R5
@@ -666,13 +665,13 @@ lab_880C:
  LDR     R8, [R11, #yCamera]
  SUB     R1, R1, R8
  CMP     R2, #0x14000000
- BHS     lab_8800
+ BHS     part1
  CMP     R2, #0x0A000000
- BLO     lab_8800
+ BLO     part1
  MOVS    R14, R0
  RSBMI   R14, R0, #0
  CMP     R14, #0x06000000
- BHS     lab_8800
+ BHS     part1
  TST     R7, #0x00020000
  BEQ     lab_8904
  STMFD   R13!, {R0-R2}
@@ -699,7 +698,7 @@ lab_88E8:
  STR     R14, [R11, #objectData]
  ADD     R3, R11, #rotationMatrix
  BL      DrawObject
- B       lab_8800
+ B       part1
 lab_8904:
  STMFD   R13!, {R0-R2, R7}
  LDR     R14, [R11, #yCamera]
@@ -744,7 +743,7 @@ sub_8998:
  CMP     R9, #SEA_LEVEL
  BEQ     sub_8A34
  TST     R7, #0x00080000
- BEQ     sub_8A58
+ BEQ     DeleteParticle
  TST     R7, #0x01000000
  BNE     sub_8A28
  MOV     R3, R3, ASR #1
@@ -776,14 +775,14 @@ sub_89C8:
  STREQ   R8, [R11, #currentScore]
  MOV     R8, #0x14
  BL      sub_8CBC
- B       sub_8A58
+ B       DeleteParticle
 sub_8A28:
  MOV     R8, #3
  BL      sub_8CBC
- B       sub_8A58
+ B       DeleteParticle
 sub_8A34:
  TST     R7, #0x00040000
- BEQ     sub_8A58
+ BEQ     DeleteParticle
  TST     R7, #0x00800000
  MOVNE   R8, #0x41
  MOVEQ   R8, #4
@@ -792,30 +791,30 @@ lab_8A4C:
  BL      sub_8C58
  SUBS    R8, R8, #1
  BNE     lab_8A4C
-sub_8A58:
- LDR     R8, [R11, #var_108]
- SUB     R8, R8, #0x20
- STR     R8, [R11, #var_108]
+DeleteParticle:
+ LDR     R8, [R11, #particleEnd]
+ SUB     R8, R8, #8*4
+ STR     R8, [R11, #particleEnd]
  LDMIA   R8, {R0-R7}
  STMIA   R10, {R0-R7}
  MOV     R7, #0
- STR     R7, [R8, #0x1C]
- LDR     R8, [R11, #var_10C]
+ STR     R7, [R8, #7*4]
+ LDR     R8, [R11, #particleCount]
  SUB     R8, R8, #1
- STR     R8, [R11, #var_10C]
- B       lab_8800
-sub_8A84:
+ STR     R8, [R11, #particleCount]
+ B       part1
+DrawBulletParticle:
  STMFD   R13!, {R8, R14}
- B       lab_8AC8
-sub_8A8C:
+ B       StoreParticleData
+DrawExhaustParticles:
  STMFD   R13!, {R8, R14}
- B       lab_8AA0
+ B       DrawRandomParticles
 sub_8A94:
  MOV     R4, #0
-lab_8A98:
+sub_8A98:
  MOV     R3, #0
  MOV     R5, #0
-lab_8AA0:
+DrawRandomParticles:
  STMFD   R13!, {R0-R1}
  BL      GetRandomNumbers
  ADD     R3, R3, R0, ASR R8
@@ -826,24 +825,24 @@ lab_8AA0:
  BL      GetRandomNumbers
  ADD     R6, R6, R0, LSR R9
  LDMFD   R13!, {R0-R1}
-lab_8AC8:
- LDR     R8, [R11, #var_10C]
- CMP     R8, #0x1E4
+StoreParticleData:
+ LDR     R8, [R11, #particleCount]
+ CMP     R8, #484
  LDMHSFD R13!, {R8, PC}
  ADD     R8, R8, #1
- STR     R8, [R11, #var_10C]
- LDR     R8, [R11, #var_108]
+ STR     R8, [R11, #particleCount]
+ LDR     R8, [R11, #particleEnd]
  STMIA   R8!, {R0-R7}
- STR     R8, [R11, #var_108]
+ STR     R8, [R11, #particleEnd]
  MOV     R9, #0
- STR     R9, [R8, #0x1C]
+ STR     R9, [R8, #7*4]
  LDMFD   R13!, {R8, PC}
-sub_8AF4:
- ADD     R0, R11, #var_700
- STR     R0, [R11, #var_108]
+InitialiseParticleData:
+ ADD     R0, R11, #particleData
+ STR     R0, [R11, #particleEnd]
  MOV     R1, #0
- STR     R1, [R0, #0x1C]
- STR     R1, [R11, #var_10C]
+ STR     R1, [R0, #7*4]
+ STR     R1, [R11, #particleCount]
  MOV     PC, R14
 sub_8B0C:
  STMFD   R13!, {R0-R2, R8, R14}
@@ -870,7 +869,7 @@ sub_8B0C:
  MOV     R9, #0x19
  MOV     R8, #0xD
  MOV     R6, #0xF
- B       lab_8A98
+ B       sub_8A98
 sub_8B70:
  STMFD   R13!, {R0-R2, R8, R14}
  BL      GetRandomNumbers
@@ -2762,7 +2761,7 @@ Entry:
  MOV     R1, #1
  MOV     R2, #0
  SWI     OS_Byte
- BL      sub_8AF4
+ BL      InitialiseParticleData
  MOV     R0, #22
  SWI     OS_WriteC
  MOV     R0, #13

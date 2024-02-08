@@ -219,9 +219,11 @@
  prevAltitude = &104                \ The altitude of the landscape at the
                                     \ previously calculated coordinate
 
- var_108 = &108                     \ Contains the address of var_700 ???
+ particleEnd = &108                 \ The address of the end of the particle
+                                    \ data in the particle data buffer
 
- var_10C = &10C                     \ 
+ particleCount = &10C               \ The number of particles currently
+                                    \ on-screen
 
  objectData = &110                  \ The address of the data block for the
                                     \ object currentlt being drawn
@@ -354,9 +356,9 @@
 
  vertexProjected = &600             \ Projected vertices
 
- var_700 = &700                     \ 
-
- var_71C = &71C                     \ Zeroed in sub_8AF4
+ particleData = &700                \ The particle data buffer, which stores
+                                    \ eight data bytes for each on-screen
+                                    \ particle
 
  objectMap = &4400                  \ The object map determines which objects
                                     \ appear on the landscape, where objects are
@@ -1976,7 +1978,7 @@ ENDIF
 \       Name: MoveAndDrawPlayer (Part 4 of 5)
 \       Type: Subroutine
 \   Category: Player
-\    Summary: Draw the exhaust plume
+\    Summary: Spawn the particles in the exhaust plume if the engine is engaged
 \
 \ ******************************************************************************
 
@@ -1996,113 +1998,158 @@ ENDIF
                                     \   R7 = yThrust
                                     \   R8 = zThrust
                                     \
-                                    \ So (R0, R1, R2) is the player's coordinate
-                                    \ and (R6, R7, R8) is the player's velocity
+                                    \ So (R0, R1, R2) is the player's velocity
+                                    \ and (R6, R7, R8) is the player's thrust
                                     \ vector
 
  ADD     R3, R0, R6, ASR #7         \ Set (R3, R4, R5) as follows:
  ADD     R4, R1, R7, ASR #7         \
- ADD     R5, R2, R8, ASR #7         \   [ (xPlayer + xVelocity / 128) / 2 ]
- MOV     R3, R3, ASR #1             \   [ (yPlayer + yVelocity / 128) / 2 ]
- MOV     R4, R4, ASR #1             \   [ (zPlayer + zVelocity / 128) / 2 ]
+ ADD     R5, R2, R8, ASR #7         \   [ (xVelocity + xThrust / 128) / 2 ]
+ MOV     R3, R3, ASR #1             \   [ (yVelocity + yThrust / 128) / 2 ]
+ MOV     R4, R4, ASR #1             \   [ (zVelocity + zThrust / 128) / 2 ]
  MOV     R5, R5, ASR #1
 
- ADD     R0, R11, #xPlayer          \ 
-
+ ADD     R0, R11, #xPlayer          \ Set R0 to R2 as follows:
  LDMIA   R0, {R0-R2}                \ 
+                                    \   R0 = xPlayer
+                                    \   R1 = yPlayer
+                                    \   R2 = zPlayer
+                                    \
+                                    \ So (R0, R1, R2) is the player's coordinate
 
- SUB     R0, R0, R3                 \ 
- SUB     R1, R1, R4                 \ 
- SUB     R2, R2, R5                 \ 
+ SUB     R0, R0, R3                 \ Set (R0, R1, R2) as follows:
+ SUB     R1, R1, R4                 \
+ SUB     R2, R2, R5                 \   [ xPlayer - R3 + (xThrust / 128) ]
+ ADD     R0, R0, R6, ASR #7         \   [ yPlayer - R4 + (yThrust / 128) ]
+ ADD     R1, R1, R7, ASR #7         \   [ zPlayer - R5 + (zThrust / 128) ]
+ ADD     R2, R2, R8, ASR #7
 
- ADD     R0, R0, R6, ASR #7         \ 
- ADD     R1, R1, R7, ASR #7         \ 
- ADD     R2, R2, R8, ASR #7         \ 
+                                    \ By this stage we have:
+                                    \
+                                    \   (R0, R1, R2) = ???
+                                    \
+                                    \   (R3, R4, R5) = ???
+                                    \
+                                    \ We now set the values of R6 to R9 to pass
+                                    \ to the DrawExhaustParticles routine
 
- MOV     R7, #&001D0000             \ 
+ MOV     R7, #&001D0000             \ Particle flags from Micro user article?
 
- MOV     R6, #8                     \ 
+ MOV     R6, #8                     \ Gets a random number added to it in
+                                    \ DrawRandomParticles
 
- MOV     R8, #&A                    \ 
+ MOV     R8, #&A                    \ Determines scale of random numbers added
+                                    \ to (R3, R4, R5) in DrawRandomParticles -
+                                    \ some kind of cloud size?
 
- MOV     R9, #&1D                   \ 
+ MOV     R9, #&1D                   \ Determines scale of random number added
+                                    \ to R6
 
- STMFD   R13!, {R0-R9}              \ 
+ STMFD   R13!, {R0-R9}              \ Store R0 to R9 on the stack so we can
+                                    \ fetch this set of values before each call
+                                    \ to DrawExhaustParticles
 
- BL      sub_8A8C                   \ 
+                                    \ We now call the DrawExhaustParticles
+                                    \ routine eight times if full thrust is
+                                    \ engaged, or twice if hover mode is being
+                                    \ used (so the exhaust plume is four times
+                                    \ denser when full thrust is engaged)
 
- TST     R10, #%00000100            \ 
- LDMNEIA R13, {R0-R9}               \ 
- BLNE    sub_8A8C                   \ 
+ BL      DrawExhaustParticles       \ Call DrawExhaustParticles with the set of
+                                    \ parameters in R0 to R9 to draw the first
+                                    \ set of particles in the exhaust plume
 
- TST     R10, #%00000100            \ 
- LDMNEIA R13, {R0-R9}               \ 
- BLNE    sub_8A8C                   \ 
+ TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
+ LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
+ BLNE    DrawExhaustParticles       \ do a second call to DrawExhaustParticles
 
- TST     R10, #%00000100            \ 
- LDMNEIA R13, {R0-R9}               \ 
- BLNE    sub_8A8C                   \ 
+ TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
+ LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
+ BLNE    DrawExhaustParticles       \ do a third call to DrawExhaustParticles
 
- TST     R10, #%00000100            \ 
- LDMNEIA R13, {R0-R9}               \ 
- BLNE    sub_8A8C                   \ 
+ TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
+ LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
+ BLNE    DrawExhaustParticles       \ do a fourth call to DrawExhaustParticles
 
- TST     R10, #%00000100            \ 
- LDMNEIA R13, {R0-R9}               \ 
- BLNE    sub_8A8C                   \ 
+ TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
+ LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
+ BLNE    DrawExhaustParticles       \ do a fifth call to DrawExhaustParticles
 
- TST     R10, #%00000100            \ 
- LDMNEIA R13, {R0-R9}               \ 
- BLNE    sub_8A8C                   \ 
+ TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
+ LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
+ BLNE    DrawExhaustParticles       \ do a sixth call to DrawExhaustParticles
 
- LDMFD   R13!, {R0-R9}              \ 
+ TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
+ LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
+ BLNE    DrawExhaustParticles       \ do a seventh call to DrawExhaustParticles
 
- BL      sub_8A8C                   \ 
+ LDMFD   R13!, {R0-R9}              \ Fetch the same parameters and do a final
+ BL      DrawExhaustParticles       \ call to DrawExhaustParticles
 
 \ ******************************************************************************
 \
 \       Name: MoveAndDrawPlayer (Part 5 of 5)
 \       Type: Subroutine
 \   Category: Player
-\    Summary: Calculate bullet trajectories
+\    Summary: Spawn a bullet particle if the fire button is being pressed
 \
 \ ******************************************************************************
 
 .ship7
 
- TST     R10, #%00000001            \ 
- BEQ     ship8                      \ 
+ TST     R10, #%00000001            \ If bit 0 of the fuel burn rate is clear
+ BEQ     ship8                      \ then the fire button is not being pressed,
+                                    \ so jump to ship8 to skip the bullet-firing
+                                    \ process and return from the subroutine
 
- LDR     R8, [R11, #currentScore]   \ Decrement the current score by one
- SUB     R8, R8, #1
+ LDR     R8, [R11, #currentScore]   \ Decrement the current score by one, as we
+ SUB     R8, R8, #1                 \ are about to fire a bullet
  STR     R8, [R11, #currentScore]
 
- ADD     R14, R11, #xPlayer         \ 
-
+ ADD     R14, R11, #xPlayer         \ Set R0 to R5 as follows:
  LDMIA   R14, {R0-R5}               \ 
+                                    \   R0 = xPlayer
+                                    \   R1 = yPlayer
+                                    \   R2 = zPlayer
+                                    \
+                                    \   R3 = xVelocity
+                                    \   R4 = yVelocity
+                                    \   R5 = zVelocity
+                                    \
+                                    \ So (R0, R1, R2) is the player's coordinate
+                                    \ and (R3, R4, R5) is the player's velocity
 
- LDR     R6, [R11, #xNoseV]         \ 
- LDR     R7, [R11, #yNoseV]         \ 
- LDR     R8, [R11, #zNoseV]         \ 
+ LDR     R6, [R11, #xNoseV]         \ Set (R6, R7, R8) to the nose vector from
+ LDR     R7, [R11, #yNoseV]         \ the rotation matrix, which is the vector
+ LDR     R8, [R11, #zNoseV]         \ that points out through the ship's nose,
+                                    \ just like the ship's gun
+                                    \
+                                    \ Let's refer to this gun vector as follows:
+                                    \
+                                    \   R6 = xGun
+                                    \   R7 = yGun
+                                    \   R8 = zGun
 
- ADD     R3, R3, R6, ASR #8         \ 
- ADD     R4, R4, R7, ASR #8         \ 
- ADD     R5, R5, R8, ASR #8         \ 
+ ADD     R3, R3, R6, ASR #8         \ Set (R3, R4, R5) as follows:
+ ADD     R4, R4, R7, ASR #8         \
+ ADD     R5, R5, R8, ASR #8         \   [ xVelocity + xGun / 256 ]
+                                    \   [ yVelocity + yGun / 256 ]
+                                    \   [ zVelocity + zGun / 256 ]
 
- SUB     R0, R0, R3                 \ 
- SUB     R1, R1, R4                 \ 
- SUB     R2, R2, R5                 \ 
+ SUB     R0, R0, R3                 \ Set (R0, R1, R2) as follows:
+ SUB     R1, R1, R4                 \
+ SUB     R2, R2, R5                 \   [ xPlayer - R3 + (xGun / 128) ]
+ ADD     R0, R0, R6, ASR #7         \   [ yPlayer - R3 + (yGun / 128) ]
+ ADD     R1, R1, R7, ASR #7         \   [ zPlayer - R3 + (zGun / 128) ]
+ ADD     R2, R2, R8, ASR #7
 
- ADD     R0, R0, R6, ASR #7         \ 
- ADD     R1, R1, R7, ASR #7         \ 
- ADD     R2, R2, R8, ASR #7         \ 
+ MOV     R6, #&14                   \ ???
 
- MOV     R6, #&14                   \ 
+ MOV     R7, #&01BC0000             \ ??? Flags = &01BC00FF
+ ORR     R7, R7, #&FF
 
- MOV     R7, #&01BC0000             \ 
- ORR     R7, R7, #&FF               \ 
-
- BL      sub_8A84                   \ 
+ BL      DrawBulletParticle         \ Add a bullet particle to the particle data
+                                    \ buffer
 
 .ship8
 
@@ -2385,15 +2432,25 @@ ENDIF
 \   Category: Particles
 \    Summary: ???
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   part1                           The start of the main particle-processing
+\                                   loop
+\
 \ ******************************************************************************
 
 .MoveAndDrawParticles
 
  STMFD   R13!, {R10, R12, R14}      \ 
- ADD     R10, R11, #var_700         \ 
+
+ ADD     R10, R11, #particleData    \ Set R10 to the address of the particle
+                                    \ data buffer
+
  LDR     R12, var_87EC              \ 
 
-.lab_8800
+.part1
 
  LDMIA   R10, {R0-R7}               \ 
  CMP     R7, #0                     \ 
@@ -2402,7 +2459,7 @@ ENDIF
 .lab_880C
 
  SUBS    R6, R6, #1                 \ 
- BEQ     sub_8A58                   \ 
+ BEQ     DeleteParticle             \ 
  ADD     R0, R0, R3                 \ 
  ADD     R1, R1, R4                 \ 
  ADD     R2, R2, R5                 \ 
@@ -2433,13 +2490,13 @@ ENDIF
  LDR     R8, [R11, #yCamera]        \ 
  SUB     R1, R1, R8                 \ 
  CMP     R2, #&14000000             \ 
- BHS     lab_8800                   \ 
+ BHS     part1                      \ 
  CMP     R2, #&0A000000             \ 
- BLO     lab_8800                   \ 
+ BLO     part1                      \ 
  MOVS    R14, R0                    \ 
  RSBMI   R14, R0, #0                \ 
  CMP     R14, #&06000000            \ 
- BHS     lab_8800                   \ 
+ BHS     part1                      \ 
  TST     R7, #&00020000             \ 
  BEQ     lab_8904                   \ 
  STMFD   R13!, {R0-R2}              \ 
@@ -2468,7 +2525,7 @@ ENDIF
  STR     R14, [R11, #objectData]    \ 
  ADD     R3, R11, #rotationMatrix   \ 
  BL      DrawObject                 \ 
- B       lab_8800                   \ 
+ B       part1                      \ 
 
 .lab_8904
 
@@ -2537,7 +2594,7 @@ ENDIF
  CMP     R9, #SEA_LEVEL             \ 
  BEQ     sub_8A34                   \ 
  TST     R7, #&00080000             \ 
- BEQ     sub_8A58                   \ 
+ BEQ     DeleteParticle             \ 
  TST     R7, #&01000000             \ 
  BNE     sub_8A28                   \ 
  MOV     R3, R3, ASR #1             \ 
@@ -2582,7 +2639,7 @@ ENDIF
 
  MOV     R8, #&14                   \ 
  BL      sub_8CBC                   \ 
- B       sub_8A58                   \ 
+ B       DeleteParticle             \ 
 
 \ ******************************************************************************
 \
@@ -2597,7 +2654,7 @@ ENDIF
 
  MOV     R8, #3                     \ 
  BL      sub_8CBC                   \ 
- B       sub_8A58                   \ 
+ B       DeleteParticle             \ 
 
 \ ******************************************************************************
 \
@@ -2611,7 +2668,7 @@ ENDIF
 .sub_8A34
 
  TST     R7, #&00040000             \ 
- BEQ     sub_8A58                   \ 
+ BEQ     DeleteParticle             \ 
  TST     R7, #&00800000             \ 
  MOVNE   R8, #&41                   \ 
  MOVEQ   R8, #4                     \ 
@@ -2625,60 +2682,87 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8A58
+\       Name: DeleteParticle
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Delete a particle from the particle data buffer and move the last
+\             particle's data down to take its place
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R10                             The address in the particle data buffer of
+\                                   the particle to delete
 \
 \ ******************************************************************************
 
-.sub_8A58
+.DeleteParticle
 
- LDR     R8, [R11, #var_108]        \ 
- SUB     R8, R8, #&20               \ 
- STR     R8, [R11, #var_108]        \ 
- LDMIA   R8, {R0-R7}                \ 
- STMIA   R10, {R0-R7}               \ 
- MOV     R7, #0                     \ 
- STR     R7, [R8, #&1C]             \ 
- LDR     R8, [R11, #var_10C]        \ 
- SUB     R8, R8, #1                 \ 
- STR     R8, [R11, #var_10C]        \ 
- B       lab_8800                   \ 
+ LDR     R8, [R11, #particleEnd]    \ Decrease the address of the end of the
+ SUB     R8, R8, #8*4               \ particle data buffer by eight words, so it
+ STR     R8, [R11, #particleEnd]    \ points to the last particle's data in the
+                                    \ buffer
+
+ LDMIA   R8, {R0-R7}                \ Copy the eight bytes of particle data from
+ STMIA   R10, {R0-R7}               \ the end of the buffer to the address in
+                                    \ R10
+
+ MOV     R7, #0                     \ Zero the last word of the last particle's
+ STR     R7, [R8, #7*4]             \ data, so the last particle in the buffer
+                                    \ now acts as a null terminator
+
+ LDR     R8, [R11, #particleCount]  \ Decrement the particle counter to reflect
+ SUB     R8, R8, #1                 \ the new number of particles on-screen
+ STR     R8, [R11, #particleCount]
+
+ B       part1                      \ Jump to the start of the main loop in
+                                    \ MoveAndDrawParticles to continue
+                                    \ processing particles
 
 \ ******************************************************************************
 \
-\       Name: sub_8A84
+\       Name: DrawBulletParticle
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Add a bullet particle to the particle data buffer
 \
 \ ******************************************************************************
 
-.sub_8A84
+.DrawBulletParticle
 
- STMFD   R13!, {R8, R14}            \ 
- B       lab_8AC8                   \ 
+ STMFD   R13!, {R8, R14}            \ Store R8 and the return address on the
+                                    \ stack, so the call to StoreParticleData
+                                    \ can return properly
+
+ B       StoreParticleData          \ Jump to StoreParticleData to store the
+                                    \ particle in the particle data buffer,
+                                    \ returning from the subroutine using a tail
+                                    \ call
 
 \ ******************************************************************************
 \
-\       Name: sub_8A8C
+\       Name: DrawExhaustParticles
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Draw the random particles in the exhaust plume
 \
 \ ******************************************************************************
 
-.sub_8A8C
+.DrawExhaustParticles
 
- STMFD   R13!, {R8, R14}            \ 
- B       lab_8AA0                   \ 
+ STMFD   R13!, {R8, R14}            \ Store R8 and the return address on the
+                                    \ stack ???
+
+ B       DrawRandomParticles        \ Jump to DrawRandomParticles to draw a
+                                    \ cloud of random particles, returning from
+                                    \ the subroutine using a tail call
 
 \ ******************************************************************************
 \
 \       Name: sub_8A94
 \       Type: Subroutine
-\   Category: ???
+\   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -2687,64 +2771,153 @@ ENDIF
 
  MOV     R4, #0                     \ 
 
-.lab_8A98
+\ ******************************************************************************
+\
+\       Name: sub_8A98
+\       Type: Subroutine
+\   Category: Particles
+\    Summary: ???
+\
+\ ******************************************************************************
+
+.sub_8A98
 
  MOV     R3, #0                     \ 
  MOV     R5, #0                     \ 
 
-.lab_8AA0
+\ ******************************************************************************
+\
+\       Name: DrawRandomParticles
+\       Type: Subroutine
+\   Category: Particles
+\    Summary: ???
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    ???
+\
+\   (R3, R4, R5)                    ???
+\
+\   R6                              ??? &14 for bullets, 8 for exhaust
+\
+\   R7                              ??? Particle flags?
+\
+\   R8                              Magnitude of random signed element added to
+\                                   (R3, R4, R5), larger figure means a smaller
+\                                   random element
+\
+\   R9                              Magnitude of random positive element added
+\                                   to R6, larger figure means a smaller random
+\                                   element
+\
+\   Stack                           Contains a value to restore into R8 at the
+\                                   end, and the return address
+\
+\ ******************************************************************************
 
- STMFD   R13!, {R0-R1}              \ 
+.DrawRandomParticles
+
+ STMFD   R13!, {R0-R1}              \ Store R0 and R1 on the stack so we can
+                                    \ restore them after the following
+
+                                    \ We now add a random signed element to
+                                    \ (R3, R4, R5), with the scale determined
+                                    \ by R8 (with larger R8 adding a smaller
+                                    \ random element)
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- ADD     R3, R3, R0, ASR R8         \ 
+ ADD     R3, R3, R0, ASR R8         \ Set R3 = R3 + R0 >> R8
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- ADD     R4, R4, R0, ASR R8         \ 
+ ADD     R4, R4, R0, ASR R8         \ Set R4 = R4 + R0 >> R8
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- ADD     R5, R5, R0, ASR R8         \ 
+ ADD     R5, R5, R0, ASR R8         \ Set R5 = R5 + R0 >> R8
+
+                                    \ We now add a random positive element to
+                                    \ R6, with the scale determined by R9 (with
+                                    \ larger R9 adding a smaller random element)
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- ADD     R6, R6, R0, LSR R9         \ 
- LDMFD   R13!, {R0-R1}              \ 
+ ADD     R6, R6, R0, LSR R9         \ Set R6 = R6 + R0 >> R9
 
-.lab_8AC8
-
- LDR     R8, [R11, #var_10C]        \ 
- CMP     R8, #&1E4                  \ 
- LDMHSFD R13!, {R8, PC}             \ 
- ADD     R8, R8, #1                 \ 
- STR     R8, [R11, #var_10C]        \ 
- LDR     R8, [R11, #var_108]        \ 
- STMIA   R8!, {R0-R7}               \ 
- STR     R8, [R11, #var_108]        \ 
- MOV     R9, #0                     \ 
- STR     R9, [R8, #&1C]             \ 
- LDMFD   R13!, {R8, PC}             \ 
+ LDMFD   R13!, {R0-R1}              \ Retrieve the values of R0 and R1 from the
+                                    \ stack that we stored above
 
 \ ******************************************************************************
 \
-\       Name: sub_8AF4
+\       Name: StoreParticleData
+\       Type: Subroutine
+\   Category: Particles
+\    Summary: Store the data for a new particle in the particle data buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0 to R7                        The eight words of particle data to store
+\
+\   Stack                           Contains a value to restore into R8 at the
+\                                   end, and the return address
+\
+\ ******************************************************************************
+
+.StoreParticleData
+
+ LDR     R8, [R11, #particleCount]  \ Set R8 to the number of particles that are
+                                    \ already on-screen
+
+ CMP     R8, #484                   \ If R8 >= 484 then we already have the
+ LDMHSFD R13!, {R8, PC}             \ maximum number of particles on-screen, so
+                                    \ restore the value of R8 from the stack and
+                                    \ return from the subroutine
+
+ ADD     R8, R8, #1                 \ Increment the particle counter to record
+ STR     R8, [R11, #particleCount]  \ that we have added a new particle
+
+ LDR     R8, [R11, #particleEnd]    \ Set R8 to the address of the end of the
+                                    \ particle data buffer, which is where we
+                                    \ can store the new batch of data
+
+ STMIA   R8!, {R0-R7}               \ Store the eight words of particle data in
+                                    \ the buffer, updating R8 as we go
+
+ STR     R8, [R11, #particleEnd]    \ Update particleEnd with the new address of
+                                    \ the end of the buffer
+
+ MOV     R9, #0                     \ Zero the last word of the next particle's
+ STR     R9, [R8, #7*4]             \ data after the one we just wrote, so this
+                                    \ acts as a null terminator
+
+ LDMFD   R13!, {R8, PC}             \ Restore the value of R8 from the stack and
+                                    \ return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: InitialiseParticleData
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Sets up some variables ???
+\    Summary: Initialise the particle data buffer and associated variables
 \
 \ ******************************************************************************
 
-.sub_8AF4
+.InitialiseParticleData
 
- ADD     R0, R11, #var_700          \ Set var_108 to the address of var_700
- STR     R0, [R11, #var_108]
+ ADD     R0, R11, #particleData     \ Set particleEnd to the address of the
+ STR     R0, [R11, #particleEnd]    \ particle data buffer, so the buffer starts
+                                    \ off empty
 
- MOV     R1, #0                     \ Set var_71C = 0 (as var_71C - var_700 =
- STR     R1, [R0, #&1C]             \ &1C)
+ MOV     R1, #0                     \ Zero the last word of the first particle's
+ STR     R1, [R0, #7*4]             \ data, so it acts as a null terminator
 
- STR     R1, [R11, #var_10C]        \ Set var_10C = 0
+ STR     R1, [R11, #particleCount]  \ Set particleCount = 0 to indicate that
+                                    \ there are no particles on-screen
 
  MOV     PC, R14                    \ Return from the subroutine
 
@@ -2752,7 +2925,7 @@ ENDIF
 \
 \       Name: sub_8B0C
 \       Type: Subroutine
-\   Category: ???
+\   Category: Particles
 \    Summary: ???
 \
 \ ------------------------------------------------------------------------------
@@ -2789,13 +2962,13 @@ ENDIF
  MOV     R9, #&19                   \ 
  MOV     R8, #&D                    \ 
  MOV     R6, #&F                    \ 
- B       lab_8A98                   \ 
+ B       sub_8A98                   \ 
 
 \ ******************************************************************************
 \
 \       Name: sub_8B70
 \       Type: Subroutine
-\   Category: ???
+\   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
@@ -8114,7 +8287,8 @@ ENDIF
  MOV     R2, #0                     \ the cursor during the game
  SWI     OS_Byte
 
- BL      sub_8AF4                   \ Set up var_108, var_71C, var_10C ???
+ BL      InitialiseParticleData     \ Initialise the particle data buffer and
+                                    \ associated variables
 
  MOV     R0, #22                    \ Change to screen mode 13 (320×256 pixels
  SWI     OS_WriteC                  \ with 256 colours), which will display
