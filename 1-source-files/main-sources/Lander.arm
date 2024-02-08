@@ -3135,8 +3135,8 @@ ENDIF
 \
 \       Name: sub_8CDC
 \       Type: Subroutine
-\   Category: Unused
-\    Summary: ???
+\   Category: Particles
+\    Summary: An unused routine that ???
 \
 \ ******************************************************************************
 
@@ -3155,8 +3155,8 @@ ENDIF
 \
 \       Name: sub_8CFC
 \       Type: Subroutine
-\   Category: Unused
-\    Summary: ???
+\   Category: Particles
+\    Summary: An unused routine that ???
 \
 \ ******************************************************************************
 
@@ -3178,22 +3178,39 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8D24
+\       Name: SpawnRock
 \       Type: Subroutine
-\   Category: Unused
-\    Summary: ???
+\   Category: 3D objects
+\    Summary: An unused routine that spawns a rock in the sky, but not as high
+\             as the rocks in the DropRocksFromTheSky routine
 \
 \ ******************************************************************************
 
-.sub_8D24
+.SpawnRock
 
- STMFD   R13!, {R6-R9, R14}         \ 
- LDR     R0, [R11, #xCamera]        \ 
- MVN     R1, #&10000000             \ 
- LDR     R2, [R11, #zCamera]        \ 
- SUB     R2, R2, #&06000000         \ 
- BL      DropARockFromTheSky        \ 
- LDMFD   R13!, {R6-R9, PC}          \ 
+ STMFD   R13!, {R6-R9, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+                                    \ Drop a rock from the sky, spawning the
+                                    \ rock at coordinates (R0, R1, R2), which
+                                    \ are set to 16 tiles above and 6 tiles back
+                                    \ from the camera coordinates, which is
+                                    \ fairly high in the sky above the ship's
+                                    \ current position and one tile in front of
+                                    \ the ship
+
+ LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
+
+ MVN     R1, #&10000000             \ Set R1 = -&10000000
+
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
+ SUB     R2, R2, #&06000000
+
+ BL      DropARockFromTheSky        \ Drop a rock from the coordinates in
+                                    \ (R0, R1, R2)
+
+ LDMFD   R13!, {R6-R9, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3235,7 +3252,7 @@ ENDIF
                                     \ above and 6 tiles back from the camera
                                     \ coordinates, which is very high in the sky
                                     \ above the ship's current position and one
-                                    \ tile in front of ship
+                                    \ tile in front of the ship
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
@@ -4752,8 +4769,8 @@ ENDIF
 \
 \       Name: TransposeRotationMatrix
 \       Type: Subroutine
-\   Category: Unused
-\    Summary: Transpose the rotation matriz
+\   Category: Maths (Geometry)
+\    Summary: An unused routine that transposes the rotation matriz
 \
 \ ******************************************************************************
 
@@ -4781,8 +4798,8 @@ ENDIF
 \
 \       Name: sub_93B4
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Geometry)
+\    Summary: An unused routine that ???
 \
 \ ******************************************************************************
 
@@ -5579,8 +5596,8 @@ ENDIF
 \
 \       Name: sub_98EC
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Geometry)
+\    Summary: An unused routine that ???
 \
 \ ******************************************************************************
 
@@ -5669,84 +5686,128 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_9948
-\       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\       Name: MultiplyVectorByConstant
+\       Type: Variable
+\   Category: Maths (Geometry)
+\    Summary: An unused routine that multiplies a vector by a constant value
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The constant value to multiply the vector by
+\
+\   R1                              The address of the three-word vector, plus a
+\                                   counter word
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   xVertexRotated                  The result of the multiplication, followed
+\                                   by the incremented counter 
 \
 \ ******************************************************************************
 
-.sub_9948
+.MultiplyVectorByConstant
 
- STMFD   R13!, {R5-R8, R14}         \ 
- LDMIA   R1, {R1-R3, R14}           \ 
- MOV     R8, R0                     \ 
- EOR     R4, R8, R1                 \ 
- TEQ     R8, #0                     \ 
- RSBMI   R8, R8, #0                 \ 
- MOVS    R8, R8, LSL #2             \ 
- TEQ     R1, #0                     \ 
- RSBMI   R1, R1, #0                 \ 
- MOV     R1, R1, LSL #1             \ 
- AND     R8, R8, #&FE000000         \ 
- ORR     R8, R8, #&01000000         \ 
- MOV     R5, #0                     \ 
+ STMFD   R13!, {R5-R8, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
-.lab_997C
+ LDMIA   R1, {R1-R3, R14}           \ Fetch R1, R2, R3 and R14 from address R1
 
- MOV     R1, R1, LSR #1             \ 
- ADDHS   R5, R5, R1                 \ 
- MOVS    R8, R8, LSL #1             \ 
- BNE     lab_997C                   \ 
- MOV     R5, R5, LSR #1             \ 
- TEQ     R4, #0                     \ 
- RSBMI   R5, R5, #0                 \ 
- MOV     R8, R0                     \ 
- EOR     R4, R8, R2                 \ 
- TEQ     R8, #0                     \ 
- RSBMI   R8, R8, #0                 \ 
- MOVS    R8, R8, LSL #2             \ 
- TEQ     R2, #0                     \ 
- RSBMI   R2, R2, #0                 \ 
- MOV     R2, R2, LSL #1             \ 
- AND     R8, R8, #&FE000000         \ 
- ORR     R8, R8, #&01000000         \ 
- MOV     R6, #0                     \ 
+ MOV     R8, R0                     \ Set R8 = R0
 
-.lab_99C4
+                                    \ We now calculate R5 = R8 * R1 using the
+                                    \ shift-and-add multiplication algorithm
 
- MOV     R2, R2, LSR #1             \ 
- ADDHS   R6, R6, R2                 \ 
- MOVS    R8, R8, LSL #1             \ 
- BNE     lab_99C4                   \ 
- MOV     R6, R6, LSR #1             \ 
- TEQ     R4, #0                     \ 
- RSBMI   R6, R6, #0                 \ 
- MOV     R8, R0                     \ 
- EOR     R4, R8, R3                 \ 
- TEQ     R8, #0                     \ 
- RSBMI   R8, R8, #0                 \ 
- MOVS    R8, R8, LSL #2             \ 
- TEQ     R3, #0                     \ 
- RSBMI   R3, R3, #0                 \ 
- MOV     R3, R3, LSL #1             \ 
- AND     R8, R8, #&FE000000         \ 
- ORR     R8, R8, #&01000000         \ 
- MOV     R7, #0                     \ 
+ EOR     R4, R8, R1                 \ Set the sign of the result in R4
 
-.lab_9A0C
+ TEQ     R8, #0                     \ Set R8 = 4 * |R8|
+ RSBMI   R8, R8, #0
+ MOVS    R8, R8, LSL #2
 
- MOV     R3, R3, LSR #1             \ 
- ADDHS   R7, R7, R3                 \ 
- MOVS    R8, R8, LSL #1             \ 
- BNE     lab_9A0C                   \ 
- MOV     R7, R7, LSR #1             \ 
- TEQ     R4, #0                     \ 
- RSBMI   R7, R7, #0                 \ 
- ADD     R14, R14, #2               \ 
- ADD     R8, R11, #xVertexRotated   \ 
- STMIA   R8, {R5-R7, R14}           \ 
- LDMFD   R13!, {R5-R8, PC}          \ 
+ TEQ     R1, #0                     \ Set R1 = 2 * |R1|
+ RSBMI   R1, R1, #0
+ MOV     R1, R1, LSL #1
+
+ AND     R8, R8, #&FE000000         \ Zero all but the top byte of R8, ensuring
+ ORR     R8, R8, #&01000000         \ that bit 0 of the top byte is set so the
+                                    \ value of the top byte is at least 1
+
+ MOV     R5, #0                     \ Set R5 = 0 to use for building the sum in
+                                    \ our shift-and-add multiplication result
+
+.vcon1
+
+ MOV     R1, R1, LSR #1             \ If bit 0 of R1 is set, add R1 to the
+ ADDCS   R5, R5, R1                 \ result in R5, shifting R1 to the right
+
+ MOVS    R8, R8, LSL #1             \ Shift R8 left by one place
+
+ BNE     vcon1                      \ Loop back if R8 is non-zero
+
+ MOV     R5, R5, LSR #1             \ Set R5 = R5 / 2
+
+ TEQ     R4, #0                     \ Apply the sign from R4 to R5 to get the
+ RSBMI   R5, R5, #0                 \ final result, so:
+                                    \
+                                    \   R5 = R8 * R1
+                                    \      = R0 * R1
+
+ MOV     R8, R0                     \ Set R8 = R0
+
+ EOR     R4, R8, R2                 \ Calculate R6 = R8 * R2 using the same algorithm
+ TEQ     R8, #0                     \ as above
+ RSBMI   R8, R8, #0                 \
+ MOVS    R8, R8, LSL #2             \ This is the first part of the algorithm
+ TEQ     R2, #0
+ RSBMI   R2, R2, #0
+ MOV     R2, R2, LSL #1
+ AND     R8, R8, #&FE000000
+ ORR     R8, R8, #&01000000
+ MOV     R6, #0
+
+.vcon2
+
+ MOV     R2, R2, LSR #1             \ This is the second part of the algorithm,
+ ADDCS   R6, R6, R2                 \ so we now have:
+ MOVS    R8, R8, LSL #1             \
+ BNE     vcon2                      \ R4 = R8 * R2
+ MOV     R6, R6, LSR #1             \    = R0 * R2
+ TEQ     R4, #0
+ RSBMI   R6, R6, #0
+
+ MOV     R8, R0                     \ Set R8 = R0
+
+ EOR     R4, R8, R3                 \ Calculate R7 = R8 * R3 using the same algorithm
+ TEQ     R8, #0                     \ as above
+ RSBMI   R8, R8, #0                 \
+ MOVS    R8, R8, LSL #2             \ This is the first part of the algorithm
+ TEQ     R3, #0
+ RSBMI   R3, R3, #0
+ MOV     R3, R3, LSL #1
+ AND     R8, R8, #&FE000000
+ ORR     R8, R8, #&01000000
+ MOV     R7, #0
+
+.vcon3
+
+ MOV     R3, R3, LSR #1             \ This is the second part of the algorithm,
+ ADDCS   R7, R7, R3                 \ so we now have:
+ MOVS    R8, R8, LSL #1             \
+ BNE     vcon3                      \   R7 = R8 * R3
+ MOV     R7, R7, LSR #1             \      = R0 * R3
+ TEQ     R4, #0
+ RSBMI   R7, R7, #0
+
+ ADD     R14, R14, #2               \ Set R14 = R14 + 2
+
+ ADD     R8, R11, #xVertexRotated   \ Store (R5, R6, R7) and the updated R14 in
+ STMIA   R8, {R5-R7, R14}           \ xVertexRotated
+
+ LDMFD   R13!, {R5-R8, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -8781,9 +8842,9 @@ ENDIF
 \
 \       Name: PrintHexNumber
 \       Type: Subroutine
-\   Category: Unused
-\    Summary: Print an 8-digit hexadecimal number on the second character row of
-\             the screen
+\   Category: Score bar
+\    Summary: An unused routine that prints an 8-digit hexadecimal number on the
+\             second character row of the screen
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8843,8 +8904,9 @@ ENDIF
 \
 \       Name: PrintHexDigit
 \       Type: Subroutine
-\   Category: Unused
-\    Summary: Print a single digit hexadecimal number
+\   Category: Score bar
+\    Summary: An unused routine that prints a single digit hexadecimal number in
+\             the score bar
 \
 \ ------------------------------------------------------------------------------
 \

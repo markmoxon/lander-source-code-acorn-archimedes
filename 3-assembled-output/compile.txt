@@ -1014,7 +1014,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D18 018058E2        	   988:  SUBS    R8, R8, #1
 00:00008D1C FCFFFF5A        	   989:  BPL     lab_8D14
 00:00008D20 C083BDE8        	   990:  LDMFD   R13!, {R6-R9, PC}
-                            	   991: sub_8D24:
+                            	   991: SpawnRock:
 00:00008D24 C0432DE9        	   992:  STMFD   R13!, {R6-R9, R14}
 00:00008D28 3C019BE5        	   993:  LDR     R0, [R11, #xCamera]
 00:00008D2C 0112E0E3        	   994:  MVN     R1, #0x10000000
@@ -1857,7 +1857,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000993C 070083E8        	  1831:  STMIA   R3, {R0-R2}
 00:00009940 6000BDE8        	  1832:  LDMFD   R13!, {R5-R6}
 00:00009944 0EF0A0E1        	  1833:  MOV     PC, R14
-                            	  1834: sub_9948:
+                            	  1834: MultiplyVectorByConstant:
 00:00009948 E0412DE9        	  1835:  STMFD   R13!, {R5-R8, R14}
 00:0000994C 0E4091E8        	  1836:  LDMIA   R1, {R1-R3, R14}
 00:00009950 0080A0E1        	  1837:  MOV     R8, R0
@@ -1871,11 +1871,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00009970 FE8408E2        	  1845:  AND     R8, R8, #0xFE000000
 00:00009974 018488E3        	  1846:  ORR     R8, R8, #0x01000000
 00:00009978 0050A0E3        	  1847:  MOV     R5, #0
-                            	  1848: lab_997C:
+                            	  1848: vcon1:
 00:0000997C A110A0E1        	  1849:  MOV     R1, R1, LSR #1
-00:00009980 01508520        	  1850:  ADDHS   R5, R5, R1
+00:00009980 01508520        	  1850:  ADDCS   R5, R5, R1
 00:00009984 8880B0E1        	  1851:  MOVS    R8, R8, LSL #1
-00:00009988 FBFFFF1A        	  1852:  BNE     lab_997C
+00:00009988 FBFFFF1A        	  1852:  BNE     vcon1
 00:0000998C A550A0E1        	  1853:  MOV     R5, R5, LSR #1
 00:00009990 000034E3        	  1854:  TEQ     R4, #0
 00:00009994 00506542        	  1855:  RSBMI   R5, R5, #0
@@ -1890,11 +1890,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000099B8 FE8408E2        	  1864:  AND     R8, R8, #0xFE000000
 00:000099BC 018488E3        	  1865:  ORR     R8, R8, #0x01000000
 00:000099C0 0060A0E3        	  1866:  MOV     R6, #0
-                            	  1867: lab_99C4:
+                            	  1867: vcon2:
 00:000099C4 A220A0E1        	  1868:  MOV     R2, R2, LSR #1
-00:000099C8 02608620        	  1869:  ADDHS   R6, R6, R2
+00:000099C8 02608620        	  1869:  ADDCS   R6, R6, R2
 00:000099CC 8880B0E1        	  1870:  MOVS    R8, R8, LSL #1
-00:000099D0 FBFFFF1A        	  1871:  BNE     lab_99C4
+00:000099D0 FBFFFF1A        	  1871:  BNE     vcon2
 00:000099D4 A660A0E1        	  1872:  MOV     R6, R6, LSR #1
 00:000099D8 000034E3        	  1873:  TEQ     R4, #0
 00:000099DC 00606642        	  1874:  RSBMI   R6, R6, #0
@@ -1909,11 +1909,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00009A00 FE8408E2        	  1883:  AND     R8, R8, #0xFE000000
 00:00009A04 018488E3        	  1884:  ORR     R8, R8, #0x01000000
 00:00009A08 0070A0E3        	  1885:  MOV     R7, #0
-                            	  1886: lab_9A0C:
+                            	  1886: vcon3:
 00:00009A0C A330A0E1        	  1887:  MOV     R3, R3, LSR #1
-00:00009A10 03708720        	  1888:  ADDHS   R7, R7, R3
+00:00009A10 03708720        	  1888:  ADDCS   R7, R7, R3
 00:00009A14 8880B0E1        	  1889:  MOVS    R8, R8, LSL #1
-00:00009A18 FBFFFF1A        	  1890:  BNE     lab_9A0C
+00:00009A18 FBFFFF1A        	  1890:  BNE     vcon3
 00:00009A1C A770A0E1        	  1891:  MOV     R7, R7, LSR #1
 00:00009A20 000034E3        	  1892:  TEQ     R4, #0
 00:00009A24 00706742        	  1893:  RSBMI   R7, R7, #0
@@ -10306,6 +10306,7 @@ LoseLife                         A:000086C8
 MainLoop                         A:0000A850
 MoveAndDrawParticles             A:000087F4
 MoveAndDrawPlayer                A:00008398
+MultiplyVectorByConstant         A:00009948
 MultiplyVectorByMatrix           A:00009254
 OS_BinaryToDecimal               S:00000028
 OS_Byte                          S:00000006
@@ -10325,6 +10326,7 @@ ProjectVertexOntoScreen          A:00009748
 ResetMousePosition               A:0000A594
 ReturnToDesktop                  A:0000A8D4
 SEA_LEVEL                        S:05500000
+SpawnRock                        A:00008D24
 StartNewGame                     A:0000A734
 StoreParticleData                A:00008AC8
 SwitchScreenBank                 A:00009D3C
@@ -10393,9 +10395,6 @@ lab_9820                         A:00009820
 lab_9830                         A:00009830
 lab_9864                         A:00009864
 lab_9890                         A:00009890
-lab_997C                         A:0000997C
-lab_99C4                         A:000099C4
-lab_9A0C                         A:00009A0C
 lab_9E20                         A:00009E20
 lab_9E40                         A:00009E40
 lab_9E60                         A:00009E60
@@ -10567,10 +10566,8 @@ sub_8C58                         A:00008C58
 sub_8CBC                         A:00008CBC
 sub_8CDC                         A:00008CDC
 sub_8CFC                         A:00008CFC
-sub_8D24                         A:00008D24
 sub_93B4                         A:000093B4
 sub_98EC                         A:000098EC
-sub_9948                         A:00009948
 term1                            A:00009D10
 tileCornerRow                    S:000000E4
 tileRowOddEven                   S:000000F8
@@ -10580,6 +10577,9 @@ varOffset                        S:00000054
 var_87EC                         A:000087EC
 var_9A70                         A:00009A70
 var_9AC0                         A:00009AC0
+vcon1                            A:0000997C
+vcon2                            A:000099C4
+vcon3                            A:00009A0C
 vertexProjected                  S:00000600
 workspace                        S:00012200
 workspaceAddr                    A:0000A56C
@@ -10626,8 +10626,8 @@ Symbols by value:
 00000009 LAUNCHPAD_OBJECT
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 xNoseV
 00000030 rotationMatrix
+00000030 xNoseV
 00000034 xRoofV
 00000038 xSideV
 0000003C yNoseV
@@ -10748,7 +10748,7 @@ Symbols by value:
 00008CDC sub_8CDC
 00008CFC sub_8CFC
 00008D14 lab_8D14
-00008D24 sub_8D24
+00008D24 SpawnRock
 00008D40 DropRocksFromTheSky
 00008D78 objectTypes
 00008DDC DrawObjects
@@ -10813,10 +10813,10 @@ Symbols by value:
 000098E8 mod_98E8
 000098EC sub_98EC
 0000991C GetVertexCoordinate
-00009948 sub_9948
-0000997C lab_997C
-000099C4 lab_99C4
-00009A0C lab_9A0C
+00009948 MultiplyVectorByConstant
+0000997C vcon1
+000099C4 vcon2
+00009A0C vcon3
 00009A38 randomSeed1
 00009A3C randomSeed2
 00009A40 GetRandomNumbers
