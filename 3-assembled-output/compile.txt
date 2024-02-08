@@ -576,7 +576,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000086B8 A8508BE5        	   558:  STR     R5, [R11, #zVelocity]
 00:000086BC 98108BE5        	   559:  STR     R1, [R11, #yPlayer]
 00:000086C0 0EF0A0E1        	   560:  MOV     PC, R14
-                            	   561: sub_86C4:
+                            	   561: LoseLifeFromParticleLoop:
 00:000086C4 0014BDE8        	   562:  LDMFD   R13!, {R10, R12}
                             	   563: LoseLife:
 00:000086C8 0000A0E3        	   564:  MOV     R0, #0
@@ -650,18 +650,18 @@ Source: "3-assembled-output/Lander.arm"
                             	   624: .balign 4
 00:000087E4 040000EF        	   625:  SWI     OS_ReadC
 00:000087E8 D10700EA        	   626:  B       StartNewGame
-                            	   627: var_87EC:
+                            	   627: graphicsBuffEndAddr2:
 00:000087EC 5C800000        	   628: .long    graphicsBuffersEnd
 00:000087F0 2C800000        	   629: .long    graphicsBuffers
                             	   630: MoveAndDrawParticles:
 00:000087F4 00542DE9        	   631:  STMFD   R13!, {R10, R12, R14}
 00:000087F8 07AC8BE2        	   632:  ADD     R10, R11, #particleData
-00:000087FC 18C01FE5        	   633:  LDR     R12, var_87EC
+00:000087FC 18C01FE5        	   633:  LDR     R12, graphicsBuffEndAddr2
                             	   634: part1:
 00:00008800 FF009AE8        	   635:  LDMIA   R10, {R0-R7}
 00:00008804 000057E3        	   636:  CMP     R7, #0
 00:00008808 0094BD08        	   637:  LDMEQFD R13!, {R10, R12, PC}
-                            	   638: lab_880C:
+                            	   638: part2:
 00:0000880C 016056E2        	   639:  SUBS    R6, R6, #1
 00:00008810 9000000A        	   640:  BEQ     DeleteParticle
 00:00008814 030080E0        	   641:  ADD     R0, R0, R3
@@ -681,7 +681,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000884C 020617E3        	   655:  TST     R7, #0x00200000
 00:00008850 5C00001B        	   656:  BLNE    sub_89C8
 00:00008854 090051E1        	   657:  CMP     R1, R9
-00:00008858 4E0000CB        	   658:  BLGT    sub_8998
+00:00008858 4E0000CB        	   658:  BLGT    BounceParticle
 00:0000885C FF00AAE8        	   659:  STMIA   R10!, {R0-R7}
 00:00008860 3C819BE5        	   660:  LDR     R8, [R11, #xCamera]
 00:00008864 080040E0        	   661:  SUB     R0, R0, R8
@@ -699,33 +699,33 @@ Source: "3-assembled-output/Lander.arm"
 00:00008894 06045EE3        	   673:  CMP     R14, #0x06000000
 00:00008898 D8FFFF2A        	   674:  BHS     part1
 00:0000889C 020817E3        	   675:  TST     R7, #0x00020000
-00:000088A0 1700000A        	   676:  BEQ     lab_8904
+00:000088A0 1700000A        	   676:  BEQ     part4
 00:000088A4 07002DE9        	   677:  STMFD   R13!, {R0-R2}
 00:000088A8 30E19BE5        	   678:  LDR     R14, [R11, #playingGame]
 00:000088AC 00005EE3        	   679:  CMP     R14, #0
-00:000088B0 0C00000A        	   680:  BEQ     lab_88E8
+00:000088B0 0C00000A        	   680:  BEQ     part3
 00:000088B4 000050E3        	   681:  CMP     R0, #0
 00:000088B8 00006042        	   682:  RSBMI   R0, R0, #0
 00:000088BC 0F2452E2        	   683:  SUBS    R2, R2, #0x0F000000
 00:000088C0 00206242        	   684:  RSBMI   R2, R2, #0
 00:000088C4 010450E3        	   685:  CMP     R0, #TILE_SIZE
 00:000088C8 01045233        	   686:  CMPLO   R2, #TILE_SIZE
-00:000088CC 0500002A        	   687:  BHS     lab_88E8
+00:000088CC 0500002A        	   687:  BHS     part3
 00:000088D0 40019BE5        	   688:  LDR     R0, [R11, #yCamera]
 00:000088D4 001081E0        	   689:  ADD     R1, R1, R0
 00:000088D8 98009BE5        	   690:  LDR     R0, [R11, #yPlayer]
 00:000088DC 001051E0        	   691:  SUBS    R1, R1, R0
 00:000088E0 00106142        	   692:  RSBMI   R1, R1, #0
 00:000088E4 010451E3        	   693:  CMP     R1, #TILE_SIZE
-                            	   694: lab_88E8:
+                            	   694: part3:
 00:000088E8 0700BDE8        	   695:  LDMFD   R13!, {R0-R2}
-00:000088EC 74FFFF3A        	   696:  BLO     sub_86C4
+00:000088EC 74FFFF3A        	   696:  BLO     LoseLifeFromParticleLoop
 00:000088F0 C8E59FE5        	   697:  LDR     R14, objectRockAddr
 00:000088F4 10E18BE5        	   698:  STR     R14, [R11, #objectData]
 00:000088F8 30308BE2        	   699:  ADD     R3, R11, #rotationMatrix
 00:000088FC 700100EB        	   700:  BL      DrawObject
 00:00008900 BEFFFFEA        	   701:  B       part1
-                            	   702: lab_8904:
+                            	   702: part4:
 00:00008904 87002DE9        	   703:  STMFD   R13!, {R0-R2, R7}
 00:00008908 40E19BE5        	   704:  LDR     R14, [R11, #yCamera]
 00:0000890C 0E1049E0        	   705:  SUB     R1, R9, R14
@@ -738,7 +738,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008928 A204003B        	   712:  BLLO    DrawParticleToBuffer
 00:0000892C FF009AE8        	   713:  LDMIA   R10, {R0-R7}
 00:00008930 000057E3        	   714:  CMP     R7, #0
-00:00008934 B4FFFF1A        	   715:  BNE     lab_880C
+00:00008934 B4FFFF1A        	   715:  BNE     part2
 00:00008938 0094BDE8        	   716:  LDMFD   R13!, {R10, R12, PC}
                             	   717: sub_893C:
 00:0000893C 47002DE9        	   718:  STMFD   R13!, {R0-R2, R6}
@@ -764,7 +764,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000898C 1D7887E3        	   738:  ORR     R7, R7, #0x001D0000
 00:00008990 4700BDE8        	   739:  LDMFD   R13!, {R0-R2, R6}
 00:00008994 0EF0A0E1        	   740:  MOV     PC, R14
-                            	   741: sub_8998:
+                            	   741: BounceParticle:
 00:00008998 0910A0E1        	   742:  MOV     R1, R9
 00:0000899C 550659E3        	   743:  CMP     R9, #SEA_LEVEL
 00:000089A0 2300000A        	   744:  BEQ     sub_8A34
@@ -10256,6 +10256,7 @@ Source: "3-assembled-output/Lander.arm"
 Symbols by name:
 AbortWithMemoryError             A:0000A5A4
 AddTerminatorsToBuffers          A:00009CFC
+BounceParticle                   A:00008998
 CODE                             S:00008000
 CalculateRotationMatrix          A:000093E4
 DecryptGameBinary                A:00011A10
@@ -10303,6 +10304,7 @@ LAUNCHPAD_SIZE                   S:08000000
 LAUNCHPAD_Y                      S:02EC0000
 LandOnLaunchpad                  A:00008654
 LoseLife                         A:000086C8
+LoseLifeFromParticleLoop         A:000086C4
 MainLoop                         A:0000A850
 MoveAndDrawParticles             A:000087F4
 MoveAndDrawPlayer                A:00008398
@@ -10365,6 +10367,7 @@ entr1                            A:0000A6E4
 fuelBarColour                    A:000091EC
 fuelBurnRate                     S:0000015C
 fuelLevel                        S:00000128
+graphicsBuffEndAddr2             A:000087EC
 graphicsBufferAddr               A:00009250
 graphicsBufferEndAddr            A:0000924C
 graphicsBuffers                  A:0000802C
@@ -10376,9 +10379,6 @@ initialFuelLevel                 A:0000A580
 initialHighScore                 A:0000A57C
 initialScore                     A:0000A578
 labOffset                        S:0000006C
-lab_880C                         A:0000880C
-lab_88E8                         A:000088E8
-lab_8904                         A:00008904
 lab_8A4C                         A:00008A4C
 lab_8CC0                         A:00008CC0
 lab_8D14                         A:00008D14
@@ -10506,6 +10506,9 @@ objectTallLeafyTreeVertices      A:0000AE34
 objectType                       S:000000F4
 objectTypes                      A:00008D78
 part1                            A:00008800
+part2                            A:0000880C
+part3                            A:000088E8
+part4                            A:00008904
 particleCount                    S:0000010C
 particleData                     S:00000700
 particleEnd                      S:00000108
@@ -10551,9 +10554,7 @@ stack                            S:000121FC
 stackAddr                        A:0000A570
 stackPointerOnEntry              A:0000A584
 stringBuffer                     S:00000200
-sub_86C4                         A:000086C4
 sub_893C                         A:0000893C
-sub_8998                         A:00008998
 sub_89C8                         A:000089C8
 sub_8A28                         A:00008A28
 sub_8A34                         A:00008A34
@@ -10574,7 +10575,6 @@ tileRowOddEven                   S:000000F8
 typeOffset                       S:000000CC
 unusedConfig                     S:000000F0
 varOffset                        S:00000054
-var_87EC                         A:000087EC
 var_9A70                         A:00009A70
 var_9AC0                         A:00009AC0
 vcon1                            A:0000997C
@@ -10616,8 +10616,8 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 OS_WriteC
 00000000 xObject
+00000000 OS_WriteC
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10636,8 +10636,8 @@ Symbols by value:
 00000048 zNoseV
 0000004C zRoofV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10714,18 +10714,18 @@ Symbols by value:
 000085F4 ship7
 00008650 ship8
 00008654 LandOnLaunchpad
-000086C4 sub_86C4
+000086C4 LoseLifeFromParticleLoop
 000086C8 LoseLife
 000086EC lose1
 00008744 GameOver
-000087EC var_87EC
+000087EC graphicsBuffEndAddr2
 000087F4 MoveAndDrawParticles
 00008800 part1
-0000880C lab_880C
-000088E8 lab_88E8
-00008904 lab_8904
+0000880C part2
+000088E8 part3
+00008904 part4
 0000893C sub_893C
-00008998 sub_8998
+00008998 BounceParticle
 000089C8 sub_89C8
 00008A28 sub_8A28
 00008A34 sub_8A34

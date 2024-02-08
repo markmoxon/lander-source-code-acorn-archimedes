@@ -2250,16 +2250,21 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_86C4
+\       Name: LoseLifeFromParticleLoop
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Main loop
+\    Summary: Lose a life when a crash is detected in the particle processing
+\             loop
 \
 \ ******************************************************************************
 
-.sub_86C4
+.LoseLifeFromParticleLoop
 
- LDMFD   R13!, {R10, R12}           \ 
+ LDMFD   R13!, {R10, R12}           \ Remove the R10 and R12 registers that the
+                                    \ MoveAndDrawParticles put on the stack,
+                                    \ leaving just the return address
+
+                                    \ Fall through into LoseLife to lose a life
 
 \ ******************************************************************************
 \
@@ -2412,14 +2417,15 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: var_87EC
+\       Name: graphicsBuffEndAddr2
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Graphics buffers
+\    Summary: The addresses of the tables containing the graphics buffer
+\             addresses (copies of graphicsBufferEndAddr and graphicsBufferAddr)
 \
 \ ******************************************************************************
 
-.var_87EC
+.graphicsBuffEndAddr2
 
  EQUD    graphicsBuffersEnd
 
@@ -2427,10 +2433,11 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawParticles
+\       Name: MoveAndDrawParticles (Part 1 of 2)
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: ???
+\    Summary: Process particle movement and draw the particles into the graphics
+\             buffers, starting with the movement of particles
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2443,45 +2450,110 @@ ENDIF
 
 .MoveAndDrawParticles
 
- STMFD   R13!, {R10, R12, R14}      \ 
+ STMFD   R13!, {R10, R12, R14}      \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
  ADD     R10, R11, #particleData    \ Set R10 to the address of the particle
-                                    \ data buffer
+                                    \ data buffer, which we update as we work
+                                    \ through the particle data buffer, so this
+                                    \ points to the data of the particle being
+                                    \ processed
 
- LDR     R12, var_87EC              \ 
+ LDR     R12, graphicsBuffEndAddr2  \ Set R1 to the address of the table that
+                                    \ contains the end addresses of the graphics
+                                    \ buffers
+
+                                    \ We now work our way through the particle
+                                    \ data buffer, processing each particle in
+                                    \ turn
 
 .part1
 
- LDMIA   R10, {R0-R7}               \ 
- CMP     R7, #0                     \ 
- LDMEQFD R13!, {R10, R12, PC}       \ 
+ LDMIA   R10, {R0-R7}               \ Fetch the eight words of particle data
+                                    \ from the particle data buffer at R10, so
+                                    \ this sets the following:
+                                    \
+                                    \   (R0, R1, R2) = particle coordinate
+                                    \
+                                    \   (R3, R4, R5) = particle velocity
+                                    \
+                                    \   R6 = particle existence counter
+                                    \
+                                    \   R7 = particle flags:
+                                    \
+                                    \     Bit 16 set = call sub_893C ???
+                                    \     Bit 20 set = apply gravity
+                                    \     Bit 21 set = call sub_89C8 ???
 
-.lab_880C
+ CMP     R7, #0                     \ If the last word of the data is zero, then
+ LDMEQFD R13!, {R10, R12, PC}       \ this is a null terminator and we have
+                                    \ reached the end of the buffer, so retrieve
+                                    \ the registers that we stored on the stack
+                                    \ and return from the subroutine
 
- SUBS    R6, R6, #1                 \ 
- BEQ     DeleteParticle             \ 
- ADD     R0, R0, R3                 \ 
- ADD     R1, R1, R4                 \ 
- ADD     R2, R2, R5                 \ 
- TST     R7, #&00100000             \ 
- LDRNE   R14, [R11, #gravity]       \ 
- ADDNE   R4, R4, R14                \ 
- TST     R7, #&00010000             \ 
- BLNE    sub_893C                   \ 
- MOV     R8, R0                     \ 
- MOV     R9, R2                     \ 
- STMFD   R13!, {R0-R3}              \ 
+.part2
+
+ SUBS    R6, R6, #1                 \ Decrement the particle's existence counter
+                                    \ in R6
+
+ BEQ     DeleteParticle             \ If R6 is now zero then the particle just
+                                    \ expired, so jump to DeleteParticle to
+                                    \ delete this particle from the particle
+                                    \ data buffer
+                                    \
+                                    \ DeleteParticle then jumps back to part1 to
+                                    \ move on to the next particle
+
+ ADD     R0, R0, R3                 \ Move the particle by its current velocity
+ ADD     R1, R1, R4                 \ by adding the particle's velocity vector
+ ADD     R2, R2, R5                 \ in (R3, R4, R5) to the particle's
+                                    \ coordinates in (R0, R1, R2)
+
+ TST     R7, #&00100000             \ If bit 20 the particle flags is set, apply
+ LDRNE   R14, [R11, #gravity]       \ gravity to the velocity's y-coordinate in
+ ADDNE   R4, R4, R14                \ R4, so the particle accelerates towards
+                                    \ the ground
+
+ TST     R7, #&00010000             \ If bit 16 the particle flags is set, call
+ BLNE    sub_893C                   \ sub_893C ???
+
+ MOV     R8, R0                     \ Set (R8, R9) = (R0, R2) so we can fetch
+ MOV     R9, R2                     \ the landscape altitude directly below the
+                                    \ particle
+
+ STMFD   R13!, {R0-R3}              \ Store R0 to R3 on the stack so they don't
+                                    \ get corrupted by the following call to
+                                    \ GetLandscapeAltitude
 
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9)
 
- MOV     R9, R0                     \ 
- LDMFD   R13!, {R0-R3}              \ 
- TST     R7, #&00200000             \ 
- BLNE    sub_89C8                   \ 
- CMP     R1, R9                     \ 
- BLGT    sub_8998                   \ 
- STMIA   R10!, {R0-R7}              \ 
+ MOV     R9, R0                     \ Copy the altitude into R9
+
+ LDMFD   R13!, {R0-R3}              \ Retrieve the values of R0 to R3 from the
+                                    \ stack that we stored above
+
+ TST     R7, #&00200000             \ If bit 21 the particle flags is set, call
+ BLNE    sub_89C8                   \ sub_89C8 ???
+
+ CMP     R1, R9                     \ If R1 > R9 then the particle is below the
+ BLGT    BounceParticle             \ level of the landscape, so bounce the
+                                    \ particle off the ground
+
+ STMIA   R10!, {R0-R7}              \ Store the updated particle data in the
+                                    \ particle data buffer, updating R10 so it
+                                    \ points to the next particle, ready for the
+                                    \ next iteration around the loop
+
+\ ******************************************************************************
+\
+\       Name: MoveAndDrawParticles (Part 2 of 2)
+\       Type: Subroutine
+\   Category: Particles
+\    Summary: Draw particles into the graphics buffers
+\
+\ ******************************************************************************
+
  LDR     R8, [R11, #xCamera]        \ 
  SUB     R0, R0, R8                 \ 
  LDR     R8, [R11, #zCamera]        \ 
@@ -2489,27 +2561,36 @@ ENDIF
  ADD     R2, R2, #&14000000         \ 
  LDR     R8, [R11, #yCamera]        \ 
  SUB     R1, R1, R8                 \ 
+
  CMP     R2, #&14000000             \ 
  BHS     part1                      \ 
  CMP     R2, #&0A000000             \ 
  BLO     part1                      \ 
+
  MOVS    R14, R0                    \ 
  RSBMI   R14, R0, #0                \ 
  CMP     R14, #&06000000            \ 
  BHS     part1                      \ 
+
  TST     R7, #&00020000             \ 
- BEQ     lab_8904                   \ 
+ BEQ     part4                      \ 
+
  STMFD   R13!, {R0-R2}              \ 
+
  LDR     R14, [R11, #playingGame]   \ 
  CMP     R14, #0                    \ 
- BEQ     lab_88E8                   \ 
+ BEQ     part3                      \ 
+
  CMP     R0, #0                     \ 
  RSBMI   R0, R0, #0                 \ 
+
  SUBS    R2, R2, #&0F000000         \ 
  RSBMI   R2, R2, #0                 \ 
+
  CMP     R0, #TILE_SIZE             \ 
  CMPLO   R2, #TILE_SIZE             \ 
- BHS     lab_88E8                   \ 
+ BHS     part3                      \ 
+
  LDR     R0, [R11, #yCamera]        \ 
  ADD     R1, R1, R0                 \ 
  LDR     R0, [R11, #yPlayer]        \ 
@@ -2517,32 +2598,50 @@ ENDIF
  RSBMI   R1, R1, #0                 \ 
  CMP     R1, #TILE_SIZE             \ 
 
-.lab_88E8
+.part3
 
  LDMFD   R13!, {R0-R2}              \ 
- BLO     sub_86C4                   \ 
+ BLO     LoseLifeFromParticleLoop   \ 
+
  LDR     R14, objectRockAddr        \ 
  STR     R14, [R11, #objectData]    \ 
+
  ADD     R3, R11, #rotationMatrix   \ 
+
  BL      DrawObject                 \ 
+
  B       part1                      \ 
 
-.lab_8904
+.part4
 
  STMFD   R13!, {R0-R2, R7}          \ 
+
  LDR     R14, [R11, #yCamera]       \ 
  SUB     R1, R9, R14                \ 
+
  MOV     R8, R2                     \ 
+
  BL      ProjectParticleOntoScreen  \ 
  BLLO    DrawParticleShadowToBuffer \ 
+
  LDMFD   R13!, {R0-R2, R7}          \ 
+
  MOV     R8, R2                     \ 
+
  BL      ProjectParticleOntoScreen  \ 
  BLLO    DrawParticleToBuffer       \ 
- LDMIA   R10, {R0-R7}               \ 
- CMP     R7, #0                     \ 
- BNE     lab_880C                   \ 
- LDMFD   R13!, {R10, R12, PC}       \ 
+
+ LDMIA   R10, {R0-R7}               \ Fetch the eight words of particle data
+                                    \ for the next particle from the particle
+                                    \ data buffer at R10
+
+ CMP     R7, #0                     \ If the last word of the data is not zero
+ BNE     part2                      \ then this is a valid particle rather than
+                                    \ a null terminator, so loop back to part2
+                                    \ to process the next particle
+
+ LDMFD   R13!, {R10, R12, PC}       \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -2581,14 +2680,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8998
+\       Name: BounceParticle
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Bounce a particle off the ground
 \
 \ ******************************************************************************
 
-.sub_8998
+.BounceParticle
 
  MOV     R1, R9                     \ 
  CMP     R9, #SEA_LEVEL             \ 
@@ -2717,8 +2816,8 @@ ENDIF
  STR     R8, [R11, #particleCount]
 
  B       part1                      \ Jump to the start of the main loop in
-                                    \ MoveAndDrawParticles to continue
-                                    \ processing particles
+                                    \ MoveAndDrawParticles to process the next
+                                    \ particle in the particle data buffer
 
 \ ******************************************************************************
 \
@@ -2769,7 +2868,11 @@ ENDIF
 
 .sub_8A94
 
- MOV     R4, #0                     \ 
+ MOV     R4, #0                     \ Set R4 = 0
+
+                                    \ Fall through into sub_8A98 so we pass
+                                    \ (R3, R4, R5) = (0, 0, 0) to the 
+                                    \ DrawRandomParticles routine
 
 \ ******************************************************************************
 \
@@ -2782,8 +2885,12 @@ ENDIF
 
 .sub_8A98
 
- MOV     R3, #0                     \ 
- MOV     R5, #0                     \ 
+ MOV     R3, #0                     \ Set R3 = 0
+
+ MOV     R5, #0                     \ Set R5 = 0
+
+                                    \ Fall through into DrawRandomParticles with
+                                    \ (R3, R4, R5) set to (0, R4, 0)
 
 \ ******************************************************************************
 \
@@ -2796,13 +2903,19 @@ ENDIF
 \
 \ Arguments:
 \
-\   (R0, R1, R2)                    ???
+\   (R0, R1, R2)                    Particle coordinate
 \
-\   (R3, R4, R5)                    ???
+\   (R3, R4, R5)                    Particle velocity
 \
-\   R6                              ??? &14 for bullets, 8 for exhaust
+\   R6                              Particle existence counter (i.e. how many
+\                                   iterations around the main loop before the
+\                                   particle expires)
 \
-\   R7                              ??? Particle flags?
+\   R7                              Particle flags:
+\
+\                                     * Bit 16 set = call sub_893C ???
+\                                     * Bit 20 set = apply gravity
+\                                     * Bit 21 set = call sub_89C8 ???
 \
 \   R8                              Magnitude of random signed element added to
 \                                   (R3, R4, R5), larger figure means a smaller

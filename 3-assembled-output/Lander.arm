@@ -558,7 +558,7 @@ LandOnLaunchpad:
  STR     R5, [R11, #zVelocity]
  STR     R1, [R11, #yPlayer]
  MOV     PC, R14
-sub_86C4:
+LoseLifeFromParticleLoop:
  LDMFD   R13!, {R10, R12}
 LoseLife:
  MOV     R0, #0
@@ -624,18 +624,18 @@ GameOver:
 .balign 4
  SWI     OS_ReadC
  B       StartNewGame
-var_87EC:
+graphicsBuffEndAddr2:
 .long    graphicsBuffersEnd
 .long    graphicsBuffers
 MoveAndDrawParticles:
  STMFD   R13!, {R10, R12, R14}
  ADD     R10, R11, #particleData
- LDR     R12, var_87EC
+ LDR     R12, graphicsBuffEndAddr2
 part1:
  LDMIA   R10, {R0-R7}
  CMP     R7, #0
  LDMEQFD R13!, {R10, R12, PC}
-lab_880C:
+part2:
  SUBS    R6, R6, #1
  BEQ     DeleteParticle
  ADD     R0, R0, R3
@@ -655,7 +655,7 @@ lab_880C:
  TST     R7, #0x00200000
  BLNE    sub_89C8
  CMP     R1, R9
- BLGT    sub_8998
+ BLGT    BounceParticle
  STMIA   R10!, {R0-R7}
  LDR     R8, [R11, #xCamera]
  SUB     R0, R0, R8
@@ -673,33 +673,33 @@ lab_880C:
  CMP     R14, #0x06000000
  BHS     part1
  TST     R7, #0x00020000
- BEQ     lab_8904
+ BEQ     part4
  STMFD   R13!, {R0-R2}
  LDR     R14, [R11, #playingGame]
  CMP     R14, #0
- BEQ     lab_88E8
+ BEQ     part3
  CMP     R0, #0
  RSBMI   R0, R0, #0
  SUBS    R2, R2, #0x0F000000
  RSBMI   R2, R2, #0
  CMP     R0, #TILE_SIZE
  CMPLO   R2, #TILE_SIZE
- BHS     lab_88E8
+ BHS     part3
  LDR     R0, [R11, #yCamera]
  ADD     R1, R1, R0
  LDR     R0, [R11, #yPlayer]
  SUBS    R1, R1, R0
  RSBMI   R1, R1, #0
  CMP     R1, #TILE_SIZE
-lab_88E8:
+part3:
  LDMFD   R13!, {R0-R2}
- BLO     sub_86C4
+ BLO     LoseLifeFromParticleLoop
  LDR     R14, objectRockAddr
  STR     R14, [R11, #objectData]
  ADD     R3, R11, #rotationMatrix
  BL      DrawObject
  B       part1
-lab_8904:
+part4:
  STMFD   R13!, {R0-R2, R7}
  LDR     R14, [R11, #yCamera]
  SUB     R1, R9, R14
@@ -712,7 +712,7 @@ lab_8904:
  BLLO    DrawParticleToBuffer
  LDMIA   R10, {R0-R7}
  CMP     R7, #0
- BNE     lab_880C
+ BNE     part2
  LDMFD   R13!, {R10, R12, PC}
 sub_893C:
  STMFD   R13!, {R0-R2, R6}
@@ -738,7 +738,7 @@ sub_893C:
  ORR     R7, R7, #0x001D0000
  LDMFD   R13!, {R0-R2, R6}
  MOV     PC, R14
-sub_8998:
+BounceParticle:
  MOV     R1, R9
  CMP     R9, #SEA_LEVEL
  BEQ     sub_8A34
