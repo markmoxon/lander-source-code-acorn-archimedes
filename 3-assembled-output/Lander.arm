@@ -1151,7 +1151,7 @@ dobj2:
  STMIA   R0, {R2-R4}
  BL      MultiplyVectorByMatrix
  ADD     R0, R11, #xObject
- BL      GetVertexCoordinate
+ BL      AddVectorToVertices
  ADD     R0, R11, #xCoord
  BL      ProjectVertexOntoScreen
  STMIA   R10!, {R0-R1}
@@ -1446,7 +1446,7 @@ TransposeRotationMatrix:
  STR     R0, [R2, #28]
  STR     R1, [R2, #20]
  MOV     PC, R14
-sub_93B4:
+AddVectorsWithFeedback:
  STMFD   R13!, {R5-R6, R14}
  LDMIA   R0, {R2-R4}
  LDMIA   R1, {R5-R6, R14}
@@ -1803,24 +1803,27 @@ lab_9890:
  RSBMI   R1, R6, #0x40
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
-mod_98E4:
+vmod1:
  ADD     R4, R11, #xVertexRotated
-mod_98E8:
+vmod2:
  ADD     R4, R11, #xCoord
-sub_98EC:
+vmod3:
  MOV     R4, R12
+vmod4:
  ADD     R4, R11, #xLandscapeCol
+vmod5:
  ADD     R4, R11, #xLandscapeRow
+AddVectors:
  STMFD   R13!, {R14}
- LDR     R1, sub_98EC
- STR     R1, GetVertexCoordinate+28
+ LDR     R1, vmod3
+ STR     R1, AddVectorToVertices+28
  LDMIA   R0, {R0-R2}
  MOV     R3, R12
- BL      GetVertexCoordinate+8
- LDR     R1, mod_98E8
- STR     R1, GetVertexCoordinate+28
+ BL      AddVectorToVertices+8
+ LDR     R1, vmod2
+ STR     R1, AddVectorToVertices+28
  LDMFD   R13!, {PC}
-GetVertexCoordinate:
+AddVectorToVertices:
  LDMIA   R0, {R0-R2}
  ADD     R3, R11, #xVertexRotated
  STMFD   R13!, {R5-R6}

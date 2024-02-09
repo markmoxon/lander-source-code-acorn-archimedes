@@ -4825,7 +4825,7 @@ ENDIF
 
  ADD     R0, R11, #xObject          \ Set R0 to the address of xObject
 
- BL      GetVertexCoordinate        \ Call GetVertexCoordinate to set:
+ BL      AddVectorToVertices        \ Call AddVectorToVertices to set:
                                     \
                                     \   [xCoord]   [xObject]   [xVertexRotated]
                                     \   [yCoord] = [yObject] + [yVertexRotated]
@@ -5828,27 +5828,59 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_93B4
+\       Name: AddVectorsWithFeedback
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: An unused routine that ???
+\    Summary: An unused routine that adds a delta vector to a coordinate and
+\             updates the delta with feedback from the coordinate value
 \
 \ ******************************************************************************
 
-.sub_93B4
+.AddVectorsWithFeedback
 
- STMFD   R13!, {R5-R6, R14}         \ 
- LDMIA   R0, {R2-R4}                \ 
- LDMIA   R1, {R5-R6, R14}           \ 
- ADD     R2, R2, R5, ASR #4         \ 
- SUB     R5, R5, R2, ASR #4         \ 
- ADD     R3, R3, R6, ASR #4         \ 
- SUB     R6, R6, R3, ASR #4         \ 
- ADD     R4, R4, R14, ASR #4        \ 
- SUB     R14, R14, R4, ASR #4       \ 
- STMIA   R0, {R2-R4}                \ 
- STMIA   R1, {R5-R6, R14}           \ 
- LDMFD   R13!, {R5-R6, PC}          \ 
+ STMFD   R13!, {R5-R6, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDMIA   R0, {R2-R4}                \ Fetch the coordinate into (R2, R3, R4)
+
+ LDMIA   R1, {R5-R6, R14}           \ Fetch the delta vector into (R5, R6, R14)
+
+ ADD     R2, R2, R5, ASR #4         \ Set R2 = R2 + R5 / 16
+                                    \
+                                    \ So this adds a small amount of the x-delta
+                                    \ to the x-coordinate
+
+ SUB     R5, R5, R2, ASR #4         \ Set R5 = R5 - R2 / 16
+                                    \
+                                    \ So this updates the x-delta with feedback
+                                    \ from the x-coordinate
+
+ ADD     R3, R3, R6, ASR #4         \ Set R3 = R3 + R6 / 16
+                                    \
+                                    \ So this adds a small amount of the y-delta
+                                    \ to the y-coordinate
+
+ SUB     R6, R6, R3, ASR #4         \ Set R6 = R6 - R3 / 16
+                                    \
+                                    \ So this updates the y-delta with feedback
+                                    \ from the y-coordinate
+
+ ADD     R4, R4, R14, ASR #4        \ Set R4 = R4 + R14 / 16
+                                    \
+                                    \ So this adds a small amount of the z-delta
+                                    \ to the  z-coordinate
+
+ SUB     R14, R14, R4, ASR #4       \ Set R14 = R14 - R4 / 16
+                                    \
+                                    \ So this updates the z-delta with feedback
+                                    \ from the z-coordinate
+
+ STMIA   R0, {R2-R4}                \ Store the updated coordinate
+
+ STMIA   R1, {R5-R6, R14}           \ Store the updated delta vector
+
+ LDMFD   R13!, {R5-R6, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -6425,17 +6457,21 @@ ENDIF
 
  CMN     R2, #&80000000             \ 
  MOVHS   PC, R14                    \ 
+
  MOVS    R3, R0                     \ 
  RSBMI   R3, R3, #0                 \ 
  MVNMI   R5, R3                     \ 
  MOVPL   R5, R3                     \ 
+
  MOVS    R4, R1                     \ 
  RSBMI   R4, R4, #0                 \ 
  MVNMI   R6, R4                     \ 
  MOVPL   R6, R4                     \ 
+
  ORR     R5, R5, R6                 \ 
  ORR     R5, R5, R2                 \ 
  ORR     R5, R5, #1                 \ 
+
  MOV     R6, #0                     \ 
 
 .lab_96A8
@@ -6443,16 +6479,20 @@ ENDIF
  MOVS    R5, R5, LSL #1             \ 
  ADDPL   R6, R6, #1                 \ 
  BPL     lab_96A8                   \ 
+
  MOV     R2, R2, LSL R6             \ 
  MOV     R3, R3, LSL R6             \ 
  MOV     R4, R4, LSL R6             \ 
+
  CMP     R3, R2                     \ 
  CMPLO   R4, R2                     \ 
  MOVHS   PC, R14                    \ 
 
  STMFD   R13!, {R7, R14}            \ 
+
  MOV     R7, R2                     \ 
- MOV     R6, #0                     \ 
+
+ MOV     R6, #0                     \ Divide R6 = R4 / R7
  MOV     R14, #&200                 \ 
 
 .lab_96DC
@@ -6463,8 +6503,9 @@ ENDIF
  ORRHS   R6, R6, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
  BLO     lab_96DC                   \ 
- MOVS    R6, R6, LSL #22            \ 
- MOV     R5, #0                     \ 
+ MOVS    R6, R6, LSL #22            \ End divide
+
+ MOV     R5, #0                     \ Divide R6 = R3 / R2
  MOV     R14, #&200                 \ 
 
 .lab_9700
@@ -6475,17 +6516,22 @@ ENDIF
  ORRHS   R5, R5, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
  BLO     lab_9700                   \ 
- MOVS    R5, R5, LSL #22            \ 
+ MOVS    R5, R5, LSL #22            \ End divide
+
  MOV     R5, R5, LSR #24            \ 
  MOV     R6, R6, LSR #24            \ 
+
  TEQ     R0, #0                     \ 
  ADDPL   R0, R5, #&A0               \ 
  RSBMI   R0, R5, #&A0               \ 
+
  TEQ     R1, #0                     \ 
  ADDPL   R1, R6, #&40               \ 
  RSBMI   R1, R6, #&40               \ 
+
  CMP     R0, #320                   \ 
  CMPLO   R1, #&EF                   \ 
+
  LDMFD   R13!, {R7, PC}             \ 
 
 \ ******************************************************************************
@@ -6500,20 +6546,26 @@ ENDIF
 .ProjectVertexOntoScreen
 
  LDMIA   R0, {R0-R2}                \ 
+
  CMN     R2, #&80000000             \ 
  MOVHS   PC, R14                    \ 
+
  STMFD   R13!, {R5-R7, R14}         \ 
+
  MOVS    R3, R0                     \ 
  RSBMI   R3, R3, #0                 \ 
  MVNMI   R5, R3                     \ 
  MOVPL   R5, R3                     \ 
+
  MOVS    R4, R1                     \ 
  RSBMI   R4, R4, #0                 \ 
  MVNMI   R6, R4                     \ 
  MOVPL   R6, R4                     \ 
+
  ORR     R5, R5, R6                 \ 
  ORR     R5, R5, R2                 \ 
  ORR     R5, R5, #1                 \ 
+
  MOV     R6, #0                     \ 
 
 .lab_9788
@@ -6521,14 +6573,18 @@ ENDIF
  MOVS    R5, R5, LSL #1             \ 
  ADDPL   R6, R6, #1                 \ 
  BPL     lab_9788                   \ 
+
  MOV     R2, R2, LSL R6             \ 
  MOV     R3, R3, LSL R6             \ 
  MOV     R4, R4, LSL R6             \ 
+
  CMP     R2, R3                     \ 
  CMPHS   R2, R4                     \ 
  BLO     lab_9820                   \ 
+
  MOV     R7, R2                     \ 
- MOV     R6, #0                     \ 
+
+ MOV     R6, #0                     \ Divide R6 = R4 / R7
  MOV     R14, #&100                 \ 
 
 .lab_97B8
@@ -6539,8 +6595,9 @@ ENDIF
  ORRHS   R6, R6, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
  BLO     lab_97B8                   \ 
- MOVS    R6, R6, LSL #23            \ 
- MOV     R5, #0                     \ 
+ MOVS    R6, R6, LSL #23            \ End divide
+
+ MOV     R5, #0                     \ Divide R5 = R3 / R2
  MOV     R14, #&200                 \ 
 
 .lab_97DC
@@ -6551,21 +6608,26 @@ ENDIF
  ORRHS   R5, R5, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
  BLO     lab_97DC                   \ 
- MOVS    R5, R5, LSL #22            \ 
+ MOVS    R5, R5, LSL #22            \ End divide
+
  MOV     R5, R5, LSR #24            \ 
  MOV     R6, R6, LSR #24            \ 
+
  TEQ     R0, #0                     \ 
  ADDPL   R0, R5, #&A0               \ 
  RSBMI   R0, R5, #&A0               \ 
+
  TEQ     R1, #0                     \ 
  ADDPL   R1, R6, #&40               \ 
  RSBMI   R1, R6, #&40               \ 
+
  CMN     R0, #0                     \ 
  LDMFD   R13!, {R5-R7, PC}          \ 
 
 .lab_9820
 
  MOV     R5, #&18                   \ 
+
  CMP     R3, R4                     \ 
  MOVHS   R6, R3, LSR #1             \ 
  MOVLO   R6, R3, LSR #1             \ 
@@ -6574,15 +6636,20 @@ ENDIF
 
  CMP     R2, R6                     \ 
  ADDLO   R5, R5, #1                 \ 
+
  MOV     R6, R6, LSR #1             \ 
+
  BLO     lab_9830                   \ 
+
  MOV     R2, R2, LSR #23            \ 
  MOV     R3, R3, LSR R5             \ 
  MOV     R4, R4, LSR R5             \ 
  MOV     R7, R2                     \ 
+
  STMFD   R13!, {R5}                 \ 
- MOV     R6, #0                     \ 
- MOV     R14, #&80                  \ 
+
+ MOV     R6, #0                     \ Divide R6 = R4 / R7 (both << 24)
+ MOV     R14, #&80                  \ More accurate for small numbers?
  MOV     R4, R4, LSL #24            \ 
  MOV     R7, R7, LSL #24            \ 
 
@@ -6594,9 +6661,10 @@ ENDIF
  ORRHS   R6, R6, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
  BLO     lab_9864                   \ 
- MOVS    R6, R6, LSL #24            \ 
- MOV     R5, #0                     \ 
- MOV     R14, #&200                 \ 
+ MOVS    R6, R6, LSL #24            \ End divide
+
+ MOV     R5, #0                     \ Divide R5 = R3 / R2 (both << 22)
+ MOV     R14, #&200                 \ More accurate for small numbers?
  MOV     R3, R3, LSL #22            \ 
  MOV     R2, R2, LSL #22            \ 
 
@@ -6608,61 +6676,116 @@ ENDIF
  ORRHS   R5, R5, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
  BLO     lab_9890                   \ 
- MOVS    R5, R5, LSL #22            \ 
+ MOVS    R5, R5, LSL #22            \ End divide
+
  LDMFD   R13!, {R14}                \ 
+
  SUB     R14, R14, #&17             \ 
  RSB     R14, R14, #&17             \ 
+
  MOV     R5, R5, LSR R14            \ 
  MOV     R6, R6, LSR R14            \ 
  MOV     R6, R6, LSR #1             \ 
+
  TEQ     R0, #0                     \ 
  ADDPL   R0, R5, #&A0               \ 
  RSBMI   R0, R5, #&A0               \ 
+
  TEQ     R1, #0                     \ 
  ADDPL   R1, R6, #&40               \ 
  RSBMI   R1, R6, #&40               \ 
+
  CMN     R0, #0                     \ 
+
  LDMFD   R13!, {R5-R7, PC}          \ 
 
 \ ******************************************************************************
 \
-\       Name: sub_98EC
+\       Name: AddVectors
 \       Type: Variable
 \   Category: Maths (Geometry)
-\    Summary: An unused routine that ???
+\    Summary: An unused routine that adds two vectors and uses self-modifying
+\             code to store the results in a specified location
 \
 \ ******************************************************************************
 
-.mod_98E4
+.vmod1
 
- ADD     R4, R11, #xVertexRotated   \ 
+ ADD     R4, R11, #xVertexRotated   \ Modification code to store the result of
+                                    \ the vector addition in xVertexRotated
 
-.mod_98E8
+.vmod2
 
- ADD     R4, R11, #xCoord           \ 
+ ADD     R4, R11, #xCoord           \ Modification code to restore the result of
+                                    \ the vector addition to xCoord
 
-.sub_98EC
+.vmod3
 
- MOV     R4, R12                    \ 
- ADD     R4, R11, #xLandscapeCol    \ 
- ADD     R4, R11, #xLandscapeRow    \ 
- STMFD   R13!, {R14}                \ 
- LDR     R1, sub_98EC               \ 
- STR     R1, GetVertexCoordinate+28 \ 
- LDMIA   R0, {R0-R2}                \ 
- MOV     R3, R12                    \ 
- BL      GetVertexCoordinate+8      \ 
- LDR     R1, mod_98E8               \ 
- STR     R1, GetVertexCoordinate+28 \ 
- LDMFD   R13!, {PC}                 \ 
+ MOV     R4, R12                    \ Modification code to store the result of
+                                    \ the vector addition in R12
+
+.vmod4
+
+ ADD     R4, R11, #xLandscapeCol    \ Modification code to store the result of
+                                    \ the vector addition in xLandscapeCol
+
+.vmod5
+
+ ADD     R4, R11, #xLandscapeRow    \ Modification code to store the result of
+                                    \ the vector addition in xLandscapeRow
+
+.AddVectors
+
+ STMFD   R13!, {R14}                \ Store the return address on the stack
+
+                                    \ We now modify the following instruction in
+                                    \ the AddVectorToVertices routine to change
+                                    \ the way it works:
+                                    \
+                                    \   ADD R3, R11, #xCoord
+                                    \
+                                    \ Interestingly, though, none of the
+                                    \ modifications above will work properly, as
+                                    \ they all change R4 rather than R3, so
+                                    \ presumably the modified subroutine was
+                                    \ refactored and this unused routine wasn't
+                                    \ updated
+                                    \
+                                    \ If this routine worked, it would use the
+                                    \ modifications to change the address where
+                                    \ we stored the result
+
+ LDR     R1, vmod3                  \ Modify the eighth instruction in the
+ STR     R1, AddVectorToVertices+28 \ AddVectorToVertices routine to the
+                                    \ instruction in vmod3
+
+ LDMIA   R0, {R0-R2}                \ Fetch the coordinate from R0 into
+                                    \ (R0, R1, R2)
+
+ MOV     R3, R12                    \ Set R3 = R12 to use as the address of the
+                                    \ second vector to add
+
+ BL      AddVectorToVertices+8      \ Add the vector (R0, R1, R2) to the vector
+                                    \ at the address in R3 (by skipping the
+                                    \ first two instructions in the modified
+                                    \ routine
+
+ LDR     R1, vmod2                  \ Revert the eighth instruction in the
+ STR     R1, AddVectorToVertices+28 \ AddVectorToVertices routine to the
+                                    \ instruction in vmod2 (thoughh note that
+                                    \ this doesn't actually revert the
+                                    \ instruction, it corrupts it, for the
+                                    \ reasons noted above)
+
+ LDMFD   R13!, {PC}                 \ Return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: GetVertexCoordinate
+\       Name: AddVectorToVertices
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Add a vector to the rotated vertex coordinates to get the vertex
-\             coordinate in 3D space
+\             coordinates in 3D space
 \
 \ ------------------------------------------------------------------------------
 \
@@ -6685,7 +6808,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.GetVertexCoordinate
+.AddVectorToVertices
 
  LDMIA   R0, {R0-R2}                \ Fetch the coordinate from R0 into
                                     \ (R0, R1, R2)
