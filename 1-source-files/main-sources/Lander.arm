@@ -1464,7 +1464,7 @@ ENDIF
 
  ORR     R8, R1, R2                 \ Set R8 to the bottom three bits of:
  AND     R8, R8, #%00000011         \
- ORR     R8, R8, R0                 \ (the bottom two bits of R1 OR R2) OR R0
+ ORR     R8, R8, R0                 \   (the bottom two bits of R1 OR R2) OR R0
  AND     R8, R8, #%00000111         \
                                     \ So this sets bits 0, 1 and 2 of R8 as
                                     \ required
@@ -2008,7 +2008,14 @@ ENDIF
  ADD     R5, R2, R8, ASR #7         \   [ (xVelocity + xThrust / 128) / 2 ]
  MOV     R3, R3, ASR #1             \   [ (yVelocity + yThrust / 128) / 2 ]
  MOV     R4, R4, ASR #1             \   [ (zVelocity + zThrust / 128) / 2 ]
- MOV     R5, R5, ASR #1
+ MOV     R5, R5, ASR #1             \
+                                    \ So this sets (R3, R4, R5) to a vector in
+                                    \ the direction of the player's velocity
+                                    \ (so the particles move along with the
+                                    \ ship) and slightly against the direction
+                                    \ of thrust (so that's heading away from
+                                    \ the engine in the direction that it's
+                                    \ pointing)
 
  ADD     R0, R11, #xPlayer          \ Set R0 to R2 as follows:
  LDMIA   R0, {R0-R2}                \ 
@@ -2023,27 +2030,41 @@ ENDIF
  SUB     R2, R2, R5                 \   [ xPlayer - R3 + (xThrust / 128) ]
  ADD     R0, R0, R6, ASR #7         \   [ yPlayer - R4 + (yThrust / 128) ]
  ADD     R1, R1, R7, ASR #7         \   [ zPlayer - R5 + (zThrust / 128) ]
- ADD     R2, R2, R8, ASR #7
+ ADD     R2, R2, R8, ASR #7         \
+                                    \ So this sets (R0, R1, R2) to a coordinate
+                                    \ just behind the player's ship (as we have
+                                    \ subtracted the velocity vector) and
+                                    \ slightly against the direction of thrust
+                                    \ (so that's below the engine in the
+                                    \ direction that it's pointing)
 
                                     \ By this stage we have:
                                     \
-                                    \   (R0, R1, R2) = ???
+                                    \   (R0, R1, R2) = particle coordinate
                                     \
-                                    \   (R3, R4, R5) = ???
+                                    \   (R3, R4, R5) = particle velocity
                                     \
                                     \ We now set the values of R6 to R9 to pass
                                     \ to the AddExhaustParticleToBuffer routine
 
- MOV     R7, #&001D0000             \ Particle flags from Micro user article?
+ MOV     R7, #&001D0000             \ Set bits 16, 18, 19 and 20 of the particle
+                                    \ flags, so that's:
+                                    \
+                                    \   * Bit 16 set = colour fades white to red
+                                    \   * Bit 18 set = splash on impact with sea
+                                    \   * Bit 19 set = bounce on ground
+                                    \   * Bit 20 set = apply gravity to particle
 
- MOV     R6, #8                     \ Gets a random number added to it in
-                                    \ AddRandomParticleToBuffer
+ MOV     R6, #8                     \ Set the particle's existence counter to 8
+                                    \ iterations of the main loop
 
- MOV     R8, #&A                    \ Determines scale of random numbers added
-                                    \ to (R3, R4, R5) - random velocity ???
+ MOV     R8, #10                    \ Set the random element of the particle's
+                                    \ velocity to the range +/- 2^(32 - 10),
+                                    \ i.e. -&400000 to +&400000
 
- MOV     R9, #&1D                   \ Determines scale of random number added
-                                    \ to R6
+ MOV     R9, #29                    \ Set the random element of the particle's
+                                    \ existence to the range 0 to 2^(32 - 29),
+                                    \ i.e. 0 to 8
 
  STMFD   R13!, {R0-R9}              \ Store R0 to R9 on the stack so we can
                                     \ fetch this set of values before each call
@@ -2142,18 +2163,55 @@ ENDIF
  ADD     R5, R5, R8, ASR #8         \   [ xVelocity + xGun / 256 ]
                                     \   [ yVelocity + yGun / 256 ]
                                     \   [ zVelocity + zGun / 256 ]
+                                    \
+                                    \ So this sets (R3, R4, R5) to a vector in
+                                    \ the direction of the player's velocity
+                                    \ (so the bullet particles move along with
+                                    \ the ship from which they are fired) and
+                                    \ then in the direction that the gun is
+                                    \ pointing (so they leave the barrel in the
+                                    \ correct direction)
 
  SUB     R0, R0, R3                 \ Set (R0, R1, R2) as follows:
  SUB     R1, R1, R4                 \
  SUB     R2, R2, R5                 \   [ xPlayer - R3 + (xGun / 128) ]
- ADD     R0, R0, R6, ASR #7         \   [ yPlayer - R3 + (yGun / 128) ]
- ADD     R1, R1, R7, ASR #7         \   [ zPlayer - R3 + (zGun / 128) ]
- ADD     R2, R2, R8, ASR #7
+ ADD     R0, R0, R6, ASR #7         \   [ yPlayer - R4 + (yGun / 128) ]
+ ADD     R1, R1, R7, ASR #7         \   [ zPlayer - R5 + (zGun / 128) ]
+ ADD     R2, R2, R8, ASR #7         \
+                                    \ The calculation for each vertex works out
+                                    \ like this:
+                                    \
+                                    \     xPlayer - R3 + (xGun / 128)
+                                    \
+                                    \   = xPlayer - (xVelocity + xGun / 256)
+                                    \             + (xGun / 128)
+                                    \
+                                    \   = xPlayer - xVelocity + xGun / 256
+                                    \
+                                    \ So this sets (R0, R1, R2) to a coordinate
+                                    \ that's back by the player's velocity
+                                    \ (which takes us to the point where the
+                                    \ ship was before we moved it in this
+                                    \ iteration, which is where we would expect
+                                    \ the gun to have fired), plus the gun
+                                    \ vector, so the bullet fires out of the end
+                                    \ of the gun
 
- MOV     R6, #&14                   \ ???
+ MOV     R6, #20                    \ Set the bullet particle's existence
+                                    \ counter to 20 iterations of the main loop
 
- MOV     R7, #&01BC0000             \ ??? Flags = &01BC00FF
- ORR     R7, R7, #&FF
+ MOV     R7, #&01BC0000             \ Set bits 18, 19, 20, 21, 23 amd 24 of the
+                                    \ particle flags, so that's:
+                                    \
+                                    \   * Bit 18 set = splash on impact with sea
+                                    \   * Bit 19 set = bounce on ground
+                                    \   * Bit 20 set = apply gravity to particle
+                                    \   * Bit 21 set = can destroy objects
+                                    \   * Bit 23 set = splash size is big
+                                    \   * Bit 24 set = explode on ground impact
+
+ ORR     R7, R7, #&FF               \ Set the particle colour to white in bits 0
+                                    \ to 7 of the particle flag
 
  BL      AddBulletParticleToBuffer  \ Add a bullet particle to the particle data
                                     \ buffer
@@ -2292,14 +2350,18 @@ ENDIF
  MOV     R0, #30                    \ Set crashLoopCount = 30 to act as a loop
  STR     R0, [R11, #crashLoopCount] \ the crash animation below
 
- MOV     R8, #81                    \ Set R8 = 8 to use as a counter in sub_8CBC
+ MOV     R8, #81                    \ Set R8 = 81 to use as the size of the
+                                    \ explosion in AddExplosionToBuffer
 
  ADD     R0, R11, #xPlayer          \ Set (R0, R1, R2) to the coordinate in
  LDMIA   R0, {R0-R2}                \ xPlayer
 
  SUB     R1, R1, #&00500000         \ Subtract &00500000 from the y-coordinate
+                                    \ so the explosion occurs just above the
+                                    \ player's ship
 
- BL      sub_8CBC                   \ ???
+ BL      AddExplosionToBuffer       \ Draw a large explosion in place of the
+                                    \ player's ship
 
 .lose1
 
@@ -2486,12 +2548,7 @@ ENDIF
                                     \
                                     \   R6 = particle existence counter
                                     \
-                                    \   R7 = particle flags:
-                                    \
-                                    \     Bit 16 set = call sub_893C ???
-                                    \     Bit 17 set = draw particle and shadow
-                                    \     Bit 20 set = apply gravity
-                                    \     Bit 21 set = call sub_89C8 ???
+                                    \   R7 = particle flags
 
  CMP     R7, #0                     \ If the last word of the data is zero, then
  LDMEQFD R13!, {R10, R12, PC}       \ this is a null terminator and we have
@@ -2517,13 +2574,17 @@ ENDIF
  ADD     R2, R2, R5                 \ in (R3, R4, R5) to the particle's
                                     \ coordinates in (R0, R1, R2)
 
- TST     R7, #&00100000             \ If bit 20 the particle flags is set, apply
- LDRNE   R14, [R11, #gravity]       \ gravity to the velocity's y-coordinate in
- ADDNE   R4, R4, R14                \ R4, so the particle accelerates towards
+ TST     R7, #&00100000             \ If bit 20 of the particle flags is set,
+ LDRNE   R14, [R11, #gravity]       \ add gravity to the velocity's y-coordinate
+ ADDNE   R4, R4, R14                \ in R4, so the particle accelerates towards
                                     \ the ground
 
- TST     R7, #&00010000             \ If bit 16 the particle flags is set, call
- BLNE    sub_893C                   \ sub_893C ???
+ TST     R7, #&00010000             \ If bit 16 of the particle flags is set,
+ BLNE    SetParticleColourToFade    \ call SetParticleColourToFade to fade the
+                                    \ particle colour from white to red,
+                                    \ according to the particle's age, and store
+                                    \ the colour in the low byte of the particle
+                                    \ flags
 
  MOV     R8, R0                     \ Set (R8, R9) = (R0, R2) so we can fetch
  MOV     R9, R2                     \ the landscape altitude directly below the
@@ -2541,8 +2602,10 @@ ENDIF
  LDMFD   R13!, {R0-R3}              \ Retrieve the values of R0 to R3 that we
                                     \ stored above
 
- TST     R7, #&00200000             \ If bit 21 the particle flags is set, call
- BLNE    sub_89C8                   \ sub_89C8 ???
+ TST     R7, #&00200000             \ If bit 21 of the particle flags is set
+ BLNE    ProcessObjectDestruction   \ then the particle can destroy objects that
+                                    \ it hits, so call ProcessObjectDestruction
+                                    \ to process this
 
  CMP     R1, R9                     \ If R1 > R9 then the particle is below the
  BLGT    BounceParticle             \ level of the landscape, so bounce the
@@ -2605,10 +2668,10 @@ ENDIF
                                     \ on-screen, so jump to dpar1 to move on to
                                     \ the next particle in the buffer
 
- TST     R7, #&00020000             \ If bit 17 the particle flags is set then
- BEQ     dpar4                      \ this is not a rock, so jump to dpar4 to
-                                    \ draw the particle and its shadow into the
-                                    \ graphics buffers in part 4
+ TST     R7, #&00020000             \ If bit 17 of the particle flags is clear
+ BEQ     dpar4                      \ then this is not a rock, so jump to dpar4
+                                    \ to draw the particle and its shadow into
+                                    \ the graphics buffers in part 4
 
                                     \ Otherwise this is a rock, so fall through
                                     \ into part 3 to process collisions
@@ -2728,7 +2791,7 @@ ENDIF
 
  BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle's
                                     \ shadow in (R0, R1, R0) onto the screen,
-                                    \ returning the results in (R0, R1) ???
+                                    \ returning the results in (R0, R1)
 
  BLLO    DrawParticleShadowToBuffer \ If the projected coordinates fit onto the
                                     \ screen, draw the particle's projected
@@ -2742,7 +2805,7 @@ ENDIF
 
  BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle in
                                     \ (R0, R1, R0) onto the screen, returning
-                                    \ the results in (R0, R1) ???
+                                    \ the results in (R0, R1)
 
  BLLO    DrawParticleToBuffer       \ If the projected coordinates fit onto the
                                     \ screen, draw the projected particle into
@@ -2762,41 +2825,114 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_893C
+\       Name: SetParticleColourToFade
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Set the flags for a particle whose colour fades from white to red
+\             over time, to give a white-hot explosion particle that cools down
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R6                              Particle existence counter (i.e. how many
+\                                   iterations around the main loop before the
+\                                   particle expires)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R7                              Particle flags for a fading colour particle
+\
+\                                     * Bit 16 set = colour fades white to red
+\                                     * Bit 18 set = splash on impact with sea
+\                                     * Bit 19 set = bounce on ground
+\                                     * Bit 20 set = apply gravity to particle
 \
 \ ******************************************************************************
 
-.sub_893C
+.SetParticleColourToFade
 
- STMFD   R13!, {R0-R2, R6}          \ 
- MOV     R0, #&F                    \ 
- CMP     R6, #8                     \ 
- MOVHS   R1, #&F                    \ 
- MOVLO   R1, R6, LSL #1             \ 
- SUBHS   R2, R6, #8                 \ 
+ STMFD   R13!, {R0-R2, R6}          \ Store R0, R1, R2 and R6 on the stack so
+                                    \ they don't get corrupted by the following
+
+ MOV     R0, #15                    \ Set the red channel to 15
+
+ CMP     R6, #8                     \ If R6 >= 8, set:
+ MOVHS   R1, #15                    \
+ MOVLO   R1, R6, LSL #1             \   Green channel in R1 = 15
+ SUBHS   R2, R6, #8                 \   Blue channel in R2 = (R6 - 8) * 2
  MOVHS   R2, R2, LSL #1             \ 
- MOVLO   R2, #0                     \ 
+ MOVLO   R2, #0                     \ otherwise set:
+                                    \
+                                    \   Green channel in R1 = R6 * 2
+                                    \   Blue = 0
+                                    \
+                                    \ So particles start out white (R6 > 8)
+                                    \ with a fading level of blue, until the
+                                    \ blue disappears entirely (R6 = 8) and
+                                    \ then the green fades away (R6 < 8) to
+                                    \ leave a pure red particle (R6 = 0)
+                                    \
+                                    \ So this is a fading particle from white
+                                    \ to red, so this looks like a burning
+                                    \ particle from an explosion that cools
+                                    \ over time
 
- ORR     R7, R1, R2                 \ VIDC
- AND     R7, R7, #3                 \ 
- ORR     R7, R7, R0                 \ 
+                                    \ We now build a VIDC colour number in R7
+                                    \ by combining the three channels into one
+                                    \ byte, which we then replicate four times
+                                    \ to get a 32-bit colour number
+                                    \
+                                    \ The byte is of the form:
+                                    \
+                                    \   * Bit 7 = blue bit 3
+                                    \   * Bit 6 = green bit 3
+                                    \   * Bit 5 = green bit 2
+                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 3 = blue bit 2
+                                    \   * Bit 2 = red bit 2
+                                    \   * Bit 1 = sum of red/green/blue bit 1
+                                    \   * Bit 0 = sum of red/green/blue bit 0
+                                    \
+                                    \ We now build this colour number in R7 from
+                                    \ the red, green and blue values in R0, R1
+                                    \ and R2
+
+ ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
+ AND     R7, R7, #%00000011         \
+ ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
  AND     R7, R7, #7                 \ 
- TST     R0, #8                     \ 
- ORRNE   R7, R7, #&10               \ 
- AND     R1, R1, #&C                \ 
- ORR     R7, R7, R1, LSL #3         \ 
- TST     R2, #4                     \ 
- ORRNE   R7, R7, #8                 \ 
- TST     R2, #8                     \ 
- ORRNE   R7, R7, #&80               \ 
+                                    \ So this sets bits 0, 1 and 2 of R7 as
+                                    \ required
 
- ORR     R7, R7, #&001D0000         \ 
+ TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
+ ORRNE   R7, R7, #%00010000         \ set bit 4 of R7
 
- LDMFD   R13!, {R0-R2, R6}          \ 
- MOV     PC, R14                    \ 
+ AND     R1, R1, #%00001100         \ Clear all bits of the green channel in R1
+                                    \ except bits 2-3
+
+ ORR     R7, R7, R1, LSL #3         \ And stick them into bits 5-6 of R7
+
+ TST     R2, #%00000100             \ If bit 2 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%00001000         \ set bit 3 of R7
+
+ TST     R2, #%00001000             \ If bit 3 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%10000000         \ set bit 7 of R7
+
+ ORR     R7, R7, #&001D0000         \ Set bits 16, 18, 19 and 20 of the particle
+                                    \ flags, so that's:
+                                    \
+                                    \   * Bit 16 set = colour fades white to red
+                                    \   * Bit 18 set = splash on impact with sea
+                                    \   * Bit 19 set = bounce on ground
+                                    \   * Bit 20 set = apply gravity to particle
+
+ LDMFD   R13!, {R0-R2, R6}          \ Retrieve the registers that we stored on
+                                    \ the stack above
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -2805,99 +2941,212 @@ ENDIF
 \   Category: Particles
 \    Summary: Bounce a particle off the ground
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinates
+\
+\   (R3, R4, R5)                    Particle velocity
+\
+\   R7                              Particle flags
+\
+\   R9                              The altitude of the landscape directly below
+\                                   the particle
+\
 \ ******************************************************************************
 
 .BounceParticle
 
- MOV     R1, R9                     \ 
- CMP     R9, #SEA_LEVEL             \ 
- BEQ     sub_8A34                   \ 
- TST     R7, #&00080000             \ 
- BEQ     DeleteParticleData         \ 
- TST     R7, #&01000000             \ 
- BNE     sub_8A28                   \ 
- MOV     R3, R3, ASR #1             \ 
- MOV     R4, R4, ASR #1             \ 
- MOV     R5, R5, ASR #1             \ 
- RSB     R4, R4, #0                 \ 
- MOV     PC, R14                    \ 
+ MOV     R1, R9                     \ Set R1 to R9, so (R0, R1, R2) now contains
+                                    \ the coordinates of the point on the
+                                    \ landscape directly below the particle
+
+ CMP     R9, #SEA_LEVEL             \ If the particle is above the sea, jump to
+ BEQ     SplashParticleIntoSea      \ SplashParticleIntoSea to splash the
+                                    \ particle into the sea, returning from the
+                                    \ subroutine using a tail call
+
+ TST     R7, #&00080000             \ If bit 19 of the particle flags is clear,
+ BEQ     DeleteParticleData         \ jump to DeleteParticleData to delete the
+                                    \ particle without bouncing or exploding
+
+ TST     R7, #&01000000             \ If bit 24 of the particle flags is set,
+ BNE     AddSmallExplosionToBuffer  \ jump to AddSmallExplosionToBuffer to
+                                    \ destroy the particle in a small explosion
+
+ MOV     R3, R3, ASR #1             \ Otherwise we bounce the particle off the
+ MOV     R4, R4, ASR #1             \ ground by setting the particle's velocity
+ MOV     R5, R5, ASR #1             \ vector to half its previous speed, and in
+ RSB     R4, R4, #0                 \ the opposite direction in the y-axis
+
+ MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: sub_89C8
+\       Name: ProcessObjectDestruction
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: If this particle has hit an object, destroy the object and the
+\             particle in an explosion, scoring points if it's a bullet
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    The particle's coordinates
+\
+\   R7                              Particle flags
+\
+\   R9                              The altitude of the landscape directly below
+\                                   the particle
 \
 \ ******************************************************************************
 
-.sub_89C8
+.ProcessObjectDestruction
 
- SUB     R8, R9, R1                 \ 
- CMP     R8, #&01800000             \ 
- MOVHS   PC, R14                    \ 
- STMFD   R13!, {R2}                 \ 
- STR     R14, [R11, #objectType]    \ 
- ADD     R14, R11, #objectMap       \ 
- AND     R2, R2, #&FF000000         \ 
- ADD     R14, R14, R0, LSR #24      \ 
- ADD     R14, R14, R2, LSR #16      \ 
- LDMFD   R13!, {R2}                 \ 
- LDRB    R8, [R14]                  \ 
- CMP     R8, #&FF                   \ 
- LDREQ   PC, [R11, #objectType]     \ 
- CMP     R8, #&C                    \ 
- BHS     sub_8A28                   \ 
- ADD     R8, R8, #&C                \ 
- STRB    R8, [R14]                  \ 
- TST     R7, #&00020000             \ 
+ SUB     R8, R9, R1                 \ Set R8 = altitude - y-coordinate
+                                    \
+                                    \ So R8 contains the vertical distance
+                                    \ between the particle and the ground
 
- LDREQ   R8, [R11, #currentScore]   \ If xxx, increment the current score by 20
- ADDEQ   R8, R8, #20
- STREQ   R8, [R11, #currentScore]
+ CMP     R8, #&01800000             \ If R8 >= &01800000 then return from the
+ MOVHS   PC, R14                    \ subroutine as the particle is too high off
+                                    \ the ground to be hitting any objects
 
- MOV     R8, #&14                   \ 
- BL      sub_8CBC                   \ 
- B       DeleteParticleData         \ 
+ STMFD   R13!, {R2}                 \ Store R2 on the stack so we can retrieve
+                                    \ it below
+
+ STR     R14, [R11, #objectType]    \ Store the return address in objectType
+                                    \ (the choice of variable is not important,
+                                    \ we are just using it as temporary storage
+                                    \ here)
+
+ ADD     R14, R11, #objectMap       \ Set R14 to the address of the object map
+
+ AND     R2, R2, #&FF000000         \ Set the bottom three bytes of R2 to zero,
+                                    \ leaving just the top byte, so we can use
+                                    \ it in the following
+
+ ADD     R14, R14, R0, LSR #24      \ Set R14 = R14 + (R0 >> 24) + (R2 >> 16)
+ ADD     R14, R14, R2, LSR #16      \
+                                    \ R0 is shifted into the bottom byte of R14,
+                                    \ so that's the x-coordinate, and R2 is
+                                    \ shifted into the second byte of R14, so
+                                    \ that's the z-coordinate, so R14 points to
+                                    \ the object map entry for coordinate
+                                    \ (R0, R2)
+
+ LDMFD   R13!, {R2}                 \ Retrieve the value of R2 that we stored
+                                    \ above, so it contains the particle
+                                    \ y-coordinate once again
+
+ LDRB    R8, [R14]                  \ Set R8 to the byte in the object map at
+                                    \ the coordinate (R0, R2)
+
+ CMP     R8, #&FF                   \ If the object map entry is &FF, then there
+ LDREQ   PC, [R11, #objectType]     \ is no object on the map at the particle's
+                                    \ location, so we haven't hit anything, so
+                                    \ return from the subroutine by fetching the
+                                    \ return address thet we stored above
+
+ CMP     R8, #12                    \ If the object being hit by the particle is
+ BHS     AddSmallExplosionToBuffer  \ 12 or greater, then the object has already
+                                    \ been destroyed, so draw a small explosion
+                                    \ by calling AddSmallExplosionToBuffer, and
+                                    \ return from the subroutine using a tail
+                                    \ call
+
+ ADD     R8, R8, #12                \ Otherwise the particle has just hit an
+ STRB    R8, [R14]                  \ undestroyed object, so add 12 to the
+                                    \ object's type in the object map to denote
+                                    \ that it has been destroyed
+
+ TST     R7, #&00020000             \ If bit 17 the particle flags is clear then
+ LDREQ   R8, [R11, #currentScore]   \ the particle doing the hitting is not a
+ ADDEQ   R8, R8, #20                \ rock, so it must be a bullet, so increment
+ STREQ   R8, [R11, #currentScore]   \ the current score by 20
+
+ MOV     R8, #20                    \ Set R8 = 20 and call AddExplosionToBuffer
+ BL      AddExplosionToBuffer       \ to draw a medium-sized explosion where the
+                                    \ particle hit
+
+ B       DeleteParticleData         \ Jump to DeleteParticleData to delete the
+                                    \ particle, as it gets destroyed in the
+                                    \ explosion, and return from the subroutine
+                                    \ using a tail call
 
 \ ******************************************************************************
 \
-\       Name: sub_8A28
+\       Name: AddSmallExplosionToBuffer
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Add a small explosion to the particle data buffer
 \
 \ ******************************************************************************
 
-.sub_8A28
+.AddSmallExplosionToBuffer
 
- MOV     R8, #3                     \ 
- BL      sub_8CBC                   \ 
- B       DeleteParticleData         \ 
+ MOV     R8, #3                     \ Set R8 = 3 and call AddExplosionToBuffer
+ BL      AddExplosionToBuffer       \ to draw a small explosion at the given
+                                    \ coordinates
+
+ B       DeleteParticleData         \ Jump to DeleteParticleData to delete the
+                                    \ particle, as it gets destroyed in the
+                                    \ explosion, and return from the subroutine
+                                    \ using a tail call
 
 \ ******************************************************************************
 \
-\       Name: sub_8A34
+\       Name: SplashParticleIntoSea
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Splash a particle into the sea
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinates (on the sea's surface)
+\
+\   (R3, R4, R5)                    Particle velocity
+\
+\   R7                              Particle flags
+\
+\   R9                              The altitude of the landscape directly below
+\                                   the particle
 \
 \ ******************************************************************************
 
-.sub_8A34
+.SplashParticleIntoSea
 
- TST     R7, #&00040000             \ 
- BEQ     DeleteParticleData         \ 
- TST     R7, #&00800000             \ 
- MOVNE   R8, #&41                   \ 
- MOVEQ   R8, #4                     \ 
- SUB     R1, R1, #&00100000         \ 
+ TST     R7, #&00040000             \ If bit 18 of the particle flags is clear,
+ BEQ     DeleteParticleData         \ jump to DeleteParticleData to delete the
+                                    \ particle without splashing
 
-.lab_8A4C
+ TST     R7, #&00800000             \ If bit 23 of the particle flags is set,
+ MOVNE   R8, #65                    \ set the number of splash particles in R8
+ MOVEQ   R8, #4                     \ to 65, otherwise set it to 4
 
- BL      sub_8C58                   \ 
- SUBS    R8, R8, #1                 \ 
- BNE     lab_8A4C                   \ 
+ SUB     R1, R1, #&00100000         \ Set R1 to a point just above the sea's
+                                    \ surface (as R1 is on the surface, so this
+                                    \ moves it to 1/16 of a tile size above the
+                                    \ waves)
+
+.psea1
+
+ BL      AddSplashParticleToBuffer  \ Add a splash particle to the particle data
+                                    \ buffer
+
+ SUBS    R8, R8, #1                 \ Decrement the particle counter in R8
+
+ BNE     psea1                      \ Loop back until we have added all the
+                                    \ splash particles
+
+                                    \ Fall through into DeleteParticleData to
+                                    \ delete the particle and return from the
+                                    \ subroutine, as the particle has now
+                                    \ crashed into the sea
 
 \ ******************************************************************************
 \
@@ -2946,6 +3195,28 @@ ENDIF
 \   Category: Particles
 \    Summary: Add a bullet particle to the particle data buffer
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinate
+\
+\   R6                              Particle existence counter (i.e. how many
+\                                   iterations around the main loop before the
+\                                   particle expires)
+\
+\   R7                              Particle flags
+\
+\   R8                              Magnitude of the random element that's added
+\                                   to the velocity, with a larger figure giving
+\                                   a smaller random element; the actual range
+\                                   is +/- 2^(32 - R8)
+\
+\   R9                              Magnitude of the random element that's added
+\                                   to the particle existence, with a larger
+\                                   figure giving a smaller random element; the
+\                                   actual range is 0 to 2^(32 - R9)
+\
 \ ******************************************************************************
 
 .AddBulletParticleToBuffer
@@ -2964,17 +3235,41 @@ ENDIF
 \       Name: AddExhaustParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: Add one of the random particles in the exhaust plume to the
+\    Summary: Add one of the moving particles in the exhaust plume to the
 \             particle data buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinate
+\
+\   R6                              Particle existence counter (i.e. how many
+\                                   iterations around the main loop before the
+\                                   particle expires)
+\
+\   R7                              Particle flags
+\
+\   R8                              Magnitude of the random element that's added
+\                                   to the velocity, with a larger figure giving
+\                                   a smaller random element; the actual range
+\                                   is +/- 2^(32 - R8)
+\
+\   R9                              Magnitude of the random element that's added
+\                                   to the particle existence, with a larger
+\                                   figure giving a smaller random element; the
+\                                   actual range is 0 to 2^(32 - R9)
 \
 \ ******************************************************************************
 
 .AddExhaustParticleToBuffer
 
  STMFD   R13!, {R8, R14}            \ Store R8 and the return address on the
-                                    \ stack ???
+                                    \ stack, so the following call to the
+                                    \ particle adding routine below can return
+                                    \ properly
 
- B       AddRandomParticleToBuffer  \ Jump to AddRandomParticleToBuffer to add a
+ B       AddMovingParticleToBuffer  \ Jump to AddMovingParticleToBuffer to add a
                                     \ random particle to the particle data
                                     \ buffer, returning from the subroutine
                                     \ using a tail call
@@ -2984,7 +3279,43 @@ ENDIF
 \       Name: AddStaticParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: ???
+\    Summary: Add a particle to the particle data buffer that starts off static,
+\             adding a random element to its velocity and existence counter
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinate
+\
+\   R6                              Particle existence counter (i.e. how many
+\                                   iterations around the main loop before the
+\                                   particle expires)
+\
+\   R7                              Particle flags:
+\
+\                                     * Bits 0-7   = particle colour
+\                                     * Bit 16 set = colour fades white to red
+\                                     * Bit 17 set = particle is a rock
+\                                     * Bit 18 set = splash on impact with sea
+\                                     * Bit 19 set = bounce on ground impact
+\                                     * Bit 20 set = apply gravity to particle
+\                                     * Bit 21 set = can destroy objects
+\                                     * Bit 23 set = splash size (big when set)
+\                                     * Bit 24 set = explode on ground impact
+\
+\   R8                              Magnitude of the random element that's added
+\                                   to the velocity, with a larger figure giving
+\                                   a smaller random element; the actual range
+\                                   is +/- 2^(32 - R8)
+\
+\   R9                              Magnitude of the random element that's added
+\                                   to the particle existence, with a larger
+\                                   figure giving a smaller random element; the
+\                                   actual range is 0 to 2^(32 - R9)
+\
+\   Stack                           Contains a value to restore into R8 at the
+\                                   end, and the return address
 \
 \ ******************************************************************************
 
@@ -2993,15 +3324,53 @@ ENDIF
  MOV     R4, #0                     \ Set R4 = 0
 
                                     \ Fall into AddFallingParticleToBuffer so we
-                                    \ pass (R3, R4, R5) = (0, 0, 0) to the 
-                                    \ AddRandomParticleToBuffer routine
+                                    \ pass a velocity of (0, 0, 0) to the 
+                                    \ AddMovingParticleToBuffer routine
 
 \ ******************************************************************************
 \
 \       Name: AddFallingParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: ???
+\    Summary: Add a particle to the particle data buffer that only moves up or
+\             down, with a random element to its velocity and existence counter
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinate
+\
+\   R4                              Particle velocity in the y-axis (up-down)
+\
+\   R6                              Particle existence counter (i.e. how many
+\                                   iterations around the main loop before the
+\                                   particle expires)
+\
+\   R7                              Particle flags:
+\
+\                                     * Bits 0-7   = particle colour
+\                                     * Bit 16 set = colour fades white to red
+\                                     * Bit 17 set = particle is a rock
+\                                     * Bit 18 set = splash on impact with sea
+\                                     * Bit 19 set = bounce on ground impact
+\                                     * Bit 20 set = apply gravity to particle
+\                                     * Bit 21 set = can destroy objects
+\                                     * Bit 23 set = splash size (big when set)
+\                                     * Bit 24 set = explode on ground impact
+\
+\   R8                              Magnitude of the random element that's added
+\                                   to the velocity, with a larger figure giving
+\                                   a smaller random element; the actual range
+\                                   is +/- 2^(32 - R8)
+\
+\   R9                              Magnitude of the random element that's added
+\                                   to the particle existence, with a larger
+\                                   figure giving a smaller random element; the
+\                                   actual range is 0 to 2^(32 - R9)
+\
+\   Stack                           Contains a value to restore into R8 at the
+\                                   end, and the return address
 \
 \ ******************************************************************************
 
@@ -3011,15 +3380,16 @@ ENDIF
 
  MOV     R5, #0                     \ Set R5 = 0
 
-                                    \ Fall into AddRandomParticleToBuffer with
-                                    \ (R3, R4, R5) set to (0, R4, 0)
+                                    \ Fall into AddMovingParticleToBuffer with
+                                    \ a velocity of (0, R4, 0)
 
 \ ******************************************************************************
 \
-\       Name: AddRandomParticleToBuffer
+\       Name: AddMovingParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: ???
+\    Summary: Add a moving particle to the particle data buffer, adding a random
+\             element to its velocity and existence counter
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3035,53 +3405,75 @@ ENDIF
 \
 \   R7                              Particle flags:
 \
-\                                     * Bit 16 set = call sub_893C ???
-\                                     * Bit 17 set = draw particle and shadow
-\                                     * Bit 20 set = apply gravity
-\                                     * Bit 21 set = call sub_89C8 ???
+\                                     * Bits 0-7   = particle colour
+\                                     * Bit 16 set = colour fades white to red
+\                                     * Bit 17 set = particle is a rock
+\                                     * Bit 18 set = splash on impact with sea
+\                                     * Bit 19 set = bounce on ground impact
+\                                     * Bit 20 set = apply gravity to particle
+\                                     * Bit 21 set = can destroy objects
+\                                     * Bit 23 set = splash size (big when set)
+\                                     * Bit 24 set = explode on ground impact
 \
-\   R8                              Magnitude of random signed element added to
-\                                   (R3, R4, R5), larger figure means a smaller
-\                                   random element
+\   R8                              Magnitude of the random element that's added
+\                                   to the velocity, with a larger figure giving
+\                                   a smaller random element; the actual range
+\                                   is +/- 2^(32 - R8)
 \
-\   R9                              Magnitude of random positive element added
-\                                   to R6, larger figure means a smaller random
-\                                   element
+\   R9                              Magnitude of the random element that's added
+\                                   to the particle existence, with a larger
+\                                   figure giving a smaller random element; the
+\                                   actual range is 0 to 2^(32 - R9)
 \
 \   Stack                           Contains a value to restore into R8 at the
 \                                   end, and the return address
 \
 \ ******************************************************************************
 
-.AddRandomParticleToBuffer
+.AddMovingParticleToBuffer
 
  STMFD   R13!, {R0-R1}              \ Store R0 and R1 on the stack so we can
                                     \ restore them after the following
 
-                                    \ We now add a random signed element to
-                                    \ (R3, R4, R5), with the scale determined
-                                    \ by R8 (with larger R8 adding a smaller
-                                    \ random element)
+                                    \ We now add a random signed element to the
+                                    \ particle velocity in (R3, R4, R5), with
+                                    \ the scale of the random element determined
+                                    \ by R8 (so a larger R8 adds a smaller
+                                    \ random element to the velocity)
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
  ADD     R3, R3, R0, ASR R8         \ Set R3 = R3 + R0 >> R8
+                                    \
+                                    \ We keep the sign in R0, so this can either
+                                    \ increase or decrease R3
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
  ADD     R4, R4, R0, ASR R8         \ Set R4 = R4 + R0 >> R8
+                                    \
+                                    \ We keep the sign in R0, so this can either
+                                    \ increase or decrease R4
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
  ADD     R5, R5, R0, ASR R8         \ Set R5 = R5 + R0 >> R8
+                                    \
+                                    \ We keep the sign in R0, so this can either
+                                    \ increase or decrease R5
 
                                     \ We now add a random positive element to
-                                    \ R6, with the scale determined by R9 (with
-                                    \ larger R9 adding a smaller random element)
+                                    \ the particle's existence counter in R6,
+                                    \ with the scale determined by R9 (so a
+                                    \ larger R9 adds a smaller random element
+                                    \ to the particle's lifespan)
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
  ADD     R6, R6, R0, LSR R9         \ Set R6 = R6 + R0 >> R9
+                                    \
+                                    \ We do not keep the sign in R0, so the
+                                    \ addition is always positive
 
  LDMFD   R13!, {R0-R1}              \ Retrieve the values of R0 and R1 that we
                                     \ stored above
@@ -3097,7 +3489,23 @@ ENDIF
 \
 \ Arguments:
 \
-\   R0 to R7                        The eight words of particle data to store
+\   (R0, R1, R2)                    Particle coordinate
+\
+\   R6                              Particle existence counter (i.e. how many
+\                                   iterations around the main loop before the
+\                                   particle expires)
+\
+\   R7                              Particle flags
+\
+\   R8                              Magnitude of the random element that's added
+\                                   to the velocity, with a larger figure giving
+\                                   a smaller random element; the actual range
+\                                   is +/- 2^(32 - R8)
+\
+\   R9                              Magnitude of the random element that's added
+\                                   to the particle existence, with a larger
+\                                   figure giving a smaller random element; the
+\                                   actual range is 0 to 2^(32 - R9)
 \
 \   Stack                           Contains a value to restore into R8 at the
 \                                   end, and the return address
@@ -3159,52 +3567,105 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8B0C
+\       Name: AddSmokeParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: ???
+\    Summary: Add a smoke particle to the particle data buffer
 \
 \ ------------------------------------------------------------------------------
 \
-\ This is called for destroyed objects - it displays the smoke particles?
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinate
 \
 \ ******************************************************************************
 
-.sub_8B0C
+.AddSmokeParticleToBuffer
 
- STMFD   R13!, {R0-R2, R8, R14}     \ 
+ STMFD   R13!, {R0-R2, R8, R14}     \ Store the particle coordinates on the
+                                    \ stack so we can retrieve them below, and
+                                    \ also store R8 and the return address so
+                                    \ we can pass them to the particle adding
+                                    \ routine below
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- AND     R0, R0, #7                 \ 
- ADD     R0, R0, #3                 \ 
- MOV     R1, R0                     \ 
- MOV     R2, R0                     \ 
+ AND     R0, R0, #7                 \ Reduce R0 to a random number in the range
+ ADD     R0, R0, #3                 \ 3 to 10
 
- ORR     R7, R1, R2                 \ VIDC
- AND     R7, R7, #3                 \ 
- ORR     R7, R7, R0                 \ 
+ MOV     R1, R0                     \ Set R1 and R2 to the same number, so if
+ MOV     R2, R0                     \ R0, R1 and R2 represent the three colour
+                                    \ channels, we have a grey colour of a
+                                    \ random intensity
+
+                                    \ We now build a VIDC colour number in R7
+                                    \ by combining the three channels into one
+                                    \ byte, which we then replicate four times
+                                    \ to get a 32-bit colour number
+                                    \
+                                    \ The byte is of the form:
+                                    \
+                                    \   * Bit 7 = blue bit 3
+                                    \   * Bit 6 = green bit 3
+                                    \   * Bit 5 = green bit 2
+                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 3 = blue bit 2
+                                    \   * Bit 2 = red bit 2
+                                    \   * Bit 1 = sum of red/green/blue bit 1
+                                    \   * Bit 0 = sum of red/green/blue bit 0
+                                    \
+                                    \ We now build this colour number in R7 from
+                                    \ the red, green and blue values in R0, R1
+                                    \ and R2
+
+ ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
+ AND     R7, R7, #%00000011         \
+ ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
  AND     R7, R7, #7                 \ 
- TST     R0, #8                     \ 
- ORRNE   R7, R7, #&10               \ 
- AND     R1, R1, #&C                \ 
- ORR     R7, R7, R1, LSL #3         \ 
- TST     R2, #4                     \ 
- ORRNE   R7, R7, #8                 \ 
- TST     R2, #8                     \ 
- ORRNE   R7, R7, #&80               \ 
+                                    \ So this sets bits 0, 1 and 2 of R7 as
+                                    \ required
 
- ORR     R7, R7, #&00080000         \ 
+ TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
+ ORRNE   R7, R7, #%00010000         \ set bit 4 of R7
 
- MVN     R4, #&80000                \ 
+ AND     R1, R1, #%00001100         \ Clear all bits of the green channel in R1
+                                    \ except bits 2-3
 
- LDMFD   R13!, {R0-R2}              \ 
+ ORR     R7, R7, R1, LSL #3         \ And stick them into bits 5-6 of R7
 
- MOV     R9, #&19                   \ 
- MOV     R8, #&D                    \ 
- MOV     R6, #&F                    \ 
+ TST     R2, #%00000100             \ If bit 2 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%00001000         \ set bit 3 of R7
 
- B       AddFallingParticleToBuffer \ 
+ TST     R2, #%00001000             \ If bit 3 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%10000000         \ set bit 7 of R7
+
+ ORR     R7, R7, #&00080000         \ Set bit 19 of the particle flags, so that
+                                    \ the particle bounces on the ground should
+                                    \ it ever reach it
+
+ MVN     R4, #&00080000             \ Set R4 = -&00080000 to pass as the y-axis
+                                    \ velocity in the particle adding routine
+                                    \ below, so the particle drifts slowly up
+                                    \ and away from the ground
+
+ LDMFD   R13!, {R0-R2}              \ Retrieve the particle coordinates that we
+                                    \ stored above into (R0, R1, R2)
+
+ MOV     R9, #25                    \ Set the random element of the particle's
+                                    \ existence to the range 0 to 2^(32 - 25),
+                                    \ i.e. 0 to 128
+
+ MOV     R8, #13                    \ Set the random element of the particle's
+                                    \ velocity to the range +/- 2^(32 - 13),
+                                    \ i.e. -&80000 to +&80000
+
+ MOV     R6, #15                    \ Set the particle's existence counter to 15
+                                    \ iterations of the main loop
+
+ B       AddFallingParticleToBuffer \ Add a particle to the particle data buffer
+                                    \ that initially drifts upwards, and with a
+                                    \ random element being added to its velocity
+                                    \ and existence counter
 
 \ ******************************************************************************
 \
@@ -3217,7 +3678,11 @@ ENDIF
 
 .sub_8B70
 
- STMFD   R13!, {R0-R2, R8, R14}     \ 
+ STMFD   R13!, {R0-R2, R8, R14}     \ Store the particle coordinates on the
+                                    \ stack so we can retrieve them below, and
+                                    \ also store R8 and the return address so
+                                    \ we can pass them to the particle adding
+                                    \ routine below
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
@@ -3228,26 +3693,67 @@ ENDIF
  ADD     R1, R1, #2                 \ 
  ADD     R2, R2, #4                 \ 
 
- ORR     R7, R1, R2                 \ VIDC
- AND     R7, R7, #3                 \ 
- ORR     R7, R7, R0                 \ 
+                                    \ We now build a VIDC colour number in R7
+                                    \ by combining the three channels into one
+                                    \ byte, which we then replicate four times
+                                    \ to get a 32-bit colour number
+                                    \
+                                    \ The byte is of the form:
+                                    \
+                                    \   * Bit 7 = blue bit 3
+                                    \   * Bit 6 = green bit 3
+                                    \   * Bit 5 = green bit 2
+                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 3 = blue bit 2
+                                    \   * Bit 2 = red bit 2
+                                    \   * Bit 1 = sum of red/green/blue bit 1
+                                    \   * Bit 0 = sum of red/green/blue bit 0
+                                    \
+                                    \ We now build this colour number in R7 from
+                                    \ the red, green and blue values in R0, R1
+                                    \ and R2
+
+ ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
+ AND     R7, R7, #%00000011         \
+ ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
  AND     R7, R7, #7                 \ 
- TST     R0, #8                     \ 
- ORRNE   R7, R7, #&10               \ 
- AND     R1, R1, #&C                \ 
- ORR     R7, R7, R1, LSL #3         \ 
- TST     R2, #4                     \ 
- ORRNE   R7, R7, #8                 \ 
- TST     R2, #8                     \ 
- ORRNE   R7, R7, #&80               \ 
+                                    \ So this sets bits 0, 1 and 2 of R7 as
+                                    \ required
 
- ORR     R7, R7, #&001C0000         \ 
+ TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
+ ORRNE   R7, R7, #%00010000         \ set bit 4 of R7
 
- LDMFD   R13!, {R0-R2}              \ 
+ AND     R1, R1, #%00001100         \ Clear all bits of the green channel in R1
+                                    \ except bits 2-3
 
- MOV     R9, #&1A                   \ 
- MOV     R8, #&A                    \ 
- MOV     R6, #&F                    \ 
+ ORR     R7, R7, R1, LSL #3         \ And stick them into bits 5-6 of R7
+
+ TST     R2, #%00000100             \ If bit 2 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%00001000         \ set bit 3 of R7
+
+ TST     R2, #%00001000             \ If bit 3 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%10000000         \ set bit 7 of R7
+
+ ORR     R7, R7, #&001C0000         \ Set bits 18, 19 and 20 of the particle
+                                    \ flags, so that's:
+                                    \
+                                    \   * Bit 18 set = splash on impact with sea
+                                    \   * Bit 19 set = bounce on ground
+                                    \   * Bit 20 set = apply gravity to particle
+
+ LDMFD   R13!, {R0-R2}              \ Retrieve the particle coordinates that we
+                                    \ stored above into (R0, R1, R2)
+
+ MOV     R9, #26                    \ Set the random element of the particle's
+                                    \ existence to the range 0 to 2^(32 - 26),
+                                    \ i.e. 0 to 64
+
+ MOV     R8, #10                    \ Set the random element of the particle's
+                                    \ velocity to the range +/- 2^(32 - 10),
+                                    \ i.e. -&400000 to +&400000
+
+ MOV     R6, #15                    \ Set the particle's existence counter to 15
+                                    \ iterations of the main loop
 
  B       AddStaticParticleToBuffer  \ 
 
@@ -3270,7 +3776,11 @@ ENDIF
 
 .DropARockFromTheSky
 
- STMFD   R13!, {R0-R2, R8, R14}     \ 
+ STMFD   R13!, {R0-R2, R8, R14}     \ Store the particle coordinates on the
+                                    \ stack so we can retrieve them below, and
+                                    \ also store R8 and the return address so
+                                    \ we can pass them to the particle adding
+                                    \ routine below
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
@@ -3281,22 +3791,52 @@ ENDIF
  ADD     R1, R1, #2                 \ 
  ADD     R2, R2, #4                 \ 
 
- ORR     R7, R1, R2                 \ VIDC
- AND     R7, R7, #3                 \ 
- ORR     R7, R7, R0                 \ 
+                                    \ We now build a VIDC colour number in R7
+                                    \ by combining the three channels into one
+                                    \ byte, which we then replicate four times
+                                    \ to get a 32-bit colour number
+                                    \
+                                    \ The byte is of the form:
+                                    \
+                                    \   * Bit 7 = blue bit 3
+                                    \   * Bit 6 = green bit 3
+                                    \   * Bit 5 = green bit 2
+                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 3 = blue bit 2
+                                    \   * Bit 2 = red bit 2
+                                    \   * Bit 1 = sum of red/green/blue bit 1
+                                    \   * Bit 0 = sum of red/green/blue bit 0
+                                    \
+                                    \ We now build this colour number in R7 from
+                                    \ the red, green and blue values in R0, R1
+                                    \ and R2
+
+ ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
+ AND     R7, R7, #%00000011         \
+ ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
  AND     R7, R7, #7                 \ 
- TST     R0, #8                     \ 
- ORRNE   R7, R7, #&10               \ 
- AND     R1, R1, #&C                \ 
- ORR     R7, R7, R1, LSL #3         \ 
- TST     R2, #4                     \ 
- ORRNE   R7, R7, #8                 \ 
- TST     R2, #8                     \ 
- ORRNE   R7, R7, #&80               \ 
+                                    \ So this sets bits 0, 1 and 2 of R7 as
+                                    \ required
+
+ TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
+ ORRNE   R7, R7, #%00010000         \ set bit 4 of R7
+
+ AND     R1, R1, #%00001100         \ Clear all bits of the green channel in R1
+                                    \ except bits 2-3
+
+ ORR     R7, R7, R1, LSL #3         \ And stick them into bits 5-6 of R7
+
+ TST     R2, #%00000100             \ If bit 2 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%00001000         \ set bit 3 of R7
+
+ TST     R2, #%00001000             \ If bit 3 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%10000000         \ set bit 7 of R7
+
 
  ORR     R7, R7, #&00FE0000         \ 
 
- LDMFD   R13!, {R0-R2}              \ 
+ LDMFD   R13!, {R0-R2}              \ Retrieve the particle coordinates that we
+                                    \ stored above into (R0, R1, R2)
 
  MOV     R9, #&1B                   \ 
  MOV     R8, #&A                    \ 
@@ -3306,34 +3846,60 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8C40
+\       Name: AddSparkParticleToBuffer
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Add a spark particle to the particle data buffer that fades from
+\             white-hot to red over time
 \
 \ ******************************************************************************
 
-.sub_8C40
+.AddSparkParticleToBuffer
 
- STMFD   R13!, {R8, R14}            \ 
- MOV     R7, #&001D0000             \ 
- MOV     R9, #&1D                   \ 
- MOV     R8, #8                     \ 
- MOV     R6, #8                     \ 
- B       AddStaticParticleToBuffer  \ 
+ STMFD   R13!, {R8, R14}            \ Store R8 and the return address on the
+                                    \ stack, so the call to the particle adding
+                                    \ routine below can return properly
+
+ MOV     R7, #&001D0000             \ Set bits 16, 18, 19 and 20 of the particle
+                                    \ flags, so that's:
+                                    \
+                                    \   * Bit 16 set = colour fades white to red
+                                    \   * Bit 18 set = splash on impact with sea
+                                    \   * Bit 19 set = bounce on ground
+                                    \   * Bit 20 set = apply gravity to particle
+
+ MOV     R9, #29                    \ Set the random element of the particle's
+                                    \ existence to the range 0 to 2^(32 - 29),
+                                    \ i.e. 0 to 8
+
+ MOV     R8, #8                     \ Set the random element of the particle's
+                                    \ velocity to the range +/- 2^(32 - 8),
+                                    \ i.e. -&1000000 to +&1000000
+
+ MOV     R6, #8                     \ Set the particle's existence counter to 8
+                                    \ iterations of the main loop
+
+ B       AddStaticParticleToBuffer  \ Jump to AddStaticParticleToBuffer to add a
+                                    \ static particle to the particle data
+                                    \ buffer, returning from the subroutine
+                                    \ using a tail call
 
 \ ******************************************************************************
 \
-\       Name: sub_8C58
+\       Name: AddSplashParticleToBuffer
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Add a splash particle to the particle data buffer
 \
 \ ******************************************************************************
 
-.sub_8C58
+.AddSplashParticleToBuffer
 
- STMFD   R13!, {R0-R2, R8, R14}     \ 
+ STMFD   R13!, {R0-R2, R8, R14}     \ Store the particle coordinates on the
+                                    \ stack so we can retrieve them below, and
+                                    \ also store R8 and the return address so
+                                    \ we can pass them to the particle adding
+                                    \ routine below
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
@@ -3343,22 +3909,52 @@ ENDIF
  ADD     R0, R0, #8                 \ 
  MOV     R1, R0                     \ 
 
- ORR     R7, R1, R2                 \ VIDC
- AND     R7, R7, #3                 \ 
- ORR     R7, R7, R0                 \ 
+                                    \ We now build a VIDC colour number in R7
+                                    \ by combining the three channels into one
+                                    \ byte, which we then replicate four times
+                                    \ to get a 32-bit colour number
+                                    \
+                                    \ The byte is of the form:
+                                    \
+                                    \   * Bit 7 = blue bit 3
+                                    \   * Bit 6 = green bit 3
+                                    \   * Bit 5 = green bit 2
+                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 3 = blue bit 2
+                                    \   * Bit 2 = red bit 2
+                                    \   * Bit 1 = sum of red/green/blue bit 1
+                                    \   * Bit 0 = sum of red/green/blue bit 0
+                                    \
+                                    \ We now build this colour number in R7 from
+                                    \ the red, green and blue values in R0, R1
+                                    \ and R2
+
+ ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
+ AND     R7, R7, #%00000011         \
+ ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
  AND     R7, R7, #7                 \ 
- TST     R0, #8                     \ 
- ORRNE   R7, R7, #&10               \ 
- AND     R1, R1, #&C                \ 
- ORR     R7, R7, R1, LSL #3         \ 
- TST     R2, #4                     \ 
- ORRNE   R7, R7, #8                 \ 
- TST     R2, #8                     \ 
- ORRNE   R7, R7, #&80               \ 
+                                    \ So this sets bits 0, 1 and 2 of R7 as
+                                    \ required
+
+ TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
+ ORRNE   R7, R7, #%00010000         \ set bit 4 of R7
+
+ AND     R1, R1, #%00001100         \ Clear all bits of the green channel in R1
+                                    \ except bits 2-3
+
+ ORR     R7, R7, R1, LSL #3         \ And stick them into bits 5-6 of R7
+
+ TST     R2, #%00000100             \ If bit 2 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%00001000         \ set bit 3 of R7
+
+ TST     R2, #%00001000             \ If bit 3 of the blue channel in R2 is set,
+ ORRNE   R7, R7, #%10000000         \ set bit 7 of R7
+
 
  ORR     R7, R7, #&00100000         \ 
 
- LDMFD   R13!, {R0-R2}              \ 
+ LDMFD   R13!, {R0-R2}              \ Retrieve the particle coordinates that we
+                                    \ stored above into (R0, R1, R2)
 
  MOV     R9, #&1A                   \ 
  MOV     R8, #&A                    \ 
@@ -3368,26 +3964,45 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8CBC
+\       Name: AddExplosionToBuffer
 \       Type: Subroutine
-\   Category: ???
-\    Summary: ???
+\   Category: Particles
+\    Summary: Create a big explosion of particles and add it to the particle
+\             data buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R8                              The number of particle clusters in the
+\                                   explosion (there are four particles per
+\                                   cluster)
 \
 \ ******************************************************************************
 
-.sub_8CBC
+.AddExplosionToBuffer
 
- STMFD   R13!, {R3-R9, R14}         \ 
+ STMFD   R13!, {R3-R9, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
-.lab_8CC0
+.expl1
 
- BL      sub_8C40                   \ 
+ BL      AddSparkParticleToBuffer   \ 
+
  BL      sub_8B70                   \ 
- BL      sub_8B0C                   \ 
- BL      sub_8C40                   \ 
- SUBS    R8, R8, #1                 \ 
- BPL     lab_8CC0                   \ 
- LDMFD   R13!, {R3-R9, PC}          \ 
+
+ BL      AddSmokeParticleToBuffer   \ 
+
+ BL      AddSparkParticleToBuffer   \ 
+
+ SUBS    R8, R8, #1                 \ Decrement the particle cluster counter in
+                                    \ R8
+
+ BPL     expl1                      \ Loop back until we have drawn all R8
+                                    \ particle clusters in the explosion
+
+ LDMFD   R13!, {R3-R9, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -3406,7 +4021,7 @@ ENDIF
  MOV     R1, #0                     \ 
  LDR     R2, [R11, #zCamera]        \ 
  SUB     R2, R2, #&06000000         \ 
- BL      sub_8CBC                   \ 
+ BL      AddExplosionToBuffer       \ 
  LDMFD   R13!, {PC}                 \ 
 
 \ ******************************************************************************
@@ -3429,7 +4044,7 @@ ENDIF
 
 .lab_8D14
 
- BL      sub_8C40                   \ 
+ BL      AddSparkParticleToBuffer   \ 
  SUBS    R8, R8, #1                 \ 
  BPL     lab_8D14                   \ 
  LDMFD   R13!, {R6-R9, PC}          \ 
@@ -3810,10 +4425,13 @@ ENDIF
  MOV     R2, R9                     \
  SUB     R1, R1, #&00C00000         \ So this is the coordinate that's &C00000
                                     \ above the base of the object (as the
-                                    \ y-axis points downwards)
+                                    \ y-axis points downwards), which is where
+                                    \ we add our smoke particles, one on each
+                                    \ iteration around the main loop
 
- BL      sub_8B0C                   \ Call sub_8B0C to draw smoke particles
-                                    \ rising from the destroyed object ???
+ BL      AddSmokeParticleToBuffer   \ Call AddSmokeParticleToBuffer to draw a
+                                    \ smoke particle rising from the destroyed
+                                    \ object
 
  LDMFD   R13!, {R0-R7, R9}          \ Retrieve the registers that we stored on
                                     \ the stack
@@ -8867,7 +9485,8 @@ ENDIF
                                     \ object types
 
  AND     R9, R9, #&FF000000         \ Set the bottom three bytes of R9 to zero,
-                                    \ leaving just the top byte
+                                    \ leaving just the top byte, so we can use
+                                    \ it in the following
 
                                     \ The object at coordinate (x, z) is stored
                                     \ at offset &zzxx within objectMap, where

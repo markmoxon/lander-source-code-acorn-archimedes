@@ -497,8 +497,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00008588 C82382E0        	   479:  ADD     R2, R2, R8, ASR #7
 00:0000858C 1D78A0E3        	   480:  MOV     R7, #0x001D0000
 00:00008590 0860A0E3        	   481:  MOV     R6, #8
-00:00008594 0A80A0E3        	   482:  MOV     R8, #0xA
-00:00008598 1D90A0E3        	   483:  MOV     R9, #0x1D
+00:00008594 0A80A0E3        	   482:  MOV     R8, #10
+00:00008598 1D90A0E3        	   483:  MOV     R9, #29
 00:0000859C FF032DE9        	   484:  STMFD   R13!, {R0-R9}
 00:000085A0 390100EB        	   485:  BL      AddExhaustParticleToBuffer
 00:000085A4 04001AE3        	   486:  TST     R10, #0x4
@@ -541,7 +541,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008634 C60380E0        	   523:  ADD     R0, R0, R6, ASR #7
 00:00008638 C71381E0        	   524:  ADD     R1, R1, R7, ASR #7
 00:0000863C C82382E0        	   525:  ADD     R2, R2, R8, ASR #7
-00:00008640 1460A0E3        	   526:  MOV     R6, #0x14
+00:00008640 1460A0E3        	   526:  MOV     R6, #20
 00:00008644 6F77A0E3        	   527:  MOV     R7, #0x01BC0000
 00:00008648 FF7087E3        	   528:  ORR     R7, R7, #0xFF
 00:0000864C 0C0100EB        	   529:  BL      AddBulletParticleToBuffer
@@ -587,7 +587,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000086DC 94008BE2        	   569:  ADD     R0, R11, #xPlayer
 00:000086E0 070090E8        	   570:  LDMIA   R0, {R0-R2}
 00:000086E4 051641E2        	   571:  SUB     R1, R1, #0x00500000
-00:000086E8 730100EB        	   572:  BL      sub_8CBC
+00:000086E8 730100EB        	   572:  BL      AddExplosionToBuffer
                             	   573: lose1:
 00:000086EC 18019BE5        	   574:  LDR     R0, [R11, #mainLoopCount]
 00:000086F0 000CA0E1        	   575:  MOV     R0, R0, LSL #24
@@ -671,7 +671,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008824 2CE19B15        	   645:  LDRNE   R14, [R11, #gravity]
 00:00008828 0E408410        	   646:  ADDNE   R4, R4, R14
 00:0000882C 010817E3        	   647:  TST     R7, #0x00010000
-00:00008830 4100001B        	   648:  BLNE    sub_893C
+00:00008830 4100001B        	   648:  BLNE    SetParticleColourToFade
 00:00008834 0080A0E1        	   649:  MOV     R8, R0
 00:00008838 0290A0E1        	   650:  MOV     R9, R2
 00:0000883C 0F002DE9        	   651:  STMFD   R13!, {R0-R3}
@@ -679,7 +679,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008844 0090A0E1        	   653:  MOV     R9, R0
 00:00008848 0F00BDE8        	   654:  LDMFD   R13!, {R0-R3}
 00:0000884C 020617E3        	   655:  TST     R7, #0x00200000
-00:00008850 5C00001B        	   656:  BLNE    sub_89C8
+00:00008850 5C00001B        	   656:  BLNE    ProcessObjectDestruction
 00:00008854 090051E1        	   657:  CMP     R1, R9
 00:00008858 4E0000CB        	   658:  BLGT    BounceParticle
 00:0000885C FF00AAE8        	   659:  STMIA   R10!, {R0-R7}
@@ -740,26 +740,26 @@ Source: "3-assembled-output/Lander.arm"
 00:00008930 000057E3        	   714:  CMP     R7, #0
 00:00008934 B4FFFF1A        	   715:  BNE     dpar2
 00:00008938 0094BDE8        	   716:  LDMFD   R13!, {R10, R12, PC}
-                            	   717: sub_893C:
+                            	   717: SetParticleColourToFade:
 00:0000893C 47002DE9        	   718:  STMFD   R13!, {R0-R2, R6}
-00:00008940 0F00A0E3        	   719:  MOV     R0, #0xF
+00:00008940 0F00A0E3        	   719:  MOV     R0, #15
 00:00008944 080056E3        	   720:  CMP     R6, #8
-00:00008948 0F10A023        	   721:  MOVHS   R1, #0xF
+00:00008948 0F10A023        	   721:  MOVHS   R1, #15
 00:0000894C 8610A031        	   722:  MOVLO   R1, R6, LSL #1
 00:00008950 08204622        	   723:  SUBHS   R2, R6, #8
 00:00008954 8220A021        	   724:  MOVHS   R2, R2, LSL #1
 00:00008958 0020A033        	   725:  MOVLO   R2, #0
 00:0000895C 027081E1        	   726:  ORR     R7, R1, R2
-00:00008960 037007E2        	   727:  AND     R7, R7, #3
+00:00008960 037007E2        	   727:  AND     R7, R7, #0x3
 00:00008964 007087E1        	   728:  ORR     R7, R7, R0
 00:00008968 077007E2        	   729:  AND     R7, R7, #7
-00:0000896C 080010E3        	   730:  TST     R0, #8
+00:0000896C 080010E3        	   730:  TST     R0, #0x8
 00:00008970 10708713        	   731:  ORRNE   R7, R7, #0x10
-00:00008974 0C1001E2        	   732:  AND     R1, R1, #0xC
+00:00008974 0C1001E2        	   732:  AND     R1, R1, #0xc
 00:00008978 817187E1        	   733:  ORR     R7, R7, R1, LSL #3
-00:0000897C 040012E3        	   734:  TST     R2, #4
-00:00008980 08708713        	   735:  ORRNE   R7, R7, #8
-00:00008984 080012E3        	   736:  TST     R2, #8
+00:0000897C 040012E3        	   734:  TST     R2, #0x4
+00:00008980 08708713        	   735:  ORRNE   R7, R7, #0x8
+00:00008984 080012E3        	   736:  TST     R2, #0x8
 00:00008988 80708713        	   737:  ORRNE   R7, R7, #0x80
 00:0000898C 1D7887E3        	   738:  ORR     R7, R7, #0x001D0000
 00:00008990 4700BDE8        	   739:  LDMFD   R13!, {R0-R2, R6}
@@ -767,17 +767,17 @@ Source: "3-assembled-output/Lander.arm"
                             	   741: BounceParticle:
 00:00008998 0910A0E1        	   742:  MOV     R1, R9
 00:0000899C 550659E3        	   743:  CMP     R9, #SEA_LEVEL
-00:000089A0 2300000A        	   744:  BEQ     sub_8A34
+00:000089A0 2300000A        	   744:  BEQ     SplashParticleIntoSea
 00:000089A4 020717E3        	   745:  TST     R7, #0x00080000
 00:000089A8 2A00000A        	   746:  BEQ     DeleteParticleData
 00:000089AC 010417E3        	   747:  TST     R7, #0x01000000
-00:000089B0 1C00001A        	   748:  BNE     sub_8A28
+00:000089B0 1C00001A        	   748:  BNE     AddSmallExplosionToBuffer
 00:000089B4 C330A0E1        	   749:  MOV     R3, R3, ASR #1
 00:000089B8 C440A0E1        	   750:  MOV     R4, R4, ASR #1
 00:000089BC C550A0E1        	   751:  MOV     R5, R5, ASR #1
 00:000089C0 004064E2        	   752:  RSB     R4, R4, #0
 00:000089C4 0EF0A0E1        	   753:  MOV     PC, R14
-                            	   754: sub_89C8:
+                            	   754: ProcessObjectDestruction:
 00:000089C8 018049E0        	   755:  SUB     R8, R9, R1
 00:000089CC 060558E3        	   756:  CMP     R8, #0x01800000
 00:000089D0 0EF0A021        	   757:  MOVHS   PC, R14
@@ -791,32 +791,32 @@ Source: "3-assembled-output/Lander.arm"
 00:000089F0 0080DEE5        	   765:  LDRB    R8, [R14]
 00:000089F4 FF0058E3        	   766:  CMP     R8, #0xFF
 00:000089F8 F4F09B05        	   767:  LDREQ   PC, [R11, #objectType]
-00:000089FC 0C0058E3        	   768:  CMP     R8, #0xC
-00:00008A00 0800002A        	   769:  BHS     sub_8A28
-00:00008A04 0C8088E2        	   770:  ADD     R8, R8, #0xC
+00:000089FC 0C0058E3        	   768:  CMP     R8, #12
+00:00008A00 0800002A        	   769:  BHS     AddSmallExplosionToBuffer
+00:00008A04 0C8088E2        	   770:  ADD     R8, R8, #12
 00:00008A08 0080CEE5        	   771:  STRB    R8, [R14]
 00:00008A0C 020817E3        	   772:  TST     R7, #0x00020000
 00:00008A10 24819B05        	   773:  LDREQ   R8, [R11, #currentScore]
 00:00008A14 14808802        	   774:  ADDEQ   R8, R8, #20
 00:00008A18 24818B05        	   775:  STREQ   R8, [R11, #currentScore]
-00:00008A1C 1480A0E3        	   776:  MOV     R8, #0x14
-00:00008A20 A50000EB        	   777:  BL      sub_8CBC
+00:00008A1C 1480A0E3        	   776:  MOV     R8, #20
+00:00008A20 A50000EB        	   777:  BL      AddExplosionToBuffer
 00:00008A24 0B0000EA        	   778:  B       DeleteParticleData
-                            	   779: sub_8A28:
+                            	   779: AddSmallExplosionToBuffer:
 00:00008A28 0380A0E3        	   780:  MOV     R8, #3
-00:00008A2C A20000EB        	   781:  BL      sub_8CBC
+00:00008A2C A20000EB        	   781:  BL      AddExplosionToBuffer
 00:00008A30 080000EA        	   782:  B       DeleteParticleData
-                            	   783: sub_8A34:
+                            	   783: SplashParticleIntoSea:
 00:00008A34 010717E3        	   784:  TST     R7, #0x00040000
 00:00008A38 0600000A        	   785:  BEQ     DeleteParticleData
 00:00008A3C 020517E3        	   786:  TST     R7, #0x00800000
-00:00008A40 4180A013        	   787:  MOVNE   R8, #0x41
+00:00008A40 4180A013        	   787:  MOVNE   R8, #65
 00:00008A44 0480A003        	   788:  MOVEQ   R8, #4
 00:00008A48 011641E2        	   789:  SUB     R1, R1, #0x00100000
-                            	   790: lab_8A4C:
-00:00008A4C 810000EB        	   791:  BL      sub_8C58
+                            	   790: psea1:
+00:00008A4C 810000EB        	   791:  BL      AddSplashParticleToBuffer
 00:00008A50 018058E2        	   792:  SUBS    R8, R8, #1
-00:00008A54 FCFFFF1A        	   793:  BNE     lab_8A4C
+00:00008A54 FCFFFF1A        	   793:  BNE     psea1
                             	   794: DeleteParticleData:
 00:00008A58 08819BE5        	   795:  LDR     R8, [R11, #particleEnd]
 00:00008A5C 208048E2        	   796:  SUB     R8, R8, #8*4
@@ -834,13 +834,13 @@ Source: "3-assembled-output/Lander.arm"
 00:00008A88 0E0000EA        	   808:  B       StoreParticleData
                             	   809: AddExhaustParticleToBuffer:
 00:00008A8C 00412DE9        	   810:  STMFD   R13!, {R8, R14}
-00:00008A90 020000EA        	   811:  B       AddRandomParticleToBuffer
+00:00008A90 020000EA        	   811:  B       AddMovingParticleToBuffer
                             	   812: AddStaticParticleToBuffer:
 00:00008A94 0040A0E3        	   813:  MOV     R4, #0
                             	   814: AddFallingParticleToBuffer:
 00:00008A98 0030A0E3        	   815:  MOV     R3, #0
 00:00008A9C 0050A0E3        	   816:  MOV     R5, #0
-                            	   817: AddRandomParticleToBuffer:
+                            	   817: AddMovingParticleToBuffer:
 00:00008AA0 03002DE9        	   818:  STMFD   R13!, {R0-R1}
 00:00008AA4 E50300EB        	   819:  BL      GetRandomNumbers
 00:00008AA8 503883E0        	   820:  ADD     R3, R3, R0, ASR R8
@@ -870,7 +870,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008B00 1C1080E5        	   844:  STR     R1, [R0, #7*4]
 00:00008B04 0C118BE5        	   845:  STR     R1, [R11, #particleCount]
 00:00008B08 0EF0A0E1        	   846:  MOV     PC, R14
-                            	   847: sub_8B0C:
+                            	   847: AddSmokeParticleToBuffer:
 00:00008B0C 07412DE9        	   848:  STMFD   R13!, {R0-R2, R8, R14}
 00:00008B10 CA0300EB        	   849:  BL      GetRandomNumbers
 00:00008B14 070000E2        	   850:  AND     R0, R0, #7
@@ -878,23 +878,23 @@ Source: "3-assembled-output/Lander.arm"
 00:00008B1C 0010A0E1        	   852:  MOV     R1, R0
 00:00008B20 0020A0E1        	   853:  MOV     R2, R0
 00:00008B24 027081E1        	   854:  ORR     R7, R1, R2
-00:00008B28 037007E2        	   855:  AND     R7, R7, #3
+00:00008B28 037007E2        	   855:  AND     R7, R7, #0x3
 00:00008B2C 007087E1        	   856:  ORR     R7, R7, R0
 00:00008B30 077007E2        	   857:  AND     R7, R7, #7
-00:00008B34 080010E3        	   858:  TST     R0, #8
+00:00008B34 080010E3        	   858:  TST     R0, #0x8
 00:00008B38 10708713        	   859:  ORRNE   R7, R7, #0x10
-00:00008B3C 0C1001E2        	   860:  AND     R1, R1, #0xC
+00:00008B3C 0C1001E2        	   860:  AND     R1, R1, #0xc
 00:00008B40 817187E1        	   861:  ORR     R7, R7, R1, LSL #3
-00:00008B44 040012E3        	   862:  TST     R2, #4
-00:00008B48 08708713        	   863:  ORRNE   R7, R7, #8
-00:00008B4C 080012E3        	   864:  TST     R2, #8
+00:00008B44 040012E3        	   862:  TST     R2, #0x4
+00:00008B48 08708713        	   863:  ORRNE   R7, R7, #0x8
+00:00008B4C 080012E3        	   864:  TST     R2, #0x8
 00:00008B50 80708713        	   865:  ORRNE   R7, R7, #0x80
 00:00008B54 027787E3        	   866:  ORR     R7, R7, #0x00080000
-00:00008B58 0247E0E3        	   867:  MVN     R4, #0x80000
+00:00008B58 0247E0E3        	   867:  MVN     R4, #0x00080000
 00:00008B5C 0700BDE8        	   868:  LDMFD   R13!, {R0-R2}
-00:00008B60 1990A0E3        	   869:  MOV     R9, #0x19
-00:00008B64 0D80A0E3        	   870:  MOV     R8, #0xD
-00:00008B68 0F60A0E3        	   871:  MOV     R6, #0xF
+00:00008B60 1990A0E3        	   869:  MOV     R9, #25
+00:00008B64 0D80A0E3        	   870:  MOV     R8, #13
+00:00008B68 0F60A0E3        	   871:  MOV     R6, #15
 00:00008B6C C9FFFFEA        	   872:  B       AddFallingParticleToBuffer
                             	   873: sub_8B70:
 00:00008B70 07412DE9        	   874:  STMFD   R13!, {R0-R2, R8, R14}
@@ -906,22 +906,22 @@ Source: "3-assembled-output/Lander.arm"
 00:00008B88 021081E2        	   880:  ADD     R1, R1, #2
 00:00008B8C 042082E2        	   881:  ADD     R2, R2, #4
 00:00008B90 027081E1        	   882:  ORR     R7, R1, R2
-00:00008B94 037007E2        	   883:  AND     R7, R7, #3
+00:00008B94 037007E2        	   883:  AND     R7, R7, #0x3
 00:00008B98 007087E1        	   884:  ORR     R7, R7, R0
 00:00008B9C 077007E2        	   885:  AND     R7, R7, #7
-00:00008BA0 080010E3        	   886:  TST     R0, #8
+00:00008BA0 080010E3        	   886:  TST     R0, #0x8
 00:00008BA4 10708713        	   887:  ORRNE   R7, R7, #0x10
-00:00008BA8 0C1001E2        	   888:  AND     R1, R1, #0xC
+00:00008BA8 0C1001E2        	   888:  AND     R1, R1, #0xc
 00:00008BAC 817187E1        	   889:  ORR     R7, R7, R1, LSL #3
-00:00008BB0 040012E3        	   890:  TST     R2, #4
-00:00008BB4 08708713        	   891:  ORRNE   R7, R7, #8
-00:00008BB8 080012E3        	   892:  TST     R2, #8
+00:00008BB0 040012E3        	   890:  TST     R2, #0x4
+00:00008BB4 08708713        	   891:  ORRNE   R7, R7, #0x8
+00:00008BB8 080012E3        	   892:  TST     R2, #0x8
 00:00008BBC 80708713        	   893:  ORRNE   R7, R7, #0x80
 00:00008BC0 077787E3        	   894:  ORR     R7, R7, #0x001C0000
 00:00008BC4 0700BDE8        	   895:  LDMFD   R13!, {R0-R2}
-00:00008BC8 1A90A0E3        	   896:  MOV     R9, #0x1A
-00:00008BCC 0A80A0E3        	   897:  MOV     R8, #0xA
-00:00008BD0 0F60A0E3        	   898:  MOV     R6, #0xF
+00:00008BC8 1A90A0E3        	   896:  MOV     R9, #26
+00:00008BCC 0A80A0E3        	   897:  MOV     R8, #10
+00:00008BD0 0F60A0E3        	   898:  MOV     R6, #15
 00:00008BD4 AEFFFFEA        	   899:  B       AddStaticParticleToBuffer
                             	   900: DropARockFromTheSky:
 00:00008BD8 07412DE9        	   901:  STMFD   R13!, {R0-R2, R8, R14}
@@ -933,16 +933,16 @@ Source: "3-assembled-output/Lander.arm"
 00:00008BF0 021081E2        	   907:  ADD     R1, R1, #2
 00:00008BF4 042082E2        	   908:  ADD     R2, R2, #4
 00:00008BF8 027081E1        	   909:  ORR     R7, R1, R2
-00:00008BFC 037007E2        	   910:  AND     R7, R7, #3
+00:00008BFC 037007E2        	   910:  AND     R7, R7, #0x3
 00:00008C00 007087E1        	   911:  ORR     R7, R7, R0
 00:00008C04 077007E2        	   912:  AND     R7, R7, #7
-00:00008C08 080010E3        	   913:  TST     R0, #8
+00:00008C08 080010E3        	   913:  TST     R0, #0x8
 00:00008C0C 10708713        	   914:  ORRNE   R7, R7, #0x10
-00:00008C10 0C1001E2        	   915:  AND     R1, R1, #0xC
+00:00008C10 0C1001E2        	   915:  AND     R1, R1, #0xc
 00:00008C14 817187E1        	   916:  ORR     R7, R7, R1, LSL #3
-00:00008C18 040012E3        	   917:  TST     R2, #4
-00:00008C1C 08708713        	   918:  ORRNE   R7, R7, #8
-00:00008C20 080012E3        	   919:  TST     R2, #8
+00:00008C18 040012E3        	   917:  TST     R2, #0x4
+00:00008C1C 08708713        	   918:  ORRNE   R7, R7, #0x8
+00:00008C20 080012E3        	   919:  TST     R2, #0x8
 00:00008C24 80708713        	   920:  ORRNE   R7, R7, #0x80
 00:00008C28 FE7887E3        	   921:  ORR     R7, R7, #0x00FE0000
 00:00008C2C 0700BDE8        	   922:  LDMFD   R13!, {R0-R2}
@@ -950,14 +950,14 @@ Source: "3-assembled-output/Lander.arm"
 00:00008C34 0A80A0E3        	   924:  MOV     R8, #0xA
 00:00008C38 AA60A0E3        	   925:  MOV     R6, #0xAA
 00:00008C3C 94FFFFEA        	   926:  B       AddStaticParticleToBuffer
-                            	   927: sub_8C40:
+                            	   927: AddSparkParticleToBuffer:
 00:00008C40 00412DE9        	   928:  STMFD   R13!, {R8, R14}
 00:00008C44 1D78A0E3        	   929:  MOV     R7, #0x001D0000
-00:00008C48 1D90A0E3        	   930:  MOV     R9, #0x1D
+00:00008C48 1D90A0E3        	   930:  MOV     R9, #29
 00:00008C4C 0880A0E3        	   931:  MOV     R8, #8
 00:00008C50 0860A0E3        	   932:  MOV     R6, #8
 00:00008C54 8EFFFFEA        	   933:  B       AddStaticParticleToBuffer
-                            	   934: sub_8C58:
+                            	   934: AddSplashParticleToBuffer:
 00:00008C58 07412DE9        	   935:  STMFD   R13!, {R0-R2, R8, R14}
 00:00008C5C 770300EB        	   936:  BL      GetRandomNumbers
 00:00008C60 032000E2        	   937:  AND     R2, R0, #3
@@ -966,16 +966,16 @@ Source: "3-assembled-output/Lander.arm"
 00:00008C6C 080080E2        	   940:  ADD     R0, R0, #8
 00:00008C70 0010A0E1        	   941:  MOV     R1, R0
 00:00008C74 027081E1        	   942:  ORR     R7, R1, R2
-00:00008C78 037007E2        	   943:  AND     R7, R7, #3
+00:00008C78 037007E2        	   943:  AND     R7, R7, #0x3
 00:00008C7C 007087E1        	   944:  ORR     R7, R7, R0
 00:00008C80 077007E2        	   945:  AND     R7, R7, #7
-00:00008C84 080010E3        	   946:  TST     R0, #8
+00:00008C84 080010E3        	   946:  TST     R0, #0x8
 00:00008C88 10708713        	   947:  ORRNE   R7, R7, #0x10
-00:00008C8C 0C1001E2        	   948:  AND     R1, R1, #0xC
+00:00008C8C 0C1001E2        	   948:  AND     R1, R1, #0xc
 00:00008C90 817187E1        	   949:  ORR     R7, R7, R1, LSL #3
-00:00008C94 040012E3        	   950:  TST     R2, #4
-00:00008C98 08708713        	   951:  ORRNE   R7, R7, #8
-00:00008C9C 080012E3        	   952:  TST     R2, #8
+00:00008C94 040012E3        	   950:  TST     R2, #0x4
+00:00008C98 08708713        	   951:  ORRNE   R7, R7, #0x8
+00:00008C9C 080012E3        	   952:  TST     R2, #0x8
 00:00008CA0 80708713        	   953:  ORRNE   R7, R7, #0x80
 00:00008CA4 017687E3        	   954:  ORR     R7, R7, #0x00100000
 00:00008CA8 0700BDE8        	   955:  LDMFD   R13!, {R0-R2}
@@ -983,15 +983,15 @@ Source: "3-assembled-output/Lander.arm"
 00:00008CB0 0A80A0E3        	   957:  MOV     R8, #0xA
 00:00008CB4 1460A0E3        	   958:  MOV     R6, #0x14
 00:00008CB8 75FFFFEA        	   959:  B       AddStaticParticleToBuffer
-                            	   960: sub_8CBC:
+                            	   960: AddExplosionToBuffer:
 00:00008CBC F8432DE9        	   961:  STMFD   R13!, {R3-R9, R14}
-                            	   962: lab_8CC0:
-00:00008CC0 DEFFFFEB        	   963:  BL      sub_8C40
+                            	   962: expl1:
+00:00008CC0 DEFFFFEB        	   963:  BL      AddSparkParticleToBuffer
 00:00008CC4 A9FFFFEB        	   964:  BL      sub_8B70
-00:00008CC8 8FFFFFEB        	   965:  BL      sub_8B0C
-00:00008CCC DBFFFFEB        	   966:  BL      sub_8C40
+00:00008CC8 8FFFFFEB        	   965:  BL      AddSmokeParticleToBuffer
+00:00008CCC DBFFFFEB        	   966:  BL      AddSparkParticleToBuffer
 00:00008CD0 018058E2        	   967:  SUBS    R8, R8, #1
-00:00008CD4 F9FFFF5A        	   968:  BPL     lab_8CC0
+00:00008CD4 F9FFFF5A        	   968:  BPL     expl1
 00:00008CD8 F883BDE8        	   969:  LDMFD   R13!, {R3-R9, PC}
                             	   970: sub_8CDC:
 00:00008CDC 00402DE9        	   971:  STMFD   R13!, {R14}
@@ -1000,7 +1000,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008CE8 0010A0E3        	   974:  MOV     R1, #0
 00:00008CEC 44219BE5        	   975:  LDR     R2, [R11, #zCamera]
 00:00008CF0 062442E2        	   976:  SUB     R2, R2, #0x06000000
-00:00008CF4 F0FFFFEB        	   977:  BL      sub_8CBC
+00:00008CF4 F0FFFFEB        	   977:  BL      AddExplosionToBuffer
 00:00008CF8 0080BDE8        	   978:  LDMFD   R13!, {PC}
                             	   979: sub_8CFC:
 00:00008CFC C0432DE9        	   980:  STMFD   R13!, {R6-R9, R14}
@@ -1010,7 +1010,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D0C 44219BE5        	   984:  LDR     R2, [R11, #zCamera]
 00:00008D10 062442E2        	   985:  SUB     R2, R2, #0x06000000
                             	   986: lab_8D14:
-00:00008D14 C9FFFFEB        	   987:  BL      sub_8C40
+00:00008D14 C9FFFFEB        	   987:  BL      AddSparkParticleToBuffer
 00:00008D18 018058E2        	   988:  SUBS    R8, R8, #1
 00:00008D1C FCFFFF5A        	   989:  BPL     lab_8D14
 00:00008D20 C083BDE8        	   990:  LDMFD   R13!, {R6-R9, PC}
@@ -1124,7 +1124,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008EA4 0800A0E1        	  1098:  MOV     R0, R8
 00:00008EA8 0920A0E1        	  1099:  MOV     R2, R9
 00:00008EAC 031541E2        	  1100:  SUB     R1, R1, #0x00C00000
-00:00008EB0 15FFFFEB        	  1101:  BL      sub_8B0C
+00:00008EB0 15FFFFEB        	  1101:  BL      AddSmokeParticleToBuffer
 00:00008EB4 FF02BDE8        	  1102:  LDMFD   R13!, {R0-R7, R9}
 00:00008EB8 F0FFFFEA        	  1103:  B       dobs5
                             	  1104: objectPlayerAddr:
@@ -10257,8 +10257,13 @@ Symbols by name:
 AbortWithMemoryError             A:0000A5A4
 AddBulletParticleToBuffer        A:00008A84
 AddExhaustParticleToBuffer       A:00008A8C
+AddExplosionToBuffer             A:00008CBC
 AddFallingParticleToBuffer       A:00008A98
-AddRandomParticleToBuffer        A:00008AA0
+AddMovingParticleToBuffer        A:00008AA0
+AddSmallExplosionToBuffer        A:00008A28
+AddSmokeParticleToBuffer         A:00008B0C
+AddSparkParticleToBuffer         A:00008C40
+AddSplashParticleToBuffer        A:00008C58
 AddStaticParticleToBuffer        A:00008A94
 AddTerminatorsToBuffers          A:00009CFC
 BounceParticle                   A:00008998
@@ -10325,12 +10330,15 @@ PrintCurrentScore                A:00009108
 PrintHexDigit                    A:0000A948
 PrintHexNumber                   A:0000A8E0
 PrintScoreInBothBanks            A:00009160
+ProcessObjectDestruction         A:000089C8
 ProjectParticleOntoScreen        A:00009670
 ProjectVertexOntoScreen          A:00009748
 ResetMousePosition               A:0000A594
 ReturnToDesktop                  A:0000A8D4
 SEA_LEVEL                        S:05500000
+SetParticleColourToFade          A:0000893C
 SpawnRock                        A:00008D24
+SplashParticleIntoSea            A:00008A34
 StartNewGame                     A:0000A734
 StoreParticleData                A:00008AC8
 SwitchScreenBank                 A:00009D3C
@@ -10370,6 +10378,7 @@ dpar3                            A:000088E8
 dpar4                            A:00008904
 endCode                          A:00011A24
 entr1                            A:0000A6E4
+expl1                            A:00008CC0
 fuelBarColour                    A:000091EC
 fuelBurnRate                     S:0000015C
 fuelLevel                        S:00000128
@@ -10387,8 +10396,6 @@ initialFuelLevel                 A:0000A580
 initialHighScore                 A:0000A57C
 initialScore                     A:0000A578
 labOffset                        S:0000006C
-lab_8A4C                         A:00008A4C
-lab_8CC0                         A:00008CC0
 lab_8D14                         A:00008D14
 lab_9498                         A:00009498
 lab_94E4                         A:000094E4
@@ -10528,6 +10535,7 @@ previousColumn                   S:000000C4
 prsb1                            A:000091A0
 prsb2                            A:000091D8
 prsc1                            A:00009140
+psea1                            A:00008A4C
 randomSeed1                      A:00009A38
 randomSeed2                      A:00009A3C
 remainingLives                   S:00000134
@@ -10558,15 +10566,7 @@ stack                            S:000121FC
 stackAddr                        A:0000A570
 stackPointerOnEntry              A:0000A584
 stringBuffer                     S:00000200
-sub_893C                         A:0000893C
-sub_89C8                         A:000089C8
-sub_8A28                         A:00008A28
-sub_8A34                         A:00008A34
-sub_8B0C                         A:00008B0C
 sub_8B70                         A:00008B70
-sub_8C40                         A:00008C40
-sub_8C58                         A:00008C58
-sub_8CBC                         A:00008CBC
 sub_8CDC                         A:00008CDC
 sub_8CFC                         A:00008CFC
 sub_93B4                         A:000093B4
@@ -10626,8 +10626,8 @@ Symbols by value:
 00000009 LAUNCHPAD_OBJECT
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 xNoseV
 00000030 rotationMatrix
+00000030 xNoseV
 00000034 xRoofV
 00000038 xSideV
 0000003C yNoseV
@@ -10636,8 +10636,8 @@ Symbols by value:
 00000048 zNoseV
 0000004C zRoofV
 00000050 zSideV
-00000054 varOffset
 00000054 xVertex
+00000054 varOffset
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10688,8 +10688,8 @@ Symbols by value:
 00000600 vertexProjected
 00000700 particleData
 00004400 objectMap
-00008000 landscapeOffset
 00008000 CODE
+00008000 landscapeOffset
 0000800C landscapeOffsetAddr
 00008010 landscapeConfig
 00008028 landscapeConfigAddr
@@ -10724,27 +10724,27 @@ Symbols by value:
 0000880C dpar2
 000088E8 dpar3
 00008904 dpar4
-0000893C sub_893C
+0000893C SetParticleColourToFade
 00008998 BounceParticle
-000089C8 sub_89C8
-00008A28 sub_8A28
-00008A34 sub_8A34
-00008A4C lab_8A4C
+000089C8 ProcessObjectDestruction
+00008A28 AddSmallExplosionToBuffer
+00008A34 SplashParticleIntoSea
+00008A4C psea1
 00008A58 DeleteParticleData
 00008A84 AddBulletParticleToBuffer
 00008A8C AddExhaustParticleToBuffer
 00008A94 AddStaticParticleToBuffer
 00008A98 AddFallingParticleToBuffer
-00008AA0 AddRandomParticleToBuffer
+00008AA0 AddMovingParticleToBuffer
 00008AC8 StoreParticleData
 00008AF4 InitialiseParticleData
-00008B0C sub_8B0C
+00008B0C AddSmokeParticleToBuffer
 00008B70 sub_8B70
 00008BD8 DropARockFromTheSky
-00008C40 sub_8C40
-00008C58 sub_8C58
-00008CBC sub_8CBC
-00008CC0 lab_8CC0
+00008C40 AddSparkParticleToBuffer
+00008C58 AddSplashParticleToBuffer
+00008CBC AddExplosionToBuffer
+00008CC0 expl1
 00008CDC sub_8CDC
 00008CFC sub_8CFC
 00008D14 lab_8D14

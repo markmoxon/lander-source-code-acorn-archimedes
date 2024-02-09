@@ -479,8 +479,8 @@ ship6:
  ADD     R2, R2, R8, ASR #7
  MOV     R7, #0x001D0000
  MOV     R6, #8
- MOV     R8, #0xA
- MOV     R9, #0x1D
+ MOV     R8, #10
+ MOV     R9, #29
  STMFD   R13!, {R0-R9}
  BL      AddExhaustParticleToBuffer
  TST     R10, #0x4
@@ -523,7 +523,7 @@ ship7:
  ADD     R0, R0, R6, ASR #7
  ADD     R1, R1, R7, ASR #7
  ADD     R2, R2, R8, ASR #7
- MOV     R6, #0x14
+ MOV     R6, #20
  MOV     R7, #0x01BC0000
  ORR     R7, R7, #0xFF
  BL      AddBulletParticleToBuffer
@@ -569,7 +569,7 @@ LoseLife:
  ADD     R0, R11, #xPlayer
  LDMIA   R0, {R0-R2}
  SUB     R1, R1, #0x00500000
- BL      sub_8CBC
+ BL      AddExplosionToBuffer
 lose1:
  LDR     R0, [R11, #mainLoopCount]
  MOV     R0, R0, LSL #24
@@ -645,7 +645,7 @@ dpar2:
  LDRNE   R14, [R11, #gravity]
  ADDNE   R4, R4, R14
  TST     R7, #0x00010000
- BLNE    sub_893C
+ BLNE    SetParticleColourToFade
  MOV     R8, R0
  MOV     R9, R2
  STMFD   R13!, {R0-R3}
@@ -653,7 +653,7 @@ dpar2:
  MOV     R9, R0
  LDMFD   R13!, {R0-R3}
  TST     R7, #0x00200000
- BLNE    sub_89C8
+ BLNE    ProcessObjectDestruction
  CMP     R1, R9
  BLGT    BounceParticle
  STMIA   R10!, {R0-R7}
@@ -714,26 +714,26 @@ dpar4:
  CMP     R7, #0
  BNE     dpar2
  LDMFD   R13!, {R10, R12, PC}
-sub_893C:
+SetParticleColourToFade:
  STMFD   R13!, {R0-R2, R6}
- MOV     R0, #0xF
+ MOV     R0, #15
  CMP     R6, #8
- MOVHS   R1, #0xF
+ MOVHS   R1, #15
  MOVLO   R1, R6, LSL #1
  SUBHS   R2, R6, #8
  MOVHS   R2, R2, LSL #1
  MOVLO   R2, #0
  ORR     R7, R1, R2
- AND     R7, R7, #3
+ AND     R7, R7, #0x3
  ORR     R7, R7, R0
  AND     R7, R7, #7
- TST     R0, #8
+ TST     R0, #0x8
  ORRNE   R7, R7, #0x10
- AND     R1, R1, #0xC
+ AND     R1, R1, #0xc
  ORR     R7, R7, R1, LSL #3
- TST     R2, #4
- ORRNE   R7, R7, #8
- TST     R2, #8
+ TST     R2, #0x4
+ ORRNE   R7, R7, #0x8
+ TST     R2, #0x8
  ORRNE   R7, R7, #0x80
  ORR     R7, R7, #0x001D0000
  LDMFD   R13!, {R0-R2, R6}
@@ -741,17 +741,17 @@ sub_893C:
 BounceParticle:
  MOV     R1, R9
  CMP     R9, #SEA_LEVEL
- BEQ     sub_8A34
+ BEQ     SplashParticleIntoSea
  TST     R7, #0x00080000
  BEQ     DeleteParticleData
  TST     R7, #0x01000000
- BNE     sub_8A28
+ BNE     AddSmallExplosionToBuffer
  MOV     R3, R3, ASR #1
  MOV     R4, R4, ASR #1
  MOV     R5, R5, ASR #1
  RSB     R4, R4, #0
  MOV     PC, R14
-sub_89C8:
+ProcessObjectDestruction:
  SUB     R8, R9, R1
  CMP     R8, #0x01800000
  MOVHS   PC, R14
@@ -765,32 +765,32 @@ sub_89C8:
  LDRB    R8, [R14]
  CMP     R8, #0xFF
  LDREQ   PC, [R11, #objectType]
- CMP     R8, #0xC
- BHS     sub_8A28
- ADD     R8, R8, #0xC
+ CMP     R8, #12
+ BHS     AddSmallExplosionToBuffer
+ ADD     R8, R8, #12
  STRB    R8, [R14]
  TST     R7, #0x00020000
  LDREQ   R8, [R11, #currentScore]
  ADDEQ   R8, R8, #20
  STREQ   R8, [R11, #currentScore]
- MOV     R8, #0x14
- BL      sub_8CBC
+ MOV     R8, #20
+ BL      AddExplosionToBuffer
  B       DeleteParticleData
-sub_8A28:
+AddSmallExplosionToBuffer:
  MOV     R8, #3
- BL      sub_8CBC
+ BL      AddExplosionToBuffer
  B       DeleteParticleData
-sub_8A34:
+SplashParticleIntoSea:
  TST     R7, #0x00040000
  BEQ     DeleteParticleData
  TST     R7, #0x00800000
- MOVNE   R8, #0x41
+ MOVNE   R8, #65
  MOVEQ   R8, #4
  SUB     R1, R1, #0x00100000
-lab_8A4C:
- BL      sub_8C58
+psea1:
+ BL      AddSplashParticleToBuffer
  SUBS    R8, R8, #1
- BNE     lab_8A4C
+ BNE     psea1
 DeleteParticleData:
  LDR     R8, [R11, #particleEnd]
  SUB     R8, R8, #8*4
@@ -808,13 +808,13 @@ AddBulletParticleToBuffer:
  B       StoreParticleData
 AddExhaustParticleToBuffer:
  STMFD   R13!, {R8, R14}
- B       AddRandomParticleToBuffer
+ B       AddMovingParticleToBuffer
 AddStaticParticleToBuffer:
  MOV     R4, #0
 AddFallingParticleToBuffer:
  MOV     R3, #0
  MOV     R5, #0
-AddRandomParticleToBuffer:
+AddMovingParticleToBuffer:
  STMFD   R13!, {R0-R1}
  BL      GetRandomNumbers
  ADD     R3, R3, R0, ASR R8
@@ -844,7 +844,7 @@ InitialiseParticleData:
  STR     R1, [R0, #7*4]
  STR     R1, [R11, #particleCount]
  MOV     PC, R14
-sub_8B0C:
+AddSmokeParticleToBuffer:
  STMFD   R13!, {R0-R2, R8, R14}
  BL      GetRandomNumbers
  AND     R0, R0, #7
@@ -852,23 +852,23 @@ sub_8B0C:
  MOV     R1, R0
  MOV     R2, R0
  ORR     R7, R1, R2
- AND     R7, R7, #3
+ AND     R7, R7, #0x3
  ORR     R7, R7, R0
  AND     R7, R7, #7
- TST     R0, #8
+ TST     R0, #0x8
  ORRNE   R7, R7, #0x10
- AND     R1, R1, #0xC
+ AND     R1, R1, #0xc
  ORR     R7, R7, R1, LSL #3
- TST     R2, #4
- ORRNE   R7, R7, #8
- TST     R2, #8
+ TST     R2, #0x4
+ ORRNE   R7, R7, #0x8
+ TST     R2, #0x8
  ORRNE   R7, R7, #0x80
  ORR     R7, R7, #0x00080000
- MVN     R4, #0x80000
+ MVN     R4, #0x00080000
  LDMFD   R13!, {R0-R2}
- MOV     R9, #0x19
- MOV     R8, #0xD
- MOV     R6, #0xF
+ MOV     R9, #25
+ MOV     R8, #13
+ MOV     R6, #15
  B       AddFallingParticleToBuffer
 sub_8B70:
  STMFD   R13!, {R0-R2, R8, R14}
@@ -880,22 +880,22 @@ sub_8B70:
  ADD     R1, R1, #2
  ADD     R2, R2, #4
  ORR     R7, R1, R2
- AND     R7, R7, #3
+ AND     R7, R7, #0x3
  ORR     R7, R7, R0
  AND     R7, R7, #7
- TST     R0, #8
+ TST     R0, #0x8
  ORRNE   R7, R7, #0x10
- AND     R1, R1, #0xC
+ AND     R1, R1, #0xc
  ORR     R7, R7, R1, LSL #3
- TST     R2, #4
- ORRNE   R7, R7, #8
- TST     R2, #8
+ TST     R2, #0x4
+ ORRNE   R7, R7, #0x8
+ TST     R2, #0x8
  ORRNE   R7, R7, #0x80
  ORR     R7, R7, #0x001C0000
  LDMFD   R13!, {R0-R2}
- MOV     R9, #0x1A
- MOV     R8, #0xA
- MOV     R6, #0xF
+ MOV     R9, #26
+ MOV     R8, #10
+ MOV     R6, #15
  B       AddStaticParticleToBuffer
 DropARockFromTheSky:
  STMFD   R13!, {R0-R2, R8, R14}
@@ -907,16 +907,16 @@ DropARockFromTheSky:
  ADD     R1, R1, #2
  ADD     R2, R2, #4
  ORR     R7, R1, R2
- AND     R7, R7, #3
+ AND     R7, R7, #0x3
  ORR     R7, R7, R0
  AND     R7, R7, #7
- TST     R0, #8
+ TST     R0, #0x8
  ORRNE   R7, R7, #0x10
- AND     R1, R1, #0xC
+ AND     R1, R1, #0xc
  ORR     R7, R7, R1, LSL #3
- TST     R2, #4
- ORRNE   R7, R7, #8
- TST     R2, #8
+ TST     R2, #0x4
+ ORRNE   R7, R7, #0x8
+ TST     R2, #0x8
  ORRNE   R7, R7, #0x80
  ORR     R7, R7, #0x00FE0000
  LDMFD   R13!, {R0-R2}
@@ -924,14 +924,14 @@ DropARockFromTheSky:
  MOV     R8, #0xA
  MOV     R6, #0xAA
  B       AddStaticParticleToBuffer
-sub_8C40:
+AddSparkParticleToBuffer:
  STMFD   R13!, {R8, R14}
  MOV     R7, #0x001D0000
- MOV     R9, #0x1D
+ MOV     R9, #29
  MOV     R8, #8
  MOV     R6, #8
  B       AddStaticParticleToBuffer
-sub_8C58:
+AddSplashParticleToBuffer:
  STMFD   R13!, {R0-R2, R8, R14}
  BL      GetRandomNumbers
  AND     R2, R0, #3
@@ -940,16 +940,16 @@ sub_8C58:
  ADD     R0, R0, #8
  MOV     R1, R0
  ORR     R7, R1, R2
- AND     R7, R7, #3
+ AND     R7, R7, #0x3
  ORR     R7, R7, R0
  AND     R7, R7, #7
- TST     R0, #8
+ TST     R0, #0x8
  ORRNE   R7, R7, #0x10
- AND     R1, R1, #0xC
+ AND     R1, R1, #0xc
  ORR     R7, R7, R1, LSL #3
- TST     R2, #4
- ORRNE   R7, R7, #8
- TST     R2, #8
+ TST     R2, #0x4
+ ORRNE   R7, R7, #0x8
+ TST     R2, #0x8
  ORRNE   R7, R7, #0x80
  ORR     R7, R7, #0x00100000
  LDMFD   R13!, {R0-R2}
@@ -957,15 +957,15 @@ sub_8C58:
  MOV     R8, #0xA
  MOV     R6, #0x14
  B       AddStaticParticleToBuffer
-sub_8CBC:
+AddExplosionToBuffer:
  STMFD   R13!, {R3-R9, R14}
-lab_8CC0:
- BL      sub_8C40
+expl1:
+ BL      AddSparkParticleToBuffer
  BL      sub_8B70
- BL      sub_8B0C
- BL      sub_8C40
+ BL      AddSmokeParticleToBuffer
+ BL      AddSparkParticleToBuffer
  SUBS    R8, R8, #1
- BPL     lab_8CC0
+ BPL     expl1
  LDMFD   R13!, {R3-R9, PC}
 sub_8CDC:
  STMFD   R13!, {R14}
@@ -974,7 +974,7 @@ sub_8CDC:
  MOV     R1, #0
  LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #0x06000000
- BL      sub_8CBC
+ BL      AddExplosionToBuffer
  LDMFD   R13!, {PC}
 sub_8CFC:
  STMFD   R13!, {R6-R9, R14}
@@ -984,7 +984,7 @@ sub_8CFC:
  LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #0x06000000
 lab_8D14:
- BL      sub_8C40
+ BL      AddSparkParticleToBuffer
  SUBS    R8, R8, #1
  BPL     lab_8D14
  LDMFD   R13!, {R6-R9, PC}
@@ -1098,7 +1098,7 @@ dobs6:
  MOV     R0, R8
  MOV     R2, R9
  SUB     R1, R1, #0x00C00000
- BL      sub_8B0C
+ BL      AddSmokeParticleToBuffer
  LDMFD   R13!, {R0-R7, R9}
  B       dobs5
 objectPlayerAddr:
