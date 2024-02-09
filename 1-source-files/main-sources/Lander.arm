@@ -103,7 +103,7 @@
  zObject = &08                      \ The z-coordinate of the object currently
                                     \ being drawn
 
-                                    \ &0C to &2C appear to be unused ???
+                                    \ Offsets &0C to &2C appear to be unused
 
  rotationMatrix = &30               \ The rotation matrix of the object
                                     \ currently being drawn (i.e. the matrix
@@ -137,7 +137,7 @@
  zVertex = &5C                      \ The z-coordinate of the vertex being
                                     \ processed, relative to the object's origin
 
-                                    \ &60 appears to be unused ???
+                                    \ Offset &60 appears to be unused
 
  xVertexRotated = &64               \ The x-coordinate of the vertex after being
                                     \ rotated by the object's rotation matrix
@@ -148,7 +148,7 @@
  zVertexRotated = &6C               \ The z-coordinate of the vertex after being
                                     \ rotated by the object's rotation matrix
 
-                                    \ &70 appears to be unused ???
+                                    \ Offset &70 appears to be unused
 
  xCoord = &74                       \ The x-coordinate of the vertex being
                                     \ processed, in the game's 3D coordinate
@@ -162,7 +162,7 @@
                                     \ processed, in the game's 3D coordinate
                                     \ system
 
-                                    \ &80 appears to be unused ???
+                                    \ Offset &80 appears to be unused
 
  xObjectScaled = &84                \ The x-coordinate of the vertex being
                                     \ processed, scaled as high as possible
@@ -173,7 +173,7 @@
  zObjectScaled = &8C                \ The z-coordinate of the vertex being
                                     \ processed, scaled as high as possible
 
-                                    \ &90 appears to be unused ???
+                                    \ Offset &90 appears to be unused
 
  xPlayer = &94                      \ The x-coordinate of the player's ship
 
@@ -196,12 +196,16 @@
  zThrust = &B4                      \ The z-coordinate of the ship's thrust
                                     \ vector
 
+                                    \ Offsets &B8 to &C0 appear to be unused
+
  previousColumn = &C4               \ The corner coordinates of the previous
                                     \ column while working along a row from left
                                     \ to right
 
  tileCornerRow = &E4                \ The number of the landscape tile corner
                                     \ row that is currently being processed
+
+                                    \ Offset &E8 appears to be unused
 
  unusedConfig = &F0                 \ Storage for the first configuration value
                                     \ in the landscapeConfig table, which is
@@ -214,6 +218,8 @@
                                     \ a tile corner row when drawing the
                                     \ landscape, so we can trigger actions
                                     \ accordingly
+
+                                    \ Offset &FC appears to be unused
 
  altitude = &100                    \ The altitude of the landscape at the
                                     \ most recently calculated coordinate
@@ -301,7 +307,6 @@
                                     \ matrix, and which is determined by the
                                     \ angle of the mouse from the centre point
 
-
  shipPitch = &158                   \ The pitch of the player's ship, which is
                                     \ angle a in the rotation matrix, and which
                                     \ is determined by the distance of the mouse
@@ -325,7 +330,7 @@
                                     \ where rows run from left to right across
                                     \ the screen (this is a relative coordinate)
 
-                                    \ &16C appears to be unused ???
+                                    \ Offset &16C appears to be unused
 
  xLandscapeCol = &170               \ The x-coordinate of the far-left corner
                                     \ of the column (i.e. tile) that we are
@@ -345,7 +350,7 @@
                                     \ where columns run in and out of the screen
                                     \ (this is a relative coordinate)
 
-                                    \ &17C to &1FC appear to be unused ???
+                                    \ Offsets &17C to &1FC appear to be unused
 
  stringBuffer = &200                \ A string buffer that's used when printing
                                     \ the scores
@@ -2641,7 +2646,7 @@ ENDIF
  ADD     R2, R2, #TILE_SIZE_20      \ Move the coordinate back by 20 tiles, so
                                     \ (R0, R2) contains the coordinate of the
                                     \ particle relative to the back-centre point
-                                    \ of the landscape ???
+                                    \ of the landscape
 
  LDR     R8, [R11, #yCamera]        \ Set R1 = R1 - yCamera
  SUB     R1, R1, R8                 \        = y - yCamera
@@ -2846,6 +2851,7 @@ ENDIF
 \
 \   R7                              Particle flags for a fading colour particle
 \
+\                                     * Bits 0-7   = particle colour
 \                                     * Bit 16 set = colour fades white to red
 \                                     * Bit 18 set = splash on impact with sea
 \                                     * Bit 19 set = bounce on ground
@@ -3089,6 +3095,14 @@ ENDIF
 \   Category: Particles
 \    Summary: Add a small explosion to the particle data buffer
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Explosion coordinates
+\
+\   R7                              Particle flags
+\
 \ ******************************************************************************
 
 .AddSmallExplosionToBuffer
@@ -3115,12 +3129,7 @@ ENDIF
 \
 \   (R0, R1, R2)                    Particle coordinates (on the sea's surface)
 \
-\   (R3, R4, R5)                    Particle velocity
-\
 \   R7                              Particle flags
-\
-\   R9                              The altitude of the landscape directly below
-\                                   the particle
 \
 \ ******************************************************************************
 
@@ -3207,6 +3216,8 @@ ENDIF
 \
 \   (R0, R1, R2)                    Particle coordinate
 \
+\   (R3, R4, R5)                    Particle velocity
+\
 \   R6                              Particle existence counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
@@ -3249,6 +3260,8 @@ ENDIF
 \ Arguments:
 \
 \   (R0, R1, R2)                    Particle coordinate
+\
+\   (R3, R4, R5)                    Particle velocity
 \
 \   R6                              Particle existence counter (i.e. how many
 \                                   iterations around the main loop before the
@@ -3686,7 +3699,14 @@ ENDIF
 \       Name: AddDebrisParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: ???
+\    Summary: Add a debris particle to the particle data buffer, which is a
+\             purple-brownish-green particle that bounces out of an explosion
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinates
 \
 \ ******************************************************************************
 
@@ -3724,7 +3744,7 @@ ENDIF
                                     \ to 7, to use in the blue channel
 
                                     \ This sets the channels to a randomly
-                                    \ purple-brownish colour
+                                    \ purple-brownish-green colour
 
                                     \ We now build a VIDC colour number in R7
                                     \ by combining the three channels into one
@@ -3845,7 +3865,7 @@ ENDIF
                                     \ to 7, to use in the blue channel
 
                                     \ This sets the channels to a randomly
-                                    \ purple-brownish colour
+                                    \ purple-brownish-green colour
 
                                     \ We now build a VIDC colour number in R7
                                     \ by combining the three channels into one
@@ -3929,6 +3949,12 @@ ENDIF
 \    Summary: Add a spark particle to the particle data buffer that fades from
 \             white-hot to red over time
 \
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinates
+\
 \ ******************************************************************************
 
 .AddSparkParticleToBuffer
@@ -3968,6 +3994,12 @@ ENDIF
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a splash particle to the particle data buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinates
 \
 \ ******************************************************************************
 
@@ -4096,8 +4128,8 @@ ENDIF
                                     \ buffer (one that fades from white to red)
 
  BL      AddDebrisParticleToBuffer  \ Add a spark particle to the particle data
-                                    \ buffer (a purple-brown particle that flies
-                                    \ out and bounces on the ground)
+                                    \ buffer (a purple-brownish-green particle
+                                    \ that flies out and bounces on the ground)
 
  BL      AddSmokeParticleToBuffer   \ Add a smoke particle to the particle data
                                     \ buffer (a grey particle that slowly rises)
@@ -4189,14 +4221,14 @@ ENDIF
  LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
  SUB     R2, R2, #&06000000
 
-.lab_8D14
+.spcl1
 
  BL      AddSparkParticleToBuffer   \ Add a spark particle to the particle data
                                     \ buffer (one that fades from white to red)
 
  SUBS    R8, R8, #1                 \ Decrement the particle counter in R8
 
- BPL     lab_8D14                   \ Loop back until we have drawn all R8
+ BPL     spcl1                      \ Loop back until we have drawn all R8
                                     \ particles
 
  LDMFD   R13!, {R6-R9, PC}          \ Retrieve the registers that we stored on
@@ -4354,10 +4386,11 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawObjects
+\       Name: DrawObjects (Part 1 of 3)
 \       Type: Subroutine
 \   Category: 3D objects
-\    Summary: Draw all the objects in the visible portion of the object map
+\    Summary: Draw all the objects in the visible portion of the object map,
+\             starting by working our way through the map looking for objects
 \
 \ ******************************************************************************
 
@@ -4483,6 +4516,15 @@ ENDIF
  LDMFD   R13!, {R5-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
+\ ******************************************************************************
+\
+\       Name: DrawObjects (Part 2 of 3)
+\       Type: Subroutine
+\   Category: 3D objects
+\    Summary: Draw the object that we have found on the object map
+\
+\ ******************************************************************************
+
 .dobs4
 
                                     \ If we get here then there is an object at
@@ -4531,7 +4573,7 @@ ENDIF
  ADD     R2, R2, #TILE_SIZE_20      \ Move the coordinate back by 20 tiles, so
                                     \ (R0, R2) contains the coordinate of the
                                     \ object relative to the back-centre point
-                                    \ of the landscape ???
+                                    \ of the landscape
 
  LDR     R14, [R11, #yCamera]       \ Set R1 = R1 - yCamera
  SUB     R1, R1, R14                \        = y - yCamera
@@ -4552,6 +4594,15 @@ ENDIF
 
  B       dobs3                      \ Jump back to dobs3 to move on to the next
                                     \ object
+
+\ ******************************************************************************
+\
+\       Name: DrawObjects (Part 3 of 3)
+\       Type: Subroutine
+\   Category: 3D objects
+\    Summary: Draw a destroyed object that we have found on the object map
+\
+\ ******************************************************************************
 
 .dobs6
 
@@ -4619,10 +4670,10 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawObject (Part 1 of 3)
+\       Name: DrawObject (Part 1 of 5)
 \       Type: Subroutine
 \   Category: 3D objects
-\    Summary: Draw a 3D object
+\    Summary: Draw a 3D object and its shadow
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4759,10 +4810,10 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawObject (Part 2 of 3)
+\       Name: DrawObject (Part 2 of 5)
 \       Type: Subroutine
 \   Category: 3D objects
-\    Summary: Draw a 3D object: Process the object's vertices
+\    Summary: Process the object's vertices
 \
 \ ******************************************************************************
 
@@ -4897,10 +4948,10 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawObject (Part 3 of 3)
+\       Name: DrawObject (Part 3 of 5)
 \       Type: Subroutine
 \   Category: 3D objects
-\    Summary: Draw a 3D object: Draw the object's faces
+\    Summary: Calculate the visibility of each of the object's faces
 \
 \ ******************************************************************************
 
@@ -4995,6 +5046,15 @@ ENDIF
                                     \ the stack so they can be retrieved at
                                     \ dobj5 after the face has been processed
 
+\ ******************************************************************************
+\
+\       Name: DrawObject (Part 4 of 5)
+\       Type: Subroutine
+\   Category: 3D objects
+\    Summary: Draw the shadow for each of the object's faces
+\
+\ ******************************************************************************
+
  CMP     R1, #0                     \ If R1 is positive, then the y-coordinate
  BPL     dobj4                      \ of the rotated normal vector is positive,
                                     \ which means it is pointing down, so jump
@@ -5064,6 +5124,15 @@ ENDIF
 
  LDMFD   R13!, {R3, R9, R11}        \ Retrieve the registers that we stored on
                                     \ the stack
+
+\ ******************************************************************************
+\
+\       Name: DrawObject (Part 5 of 5)
+\       Type: Subroutine
+\   Category: 3D objects
+\    Summary: Draw each of the object's faces
+\
+\ ******************************************************************************
 
 .dobj4
 
@@ -6036,12 +6105,12 @@ ENDIF
  ORR     R0, R0, #&01000000
  MOV     R4, #0
 
-.lab_9498
+.rmat2
 
  MOV     R1, R1, LSR #1             \ This is the second part of the algorithm,
  ADDHS   R4, R4, R1                 \ so we now have:
  MOVS    R0, R0, LSL #1             \
- BNE     lab_9498                   \    R4 = R0 * R1
+ BNE     rmat2                      \    R4 = R0 * R1
  MOV     R4, R4, LSR #1             \       = sin(a) * sin(b)
  TEQ     R14, #0
  RSBMI   R4, R4, #0
@@ -6071,12 +6140,12 @@ ENDIF
  ORR     R1, R1, #&01000000
  MOV     R4, #0
 
-.lab_94E4
+.rmat3
 
  MOV     R2, R2, LSR #1             \ This is the second part of the algorithm,
  ADDHS   R4, R4, R2                 \ so we now have:
  MOVS    R1, R1, LSL #1             \
- BNE     lab_94E4                   \   R4 = R1 * R2
+ BNE     rmat3                      \   R4 = R1 * R2
  MOV     R4, R4, LSR #1             \      = sin(b) * cos(a)
  TEQ     R14, #0                    \      = cos(a) * sin(b)
  RSBMI   R4, R4, #0
@@ -6097,12 +6166,12 @@ ENDIF
  ORR     R0, R0, #&01000000
  MOV     R4, #0
 
-.lab_9530
+.rmat4
 
  MOV     R3, R3, LSR #1             \ This is the second part of the algorithm,
  ADDHS   R4, R4, R3                 \ so we now have:
  MOVS    R0, R0, LSL #1             \
- BNE     lab_9530                   \   R4 = R0 * R3
+ BNE     rmat4                      \   R4 = R0 * R3
  MOV     R4, R4, LSR #1             \      = sin(a) * cos(b)
  TEQ     R14, #0
  RSBMI   R4, R4, #0
@@ -6138,10 +6207,11 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: GetMouseInPolarCoordinates
+\       Name: GetMouseInPolarCoordinates (Part 1 of 2)
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: Convert the mouse x- and y-coordinates into polar coordinates
+\    Summary: Convert the mouse x- and y-coordinates into polar coordinates,
+\             starting by calculating the polar angle
 \
 \ ------------------------------------------------------------------------------
 \
@@ -6334,8 +6404,17 @@ ENDIF
                                     \ yMouse
 
                                     \ We now have the angle for our polar
-                                    \ coordinate in R1, so now we need to
+                                    \ coordinate in R1, so next we need to
                                     \ calculate the distance
+
+\ ******************************************************************************
+\
+\       Name: GetMouseInPolarCoordinates (Part 2 of 2)
+\       Type: Subroutine
+\   Category: Maths (Geometry)
+\    Summary: Calculate the polar distance
+\
+\ ******************************************************************************
 
  LDMFD   R13!, {R0, R2}             \ Retrieve the values we put on the stack
                                     \ earlier, so:
@@ -6449,7 +6528,7 @@ ENDIF
 \       Name: ProjectParticleOntoScreen
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: ???
+\    Summary: Project a 3D particle coordinate onto the screen
 \
 \ ******************************************************************************
 
@@ -6474,11 +6553,11 @@ ENDIF
 
  MOV     R6, #0                     \ 
 
-.lab_96A8
+.ppar1
 
  MOVS    R5, R5, LSL #1             \ 
  ADDPL   R6, R6, #1                 \ 
- BPL     lab_96A8                   \ 
+ BPL     ppar1                      \ 
 
  MOV     R2, R2, LSL R6             \ 
  MOV     R3, R3, LSL R6             \ 
@@ -6495,27 +6574,27 @@ ENDIF
  MOV     R6, #0                     \ Divide R6 = R4 / R7
  MOV     R14, #&200                 \ 
 
-.lab_96DC
+.ppar2
 
  MOVS    R4, R4, LSL #1             \ 
  CMPLO   R4, R7                     \ 
  SUBHS   R4, R4, R7                 \ 
  ORRHS   R6, R6, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     lab_96DC                   \ 
+ BLO     ppar2                      \ 
  MOVS    R6, R6, LSL #22            \ End divide
 
  MOV     R5, #0                     \ Divide R6 = R3 / R2
  MOV     R14, #&200                 \ 
 
-.lab_9700
+.ppar3
 
  MOVS    R3, R3, LSL #1             \ 
  CMPLO   R3, R2                     \ 
  SUBHS   R3, R3, R2                 \ 
  ORRHS   R5, R5, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     lab_9700                   \ 
+ BLO     ppar3                      \ 
  MOVS    R5, R5, LSL #22            \ End divide
 
  MOV     R5, R5, LSR #24            \ 
@@ -6539,7 +6618,7 @@ ENDIF
 \       Name: ProjectVertexOntoScreen
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: ???
+\    Summary: Project a vertex coordinate from a 3D object onto the screen
 \
 \ ******************************************************************************
 
@@ -6568,11 +6647,11 @@ ENDIF
 
  MOV     R6, #0                     \ 
 
-.lab_9788
+.pver1
 
  MOVS    R5, R5, LSL #1             \ 
  ADDPL   R6, R6, #1                 \ 
- BPL     lab_9788                   \ 
+ BPL     pver1                      \ 
 
  MOV     R2, R2, LSL R6             \ 
  MOV     R3, R3, LSL R6             \ 
@@ -6580,34 +6659,34 @@ ENDIF
 
  CMP     R2, R3                     \ 
  CMPHS   R2, R4                     \ 
- BLO     lab_9820                   \ 
+ BLO     pver4                      \ 
 
  MOV     R7, R2                     \ 
 
  MOV     R6, #0                     \ Divide R6 = R4 / R7
  MOV     R14, #&100                 \ 
 
-.lab_97B8
+.pver2
 
  MOVS    R4, R4, LSL #1             \ 
  CMPLO   R4, R7                     \ 
  SUBHS   R4, R4, R7                 \ 
  ORRHS   R6, R6, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     lab_97B8                   \ 
+ BLO     pver2                      \ 
  MOVS    R6, R6, LSL #23            \ End divide
 
  MOV     R5, #0                     \ Divide R5 = R3 / R2
  MOV     R14, #&200                 \ 
 
-.lab_97DC
+.pver3
 
  MOVS    R3, R3, LSL #1             \ 
  CMPLO   R3, R2                     \ 
  SUBHS   R3, R3, R2                 \ 
  ORRHS   R5, R5, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     lab_97DC                   \ 
+ BLO     pver3                   \ 
  MOVS    R5, R5, LSL #22            \ End divide
 
  MOV     R5, R5, LSR #24            \ 
@@ -6624,7 +6703,7 @@ ENDIF
  CMN     R0, #0                     \ 
  LDMFD   R13!, {R5-R7, PC}          \ 
 
-.lab_9820
+.pver4
 
  MOV     R5, #&18                   \ 
 
@@ -6632,14 +6711,14 @@ ENDIF
  MOVHS   R6, R3, LSR #1             \ 
  MOVLO   R6, R3, LSR #1             \ 
 
-.lab_9830
+.pver5
 
  CMP     R2, R6                     \ 
  ADDLO   R5, R5, #1                 \ 
 
  MOV     R6, R6, LSR #1             \ 
 
- BLO     lab_9830                   \ 
+ BLO     pver5                      \ 
 
  MOV     R2, R2, LSR #23            \ 
  MOV     R3, R3, LSR R5             \ 
@@ -6653,14 +6732,14 @@ ENDIF
  MOV     R4, R4, LSL #24            \ 
  MOV     R7, R7, LSL #24            \ 
 
-.lab_9864
+.pver6
 
  MOVS    R4, R4, LSL #1             \ 
  CMPLO   R4, R7                     \ 
  SUBHS   R4, R4, R7                 \ 
  ORRHS   R6, R6, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     lab_9864                   \ 
+ BLO     pver6                      \ 
  MOVS    R6, R6, LSL #24            \ End divide
 
  MOV     R5, #0                     \ Divide R5 = R3 / R2 (both << 22)
@@ -6668,14 +6747,14 @@ ENDIF
  MOV     R3, R3, LSL #22            \ 
  MOV     R2, R2, LSL #22            \ 
 
-.lab_9890
+.pver7
 
  MOVS    R3, R3, LSL #1             \ 
  CMPLO   R3, R2                     \ 
  SUBHS   R3, R3, R2                 \ 
  ORRHS   R5, R5, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     lab_9890                   \ 
+ BLO     pver7                      \ 
  MOVS    R5, R5, LSL #22            \ End divide
 
  LDMFD   R13!, {R14}                \ 
@@ -9344,7 +9423,7 @@ ENDIF
 \
 \       Name: stackPointerOnEntry
 \       Type: Variable
-\   Category: ???
+\   Category: Start and end
 \    Summary: Stores the stack pointer from when the game was run
 \
 \ ******************************************************************************
@@ -11253,8 +11332,8 @@ ENDIF
 \
 \       Name: divisionTable
 \       Type: Variable
-\   Category: ???
-\    Summary: ???
+\   Category: Maths (Arithmetic)
+\    Summary: Division lookup tables
 \
 \ ------------------------------------------------------------------------------
 \

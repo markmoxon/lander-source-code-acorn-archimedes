@@ -1010,10 +1010,10 @@ Source: "3-assembled-output/Lander.arm"
 00:00008D08 0010A0E3        	   984:  MOV     R1, #0
 00:00008D0C 44219BE5        	   985:  LDR     R2, [R11, #zCamera]
 00:00008D10 062442E2        	   986:  SUB     R2, R2, #0x06000000
-                            	   987: lab_8D14:
+                            	   987: spcl1:
 00:00008D14 C9FFFFEB        	   988:  BL      AddSparkParticleToBuffer
 00:00008D18 018058E2        	   989:  SUBS    R8, R8, #1
-00:00008D1C FCFFFF5A        	   990:  BPL     lab_8D14
+00:00008D1C FCFFFF5A        	   990:  BPL     spcl1
 00:00008D20 C083BDE8        	   991:  LDMFD   R13!, {R6-R9, PC}
                             	   992: SpawnRock:
 00:00008D24 C0432DE9        	   993:  STMFD   R13!, {R6-R9, R14}
@@ -1532,11 +1532,11 @@ Source: "3-assembled-output/Lander.arm"
 00:0000948C FE0400E2        	  1506:  AND     R0, R0, #0xFE000000
 00:00009490 010480E3        	  1507:  ORR     R0, R0, #0x01000000
 00:00009494 0040A0E3        	  1508:  MOV     R4, #0
-                            	  1509: lab_9498:
+                            	  1509: rmat2:
 00:00009498 A110A0E1        	  1510:  MOV     R1, R1, LSR #1
 00:0000949C 01408420        	  1511:  ADDHS   R4, R4, R1
 00:000094A0 8000B0E1        	  1512:  MOVS    R0, R0, LSL #1
-00:000094A4 FBFFFF1A        	  1513:  BNE     lab_9498
+00:000094A4 FBFFFF1A        	  1513:  BNE     rmat2
 00:000094A8 A440A0E1        	  1514:  MOV     R4, R4, LSR #1
 00:000094AC 00003EE3        	  1515:  TEQ     R14, #0
 00:000094B0 00406442        	  1516:  RSBMI   R4, R4, #0
@@ -1552,11 +1552,11 @@ Source: "3-assembled-output/Lander.arm"
 00:000094D8 FE1401E2        	  1526:  AND     R1, R1, #0xFE000000
 00:000094DC 011481E3        	  1527:  ORR     R1, R1, #0x01000000
 00:000094E0 0040A0E3        	  1528:  MOV     R4, #0
-                            	  1529: lab_94E4:
+                            	  1529: rmat3:
 00:000094E4 A220A0E1        	  1530:  MOV     R2, R2, LSR #1
 00:000094E8 02408420        	  1531:  ADDHS   R4, R4, R2
 00:000094EC 8110B0E1        	  1532:  MOVS    R1, R1, LSL #1
-00:000094F0 FBFFFF1A        	  1533:  BNE     lab_94E4
+00:000094F0 FBFFFF1A        	  1533:  BNE     rmat3
 00:000094F4 A440A0E1        	  1534:  MOV     R4, R4, LSR #1
 00:000094F8 00003EE3        	  1535:  TEQ     R14, #0
 00:000094FC 00406442        	  1536:  RSBMI   R4, R4, #0
@@ -1572,11 +1572,11 @@ Source: "3-assembled-output/Lander.arm"
 00:00009524 FE0400E2        	  1546:  AND     R0, R0, #0xFE000000
 00:00009528 010480E3        	  1547:  ORR     R0, R0, #0x01000000
 00:0000952C 0040A0E3        	  1548:  MOV     R4, #0
-                            	  1549: lab_9530:
+                            	  1549: rmat4:
 00:00009530 A330A0E1        	  1550:  MOV     R3, R3, LSR #1
 00:00009534 03408420        	  1551:  ADDHS   R4, R4, R3
 00:00009538 8000B0E1        	  1552:  MOVS    R0, R0, LSL #1
-00:0000953C FBFFFF1A        	  1553:  BNE     lab_9530
+00:0000953C FBFFFF1A        	  1553:  BNE     rmat4
 00:00009540 A440A0E1        	  1554:  MOV     R4, R4, LSR #1
 00:00009544 00003EE3        	  1555:  TEQ     R14, #0
 00:00009548 00406442        	  1556:  RSBMI   R4, R4, #0
@@ -1675,10 +1675,10 @@ Source: "3-assembled-output/Lander.arm"
 00:0000969C 025085E1        	  1649:  ORR     R5, R5, R2
 00:000096A0 015085E3        	  1650:  ORR     R5, R5, #1
 00:000096A4 0060A0E3        	  1651:  MOV     R6, #0
-                            	  1652: lab_96A8:
+                            	  1652: ppar1:
 00:000096A8 8550B0E1        	  1653:  MOVS    R5, R5, LSL #1
 00:000096AC 01608652        	  1654:  ADDPL   R6, R6, #1
-00:000096B0 FCFFFF5A        	  1655:  BPL     lab_96A8
+00:000096B0 FCFFFF5A        	  1655:  BPL     ppar1
 00:000096B4 1226A0E1        	  1656:  MOV     R2, R2, LSL R6
 00:000096B8 1336A0E1        	  1657:  MOV     R3, R3, LSL R6
 00:000096BC 1446A0E1        	  1658:  MOV     R4, R4, LSL R6
@@ -1689,23 +1689,23 @@ Source: "3-assembled-output/Lander.arm"
 00:000096D0 0270A0E1        	  1663:  MOV     R7, R2
 00:000096D4 0060A0E3        	  1664:  MOV     R6, #0
 00:000096D8 02ECA0E3        	  1665:  MOV     R14, #0x200
-                            	  1666: lab_96DC:
+                            	  1666: ppar2:
 00:000096DC 8440B0E1        	  1667:  MOVS    R4, R4, LSL #1
 00:000096E0 07005431        	  1668:  CMPLO   R4, R7
 00:000096E4 07404420        	  1669:  SUBHS   R4, R4, R7
 00:000096E8 0E608621        	  1670:  ORRHS   R6, R6, R14
 00:000096EC AEE0B0E1        	  1671:  MOVS    R14, R14, LSR #1
-00:000096F0 F9FFFF3A        	  1672:  BLO     lab_96DC
+00:000096F0 F9FFFF3A        	  1672:  BLO     ppar2
 00:000096F4 066BB0E1        	  1673:  MOVS    R6, R6, LSL #22
 00:000096F8 0050A0E3        	  1674:  MOV     R5, #0
 00:000096FC 02ECA0E3        	  1675:  MOV     R14, #0x200
-                            	  1676: lab_9700:
+                            	  1676: ppar3:
 00:00009700 8330B0E1        	  1677:  MOVS    R3, R3, LSL #1
 00:00009704 02005331        	  1678:  CMPLO   R3, R2
 00:00009708 02304320        	  1679:  SUBHS   R3, R3, R2
 00:0000970C 0E508521        	  1680:  ORRHS   R5, R5, R14
 00:00009710 AEE0B0E1        	  1681:  MOVS    R14, R14, LSR #1
-00:00009714 F9FFFF3A        	  1682:  BLO     lab_9700
+00:00009714 F9FFFF3A        	  1682:  BLO     ppar3
 00:00009718 055BB0E1        	  1683:  MOVS    R5, R5, LSL #22
 00:0000971C 255CA0E1        	  1684:  MOV     R5, R5, LSR #24
 00:00009720 266CA0E1        	  1685:  MOV     R6, R6, LSR #24
@@ -1735,36 +1735,36 @@ Source: "3-assembled-output/Lander.arm"
 00:0000977C 025085E1        	  1709:  ORR     R5, R5, R2
 00:00009780 015085E3        	  1710:  ORR     R5, R5, #1
 00:00009784 0060A0E3        	  1711:  MOV     R6, #0
-                            	  1712: lab_9788:
+                            	  1712: pver1:
 00:00009788 8550B0E1        	  1713:  MOVS    R5, R5, LSL #1
 00:0000978C 01608652        	  1714:  ADDPL   R6, R6, #1
-00:00009790 FCFFFF5A        	  1715:  BPL     lab_9788
+00:00009790 FCFFFF5A        	  1715:  BPL     pver1
 00:00009794 1226A0E1        	  1716:  MOV     R2, R2, LSL R6
 00:00009798 1336A0E1        	  1717:  MOV     R3, R3, LSL R6
 00:0000979C 1446A0E1        	  1718:  MOV     R4, R4, LSL R6
 00:000097A0 030052E1        	  1719:  CMP     R2, R3
 00:000097A4 04005221        	  1720:  CMPHS   R2, R4
-00:000097A8 1C00003A        	  1721:  BLO     lab_9820
+00:000097A8 1C00003A        	  1721:  BLO     pver4
 00:000097AC 0270A0E1        	  1722:  MOV     R7, R2
 00:000097B0 0060A0E3        	  1723:  MOV     R6, #0
 00:000097B4 01ECA0E3        	  1724:  MOV     R14, #0x100
-                            	  1725: lab_97B8:
+                            	  1725: pver2:
 00:000097B8 8440B0E1        	  1726:  MOVS    R4, R4, LSL #1
 00:000097BC 07005431        	  1727:  CMPLO   R4, R7
 00:000097C0 07404420        	  1728:  SUBHS   R4, R4, R7
 00:000097C4 0E608621        	  1729:  ORRHS   R6, R6, R14
 00:000097C8 AEE0B0E1        	  1730:  MOVS    R14, R14, LSR #1
-00:000097CC F9FFFF3A        	  1731:  BLO     lab_97B8
+00:000097CC F9FFFF3A        	  1731:  BLO     pver2
 00:000097D0 866BB0E1        	  1732:  MOVS    R6, R6, LSL #23
 00:000097D4 0050A0E3        	  1733:  MOV     R5, #0
 00:000097D8 02ECA0E3        	  1734:  MOV     R14, #0x200
-                            	  1735: lab_97DC:
+                            	  1735: pver3:
 00:000097DC 8330B0E1        	  1736:  MOVS    R3, R3, LSL #1
 00:000097E0 02005331        	  1737:  CMPLO   R3, R2
 00:000097E4 02304320        	  1738:  SUBHS   R3, R3, R2
 00:000097E8 0E508521        	  1739:  ORRHS   R5, R5, R14
 00:000097EC AEE0B0E1        	  1740:  MOVS    R14, R14, LSR #1
-00:000097F0 F9FFFF3A        	  1741:  BLO     lab_97DC
+00:000097F0 F9FFFF3A        	  1741:  BLO     pver3
 00:000097F4 055BB0E1        	  1742:  MOVS    R5, R5, LSL #22
 00:000097F8 255CA0E1        	  1743:  MOV     R5, R5, LSR #24
 00:000097FC 266CA0E1        	  1744:  MOV     R6, R6, LSR #24
@@ -1776,16 +1776,16 @@ Source: "3-assembled-output/Lander.arm"
 00:00009814 40106642        	  1750:  RSBMI   R1, R6, #0x40
 00:00009818 000070E3        	  1751:  CMN     R0, #0
 00:0000981C E080BDE8        	  1752:  LDMFD   R13!, {R5-R7, PC}
-                            	  1753: lab_9820:
+                            	  1753: pver4:
 00:00009820 1850A0E3        	  1754:  MOV     R5, #0x18
 00:00009824 040053E1        	  1755:  CMP     R3, R4
 00:00009828 A360A021        	  1756:  MOVHS   R6, R3, LSR #1
 00:0000982C A360A031        	  1757:  MOVLO   R6, R3, LSR #1
-                            	  1758: lab_9830:
+                            	  1758: pver5:
 00:00009830 060052E1        	  1759:  CMP     R2, R6
 00:00009834 01508532        	  1760:  ADDLO   R5, R5, #1
 00:00009838 A660A0E1        	  1761:  MOV     R6, R6, LSR #1
-00:0000983C FBFFFF3A        	  1762:  BLO     lab_9830
+00:0000983C FBFFFF3A        	  1762:  BLO     pver5
 00:00009840 A22BA0E1        	  1763:  MOV     R2, R2, LSR #23
 00:00009844 3335A0E1        	  1764:  MOV     R3, R3, LSR R5
 00:00009848 3445A0E1        	  1765:  MOV     R4, R4, LSR R5
@@ -1795,25 +1795,25 @@ Source: "3-assembled-output/Lander.arm"
 00:00009858 80E0A0E3        	  1769:  MOV     R14, #0x80
 00:0000985C 044CA0E1        	  1770:  MOV     R4, R4, LSL #24
 00:00009860 077CA0E1        	  1771:  MOV     R7, R7, LSL #24
-                            	  1772: lab_9864:
+                            	  1772: pver6:
 00:00009864 8440B0E1        	  1773:  MOVS    R4, R4, LSL #1
 00:00009868 07005431        	  1774:  CMPLO   R4, R7
 00:0000986C 07404420        	  1775:  SUBHS   R4, R4, R7
 00:00009870 0E608621        	  1776:  ORRHS   R6, R6, R14
 00:00009874 AEE0B0E1        	  1777:  MOVS    R14, R14, LSR #1
-00:00009878 F9FFFF3A        	  1778:  BLO     lab_9864
+00:00009878 F9FFFF3A        	  1778:  BLO     pver6
 00:0000987C 066CB0E1        	  1779:  MOVS    R6, R6, LSL #24
 00:00009880 0050A0E3        	  1780:  MOV     R5, #0
 00:00009884 02ECA0E3        	  1781:  MOV     R14, #0x200
 00:00009888 033BA0E1        	  1782:  MOV     R3, R3, LSL #22
 00:0000988C 022BA0E1        	  1783:  MOV     R2, R2, LSL #22
-                            	  1784: lab_9890:
+                            	  1784: pver7:
 00:00009890 8330B0E1        	  1785:  MOVS    R3, R3, LSL #1
 00:00009894 02005331        	  1786:  CMPLO   R3, R2
 00:00009898 02304320        	  1787:  SUBHS   R3, R3, R2
 00:0000989C 0E508521        	  1788:  ORRHS   R5, R5, R14
 00:000098A0 AEE0B0E1        	  1789:  MOVS    R14, R14, LSR #1
-00:000098A4 F9FFFF3A        	  1790:  BLO     lab_9890
+00:000098A4 F9FFFF3A        	  1790:  BLO     pver7
 00:000098A8 055BB0E1        	  1791:  MOVS    R5, R5, LSL #22
 00:000098AC 0040BDE8        	  1792:  LDMFD   R13!, {R14}
 00:000098B0 17E04EE2        	  1793:  SUB     R14, R14, #0x17
@@ -10406,20 +10406,6 @@ initialFuelLevel                 A:0000A580
 initialHighScore                 A:0000A57C
 initialScore                     A:0000A578
 labOffset                        S:0000006C
-lab_8D14                         A:00008D14
-lab_9498                         A:00009498
-lab_94E4                         A:000094E4
-lab_9530                         A:00009530
-lab_96A8                         A:000096A8
-lab_96DC                         A:000096DC
-lab_9700                         A:00009700
-lab_9788                         A:00009788
-lab_97B8                         A:000097B8
-lab_97DC                         A:000097DC
-lab_9820                         A:00009820
-lab_9830                         A:00009830
-lab_9864                         A:00009864
-lab_9890                         A:00009890
 lab_9E20                         A:00009E20
 lab_9E40                         A:00009E40
 lab_9E60                         A:00009E60
@@ -10538,16 +10524,29 @@ pole3                            A:000095D4
 pole4                            A:000095F0
 pole5                            A:00009624
 pole6                            A:00009648
+ppar1                            A:000096A8
+ppar2                            A:000096DC
+ppar3                            A:00009700
 prevAltitude                     S:00000104
 previousColumn                   S:000000C4
 prsb1                            A:000091A0
 prsb2                            A:000091D8
 prsc1                            A:00009140
 psea1                            A:00008A4C
+pver1                            A:00009788
+pver2                            A:000097B8
+pver3                            A:000097DC
+pver4                            A:00009820
+pver5                            A:00009830
+pver6                            A:00009864
+pver7                            A:00009890
 randomSeed1                      A:00009A38
 randomSeed2                      A:00009A3C
 remainingLives                   S:00000134
 rmat1                            A:00009450
+rmat2                            A:00009498
+rmat3                            A:000094E4
+rmat4                            A:00009530
 rotationMatrix                   S:00000030
 screenAddr                       A:00009A6C
 screenBank1Addr                  A:00009D30
@@ -10568,6 +10567,7 @@ sinTableAddr                     A:000091F0
 snew1                            A:0000A78C
 snew2                            A:0000A7A0
 snew3                            A:0000A7E0
+spcl1                            A:00008D14
 squareRootTable                  A:0000CA10
 squareRootTableAddr              A:000091F8
 stack                            S:000121FC
@@ -10624,8 +10624,8 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 OS_WriteC
 00000000 xObject
+00000000 OS_WriteC
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -10644,8 +10644,8 @@ Symbols by value:
 00000048 zNoseV
 0000004C zRoofV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10755,7 +10755,7 @@ Symbols by value:
 00008CC0 expl1
 00008CDC AddShipExplosionToBuffer
 00008CFC AddSparkCloudToBuffer
-00008D14 lab_8D14
+00008D14 spcl1
 00008D24 SpawnRock
 00008D40 DropRocksFromTheSky
 00008D78 objectTypes
@@ -10795,9 +10795,9 @@ Symbols by value:
 000093B4 AddVectorsWithFeedback
 000093E4 CalculateRotationMatrix
 00009450 rmat1
-00009498 lab_9498
-000094E4 lab_94E4
-00009530 lab_9530
+00009498 rmat2
+000094E4 rmat3
+00009530 rmat4
 00009574 GetMouseInPolarCoordinates
 000095AC pole1
 000095CC pole2
@@ -10806,17 +10806,17 @@ Symbols by value:
 00009624 pole5
 00009648 pole6
 00009670 ProjectParticleOntoScreen
-000096A8 lab_96A8
-000096DC lab_96DC
-00009700 lab_9700
+000096A8 ppar1
+000096DC ppar2
+00009700 ppar3
 00009748 ProjectVertexOntoScreen
-00009788 lab_9788
-000097B8 lab_97B8
-000097DC lab_97DC
-00009820 lab_9820
-00009830 lab_9830
-00009864 lab_9864
-00009890 lab_9890
+00009788 pver1
+000097B8 pver2
+000097DC pver3
+00009820 pver4
+00009830 pver5
+00009864 pver6
+00009890 pver7
 000098E4 vmod1
 000098E8 vmod2
 000098EC vmod3

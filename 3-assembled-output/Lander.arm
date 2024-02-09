@@ -984,10 +984,10 @@ AddSparkCloudToBuffer:
  MOV     R1, #0
  LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #0x06000000
-lab_8D14:
+spcl1:
  BL      AddSparkParticleToBuffer
  SUBS    R8, R8, #1
- BPL     lab_8D14
+ BPL     spcl1
  LDMFD   R13!, {R6-R9, PC}
 SpawnRock:
  STMFD   R13!, {R6-R9, R14}
@@ -1506,11 +1506,11 @@ rmat1:
  AND     R0, R0, #0xFE000000
  ORR     R0, R0, #0x01000000
  MOV     R4, #0
-lab_9498:
+rmat2:
  MOV     R1, R1, LSR #1
  ADDHS   R4, R4, R1
  MOVS    R0, R0, LSL #1
- BNE     lab_9498
+ BNE     rmat2
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
@@ -1526,11 +1526,11 @@ lab_9498:
  AND     R1, R1, #0xFE000000
  ORR     R1, R1, #0x01000000
  MOV     R4, #0
-lab_94E4:
+rmat3:
  MOV     R2, R2, LSR #1
  ADDHS   R4, R4, R2
  MOVS    R1, R1, LSL #1
- BNE     lab_94E4
+ BNE     rmat3
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
@@ -1546,11 +1546,11 @@ lab_94E4:
  AND     R0, R0, #0xFE000000
  ORR     R0, R0, #0x01000000
  MOV     R4, #0
-lab_9530:
+rmat4:
  MOV     R3, R3, LSR #1
  ADDHS   R4, R4, R3
  MOVS    R0, R0, LSL #1
- BNE     lab_9530
+ BNE     rmat4
  MOV     R4, R4, LSR #1
  TEQ     R14, #0
  RSBMI   R4, R4, #0
@@ -1649,10 +1649,10 @@ ProjectParticleOntoScreen:
  ORR     R5, R5, R2
  ORR     R5, R5, #1
  MOV     R6, #0
-lab_96A8:
+ppar1:
  MOVS    R5, R5, LSL #1
  ADDPL   R6, R6, #1
- BPL     lab_96A8
+ BPL     ppar1
  MOV     R2, R2, LSL R6
  MOV     R3, R3, LSL R6
  MOV     R4, R4, LSL R6
@@ -1663,23 +1663,23 @@ lab_96A8:
  MOV     R7, R2
  MOV     R6, #0
  MOV     R14, #0x200
-lab_96DC:
+ppar2:
  MOVS    R4, R4, LSL #1
  CMPLO   R4, R7
  SUBHS   R4, R4, R7
  ORRHS   R6, R6, R14
  MOVS    R14, R14, LSR #1
- BLO     lab_96DC
+ BLO     ppar2
  MOVS    R6, R6, LSL #22
  MOV     R5, #0
  MOV     R14, #0x200
-lab_9700:
+ppar3:
  MOVS    R3, R3, LSL #1
  CMPLO   R3, R2
  SUBHS   R3, R3, R2
  ORRHS   R5, R5, R14
  MOVS    R14, R14, LSR #1
- BLO     lab_9700
+ BLO     ppar3
  MOVS    R5, R5, LSL #22
  MOV     R5, R5, LSR #24
  MOV     R6, R6, LSR #24
@@ -1709,36 +1709,36 @@ ProjectVertexOntoScreen:
  ORR     R5, R5, R2
  ORR     R5, R5, #1
  MOV     R6, #0
-lab_9788:
+pver1:
  MOVS    R5, R5, LSL #1
  ADDPL   R6, R6, #1
- BPL     lab_9788
+ BPL     pver1
  MOV     R2, R2, LSL R6
  MOV     R3, R3, LSL R6
  MOV     R4, R4, LSL R6
  CMP     R2, R3
  CMPHS   R2, R4
- BLO     lab_9820
+ BLO     pver4
  MOV     R7, R2
  MOV     R6, #0
  MOV     R14, #0x100
-lab_97B8:
+pver2:
  MOVS    R4, R4, LSL #1
  CMPLO   R4, R7
  SUBHS   R4, R4, R7
  ORRHS   R6, R6, R14
  MOVS    R14, R14, LSR #1
- BLO     lab_97B8
+ BLO     pver2
  MOVS    R6, R6, LSL #23
  MOV     R5, #0
  MOV     R14, #0x200
-lab_97DC:
+pver3:
  MOVS    R3, R3, LSL #1
  CMPLO   R3, R2
  SUBHS   R3, R3, R2
  ORRHS   R5, R5, R14
  MOVS    R14, R14, LSR #1
- BLO     lab_97DC
+ BLO     pver3
  MOVS    R5, R5, LSL #22
  MOV     R5, R5, LSR #24
  MOV     R6, R6, LSR #24
@@ -1750,16 +1750,16 @@ lab_97DC:
  RSBMI   R1, R6, #0x40
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
-lab_9820:
+pver4:
  MOV     R5, #0x18
  CMP     R3, R4
  MOVHS   R6, R3, LSR #1
  MOVLO   R6, R3, LSR #1
-lab_9830:
+pver5:
  CMP     R2, R6
  ADDLO   R5, R5, #1
  MOV     R6, R6, LSR #1
- BLO     lab_9830
+ BLO     pver5
  MOV     R2, R2, LSR #23
  MOV     R3, R3, LSR R5
  MOV     R4, R4, LSR R5
@@ -1769,25 +1769,25 @@ lab_9830:
  MOV     R14, #0x80
  MOV     R4, R4, LSL #24
  MOV     R7, R7, LSL #24
-lab_9864:
+pver6:
  MOVS    R4, R4, LSL #1
  CMPLO   R4, R7
  SUBHS   R4, R4, R7
  ORRHS   R6, R6, R14
  MOVS    R14, R14, LSR #1
- BLO     lab_9864
+ BLO     pver6
  MOVS    R6, R6, LSL #24
  MOV     R5, #0
  MOV     R14, #0x200
  MOV     R3, R3, LSL #22
  MOV     R2, R2, LSL #22
-lab_9890:
+pver7:
  MOVS    R3, R3, LSL #1
  CMPLO   R3, R2
  SUBHS   R3, R3, R2
  ORRHS   R5, R5, R14
  MOVS    R14, R14, LSR #1
- BLO     lab_9890
+ BLO     pver7
  MOVS    R5, R5, LSL #22
  LDMFD   R13!, {R14}
  SUB     R14, R14, #0x17
