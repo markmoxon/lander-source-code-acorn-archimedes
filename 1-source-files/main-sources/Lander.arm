@@ -2032,60 +2032,66 @@ ENDIF
                                     \   (R3, R4, R5) = ???
                                     \
                                     \ We now set the values of R6 to R9 to pass
-                                    \ to the DrawExhaustParticles routine
+                                    \ to the AddExhaustParticleToBuffer routine
 
  MOV     R7, #&001D0000             \ Particle flags from Micro user article?
 
  MOV     R6, #8                     \ Gets a random number added to it in
-                                    \ DrawRandomParticles
+                                    \ AddRandomParticleToBuffer
 
  MOV     R8, #&A                    \ Determines scale of random numbers added
-                                    \ to (R3, R4, R5) in DrawRandomParticles -
-                                    \ some kind of cloud size?
+                                    \ to (R3, R4, R5) - random velocity ???
 
  MOV     R9, #&1D                   \ Determines scale of random number added
                                     \ to R6
 
  STMFD   R13!, {R0-R9}              \ Store R0 to R9 on the stack so we can
                                     \ fetch this set of values before each call
-                                    \ to DrawExhaustParticles
+                                    \ to AddExhaustParticleToBuffer
 
-                                    \ We now call the DrawExhaustParticles
+                                    \ We now call the AddExhaustParticleToBuffer
                                     \ routine eight times if full thrust is
                                     \ engaged, or twice if hover mode is being
                                     \ used (so the exhaust plume is four times
                                     \ denser when full thrust is engaged)
 
- BL      DrawExhaustParticles       \ Call DrawExhaustParticles with the set of
-                                    \ parameters in R0 to R9 to draw the first
-                                    \ set of particles in the exhaust plume
+ BL      AddExhaustParticleToBuffer \ Call AddExhaustParticleToBuffer with the
+                                    \ set of parameters in R0 to R9 to add the
+                                    \ first exhaust plume particle to the
+                                    \ particle data buffer
 
  TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
  LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
- BLNE    DrawExhaustParticles       \ do a second call to DrawExhaustParticles
+ BLNE    AddExhaustParticleToBuffer \ add the second particle to the particle
+                                    \ data buffer
 
  TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
  LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
- BLNE    DrawExhaustParticles       \ do a third call to DrawExhaustParticles
+ BLNE    AddExhaustParticleToBuffer \ add the third particle to the particle
+                                    \ data buffer
 
  TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
  LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
- BLNE    DrawExhaustParticles       \ do a fourth call to DrawExhaustParticles
+ BLNE    AddExhaustParticleToBuffer \ add the fourth particle to the particle
+                                    \ data buffer
 
  TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
  LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
- BLNE    DrawExhaustParticles       \ do a fifth call to DrawExhaustParticles
+ BLNE    AddExhaustParticleToBuffer \ add the fifth particle to the particle
+                                    \ data buffer
 
  TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
  LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
- BLNE    DrawExhaustParticles       \ do a sixth call to DrawExhaustParticles
+ BLNE    AddExhaustParticleToBuffer \ add the sixth particle to the particle
+                                    \ data buffer
 
  TST     R10, #%00000100            \ If bit 2 of R10 is set then full thrust is
  LDMNEIA R13, {R0-R9}               \ engaged, so fetch the same parameters and
- BLNE    DrawExhaustParticles       \ do a seventh call to DrawExhaustParticles
+ BLNE    AddExhaustParticleToBuffer \ add the seventh particle to the particle
+                                    \ data buffer
 
- LDMFD   R13!, {R0-R9}              \ Fetch the same parameters and do a final
- BL      DrawExhaustParticles       \ call to DrawExhaustParticles
+ LDMFD   R13!, {R0-R9}              \ Fetch the same parameters and add the
+ BL      AddExhaustParticleToBuffer \ final particle to the particle data buffer
 
 \ ******************************************************************************
 \
@@ -2149,7 +2155,7 @@ ENDIF
  MOV     R7, #&01BC0000             \ ??? Flags = &01BC00FF
  ORR     R7, R7, #&FF
 
- BL      DrawBulletParticle         \ Add a bullet particle to the particle data
+ BL      AddBulletParticleToBuffer  \ Add a bullet particle to the particle data
                                     \ buffer
 
 .ship8
@@ -2444,7 +2450,7 @@ ENDIF
 \
 \ Other entry points:
 \
-\   part1                           The start of the main particle-processing
+\   dpar1                           The start of the main particle-processing
 \                                   loop
 \
 \ ******************************************************************************
@@ -2468,7 +2474,7 @@ ENDIF
                                     \ data buffer, processing each particle in
                                     \ turn
 
-.part1
+.dpar1
 
  LDMIA   R10, {R0-R7}               \ Fetch the eight words of particle data
                                     \ from the particle data buffer at R10, so
@@ -2483,6 +2489,7 @@ ENDIF
                                     \   R7 = particle flags:
                                     \
                                     \     Bit 16 set = call sub_893C ???
+                                    \     Bit 17 set = draw particle and shadow
                                     \     Bit 20 set = apply gravity
                                     \     Bit 21 set = call sub_89C8 ???
 
@@ -2492,18 +2499,18 @@ ENDIF
                                     \ the registers that we stored on the stack
                                     \ and return from the subroutine
 
-.part2
+.dpar2
 
  SUBS    R6, R6, #1                 \ Decrement the particle's existence counter
                                     \ in R6
 
- BEQ     DeleteParticle             \ If R6 is now zero then the particle just
-                                    \ expired, so jump to DeleteParticle to
+ BEQ     DeleteParticleData         \ If R6 is now zero then the particle just
+                                    \ expired, so jump to DeleteParticleData to
                                     \ delete this particle from the particle
                                     \ data buffer
                                     \
-                                    \ DeleteParticle then jumps back to part1 to
-                                    \ move on to the next particle
+                                    \ DeleteParticleData then jumps back to
+                                    \ dpar1 to move on to the next particle
 
  ADD     R0, R0, R3                 \ Move the particle by its current velocity
  ADD     R1, R1, R4                 \ by adding the particle's velocity vector
@@ -2531,8 +2538,8 @@ ENDIF
 
  MOV     R9, R0                     \ Copy the altitude into R9
 
- LDMFD   R13!, {R0-R3}              \ Retrieve the values of R0 to R3 from the
-                                    \ stack that we stored above
+ LDMFD   R13!, {R0-R3}              \ Retrieve the values of R0 to R3 that we
+                                    \ stored above
 
  TST     R7, #&00200000             \ If bit 21 the particle flags is set, call
  BLNE    sub_89C8                   \ sub_89C8 ???
@@ -2555,90 +2562,199 @@ ENDIF
 \
 \ ******************************************************************************
 
- LDR     R8, [R11, #xCamera]        \ 
- SUB     R0, R0, R8                 \ 
- LDR     R8, [R11, #zCamera]        \ 
- SUB     R2, R2, R8                 \ 
- ADD     R2, R2, #&14000000         \ 
- LDR     R8, [R11, #yCamera]        \ 
- SUB     R1, R1, R8                 \ 
+ LDR     R8, [R11, #xCamera]        \ Set R0 = R0 - xCamera
+ SUB     R0, R0, R8                 \        = x - xCamera
+                                    \
+                                    \ So R0 contains the x-coordinate of the
+                                    \ particle relative to the camera
 
- CMP     R2, #&14000000             \ 
- BHS     part1                      \ 
- CMP     R2, #&0A000000             \ 
- BLO     part1                      \ 
+ LDR     R8, [R11, #zCamera]        \ Set R2 = R2 - zCamera
+ SUB     R2, R2, R8                 \
+                                    \ So R2 contains the z-coordinate of the
+                                    \ particle relative to camera
 
- MOVS    R14, R0                    \ 
- RSBMI   R14, R0, #0                \ 
- CMP     R14, #&06000000            \ 
- BHS     part1                      \ 
+ ADD     R2, R2, #&14000000         \ Move the coordinate back by 14 tiles, so
+                                    \ (R0, R2) contains the coordinate of the
+                                    \ particle relative to the back-centre point
+                                    \ of the landscape ???
 
- TST     R7, #&00020000             \ 
- BEQ     part4                      \ 
+ LDR     R8, [R11, #yCamera]        \ Set R1 = R1 - yCamera
+ SUB     R1, R1, R8                 \        = y - yCamera
+                                    \
+                                    \ So R1 contains the y-coordinate of the
+                                    \ particle relative to the camera
 
- STMFD   R13!, {R0-R2}              \ 
+ CMP     R2, #&14000000             \ If R2 >= &14000000 then the z-coordinate
+ BHS     dpar1                      \ of the particle is more than 20 tiles into
+                                    \ the screen, which is too far away from us
+                                    \ to be visible on-screen, so jump to dpar1
+                                    \ to move on to the next particle in the
+                                    \ buffer
 
- LDR     R14, [R11, #playingGame]   \ 
- CMP     R14, #0                    \ 
- BEQ     part3                      \ 
+ CMP     R2, #&0A000000             \ If R2 < &0A000000 then the z-coordinate
+ BLO     dpar1                      \ of the particle is too far towards us to
+                                    \ be visible on-screen, so jump to dpar1 to
+                                    \ move on to the next particle in the buffer
 
- CMP     R0, #0                     \ 
- RSBMI   R0, R0, #0                 \ 
+ MOVS    R14, R0                    \ Set R14 = |R0|
+ RSBMI   R14, R0, #0                \         = |particle x-coordinate|
 
- SUBS    R2, R2, #&0F000000         \ 
- RSBMI   R2, R2, #0                 \ 
+ CMP     R14, #&06000000            \ If R14 >= &06000000 then the x-coordinate
+ BHS     dpar1                      \ of the particle is more than six tiles to
+                                    \ the left or right, which is too far to fit
+                                    \ on-screen, so jump to dpar1 to move on to
+                                    \ the next particle in the buffer
 
- CMP     R0, #TILE_SIZE             \ 
- CMPLO   R2, #TILE_SIZE             \ 
- BHS     part3                      \ 
+ TST     R7, #&00020000             \ If bit 17 the particle flags is set then
+ BEQ     dpar4                      \ this is not a rock, so jump to dpar4 to
+                                    \ draw the particle and its shadow into the
+                                    \ graphics buffers in part 4
 
- LDR     R0, [R11, #yCamera]        \ 
- ADD     R1, R1, R0                 \ 
- LDR     R0, [R11, #yPlayer]        \ 
- SUBS    R1, R1, R0                 \ 
- RSBMI   R1, R1, #0                 \ 
- CMP     R1, #TILE_SIZE             \ 
+                                    \ Otherwise this is a rock, so fall through
+                                    \ into part 3 to process collisions
 
-.part3
+\ ******************************************************************************
+\
+\       Name: MoveAndDrawParticles (Part 3 of 4)
+\       Type: Subroutine
+\   Category: Particles
+\    Summary: Process rocks by checking for collisions and drawing them as 3D
+\             objects
+\
+\ ******************************************************************************
 
- LDMFD   R13!, {R0-R2}              \ 
- BLO     LoseLifeFromParticleLoop   \ 
+                                    \ If we get here then the particle is a
+                                    \ rock, so we need to check whether it has
+                                    \ hit the player's ship
 
- LDR     R14, objectRockAddr        \ 
- STR     R14, [R11, #objectData]    \ 
+ STMFD   R13!, {R0-R2}              \ Store the rock coordinates in (R0, R1, R2)
+                                    \ on the stack so we can retrieve them below
 
- ADD     R3, R11, #rotationMatrix   \ 
+ LDR     R14, [R11, #playingGame]   \ If playingGame = 0 then this is the crash
+ CMP     R14, #0                    \ animation, so jump to dpar3 to draw the
+ BEQ     dpar3                      \ rock, skipping the call to lose a life (as
+                                    \ the EQ condition is true, which does not
+                                    \ match BLO)
 
- BL      DrawObject                 \ 
+ CMP     R0, #0                     \ Set R0 = |R0|
+ RSBMI   R0, R0, #0                 \        = |rock x-coordinate|
 
- B       part1                      \ 
+ SUBS    R2, R2, #&0F000000         \ Set R2 = |R2 - &0F000000|
+ RSBMI   R2, R2, #0                 \        = |rock z-coordinate - 15 tiles|
+                                    \
+                                    \ Because the player's ship is always at
+                                    \ x-coordinate 0 and a z-coordinate that's
+                                    \ into the screen by 15 tiles, this works
+                                    \ out the rock's coordinate relative to the
+                                    \ ship (for the x- and z-coordinates)
+                                    \
+                                    \ The rock object is one tile in size along
+                                    \ each axis, so we can do a check against
+                                    \ the file size to see if we are being hit
+                                    \ by the rock
 
-.part4
+ CMP     R0, #TILE_SIZE             \ If either of R0 or R2 is bigger than one
+ CMPLO   R2, #TILE_SIZE             \ tile size, jump to dpar3 as the rock is
+ BHS     dpar3                      \ missing us, skipping the call to lose a
+                                    \ life (as the HS condition is true, which
+                                    \ does not match BLO)
 
- STMFD   R13!, {R0-R2, R7}          \ 
+                                    \ The rock is overlapping the player in
+                                    \ either the x- or z-coordinate, so now we
+                                    \ need to check its altitude
 
- LDR     R14, [R11, #yCamera]       \ 
- SUB     R1, R9, R14                \ 
+ LDR     R0, [R11, #yCamera]        \ Set R1 = |R1 + yCamera - yPlayer|
+ ADD     R1, R1, R0                 \
+ LDR     R0, [R11, #yPlayer]        \ So R1 contains the y-coordinate of the
+ SUBS    R1, R1, R0                 \ rock relative to the player, which we can
+ RSBMI   R1, R1, #0                 \ also test against the tile size to check
+                                    \ for a collision
 
- MOV     R8, R2                     \ 
+ CMP     R1, #TILE_SIZE             \ If R1 < TILE_SIZE then the LO condition
+                                    \ will be true, which will send us to
+                                    \ LoseLifeFromParticleLoop below to lose a
+                                    \ life, as the rock has hit us
 
- BL      ProjectParticleOntoScreen  \ 
- BLLO    DrawParticleShadowToBuffer \ 
+.dpar3
 
- LDMFD   R13!, {R0-R2, R7}          \ 
+ LDMFD   R13!, {R0-R2}              \ Retrieve the rock coordinates that we
+                                    \ stored above into (R0, R1, R2)
 
- MOV     R8, R2                     \ 
+ BLO     LoseLifeFromParticleLoop   \ Jump to LoseLifeFromParticleLoop if the LO
+                                    \ condition is true, which will only be the
+                                    \ case if we reached the CMP just before
+                                    \ dpar3 and R1 < TILE_SIZE
 
- BL      ProjectParticleOntoScreen  \ 
- BLLO    DrawParticleToBuffer       \ 
+ LDR     R14, objectRockAddr        \ Store the address of the rock's object
+ STR     R14, [R11, #objectData]    \ data block in objectData to pass to the
+                                    \ DrawObject routine
+
+ ADD     R3, R11, #rotationMatrix   \ Set R3 to the address of the rock's
+                                    \ rotation matrix, to pass to DrawObject
+
+ BL      DrawObject                 \ Draw the rock into the graphics buffers
+
+ B       dpar1                      \ Loop back to dpar1 to process the next
+                                    \ particle in the particle data buffer
+
+\ ******************************************************************************
+\
+\       Name: MoveAndDrawParticles (Part 4 of 4)
+\       Type: Subroutine
+\   Category: Particles
+\    Summary: Draw particles into the graphics buffers
+\
+\ ******************************************************************************
+
+.dpar4
+
+                                    \ If we get here then we draw the particle
+                                    \ and its shadow into the graphics buffers
+
+ STMFD   R13!, {R0-R2, R7}          \ Store R0, R1, R2 and R7 on the stack so
+                                    \ they don't get corrupted by the following
+                                    \ calls
+
+ LDR     R14, [R11, #yCamera]       \ Set R1 = R9 - yCamera
+ SUB     R1, R9, R14                \        = landscape altitude - yCamera
+                                    \
+                                    \ We set R9 in part 1 to the altitude of the
+                                    \ landscape below the particle, so this sets
+                                    \ R1 to the y-coordinate of the particle's
+                                    \ shadow relative to the camera
+
+ MOV     R8, R2                     \ Set R8 to the z-coordinate of the particle
+                                    \ relative to camera
+
+ BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle's
+                                    \ shadow in (R0, R1, R0) onto the screen,
+                                    \ returning the results in (R0, R1) ???
+
+ BLLO    DrawParticleShadowToBuffer \ If the projected coordinates fit onto the
+                                    \ screen, draw the particle's projected
+                                    \ shadow into the graphics buffers
+
+ LDMFD   R13!, {R0-R2, R7}          \ Retrieve the values of R0, R1, R2 and R7
+                                    \ that we stored above
+
+ MOV     R8, R2                     \ Set R8 to the z-coordinate of the particle
+                                    \ relative to camera
+
+ BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle in
+                                    \ (R0, R1, R0) onto the screen, returning
+                                    \ the results in (R0, R1) ???
+
+ BLLO    DrawParticleToBuffer       \ If the projected coordinates fit onto the
+                                    \ screen, draw the projected particle into
+                                    \ the graphics buffers
 
  LDMIA   R10, {R0-R7}               \ Fetch the eight words of particle data
                                     \ for the next particle from the particle
                                     \ data buffer at R10
 
  CMP     R7, #0                     \ If the last word of the data is not zero
- BNE     part2                      \ then this is a valid particle rather than
-                                    \ a null terminator, so loop back to part2
+ BNE     dpar2                      \ then this is a valid particle rather than
+                                    \ a null terminator, so loop back to dpar2
                                     \ to process the next particle
 
  LDMFD   R13!, {R10, R12, PC}       \ Retrieve the registers that we stored on
@@ -2663,7 +2779,8 @@ ENDIF
  SUBHS   R2, R6, #8                 \ 
  MOVHS   R2, R2, LSL #1             \ 
  MOVLO   R2, #0                     \ 
- ORR     R7, R1, R2                 \ 
+
+ ORR     R7, R1, R2                 \ VIDC
  AND     R7, R7, #3                 \ 
  ORR     R7, R7, R0                 \ 
  AND     R7, R7, #7                 \ 
@@ -2675,7 +2792,9 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
+
  ORR     R7, R7, #&001D0000         \ 
+
  LDMFD   R13!, {R0-R2, R6}          \ 
  MOV     PC, R14                    \ 
 
@@ -2694,7 +2813,7 @@ ENDIF
  CMP     R9, #SEA_LEVEL             \ 
  BEQ     sub_8A34                   \ 
  TST     R7, #&00080000             \ 
- BEQ     DeleteParticle             \ 
+ BEQ     DeleteParticleData         \ 
  TST     R7, #&01000000             \ 
  BNE     sub_8A28                   \ 
  MOV     R3, R3, ASR #1             \ 
@@ -2739,7 +2858,7 @@ ENDIF
 
  MOV     R8, #&14                   \ 
  BL      sub_8CBC                   \ 
- B       DeleteParticle             \ 
+ B       DeleteParticleData         \ 
 
 \ ******************************************************************************
 \
@@ -2754,7 +2873,7 @@ ENDIF
 
  MOV     R8, #3                     \ 
  BL      sub_8CBC                   \ 
- B       DeleteParticle             \ 
+ B       DeleteParticleData         \ 
 
 \ ******************************************************************************
 \
@@ -2768,7 +2887,7 @@ ENDIF
 .sub_8A34
 
  TST     R7, #&00040000             \ 
- BEQ     DeleteParticle             \ 
+ BEQ     DeleteParticleData         \ 
  TST     R7, #&00800000             \ 
  MOVNE   R8, #&41                   \ 
  MOVEQ   R8, #4                     \ 
@@ -2782,7 +2901,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DeleteParticle
+\       Name: DeleteParticleData
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Delete a particle from the particle data buffer and move the last
@@ -2797,7 +2916,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.DeleteParticle
+.DeleteParticleData
 
  LDR     R8, [R11, #particleEnd]    \ Decrease the address of the end of the
  SUB     R8, R8, #8*4               \ particle data buffer by eight words, so it
@@ -2816,20 +2935,20 @@ ENDIF
  SUB     R8, R8, #1                 \ the new number of particles on-screen
  STR     R8, [R11, #particleCount]
 
- B       part1                      \ Jump to the start of the main loop in
+ B       dpar1                      \ Jump to the start of the main loop in
                                     \ MoveAndDrawParticles to process the next
                                     \ particle in the particle data buffer
 
 \ ******************************************************************************
 \
-\       Name: DrawBulletParticle
+\       Name: AddBulletParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a bullet particle to the particle data buffer
 \
 \ ******************************************************************************
 
-.DrawBulletParticle
+.AddBulletParticleToBuffer
 
  STMFD   R13!, {R8, R14}            \ Store R8 and the return address on the
                                     \ stack, so the call to StoreParticleData
@@ -2842,60 +2961,62 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DrawExhaustParticles
+\       Name: AddExhaustParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: Draw the random particles in the exhaust plume
+\    Summary: Add one of the random particles in the exhaust plume to the
+\             particle data buffer
 \
 \ ******************************************************************************
 
-.DrawExhaustParticles
+.AddExhaustParticleToBuffer
 
  STMFD   R13!, {R8, R14}            \ Store R8 and the return address on the
                                     \ stack ???
 
- B       DrawRandomParticles        \ Jump to DrawRandomParticles to draw a
-                                    \ cloud of random particles, returning from
-                                    \ the subroutine using a tail call
+ B       AddRandomParticleToBuffer  \ Jump to AddRandomParticleToBuffer to add a
+                                    \ random particle to the particle data
+                                    \ buffer, returning from the subroutine
+                                    \ using a tail call
 
 \ ******************************************************************************
 \
-\       Name: sub_8A94
+\       Name: AddStaticParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_8A94
+.AddStaticParticleToBuffer
 
  MOV     R4, #0                     \ Set R4 = 0
 
-                                    \ Fall through into sub_8A98 so we pass
-                                    \ (R3, R4, R5) = (0, 0, 0) to the 
-                                    \ DrawRandomParticles routine
+                                    \ Fall into AddFallingParticleToBuffer so we
+                                    \ pass (R3, R4, R5) = (0, 0, 0) to the 
+                                    \ AddRandomParticleToBuffer routine
 
 \ ******************************************************************************
 \
-\       Name: sub_8A98
+\       Name: AddFallingParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_8A98
+.AddFallingParticleToBuffer
 
  MOV     R3, #0                     \ Set R3 = 0
 
  MOV     R5, #0                     \ Set R5 = 0
 
-                                    \ Fall through into DrawRandomParticles with
+                                    \ Fall into AddRandomParticleToBuffer with
                                     \ (R3, R4, R5) set to (0, R4, 0)
 
 \ ******************************************************************************
 \
-\       Name: DrawRandomParticles
+\       Name: AddRandomParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: ???
@@ -2915,6 +3036,7 @@ ENDIF
 \   R7                              Particle flags:
 \
 \                                     * Bit 16 set = call sub_893C ???
+\                                     * Bit 17 set = draw particle and shadow
 \                                     * Bit 20 set = apply gravity
 \                                     * Bit 21 set = call sub_89C8 ???
 \
@@ -2931,7 +3053,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-.DrawRandomParticles
+.AddRandomParticleToBuffer
 
  STMFD   R13!, {R0-R1}              \ Store R0 and R1 on the stack so we can
                                     \ restore them after the following
@@ -2961,8 +3083,8 @@ ENDIF
 
  ADD     R6, R6, R0, LSR R9         \ Set R6 = R6 + R0 >> R9
 
- LDMFD   R13!, {R0-R1}              \ Retrieve the values of R0 and R1 from the
-                                    \ stack that we stored above
+ LDMFD   R13!, {R0-R1}              \ Retrieve the values of R0 and R1 that we
+                                    \ stored above
 
 \ ******************************************************************************
 \
@@ -3058,7 +3180,8 @@ ENDIF
  ADD     R0, R0, #3                 \ 
  MOV     R1, R0                     \ 
  MOV     R2, R0                     \ 
- ORR     R7, R1, R2                 \ 
+
+ ORR     R7, R1, R2                 \ VIDC
  AND     R7, R7, #3                 \ 
  ORR     R7, R7, R0                 \ 
  AND     R7, R7, #7                 \ 
@@ -3070,13 +3193,18 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
+
  ORR     R7, R7, #&00080000         \ 
+
  MVN     R4, #&80000                \ 
+
  LDMFD   R13!, {R0-R2}              \ 
+
  MOV     R9, #&19                   \ 
  MOV     R8, #&D                    \ 
  MOV     R6, #&F                    \ 
- B       sub_8A98                   \ 
+
+ B       AddFallingParticleToBuffer \ 
 
 \ ******************************************************************************
 \
@@ -3099,7 +3227,8 @@ ENDIF
  ADD     R0, R0, #4                 \ 
  ADD     R1, R1, #2                 \ 
  ADD     R2, R2, #4                 \ 
- ORR     R7, R1, R2                 \ 
+
+ ORR     R7, R1, R2                 \ VIDC
  AND     R7, R7, #3                 \ 
  ORR     R7, R7, R0                 \ 
  AND     R7, R7, #7                 \ 
@@ -3111,12 +3240,16 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
+
  ORR     R7, R7, #&001C0000         \ 
+
  LDMFD   R13!, {R0-R2}              \ 
+
  MOV     R9, #&1A                   \ 
  MOV     R8, #&A                    \ 
  MOV     R6, #&F                    \ 
- B       sub_8A94                   \ 
+
+ B       AddStaticParticleToBuffer  \ 
 
 \ ******************************************************************************
 \
@@ -3147,7 +3280,8 @@ ENDIF
  ADD     R0, R0, #4                 \ 
  ADD     R1, R1, #2                 \ 
  ADD     R2, R2, #4                 \ 
- ORR     R7, R1, R2                 \ 
+
+ ORR     R7, R1, R2                 \ VIDC
  AND     R7, R7, #3                 \ 
  ORR     R7, R7, R0                 \ 
  AND     R7, R7, #7                 \ 
@@ -3159,12 +3293,16 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
+
  ORR     R7, R7, #&00FE0000         \ 
+
  LDMFD   R13!, {R0-R2}              \ 
+
  MOV     R9, #&1B                   \ 
  MOV     R8, #&A                    \ 
  MOV     R6, #&AA                   \ 
- B       sub_8A94                   \ 
+
+ B       AddStaticParticleToBuffer  \ 
 
 \ ******************************************************************************
 \
@@ -3182,7 +3320,7 @@ ENDIF
  MOV     R9, #&1D                   \ 
  MOV     R8, #8                     \ 
  MOV     R6, #8                     \ 
- B       sub_8A94                   \ 
+ B       AddStaticParticleToBuffer  \ 
 
 \ ******************************************************************************
 \
@@ -3204,7 +3342,8 @@ ENDIF
  AND     R0, R0, #4                 \ 
  ADD     R0, R0, #8                 \ 
  MOV     R1, R0                     \ 
- ORR     R7, R1, R2                 \ 
+
+ ORR     R7, R1, R2                 \ VIDC
  AND     R7, R7, #3                 \ 
  ORR     R7, R7, R0                 \ 
  AND     R7, R7, #7                 \ 
@@ -3216,12 +3355,16 @@ ENDIF
  ORRNE   R7, R7, #8                 \ 
  TST     R2, #8                     \ 
  ORRNE   R7, R7, #&80               \ 
+
  ORR     R7, R7, #&00100000         \ 
+
  LDMFD   R13!, {R0-R2}              \ 
+
  MOV     R9, #&1A                   \ 
  MOV     R8, #&A                    \ 
  MOV     R6, #&14                   \ 
- B       sub_8A94                   \ 
+
+ B       AddStaticParticleToBuffer  \ 
 
 \ ******************************************************************************
 \
@@ -3620,12 +3763,12 @@ ENDIF
  ADD     R2, R2, #&14000000         \ Move the coordinate back by 14 tiles, so
                                     \ (R0, R2) contains the coordinate of the
                                     \ object relative to the back-centre point
-                                    \ of the landscape
+                                    \ of the landscape ???
 
  LDR     R14, [R11, #yCamera]       \ Set R1 = R1 - yCamera
  SUB     R1, R1, R14                \        = y - yCamera
                                     \
-                                    \ So R1 contains the x-coordinate of the
+                                    \ So R1 contains the y-coordinate of the
                                     \ object relative to the camera
 
  LDRB    R14, [R11, #objectType]    \ If the object type is 12 or more, then it
@@ -6526,8 +6669,8 @@ ENDIF
  BL      DrawTriangle               \ Draw a triangle at the coordinates
                                     \ specified in R0 to R5 and R8
 
- LDMFD   R13!, {R9, R12}            \ Retrieve the values of R9 and R12 from the
-                                    \ stack that we stored above
+ LDMFD   R13!, {R9, R12}            \ Retrieve the values of R9 and R12 that we
+                                    \ stored above
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
                                     \ buffer
