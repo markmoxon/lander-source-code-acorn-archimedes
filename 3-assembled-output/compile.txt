@@ -837,7 +837,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008A90 020000EA        	   811:  B       AddMovingParticleToBuffer
                             	   812: AddStaticParticleToBuffer:
 00:00008A94 0040A0E3        	   813:  MOV     R4, #0
-                            	   814: AddFallingParticleToBuffer:
+                            	   814: AddRisingParticleToBuffer:
 00:00008A98 0030A0E3        	   815:  MOV     R3, #0
 00:00008A9C 0050A0E3        	   816:  MOV     R5, #0
                             	   817: AddMovingParticleToBuffer:
@@ -895,7 +895,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008B60 1990A0E3        	   869:  MOV     R9, #25
 00:00008B64 0D80A0E3        	   870:  MOV     R8, #13
 00:00008B68 0F60A0E3        	   871:  MOV     R6, #15
-00:00008B6C C9FFFFEA        	   872:  B       AddFallingParticleToBuffer
+00:00008B6C C9FFFFEA        	   872:  B       AddRisingParticleToBuffer
                             	   873: sub_8B70:
 00:00008B70 07412DE9        	   874:  STMFD   R13!, {R0-R2, R8, R14}
 00:00008B74 B10300EB        	   875:  BL      GetRandomNumbers
@@ -946,9 +946,9 @@ Source: "3-assembled-output/Lander.arm"
 00:00008C24 80708713        	   920:  ORRNE   R7, R7, #0x80
 00:00008C28 FE7887E3        	   921:  ORR     R7, R7, #0x00FE0000
 00:00008C2C 0700BDE8        	   922:  LDMFD   R13!, {R0-R2}
-00:00008C30 1B90A0E3        	   923:  MOV     R9, #0x1B
-00:00008C34 0A80A0E3        	   924:  MOV     R8, #0xA
-00:00008C38 AA60A0E3        	   925:  MOV     R6, #0xAA
+00:00008C30 1B90A0E3        	   923:  MOV     R9, #27
+00:00008C34 0A80A0E3        	   924:  MOV     R8, #10
+00:00008C38 AA60A0E3        	   925:  MOV     R6, #170
 00:00008C3C 94FFFFEA        	   926:  B       AddStaticParticleToBuffer
                             	   927: AddSparkParticleToBuffer:
 00:00008C40 00412DE9        	   928:  STMFD   R13!, {R8, R14}
@@ -961,7 +961,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008C58 07412DE9        	   935:  STMFD   R13!, {R0-R2, R8, R14}
 00:00008C5C 770300EB        	   936:  BL      GetRandomNumbers
 00:00008C60 032000E2        	   937:  AND     R2, R0, #3
-00:00008C64 0C2082E2        	   938:  ADD     R2, R2, #0xC
+00:00008C64 0C2082E2        	   938:  ADD     R2, R2, #12
 00:00008C68 040000E2        	   939:  AND     R0, R0, #4
 00:00008C6C 080080E2        	   940:  ADD     R0, R0, #8
 00:00008C70 0010A0E1        	   941:  MOV     R1, R0
@@ -979,9 +979,9 @@ Source: "3-assembled-output/Lander.arm"
 00:00008CA0 80708713        	   953:  ORRNE   R7, R7, #0x80
 00:00008CA4 017687E3        	   954:  ORR     R7, R7, #0x00100000
 00:00008CA8 0700BDE8        	   955:  LDMFD   R13!, {R0-R2}
-00:00008CAC 1A90A0E3        	   956:  MOV     R9, #0x1A
-00:00008CB0 0A80A0E3        	   957:  MOV     R8, #0xA
-00:00008CB4 1460A0E3        	   958:  MOV     R6, #0x14
+00:00008CAC 1A90A0E3        	   956:  MOV     R9, #26
+00:00008CB0 0A80A0E3        	   957:  MOV     R8, #10
+00:00008CB4 1460A0E3        	   958:  MOV     R6, #20
 00:00008CB8 75FFFFEA        	   959:  B       AddStaticParticleToBuffer
                             	   960: AddExplosionToBuffer:
 00:00008CBC F8432DE9        	   961:  STMFD   R13!, {R3-R9, R14}
@@ -10258,8 +10258,8 @@ AbortWithMemoryError             A:0000A5A4
 AddBulletParticleToBuffer        A:00008A84
 AddExhaustParticleToBuffer       A:00008A8C
 AddExplosionToBuffer             A:00008CBC
-AddFallingParticleToBuffer       A:00008A98
 AddMovingParticleToBuffer        A:00008AA0
+AddRisingParticleToBuffer        A:00008A98
 AddSmallExplosionToBuffer        A:00008A28
 AddSmokeParticleToBuffer         A:00008B0C
 AddSparkParticleToBuffer         A:00008C40
@@ -10734,7 +10734,7 @@ Symbols by value:
 00008A84 AddBulletParticleToBuffer
 00008A8C AddExhaustParticleToBuffer
 00008A94 AddStaticParticleToBuffer
-00008A98 AddFallingParticleToBuffer
+00008A98 AddRisingParticleToBuffer
 00008AA0 AddMovingParticleToBuffer
 00008AC8 StoreParticleData
 00008AF4 InitialiseParticleData
