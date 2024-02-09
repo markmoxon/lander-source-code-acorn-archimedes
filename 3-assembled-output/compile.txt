@@ -896,7 +896,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008B64 0D80A0E3        	   870:  MOV     R8, #13
 00:00008B68 0F60A0E3        	   871:  MOV     R6, #15
 00:00008B6C C9FFFFEA        	   872:  B       AddRisingParticleToBuffer
-                            	   873: sub_8B70:
+                            	   873: AddDebrisParticleToBuffer:
 00:00008B70 07412DE9        	   874:  STMFD   R13!, {R0-R2, R8, R14}
 00:00008B74 B10300EB        	   875:  BL      GetRandomNumbers
 00:00008B78 A11EA0E1        	   876:  MOV     R1, R1, LSR #29
@@ -987,7 +987,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008CBC F8432DE9        	   961:  STMFD   R13!, {R3-R9, R14}
                             	   962: expl1:
 00:00008CC0 DEFFFFEB        	   963:  BL      AddSparkParticleToBuffer
-00:00008CC4 A9FFFFEB        	   964:  BL      sub_8B70
+00:00008CC4 A9FFFFEB        	   964:  BL      AddDebrisParticleToBuffer
 00:00008CC8 8FFFFFEB        	   965:  BL      AddSmokeParticleToBuffer
 00:00008CCC DBFFFFEB        	   966:  BL      AddSparkParticleToBuffer
 00:00008CD0 018058E2        	   967:  SUBS    R8, R8, #1
@@ -10256,6 +10256,7 @@ Source: "3-assembled-output/Lander.arm"
 Symbols by name:
 AbortWithMemoryError             A:0000A5A4
 AddBulletParticleToBuffer        A:00008A84
+AddDebrisParticleToBuffer        A:00008B70
 AddExhaustParticleToBuffer       A:00008A8C
 AddExplosionToBuffer             A:00008CBC
 AddMovingParticleToBuffer        A:00008AA0
@@ -10566,7 +10567,6 @@ stack                            S:000121FC
 stackAddr                        A:0000A570
 stackPointerOnEntry              A:0000A584
 stringBuffer                     S:00000200
-sub_8B70                         A:00008B70
 sub_8CDC                         A:00008CDC
 sub_8CFC                         A:00008CFC
 sub_93B4                         A:000093B4
@@ -10626,8 +10626,8 @@ Symbols by value:
 00000009 LAUNCHPAD_OBJECT
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 rotationMatrix
 00000030 xNoseV
+00000030 rotationMatrix
 00000034 xRoofV
 00000038 xSideV
 0000003C yNoseV
@@ -10636,8 +10636,8 @@ Symbols by value:
 00000048 zNoseV
 0000004C zRoofV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10688,8 +10688,8 @@ Symbols by value:
 00000600 vertexProjected
 00000700 particleData
 00004400 objectMap
-00008000 CODE
 00008000 landscapeOffset
+00008000 CODE
 0000800C landscapeOffsetAddr
 00008010 landscapeConfig
 00008028 landscapeConfigAddr
@@ -10739,7 +10739,7 @@ Symbols by value:
 00008AC8 StoreParticleData
 00008AF4 InitialiseParticleData
 00008B0C AddSmokeParticleToBuffer
-00008B70 sub_8B70
+00008B70 AddDebrisParticleToBuffer
 00008BD8 DropARockFromTheSky
 00008C40 AddSparkParticleToBuffer
 00008C58 AddSplashParticleToBuffer

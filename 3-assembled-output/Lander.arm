@@ -870,7 +870,7 @@ AddSmokeParticleToBuffer:
  MOV     R8, #13
  MOV     R6, #15
  B       AddRisingParticleToBuffer
-sub_8B70:
+AddDebrisParticleToBuffer:
  STMFD   R13!, {R0-R2, R8, R14}
  BL      GetRandomNumbers
  MOV     R1, R1, LSR #29
@@ -961,7 +961,7 @@ AddExplosionToBuffer:
  STMFD   R13!, {R3-R9, R14}
 expl1:
  BL      AddSparkParticleToBuffer
- BL      sub_8B70
+ BL      AddDebrisParticleToBuffer
  BL      AddSmokeParticleToBuffer
  BL      AddSparkParticleToBuffer
  SUBS    R8, R8, #1
