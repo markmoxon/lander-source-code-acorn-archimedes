@@ -3682,14 +3682,14 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8B70
+\       Name: AddDebrisParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_8B70
+.AddDebrisParticleToBuffer
 
  STMFD   R13!, {R0-R2, R8, R14}     \ Store the particle coordinates on the
                                     \ stack so we can retrieve them below, and
@@ -3704,12 +3704,26 @@ ENDIF
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- MOV     R1, R1, LSR #29            \ 
- MOV     R2, R0, LSR #30            \ 
- AND     R0, R0, #7                 \ 
- ADD     R0, R0, #4                 \ 
- ADD     R1, R1, #2                 \ 
- ADD     R2, R2, #4                 \ 
+ MOV     R1, R1, LSR #29            \ Set R1 to a random number in the range 0
+                                    \ to 7
+
+ MOV     R2, R0, LSR #30            \ Set R2 to a random number in the range 0
+                                    \ to 3
+
+ AND     R0, R0, #7                 \ Set R0 to a random number in the range 0
+                                    \ to 7
+
+ ADD     R0, R0, #4                 \ Set R0 to a random number in the range 4
+                                    \ to 11, to use in the red channel
+
+ ADD     R1, R1, #2                 \ Set R1 to a random number in the range 2
+                                    \ to 2, to use for the green channel
+
+ ADD     R2, R2, #4                 \ Set R2 to a random number in the range 4
+                                    \ to 7, to use in the blue channel
+
+                                    \ This sets the channels to a randomly
+                                    \ purple-brownish colour
 
                                     \ We now build a VIDC colour number in R7
                                     \ by combining the three channels into one
@@ -3811,12 +3825,26 @@ ENDIF
 
  BL      GetRandomNumbers           \ Set R0 and R1 to random numbers
 
- MOV     R1, R1, LSR #29            \ 
- MOV     R2, R0, LSR #30            \ 
- AND     R0, R0, #7                 \ 
- ADD     R0, R0, #4                 \ 
- ADD     R1, R1, #2                 \ 
- ADD     R2, R2, #4                 \ 
+ MOV     R1, R1, LSR #29            \ Set R1 to a random number in the range 0
+                                    \ to 7
+
+ MOV     R2, R0, LSR #30            \ Set R2 to a random number in the range 0
+                                    \ to 3
+
+ AND     R0, R0, #7                 \ Set R0 to a random number in the range 0
+                                    \ to 7
+
+ ADD     R0, R0, #4                 \ Set R0 to a random number in the range 4
+                                    \ to 11, to use in the red channel
+
+ ADD     R1, R1, #2                 \ Set R1 to a random number in the range 2
+                                    \ to 2, to use for the green channel
+
+ ADD     R2, R2, #4                 \ Set R2 to a random number in the range 4
+                                    \ to 7, to use in the blue channel
+
+                                    \ This sets the channels to a randomly
+                                    \ purple-brownish colour
 
                                     \ We now build a VIDC colour number in R7
                                     \ by combining the three channels into one
@@ -4059,10 +4087,16 @@ ENDIF
 
 .expl1
 
+                                    \ Each cluster is made up of four particles,
+                                    \ so we now add them to the particle data
+                                    \ buffer
+
  BL      AddSparkParticleToBuffer   \ Add a spark particle to the particle data
                                     \ buffer (one that fades from white to red)
 
- BL      sub_8B70                   \ 
+ BL      AddDebrisParticleToBuffer  \ Add a spark particle to the particle data
+                                    \ buffer (a purple-brown particle that flies
+                                    \ out and bounces on the ground)
 
  BL      AddSmokeParticleToBuffer   \ Add a smoke particle to the particle data
                                     \ buffer (a grey particle that slowly rises)
