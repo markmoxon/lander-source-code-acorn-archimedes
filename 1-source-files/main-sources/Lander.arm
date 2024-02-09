@@ -65,9 +65,11 @@
  TILE_SIZE = &01000000              \ The size of a landscape tile in 3D
                                     \ coordinates
 
- TILE_SIZE_5_5 = &05800000          \ The width of 5.5 tiles (which is half of
+ TILE_SIZE_5_5 = &05800000          \ The size of 5.5 tiles (which is half of
                                     \ the landscape width once we have rounded
                                     \ a coordinate down to the nearest tile)
+
+ TILE_SIZE_20 = &14000000           \ The size of 20 tiles
 
 \ ******************************************************************************
 \
@@ -395,11 +397,11 @@ IF _RISCOS
                                     \ decrypt the game binary before jumping to
                                     \ Entry to start the game
 
- EQUD    &00000000, &14000000
+ EQUD    &00000000, TILE_SIZE_20
 
 ELSE
 
- EQUD    &FA800000, &00000000, &14000000
+ EQUD    &FA800000, &00000000, TILE_SIZE_20
 
 ENDIF
 
@@ -1281,7 +1283,7 @@ ENDIF
  LDR     R1, [R11, #zCamera]        \ get the vertex position in the game's
  ADD     R9, R9, R1                 \ coordinate system
 
- SUB     R9, R9, #&14000000         \ Move the coordinate forward by 14 tiles,
+ SUB     R9, R9, #TILE_SIZE_20      \ Move the coordinate forward by 20 tiles,
                                     \ as DrawObjects moves objects back by 14
                                     \ tiles before drawing them, and the
                                     \ altitude calculation needs the coordinate
@@ -2636,7 +2638,7 @@ ENDIF
                                     \ So R2 contains the z-coordinate of the
                                     \ particle relative to camera
 
- ADD     R2, R2, #&14000000         \ Move the coordinate back by 14 tiles, so
+ ADD     R2, R2, #TILE_SIZE_20      \ Move the coordinate back by 20 tiles, so
                                     \ (R0, R2) contains the coordinate of the
                                     \ particle relative to the back-centre point
                                     \ of the landscape ???
@@ -2647,12 +2649,11 @@ ENDIF
                                     \ So R1 contains the y-coordinate of the
                                     \ particle relative to the camera
 
- CMP     R2, #&14000000             \ If R2 >= &14000000 then the z-coordinate
- BHS     dpar1                      \ of the particle is more than 20 tiles into
-                                    \ the screen, which is too far away from us
-                                    \ to be visible on-screen, so jump to dpar1
-                                    \ to move on to the next particle in the
-                                    \ buffer
+ CMP     R2, #TILE_SIZE_20          \ If the z-coordinate of the particle in R2
+ BHS     dpar1                      \ R2 is more than 20 tiles into the screen,
+                                    \ which is too far away from us to be
+                                    \ visible on-screen, so jump to dpar1 to
+                                    \ move on to the next particle in the buffer
 
  CMP     R2, #&0A000000             \ If R2 < &0A000000 then the z-coordinate
  BLO     dpar1                      \ of the particle is too far towards us to
@@ -4116,48 +4117,90 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_8CDC
+\       Name: AddShipExplosionToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: An unused routine that ???
+\    Summary: An unused routine that adds a 50-cluster explosion cloud to the
+\             particle data buffer, just front of the player's ship
 \
 \ ******************************************************************************
 
-.sub_8CDC
+.AddShipExplosionToBuffer
 
- STMFD   R13!, {R14}                \ 
- MOV     R8, #&32                   \ 
- LDR     R0, [R11, #xCamera]        \ 
- MOV     R1, #0                     \ 
- LDR     R2, [R11, #zCamera]        \ 
- SUB     R2, R2, #&06000000         \ 
- BL      AddExplosionToBuffer       \ 
- LDMFD   R13!, {PC}                 \ 
+ STMFD   R13!, {R14}                \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R8, #50                    \ Set R8 = 50 so the explosion contains 50
+                                    \ clusters of four particles
+
+                                    \ Now we add an explosion to the particle
+                                    \ buffer at coordinates (R0, R1, R2), which
+                                    \ are set to 6 tiles forwards from the
+                                    \ camera coordinates, so that's just in
+                                    \ front of the ship (when the ship is not
+                                    \ close to the ground, in which case the
+                                    \ explosion would be above the ship as the
+                                    \ ship moves down the screen)
+
+ LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
+
+ MOV     R1, #0                     \ Set R1 = 0
+
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
+ SUB     R2, R2, #&06000000
+
+ BL      AddExplosionToBuffer       \ Add an explosion into the particle data
+                                    \ buffers
+
+ LDMFD   R13!, {PC}                 \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: sub_8CFC
+\       Name: AddSparkCloudToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: An unused routine that ???
+\    Summary: An unused routine that adds a cloud of 150 spark particles to the
+\             particle data buffer, just in front of the player's ship
 \
 \ ******************************************************************************
 
-.sub_8CFC
+.AddSparkCloudToBuffer
 
- STMFD   R13!, {R6-R9, R14}         \ 
- MOV     R8, #&96                   \ 
- LDR     R0, [R11, #xCamera]        \ 
- MOV     R1, #0                     \ 
- LDR     R2, [R11, #zCamera]        \ 
- SUB     R2, R2, #&06000000         \ 
+ STMFD   R13!, {R6-R9, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R8, #150                   \ Set R8 = 150 so the explosion contains 150
+                                    \ clusters of four particles
+
+                                    \ Now we add an explosion to the particle
+                                    \ buffer at coordinates (R0, R1, R2), which
+                                    \ are set to 6 tiles forwards from the
+                                    \ camera coordinates, so that's just in
+                                    \ front of the ship (when the ship is not
+                                    \ close to the ground, in which case the
+                                    \ explosion would be above the ship as the
+                                    \ ship moves down the screen)
+
+ LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
+
+ MOV     R1, #0                     \ Set R1 = 0
+
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
+ SUB     R2, R2, #&06000000
 
 .lab_8D14
 
- BL      AddSparkParticleToBuffer   \ 
- SUBS    R8, R8, #1                 \ 
- BPL     lab_8D14                   \ 
- LDMFD   R13!, {R6-R9, PC}          \ 
+ BL      AddSparkParticleToBuffer   \ Add a spark particle to the particle data
+                                    \ buffer (one that fades from white to red)
+
+ SUBS    R8, R8, #1                 \ Decrement the particle counter in R8
+
+ BPL     lab_8D14                   \ Loop back until we have drawn all R8
+                                    \ particles
+
+ LDMFD   R13!, {R6-R9, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -4176,11 +4219,11 @@ ENDIF
 
                                     \ Drop a rock from the sky, spawning the
                                     \ rock at coordinates (R0, R1, R2), which
-                                    \ are set to 16 tiles above and 6 tiles back
-                                    \ from the camera coordinates, which is
-                                    \ fairly high in the sky above the ship's
-                                    \ current position and one tile in front of
-                                    \ the ship
+                                    \ are set to 16 tiles above and 6 tiles
+                                    \ forwards from the camera coordinates,
+                                    \ which is fairly high in the sky above the
+                                    \ ship's current position and one tile in
+                                    \ front of the ship
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
@@ -4233,7 +4276,7 @@ ENDIF
                                     \ If we get here then we drop a rock from
                                     \ the sky, spawning the rock at coordinates
                                     \ (R0, R1, R2), which are set to 32 tiles
-                                    \ above and 6 tiles back from the camera
+                                    \ above and 6 tiles forwards from the camera
                                     \ coordinates, which is very high in the sky
                                     \ above the ship's current position and one
                                     \ tile in front of the ship
@@ -4485,7 +4528,7 @@ ENDIF
                                     \ So R2 contains the z-coordinate of the
                                     \ object relative to camera
 
- ADD     R2, R2, #&14000000         \ Move the coordinate back by 14 tiles, so
+ ADD     R2, R2, #TILE_SIZE_20      \ Move the coordinate back by 20 tiles, so
                                     \ (R0, R2) contains the coordinate of the
                                     \ object relative to the back-centre point
                                     \ of the landscape ???
@@ -7456,7 +7499,7 @@ ENDIF
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- RSB     R14, R8, #&14000000        \ Set R14 = &14000000 - R8
+ RSB     R14, R8, #TILE_SIZE_20     \ Set R14 = TILE_SIZE_20 - R8
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -7468,8 +7511,6 @@ ENDIF
                                     \ buffer 0 is for objects that are far away
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
-                                    \
-                                    \ Why &14000000 (20 tiles)? ???
 
  ADD     R14, R14, #TILE_SIZE       \ Add the size of one tile to R14 so we draw
                                     \ the particle one tile nearer than we would
@@ -7576,7 +7617,7 @@ ENDIF
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- RSB     R14, R8, #&14000000        \ Set R14 = &14000000 - R8
+ RSB     R14, R8, #TILE_SIZE_20     \ Set R14 = TILE_SIZE_20 - R8
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -7588,8 +7629,6 @@ ENDIF
                                     \ buffer 0 is for objects that are far away
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
-                                    \
-                                    \ Why &14000000 (20 tiles)? ???
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
                                     \ the buffer number, and we're going to look
@@ -7699,7 +7738,7 @@ ENDIF
  LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the
                                     \ triangle
 
- RSB     R14, R14, #&14000000       \ Set R14 = &14000000 - R14
+ RSB     R14, R14, #TILE_SIZE_20    \ Set R14 = TILE_SIZE_20 - R14
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -7711,8 +7750,6 @@ ENDIF
                                     \ buffer 0 is for objects that are far away
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
-                                    \
-                                    \ Why &14000000 (20 tiles)? ???
 
  CMP     R14, #&0B000000            \ Cap R14 to a maximum value of &0A000000,
  MOVHS   R14, #&0A000000            \ so the maximum buffer number we draw into
@@ -7813,7 +7850,7 @@ ENDIF
  LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the
                                     \ triangle
 
- RSB     R14, R14, #&14000000       \ Set R14 = &14000000 - R14
+ RSB     R14, R14, #TILE_SIZE_20    \ Set R14 = TILE_SIZE_20 - R14
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -7825,8 +7862,6 @@ ENDIF
                                     \ buffer 0 is for objects that are far away
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
-                                    \
-                                    \ Why &14000000 (20 tiles)? ???
 
  ADD     R14, R14, #TILE_SIZE       \ Add the size of one tile to R14 so we draw
                                     \ the triangle one tile nearer than we would

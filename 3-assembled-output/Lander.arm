@@ -13,6 +13,7 @@
 .set SEA_LEVEL, 0x05500000
 .set TILE_SIZE, 0x01000000
 .set TILE_SIZE_5_5, 0x05800000
+.set TILE_SIZE_20, 0x14000000
 .set stack, 0x000121FC
 .set workspace, stack + 4
 .set xObject, 0x00
@@ -94,9 +95,9 @@
 landscapeOffset:
 .ifdef _RISCOS
  B       DecryptGameBinary
-.long    0x00000000, 0x14000000
+.long    0x00000000, TILE_SIZE_20
 .else
-.long    0xFA800000, 0x00000000, 0x14000000
+.long    0xFA800000, 0x00000000, TILE_SIZE_20
 .endif
 landscapeOffsetAddr:
 .long    landscapeOffset
@@ -292,7 +293,7 @@ GetLandscapeBelowVertex:
  LDR     R9, [R0, #8]
  LDR     R1, [R11, #zCamera]
  ADD     R9, R9, R1
- SUB     R9, R9, #0x14000000
+ SUB     R9, R9, #TILE_SIZE_20
  BL      GetLandscapeAltitude
  LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
@@ -661,10 +662,10 @@ dpar2:
  SUB     R0, R0, R8
  LDR     R8, [R11, #zCamera]
  SUB     R2, R2, R8
- ADD     R2, R2, #0x14000000
+ ADD     R2, R2, #TILE_SIZE_20
  LDR     R8, [R11, #yCamera]
  SUB     R1, R1, R8
- CMP     R2, #0x14000000
+ CMP     R2, #TILE_SIZE_20
  BHS     dpar1
  CMP     R2, #0x0A000000
  BLO     dpar1
@@ -967,18 +968,18 @@ expl1:
  SUBS    R8, R8, #1
  BPL     expl1
  LDMFD   R13!, {R3-R9, PC}
-sub_8CDC:
+AddShipExplosionToBuffer:
  STMFD   R13!, {R14}
- MOV     R8, #0x32
+ MOV     R8, #50
  LDR     R0, [R11, #xCamera]
  MOV     R1, #0
  LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #0x06000000
  BL      AddExplosionToBuffer
  LDMFD   R13!, {PC}
-sub_8CFC:
+AddSparkCloudToBuffer:
  STMFD   R13!, {R6-R9, R14}
- MOV     R8, #0x96
+ MOV     R8, #150
  LDR     R0, [R11, #xCamera]
  MOV     R1, #0
  LDR     R2, [R11, #zCamera]
@@ -1078,7 +1079,7 @@ dobs4:
  SUB     R0, R8, R14
  LDR     R14, [R11, #zCamera]
  SUB     R2, R9, R14
- ADD     R2, R2, #0x14000000
+ ADD     R2, R2, #TILE_SIZE_20
  LDR     R14, [R11, #yCamera]
  SUB     R1, R1, R14
  LDRB    R14, [R11, #objectType]
@@ -2005,7 +2006,7 @@ DrawTriangleFromBuffer:
  B       DrawNextFromGraphicsBuffer
 DrawParticleToBuffer:
  STMFD   R13!, {R9, R14}
- RSB     R14, R8, #0x14000000
+ RSB     R14, R8, #TILE_SIZE_20
  ADD     R14, R14, #TILE_SIZE
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
@@ -2021,7 +2022,7 @@ DrawParticleToBuffer:
  LDMFD   R13!, {R9, PC}
 DrawParticleShadowToBuffer:
  STMFD   R13!, {R9, R14}
- RSB     R14, R8, #0x14000000
+ RSB     R14, R8, #TILE_SIZE_20
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R8, R8, LSR #25
@@ -2036,7 +2037,7 @@ DrawParticleShadowToBuffer:
 DrawTriangleShadowToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
- RSB     R14, R14, #0x14000000
+ RSB     R14, R14, #TILE_SIZE_20
  CMP     R14, #0x0B000000
  MOVHS   R14, #0x0A000000
  BIC     R14, R14, #0x00C00000
@@ -2049,7 +2050,7 @@ DrawTriangleShadowToBuffer:
 DrawTriangleToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
- RSB     R14, R14, #0x14000000
+ RSB     R14, R14, #TILE_SIZE_20
  ADD     R14, R14, #TILE_SIZE
  CMP     R14, #0x0B000000
  MOVHS   R14, #0x0A000000
