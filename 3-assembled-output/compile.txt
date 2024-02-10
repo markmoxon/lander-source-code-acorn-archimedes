@@ -199,7 +199,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008120 74018BE5        	   180:  STR     R0, [R11, #yLandscapeCol]
 00:00008124 170E8BE2        	   181:  ADD     R0, R11, #xLandscapeCol
 00:00008128 860500EB        	   182:  BL      ProjectVertexOntoScreen
-00:0000812C 0F00002A        	   183:  BHS     land4
+00:0000812C 0F00002A        	   183:  BCS     land4
 00:00008130 0300A7E8        	   184:  STMIA   R7!, {R0-R1}
 00:00008134 000056E3        	   185:  CMP     R6, #0
 00:00008138 0C00000A        	   186:  BEQ     land4
@@ -728,11 +728,11 @@ Source: "3-assembled-output/Lander.arm"
 00:0000890C 0E1049E0        	   701:  SUB     R1, R9, R14
 00:00008910 0280A0E1        	   702:  MOV     R8, R2
 00:00008914 550300EB        	   703:  BL      ProjectParticleOntoScreen
-00:00008918 B504003B        	   704:  BLLO    DrawParticleShadowToBuffer
+00:00008918 B504003B        	   704:  BLCC    DrawParticleShadowToBuffer
 00:0000891C 8700BDE8        	   705:  LDMFD   R13!, {R0-R2, R7}
 00:00008920 0280A0E1        	   706:  MOV     R8, R2
 00:00008924 510300EB        	   707:  BL      ProjectParticleOntoScreen
-00:00008928 A204003B        	   708:  BLLO    DrawParticleToBuffer
+00:00008928 A204003B        	   708:  BLCC    DrawParticleToBuffer
 00:0000892C FF009AE8        	   709:  LDMIA   R10, {R0-R7}
 00:00008930 000057E3        	   710:  CMP     R7, #0
 00:00008934 B4FFFF1A        	   711:  BNE     dpar2
@@ -1658,7 +1658,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000966C 070090E8        	  1631:  LDMIA   R0, {R0-R2}
                             	  1632: ProjectParticleOntoScreen:
 00:00009670 020172E3        	  1633:  CMN     R2, #0x80000000
-00:00009674 0EF0A021        	  1634:  MOVHS   PC, R14
+00:00009674 0EF0A021        	  1634:  MOVCS   PC, R14
 00:00009678 0030B0E1        	  1635:  MOVS    R3, R0
 00:0000967C 00306342        	  1636:  RSBMI   R3, R3, #0
 00:00009680 0350E041        	  1637:  MVNMI   R5, R3
@@ -1679,8 +1679,8 @@ Source: "3-assembled-output/Lander.arm"
 00:000096B8 1336A0E1        	  1652:  MOV     R3, R3, LSL R6
 00:000096BC 1446A0E1        	  1653:  MOV     R4, R4, LSL R6
 00:000096C0 020053E1        	  1654:  CMP     R3, R2
-00:000096C4 02005431        	  1655:  CMPLO   R4, R2
-00:000096C8 0EF0A021        	  1656:  MOVHS   PC, R14
+00:000096C4 02005431        	  1655:  CMPCC   R4, R2
+00:000096C8 0EF0A021        	  1656:  MOVCS   PC, R14
 00:000096CC 80402DE9        	  1657:  STMFD   R13!, {R7, R14}
 00:000096D0 0270A0E1        	  1658:  MOV     R7, R2
 00:000096D4 0060A0E3        	  1659:  MOV     R6, #0
@@ -1712,12 +1712,12 @@ Source: "3-assembled-output/Lander.arm"
 00:00009734 40108652        	  1685:  ADDPL   R1, R6, #64
 00:00009738 40106642        	  1686:  RSBMI   R1, R6, #64
 00:0000973C 050D50E3        	  1687:  CMP     R0, #320
-00:00009740 EF005133        	  1688:  CMPLO   R1, #239
+00:00009740 EF005133        	  1688:  CMPCC   R1, #239
 00:00009744 8080BDE8        	  1689:  LDMFD   R13!, {R7, PC}
                             	  1690: ProjectVertexOntoScreen:
 00:00009748 070090E8        	  1691:  LDMIA   R0, {R0-R2}
 00:0000974C 020172E3        	  1692:  CMN     R2, #0x80000000
-00:00009750 0EF0A021        	  1693:  MOVHS   PC, R14
+00:00009750 0EF0A021        	  1693:  MOVCS   PC, R14
 00:00009754 E0402DE9        	  1694:  STMFD   R13!, {R5-R7, R14}
 00:00009758 0030B0E1        	  1695:  MOVS    R3, R0
 00:0000975C 00306342        	  1696:  RSBMI   R3, R3, #0
@@ -1765,15 +1765,15 @@ Source: "3-assembled-output/Lander.arm"
 00:000097F8 255CA0E1        	  1738:  MOV     R5, R5, LSR #24
 00:000097FC 266CA0E1        	  1739:  MOV     R6, R6, LSR #24
 00:00009800 000030E3        	  1740:  TEQ     R0, #0
-00:00009804 A0008552        	  1741:  ADDPL   R0, R5, #0xA0
-00:00009808 A0006542        	  1742:  RSBMI   R0, R5, #0xA0
+00:00009804 A0008552        	  1741:  ADDPL   R0, R5, #160
+00:00009808 A0006542        	  1742:  RSBMI   R0, R5, #160
 00:0000980C 000031E3        	  1743:  TEQ     R1, #0
-00:00009810 40108652        	  1744:  ADDPL   R1, R6, #0x40
-00:00009814 40106642        	  1745:  RSBMI   R1, R6, #0x40
+00:00009810 40108652        	  1744:  ADDPL   R1, R6, #64
+00:00009814 40106642        	  1745:  RSBMI   R1, R6, #64
 00:00009818 000070E3        	  1746:  CMN     R0, #0
 00:0000981C E080BDE8        	  1747:  LDMFD   R13!, {R5-R7, PC}
                             	  1748: pver4:
-00:00009820 1850A0E3        	  1749:  MOV     R5, #0x18
+00:00009820 1850A0E3        	  1749:  MOV     R5, #24
 00:00009824 040053E1        	  1750:  CMP     R3, R4
 00:00009828 A360A021        	  1751:  MOVHS   R6, R3, LSR #1
 00:0000982C A360A031        	  1752:  MOVLO   R6, R3, LSR #1
@@ -1812,17 +1812,17 @@ Source: "3-assembled-output/Lander.arm"
 00:000098A4 F9FFFF3A        	  1785:  BCC     pver7
 00:000098A8 055BB0E1        	  1786:  MOVS    R5, R5, LSL #22
 00:000098AC 0040BDE8        	  1787:  LDMFD   R13!, {R14}
-00:000098B0 17E04EE2        	  1788:  SUB     R14, R14, #0x17
-00:000098B4 17E06EE2        	  1789:  RSB     R14, R14, #0x17
+00:000098B0 17E04EE2        	  1788:  SUB     R14, R14, #23
+00:000098B4 17E06EE2        	  1789:  RSB     R14, R14, #23
 00:000098B8 355EA0E1        	  1790:  MOV     R5, R5, LSR R14
 00:000098BC 366EA0E1        	  1791:  MOV     R6, R6, LSR R14
 00:000098C0 A660A0E1        	  1792:  MOV     R6, R6, LSR #1
 00:000098C4 000030E3        	  1793:  TEQ     R0, #0
-00:000098C8 A0008552        	  1794:  ADDPL   R0, R5, #0xA0
-00:000098CC A0006542        	  1795:  RSBMI   R0, R5, #0xA0
+00:000098C8 A0008552        	  1794:  ADDPL   R0, R5, #160
+00:000098CC A0006542        	  1795:  RSBMI   R0, R5, #160
 00:000098D0 000031E3        	  1796:  TEQ     R1, #0
-00:000098D4 40108652        	  1797:  ADDPL   R1, R6, #0x40
-00:000098D8 40106642        	  1798:  RSBMI   R1, R6, #0x40
+00:000098D4 40108652        	  1797:  ADDPL   R1, R6, #64
+00:000098D8 40106642        	  1798:  RSBMI   R1, R6, #64
 00:000098DC 000070E3        	  1799:  CMN     R0, #0
 00:000098E0 E080BDE8        	  1800:  LDMFD   R13!, {R5-R7, PC}
                             	  1801: vmod1:

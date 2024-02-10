@@ -180,7 +180,7 @@ land2:
  STR     R0, [R11, #yLandscapeCol]
  ADD     R0, R11, #xLandscapeCol
  BL      ProjectVertexOntoScreen
- BHS     land4
+ BCS     land4
  STMIA   R7!, {R0-R1}
  CMP     R6, #0
  BEQ     land4
@@ -701,11 +701,11 @@ dpar4:
  SUB     R1, R9, R14
  MOV     R8, R2
  BL      ProjectParticleOntoScreen
- BLLO    DrawParticleShadowToBuffer
+ BLCC    DrawParticleShadowToBuffer
  LDMFD   R13!, {R0-R2, R7}
  MOV     R8, R2
  BL      ProjectParticleOntoScreen
- BLLO    DrawParticleToBuffer
+ BLCC    DrawParticleToBuffer
  LDMIA   R10, {R0-R7}
  CMP     R7, #0
  BNE     dpar2
@@ -1631,7 +1631,7 @@ pole6:
  LDMIA   R0, {R0-R2}
 ProjectParticleOntoScreen:
  CMN     R2, #0x80000000
- MOVHS   PC, R14
+ MOVCS   PC, R14
  MOVS    R3, R0
  RSBMI   R3, R3, #0
  MVNMI   R5, R3
@@ -1652,8 +1652,8 @@ ppar1:
  MOV     R3, R3, LSL R6
  MOV     R4, R4, LSL R6
  CMP     R3, R2
- CMPLO   R4, R2
- MOVHS   PC, R14
+ CMPCC   R4, R2
+ MOVCS   PC, R14
  STMFD   R13!, {R7, R14}
  MOV     R7, R2
  MOV     R6, #0
@@ -1685,12 +1685,12 @@ ppar3:
  ADDPL   R1, R6, #64
  RSBMI   R1, R6, #64
  CMP     R0, #320
- CMPLO   R1, #239
+ CMPCC   R1, #239
  LDMFD   R13!, {R7, PC}
 ProjectVertexOntoScreen:
  LDMIA   R0, {R0-R2}
  CMN     R2, #0x80000000
- MOVHS   PC, R14
+ MOVCS   PC, R14
  STMFD   R13!, {R5-R7, R14}
  MOVS    R3, R0
  RSBMI   R3, R3, #0
@@ -1738,15 +1738,15 @@ pver3:
  MOV     R5, R5, LSR #24
  MOV     R6, R6, LSR #24
  TEQ     R0, #0
- ADDPL   R0, R5, #0xA0
- RSBMI   R0, R5, #0xA0
+ ADDPL   R0, R5, #160
+ RSBMI   R0, R5, #160
  TEQ     R1, #0
- ADDPL   R1, R6, #0x40
- RSBMI   R1, R6, #0x40
+ ADDPL   R1, R6, #64
+ RSBMI   R1, R6, #64
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
 pver4:
- MOV     R5, #0x18
+ MOV     R5, #24
  CMP     R3, R4
  MOVHS   R6, R3, LSR #1
  MOVLO   R6, R3, LSR #1
@@ -1785,17 +1785,17 @@ pver7:
  BCC     pver7
  MOVS    R5, R5, LSL #22
  LDMFD   R13!, {R14}
- SUB     R14, R14, #0x17
- RSB     R14, R14, #0x17
+ SUB     R14, R14, #23
+ RSB     R14, R14, #23
  MOV     R5, R5, LSR R14
  MOV     R6, R6, LSR R14
  MOV     R6, R6, LSR #1
  TEQ     R0, #0
- ADDPL   R0, R5, #0xA0
- RSBMI   R0, R5, #0xA0
+ ADDPL   R0, R5, #160
+ RSBMI   R0, R5, #160
  TEQ     R1, #0
- ADDPL   R1, R6, #0x40
- RSBMI   R1, R6, #0x40
+ ADDPL   R1, R6, #64
+ RSBMI   R1, R6, #64
  CMN     R0, #0
  LDMFD   R13!, {R5-R7, PC}
 vmod1:
