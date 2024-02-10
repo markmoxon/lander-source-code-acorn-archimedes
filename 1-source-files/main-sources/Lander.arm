@@ -393,22 +393,7 @@
 
 .landscapeOffset
 
-IF _RISCOS
-
- B       DecryptGameBinary          \ RISC OS runs !RunImage as an Absolute file
-                                    \ which executes from the first instruction
-                                    \ rather than having an execute address, so
-                                    \ this jumps to the decrytption routine to
-                                    \ decrypt the game binary before jumping to
-                                    \ Entry to start the game
-
- EQUD    &00000000, TILE_SIZE_20
-
-ELSE
-
  EQUD    &FA800000, &00000000, TILE_SIZE_20
-
-ENDIF
 
 \ ******************************************************************************
 \
@@ -12436,27 +12421,5 @@ ENDIF
  EQUD     &00013627, &0001304D, &00012AAA, &0001253C
  EQUD     &00012000, &00011AF2, &00011611, &0001115B
  EQUD     &00010CCC, &00010864, &00010421, &00010000
-
-IF _RISCOS
-
-\ ******************************************************************************
-\
-\       Name: DecryptGameBinary
-\       Type: Subroutine
-\   Category: Copy protection
-\    Summary: Placeholder routine to enable binary to run as an Absolute file
-\             when not encrypted
-\
-\ ******************************************************************************
-
-.DecryptGameBinary
-
- MOV     R0, #&FA800000             \ Restore the first word of the game to the
- MOV     R1, #landscapeOffset       \ value it had before we replaced it with a
- STR     R0, [R1]                   \ jump command to this routine
-
- B       Entry                      \ Start the game
-
-ENDIF
 
 .endCode

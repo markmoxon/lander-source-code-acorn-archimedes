@@ -93,12 +93,7 @@
 .set objectMap, 0x4400
 .org     CODE
 landscapeOffset:
-.ifdef _RISCOS
- B       DecryptGameBinary
-.long    0x00000000, TILE_SIZE_20
-.else
 .long    0xFA800000, 0x00000000, TILE_SIZE_20
-.endif
 landscapeOffsetAddr:
 .long    landscapeOffset
 landscapeConfig:
@@ -4804,11 +4799,4 @@ divisionTable:
 .long     0x00013627, 0x0001304D, 0x00012AAA, 0x0001253C
 .long     0x00012000, 0x00011AF2, 0x00011611, 0x0001115B
 .long     0x00010CCC, 0x00010864, 0x00010421, 0x00010000
-.ifdef _RISCOS
-DecryptGameBinary:
- MOV     R0, #0xFA800000
- MOV     R1, #landscapeOffset
- STR     R0, [R1]
- B       Entry
-.endif
 endCode:

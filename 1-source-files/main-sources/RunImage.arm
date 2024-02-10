@@ -1,0 +1,131 @@
+\ ******************************************************************************
+\
+\ LANDER !RunImage SOURCE
+\
+\ Lander was written by David Braben and is copyright D.J.Braben 1987
+\
+\ The code on this site has been reconstructed from a disassembly of the game on
+\ the Arthur and RISC OS 2 application discs
+\
+\ The commentary is copyright Mark Moxon, and any misunderstandings or mistakes
+\ in the documentation are entirely my fault
+\
+\ The terminology and notations used in this commentary are explained at
+\ https://lander.bbcelite.com/terminology
+\
+\ The deep dive articles referred to in this commentary can be found at
+\ https://lander.bbcelite.com/deep_dives
+\
+\ ------------------------------------------------------------------------------
+\
+\ This source file produces the following binary file:
+\
+\   * !RunImage.unprot.bin
+\
+\ ******************************************************************************
+
+ CODE = &00008000
+
+ ORG CODE
+
+\ ******************************************************************************
+\
+\       Name: Entry
+\       Type: Subroutine
+\   Category: Copy protection
+\    Summary: Entry point for the !RunImage Absolute file
+\
+\ ******************************************************************************
+
+ B       DecryptGameBinary          \ RISC OS runs !RunImage as an Absolute file
+                                    \ which executes from the first instruction
+                                    \ rather than having an execute address, so
+                                    \ this jumps to the decryption routine to
+                                    \ decrypt the game binary before jumping to
+                                    \ Entry to start the game
+
+\ ******************************************************************************
+\
+\       Name: gameCode
+\       Type: Variable
+\   Category: Copy protection
+\    Summary: The unencrypted game code
+\
+\ ******************************************************************************
+
+.gameCode
+
+ INCBIN "3-assembled-output/GameCode.bin"
+
+.gameCodeEnd
+
+\ ******************************************************************************
+\
+\       Name: DecryptGameBinary
+\       Type: Subroutine
+\   Category: Copy protection
+\    Summary: Placeholder routine to decrypt game code to &8000 so it can be run
+\
+\ ******************************************************************************
+
+.DecryptGameBinary
+
+ LDR     R0, gameCodeAddr           \ Set R0 to the address of the game code
+
+ LDR     R1, absoluteAddr           \ Set R1 to the address of the start of the
+                                    \ Absolute file
+
+ LDR     R2, gameCodeEndAddr        \ Set R2 to the address of the end of the
+                                    \ game code
+
+.decr1
+ 
+ LDR     R12, [R0], #4              \ Copy a word from R0 to R1, updating the
+ STR     R12, [R1], #4              \ addresses as we go (this is where the
+                                    \ decryption process would work, but
+                                    \ currently it is just a copy)
+
+ CMP     R0, R2                     \ Loop back until we have copied the whole
+ BNE     decr1                      \ game
+
+ B       &0000A614                  \ Start the game, which has execution
+                                    \ address (the Entry routine)
+
+\ ******************************************************************************
+\
+\       Name: absoluteAddr
+\       Type: Variable
+\   Category: Copy protection
+\    Summary: The address of the start of the Absolute file
+\
+\ ******************************************************************************
+
+.absoluteAddr
+
+ EQUD    CODE
+
+\ ******************************************************************************
+\
+\       Name: gameCodeAddr
+\       Type: Variable
+\   Category: Copy protection
+\    Summary: The address of the game code
+\
+\ ******************************************************************************
+
+.gameCodeAddr
+
+ EQUD    gameCode
+
+\ ******************************************************************************
+\
+\       Name: gameCodeEndAddr
+\       Type: Variable
+\   Category: Copy protection
+\    Summary: The address of the end of the game code
+\
+\ ******************************************************************************
+
+.gameCodeEndAddr
+
+ EQUD    gameCodeEnd

@@ -1,0 +1,22 @@
+.set CODE, 0x00008000
+.org CODE
+ B       DecryptGameBinary
+gameCode:
+.incbin "3-assembled-output/GameCode.bin"
+gameCodeEnd:
+DecryptGameBinary:
+ LDR     R0, gameCodeAddr
+ LDR     R1, absoluteAddr
+ LDR     R2, gameCodeEndAddr
+decr1:
+ LDR     R12, [R0], #4
+ STR     R12, [R1], #4
+ CMP     R0, R2
+ BNE     decr1
+ B       0x0000A614
+absoluteAddr:
+.long    CODE
+gameCodeAddr:
+.long    gameCode
+gameCodeEndAddr:
+.long    gameCodeEnd
