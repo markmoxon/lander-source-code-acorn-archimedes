@@ -1660,32 +1660,32 @@ ppar1:
  MOV     R14, #0x200
 ppar2:
  MOVS    R4, R4, LSL #1
- CMPLO   R4, R7
- SUBHS   R4, R4, R7
- ORRHS   R6, R6, R14
+ CMPCC   R4, R7
+ SUBCS   R4, R4, R7
+ ORRCS   R6, R6, R14
  MOVS    R14, R14, LSR #1
- BLO     ppar2
+ BCC     ppar2
  MOVS    R6, R6, LSL #22
  MOV     R5, #0
  MOV     R14, #0x200
 ppar3:
  MOVS    R3, R3, LSL #1
- CMPLO   R3, R2
- SUBHS   R3, R3, R2
- ORRHS   R5, R5, R14
+ CMPCC   R3, R2
+ SUBCS   R3, R3, R2
+ ORRCS   R5, R5, R14
  MOVS    R14, R14, LSR #1
- BLO     ppar3
+ BCC     ppar3
  MOVS    R5, R5, LSL #22
  MOV     R5, R5, LSR #24
  MOV     R6, R6, LSR #24
  TEQ     R0, #0
- ADDPL   R0, R5, #0xA0
- RSBMI   R0, R5, #0xA0
+ ADDPL   R0, R5, #160
+ RSBMI   R0, R5, #160
  TEQ     R1, #0
- ADDPL   R1, R6, #0x40
- RSBMI   R1, R6, #0x40
+ ADDPL   R1, R6, #64
+ RSBMI   R1, R6, #64
  CMP     R0, #320
- CMPLO   R1, #0xEF
+ CMPLO   R1, #239
  LDMFD   R13!, {R7, PC}
 ProjectVertexOntoScreen:
  LDMIA   R0, {R0-R2}
@@ -1719,21 +1719,21 @@ pver1:
  MOV     R14, #0x100
 pver2:
  MOVS    R4, R4, LSL #1
- CMPLO   R4, R7
- SUBHS   R4, R4, R7
- ORRHS   R6, R6, R14
+ CMPCC   R4, R7
+ SUBCS   R4, R4, R7
+ ORRCS   R6, R6, R14
  MOVS    R14, R14, LSR #1
- BLO     pver2
+ BCC     pver2
  MOVS    R6, R6, LSL #23
  MOV     R5, #0
  MOV     R14, #0x200
 pver3:
  MOVS    R3, R3, LSL #1
- CMPLO   R3, R2
- SUBHS   R3, R3, R2
- ORRHS   R5, R5, R14
+ CMPCC   R3, R2
+ SUBCS   R3, R3, R2
+ ORRCS   R5, R5, R14
  MOVS    R14, R14, LSR #1
- BLO     pver3
+ BCC     pver3
  MOVS    R5, R5, LSL #22
  MOV     R5, R5, LSR #24
  MOV     R6, R6, LSR #24
@@ -1766,11 +1766,11 @@ pver5:
  MOV     R7, R7, LSL #24
 pver6:
  MOVS    R4, R4, LSL #1
- CMPLO   R4, R7
- SUBHS   R4, R4, R7
- ORRHS   R6, R6, R14
+ CMPCC   R4, R7
+ SUBCS   R4, R4, R7
+ ORRCS   R6, R6, R14
  MOVS    R14, R14, LSR #1
- BLO     pver6
+ BCC     pver6
  MOVS    R6, R6, LSL #24
  MOV     R5, #0
  MOV     R14, #0x200
@@ -1778,11 +1778,11 @@ pver6:
  MOV     R2, R2, LSL #22
 pver7:
  MOVS    R3, R3, LSL #1
- CMPLO   R3, R2
- SUBHS   R3, R3, R2
- ORRHS   R5, R5, R14
+ CMPCC   R3, R2
+ SUBCS   R3, R3, R2
+ ORRCS   R5, R5, R14
  MOVS    R14, R14, LSR #1
- BLO     pver7
+ BCC     pver7
  MOVS    R5, R5, LSL #22
  LDMFD   R13!, {R14}
  SUB     R14, R14, #0x17

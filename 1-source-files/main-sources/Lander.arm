@@ -2781,7 +2781,7 @@
                                     \ relative to camera
 
  BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle's
-                                    \ shadow in (R0, R1, R0) onto the screen,
+                                    \ shadow in (R0, R1, R2) onto the screen,
                                     \ returning the results in (R0, R1)
 
  BLLO    DrawParticleShadowToBuffer \ If the projected coordinates fit onto the
@@ -2795,7 +2795,7 @@
                                     \ relative to camera
 
  BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle in
-                                    \ (R0, R1, R0) onto the screen, returning
+                                    \ (R0, R1, R2) onto the screen, returning
                                     \ the results in (R0, R1)
 
  BLLO    DrawParticleToBuffer       \ If the projected coordinates fit onto the
@@ -4712,7 +4712,7 @@
  ORR     R4, R4, R5                 \ Set R4 = |R0| OR |R1| OR R2
  ORR     R4, R4, R2                 \        = |x| OR |y| OR z
  ORRS    R4, R4, #1                 \
-                                    \ And round it up to the nearest odd number
+                                    \ And round it up so it is non-zero
                                     \
                                     \ So this sets R4 to a number that is
                                     \ greater than |x|, |y| and z, so R4 is
@@ -4745,7 +4745,7 @@
                                     \
                                     \ So this scales R4 as high as possible
                                     \ while still staying within 32 bits, with
-                                    \ the scale factor given in R5 
+                                    \ the scale factor given in R5
 
  MOV     R0, R0, LSL R5             \ We now scale up the coordinate (x, y, z)
  MOV     R1, R1, LSL R5             \ in (R0, R1, R2) by the scale factor in R5,
@@ -6515,88 +6515,215 @@
 \   Category: Maths (Geometry)
 \    Summary: Project a 3D particle coordinate onto the screen
 \
+\ ------------------------------------------------------------------------------
+\
+\ This routine projects a 3D coordinate (x, y, z) into screen coordinates, as
+\ follows:
+\
+\   screen x-coordinate = 160 + x / z
+\
+\   screen y-coordinate = 64 + y / z
+\
+\ The screen coordinate is deemed on-screen when it is within the following
+\ valid ranges:
+\
+\   screen x is in the range 0 to 319
+\
+\   screen y is in the range 0 to 238
+\
+\ The y-coordinate is the screen height (256 pixels) minus the two text lines
+\ that are reserved for the score bar at the top of the screen (16 pixels).
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   (R0, R1, R2)                    Particle coordinates in (x, y, z)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   (R0, R1)                        Projected screen coordinates (x, y)
+\
+\   Flags                           HS condition is true if particle is
+\                                   off-screen
+\
 \ ******************************************************************************
 
 .ProjectParticleOntoScreen
 
- CMN     R2, #&80000000             \ 
- MOVHS   PC, R14                    \ 
+ CMN     R2, #&80000000             \ If R2 >= &80000000 then the particle is
+ MOVHS   PC, R14                    \ too far away to be visible, so return from
+                                    \ the subroutine with the HS condition true
 
- MOVS    R3, R0                     \ 
- RSBMI   R3, R3, #0                 \ 
- MVNMI   R5, R3                     \ 
- MOVPL   R5, R3                     \ 
+ MOVS    R3, R0                     \ Set R3 = |R0|
+ RSBMI   R3, R3, #0                 \        = |x|
 
- MOVS    R4, R1                     \ 
- RSBMI   R4, R4, #0                 \ 
- MVNMI   R6, R4                     \ 
- MOVPL   R6, R4                     \ 
+ MVNMI   R5, R3                     \ If R0 is negative, set R5 = ~R3
 
- ORR     R5, R5, R6                 \ 
- ORR     R5, R5, R2                 \ 
- ORR     R5, R5, #1                 \ 
+ MOVPL   R5, R3                     \ If R0 is positive, set R5 = R3
 
- MOV     R6, #0                     \ 
+ MOVS    R4, R1                     \ Set R4 = |R1|
+ RSBMI   R4, R4, #0                 \        = |y|
+
+ MVNMI   R6, R4                     \ If R1 is negative, set R6 = ~R4
+
+ MOVPL   R6, R4                     \ If R1 is positive, set R6 = R4
+
+ ORR     R5, R5, R6                 \ Set R5 = R5 OR R6 OR R2
+ ORR     R5, R5, R2                 \        = |R0| OR |R1| OR R2
+ ORR     R5, R5, #1                 \        = |x| OR |y| OR z
+                                    \
+                                    \ And round it up so it is non-zero
+                                    \
+                                    \ So this sets R5 to a number that is
+                                    \ greater than |x|, |y| and z, so R5 is
+                                    \ therefore an upper bound on the values of
+                                    \ all three coordinates
+
+                                    \ We now work out how many times we can
+                                    \ scale up R5 so that it is as large as
+                                    \ possible but still fits within a 32-bit
+                                    \ word
+
+ MOV     R6, #0                     \ Set R6 = 0 to use as the scale factor in
+                                    \ the following loop
 
 .ppar1
 
- MOVS    R5, R5, LSL #1             \ 
- ADDPL   R6, R6, #1                 \ 
- BPL     ppar1                      \ 
+ MOVS    R5, R5, LSL #1             \ Shift R5 to the left until the top bit is
+ ADDPL   R6, R6, #1                 \ set, incrementing R6 for each shift so R6
+ BPL     ppar1                      \ contains the scale factor we have applied
+                                    \ to R5
+                                    \
+                                    \ So this scales R5 as high as possible
+                                    \ while still staying within 32 bits, with
+                                    \ the scale factor given in R6
 
- MOV     R2, R2, LSL R6             \ 
- MOV     R3, R3, LSL R6             \ 
- MOV     R4, R4, LSL R6             \ 
+ MOV     R2, R2, LSL R6             \ We now scale up the updated coordinate
+ MOV     R3, R3, LSL R6             \ (|x|, |y|, z) in (R3, R4, R2) by the scale
+ MOV     R4, R4, LSL R6             \ factor in R6, as we know the result will
+                                    \ stay within 32-bit words
 
- CMP     R3, R2                     \ 
- CMPLO   R4, R2                     \ 
- MOVHS   PC, R14                    \ 
+ CMP     R3, R2                     \ If R3 >= R2 or R4 >= R2, return from the
+ CMPLO   R4, R2                     \ subroutine with the HS condition true, so
+ MOVHS   PC, R14                    \ this returns from the subroutine if either
+                                    \ of these are true:
+                                    \
+                                    \   |x| >= z or |y| >= z
+                                    \
+                                    \ This is the case when the particle has a
+                                    \ greater viewing angle then 45 degrees in
+                                    \ either direction, in which case we don't
+                                    \ draw the particle on-screen
 
- STMFD   R13!, {R7, R14}            \ 
+ STMFD   R13!, {R7, R14}            \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
- MOV     R7, R2                     \ 
+ MOV     R7, R2                     \ Set R7 = R2
+                                    \        = z
+                                    \
+                                    \ where the value of z is scaled up
 
- MOV     R6, #0                     \ Divide R6 = R4 / R7
- MOV     R14, #&200                 \ 
+                                    \ We now calculate R6 = R4 / R7 using the
+                                    \ shift-and-subtract algorithm
+
+ MOV     R6, #0                     \ Set R6 = 0 to use for building the sum in
+                                    \ our shift-and-subtract division result
+
+ MOV     R14, #&200                 \ Set bit 9 in R14 to act as our shifted
+                                    \ division bit, so we populate nine bits of
+                                    \ the result
 
 .ppar2
 
- MOVS    R4, R4, LSL #1             \ 
- CMPLO   R4, R7                     \ 
- SUBHS   R4, R4, R7                 \ 
- ORRHS   R6, R6, R14                \ 
- MOVS    R14, R14, LSR #1           \ 
- BLO     ppar2                      \ 
- MOVS    R6, R6, LSL #22            \ End divide
+ MOVS    R4, R4, LSL #1             \ Shift R4 left by one place
 
- MOV     R5, #0                     \ Divide R6 = R3 / R2
- MOV     R14, #&200                 \ 
+ CMPCC   R4, R7                     \ If we just shifted a zero out of R4, set
+                                    \ the C flag if R4 >= R7
+
+ SUBCS   R4, R4, R7                 \ The numerator in R4 is bigger than the
+ ORRCS   R6, R6, R14                \ denominator in R7, so subtract the
+                                    \ denominator from the numerator and set the
+                                    \ corresponding bit in the result
+
+ MOVS    R14, R14, LSR #1           \ Shift R14 left by one place
+
+ BCC     ppar2                      \ Loop back if R4 is non-zero
+
+ MOVS    R6, R6, LSL #22            \ Shift the result in R6 left as far as
+                                    \ possible so it still fits in to 32 bits
+                                    \ (as the result contains nine bits), so now
+                                    \ we have:
+                                    \
+                                    \   R6 = R4 / R7
+                                    \      = |y| / z
+                                    \
+                                    \ where |y| and z are both scaled up by the
+                                    \ same factor
+
+ MOV     R5, #0                     \ Set R5 = R3 / R2 using the same algorithm
+ MOV     R14, #&200                 \ as above
+                                    \
+                                    \ This is the first part of the algorithm
 
 .ppar3
 
- MOVS    R3, R3, LSL #1             \ 
- CMPLO   R3, R2                     \ 
- SUBHS   R3, R3, R2                 \ 
- ORRHS   R5, R5, R14                \ 
- MOVS    R14, R14, LSR #1           \ 
- BLO     ppar3                      \ 
- MOVS    R5, R5, LSL #22            \ End divide
+ MOVS    R3, R3, LSL #1             \ This is the second part of the algorithm,
+ CMPCC   R3, R2                     \ so we now have:
+ SUBCS   R3, R3, R2                 \
+ ORRCS   R5, R5, R14                \    R5 = R3 / R2
+ MOVS    R14, R14, LSR #1           \       = |x| / z
+ BCC     ppar3                      \ 
+ MOVS    R5, R5, LSL #22            \ where |x| and z are both scaled up by the
+                                    \ same factor
 
- MOV     R5, R5, LSR #24            \ 
- MOV     R6, R6, LSR #24            \ 
+ MOV     R5, R5, LSR #24            \ Shift both division results down so we
+ MOV     R6, R6, LSR #24            \ only keep the top byte of each result
 
- TEQ     R0, #0                     \ 
- ADDPL   R0, R5, #&A0               \ 
- RSBMI   R0, R5, #&A0               \ 
+ TEQ     R0, #0                     \ If the original R0 argument was positive,
+ ADDPL   R0, R5, #160               \ set:
+ RSBMI   R0, R5, #160               \
+                                    \   R0 = 160 + R5
+                                    \      = 160 + |x| / z
+                                    \      = 160 + x / z
+                                    \
+                                    \ otherwise set:
+                                    \ 
+                                    \   R0 = 160 - R5
+                                    \      = 160 - |x| / z
+                                    \      = 160 + x / z
+                                    \
+                                    \ So this sets R0 as follows, where x and z
+                                    \ are the original particle's coordinates:
+                                    \
+                                    \   R0 = 160 + x / z
 
- TEQ     R1, #0                     \ 
- ADDPL   R1, R6, #&40               \ 
- RSBMI   R1, R6, #&40               \ 
+ TEQ     R1, #0                     \ If the original R1 argument was positive,
+ ADDPL   R1, R6, #64                \ set:
+ RSBMI   R1, R6, #64                \ 
+                                    \   R1 = 64 + R6
+                                    \      = 64 + |y| / z
+                                    \      = 64 + y / z
+                                    \
+                                    \ otherwise set:
+                                    \ 
+                                    \   R1 = 64 - R6
+                                    \      = 64 - |y| / z
+                                    \      = 64 + y / z
+                                    \
+                                    \ So this sets R1 as follows, where y and z
+                                    \ are the original particle's coordinates:
+                                    \
+                                    \   R1 = 64 + y / z
 
- CMP     R0, #320                   \ 
- CMPLO   R1, #&EF                   \ 
+ CMP     R0, #320                   \ Set the HS condition to true if the screen
+ CMPLO   R1, #239                   \ x-coordinate is >= 320 or the screen
+                                    \ y-coordinate is >= 239
 
- LDMFD   R13!, {R7, PC}             \ 
+ LDMFD   R13!, {R7, PC}             \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
@@ -6654,11 +6781,11 @@
 .pver2
 
  MOVS    R4, R4, LSL #1             \ 
- CMPLO   R4, R7                     \ 
- SUBHS   R4, R4, R7                 \ 
- ORRHS   R6, R6, R14                \ 
+ CMPCC   R4, R7                     \ 
+ SUBCS   R4, R4, R7                 \ 
+ ORRCS   R6, R6, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     pver2                      \ 
+ BCC     pver2                      \ 
  MOVS    R6, R6, LSL #23            \ End divide
 
  MOV     R5, #0                     \ Divide R5 = R3 / R2
@@ -6667,11 +6794,11 @@
 .pver3
 
  MOVS    R3, R3, LSL #1             \ 
- CMPLO   R3, R2                     \ 
- SUBHS   R3, R3, R2                 \ 
- ORRHS   R5, R5, R14                \ 
+ CMPCC   R3, R2                     \ 
+ SUBCS   R3, R3, R2                 \ 
+ ORRCS   R5, R5, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     pver3                   \ 
+ BCC     pver3                   \ 
  MOVS    R5, R5, LSL #22            \ End divide
 
  MOV     R5, R5, LSR #24            \ 
@@ -6720,11 +6847,11 @@
 .pver6
 
  MOVS    R4, R4, LSL #1             \ 
- CMPLO   R4, R7                     \ 
- SUBHS   R4, R4, R7                 \ 
- ORRHS   R6, R6, R14                \ 
+ CMPCC   R4, R7                     \ 
+ SUBCS   R4, R4, R7                 \ 
+ ORRCS   R6, R6, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     pver6                      \ 
+ BCC     pver6                      \ 
  MOVS    R6, R6, LSL #24            \ End divide
 
  MOV     R5, #0                     \ Divide R5 = R3 / R2 (both << 22)
@@ -6735,11 +6862,11 @@
 .pver7
 
  MOVS    R3, R3, LSL #1             \ 
- CMPLO   R3, R2                     \ 
- SUBHS   R3, R3, R2                 \ 
- ORRHS   R5, R5, R14                \ 
+ CMPCC   R3, R2                     \ 
+ SUBCS   R3, R3, R2                 \ 
+ ORRCS   R5, R5, R14                \ 
  MOVS    R14, R14, LSR #1           \ 
- BLO     pver7                      \ 
+ BCC     pver7                      \ 
  MOVS    R5, R5, LSL #22            \ End divide
 
  LDMFD   R13!, {R14}                \ 
