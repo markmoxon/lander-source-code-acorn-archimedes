@@ -8550,6 +8550,7 @@
                                     \ we are drawing in, pointing just below
                                     \ the two lines of text at the top of the
                                     \ screen
+
 .DrawNextFromGraphicsBuffer
 
  LDR     R0, [R9], #4               \ Fetch the address of the next free byte in
@@ -8849,17 +8850,18 @@
 \       Name: DrawTriangle (Part 1 of ???)
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: Draw a triangle
+\    Summary: Draw a triangle, starting by ordering the coordinates and jumping
+\             to the relevant part of the routine
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
-\   (R0, R1)                        Pixel coordinate of corner 1
+\   (R0, R1)                        Pixel coordinate of corner 1 in (x1, y1)
 \
-\   (R2, R3)                        Pixel coordinate of corner 2
+\   (R2, R3)                        Pixel coordinate of corner 2 in (x2, y2)
 \
-\   (R4, R5)                        Pixel coordinate of corner 3
+\   (R4, R5)                        Pixel coordinate of corner 3 in (x3, y3)
 \
 \   R8                              Colour
 \
@@ -8868,119 +8870,367 @@
 .DrawTriangle
 
  CMP     R0, #320                   \ Check to see whether any of the triangle
- CMPLO   R1, #239                   \ corners are off-screen (in which case the
- CMPLO   R2, #320                   \ x-coordinate will be >= 320, or the
- CMPLO   R3, #239                   \ y-coordinate will be >= 239)
- CMPLO   R4, #320
- CMPLO   R5, #239
+ CMPLO   R1, #239                   \ corners are off-screen, in which case at
+ CMPLO   R2, #320                   \ least one of x1 to x3 will be >= 320, or
+ CMPLO   R3, #239                   \ at least one of y1 to y3 will be >= 239
+ CMPLO   R4, #320                   \ (the y-coordinate is checked against 239
+ CMPLO   R5, #239                   \ rather than 255 as the top 16 pixel lines
+                                    \ of the 320x256 screen are taken up by the
+                                    \ score bar)
 
  BHS     trin23                     \ If any of the corners are off-screen, jump
                                     \ to trin23 to draw a clipped triangle
 
- STMFD   R13!, {R14}                \ 
+ STMFD   R13!, {R14}                \ Store the return address on the stack
 
  LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
                                     \ we are drawing in, pointing just below
                                     \ the two lines of text at the top of the
                                     \ screen
 
- CMP     R1, R3                     \ 
- BHS     trin1                      \ 
- MOV     R6, R0                     \ 
- MOV     R0, R2                     \ 
- MOV     R2, R6                     \ 
- MOV     R6, R1                     \ 
- MOV     R1, R3                     \ 
- MOV     R3, R6                     \ 
+                                    \ We start by ordering the triangle corners
+                                    \ by y-coordinte, so (x1, y1) is the
+                                    \ furthest down the screen with the highest
+                                    \ y-coordinate, followed by (x2, y2) then
+                                    \ (x3, y3), at the same or higher level, and
+                                    \ in that order
+
+ CMP     R1, R3                     \ If R1 >= R3, jump to trin1 to skip the
+ BHS     trin1                      \ following, as y1 >= y2 already
+
+ MOV     R6, R0                     \ Swap (x1, y1) and (x2, y2), so we now have
+ MOV     R0, R2                     \ y1 >= y2
+ MOV     R2, R6
+ MOV     R6, R1
+ MOV     R1, R3
+ MOV     R3, R6
 
 .trin1
 
- CMP     R1, R5                     \ 
- BHS     trin2                      \ 
- MOV     R6, R0                     \ 
- MOV     R0, R4                     \ 
- MOV     R4, R6                     \ 
- MOV     R6, R1                     \ 
- MOV     R1, R5                     \ 
- MOV     R5, R6                     \ 
+ CMP     R1, R5                     \ If R1 >= R5, jump to trin2 to skip the
+ BHS     trin2                      \ following, as y1 >= y3 already
+
+ MOV     R6, R0                     \ Swap (x1, y1) and (x3, y3), so we now have
+ MOV     R0, R4                     \ y1 >= y3
+ MOV     R4, R6
+ MOV     R6, R1
+ MOV     R1, R5
+ MOV     R5, R6
 
 .trin2
 
- CMP     R3, R5                     \ 
- BHS     trin3                      \ 
- MOV     R6, R2                     \ 
- MOV     R2, R4                     \ 
- MOV     R4, R6                     \ 
- MOV     R6, R3                     \ 
- MOV     R3, R5                     \ 
- MOV     R5, R6                     \ 
+ CMP     R3, R5                     \ If R3 >= R5, jump to trin3 to skip the
+ BHS     trin3                      \ following, as y2 >= y3 already
+
+ MOV     R6, R2                     \ Swap (x2, y2) and (x3, y3), so we now have
+ MOV     R2, R4                     \ y2 >= y3
+ MOV     R4, R6
+ MOV     R6, R3
+ MOV     R3, R5
+ MOV     R5, R6
+
+                                    \ So the triangle coordinates are ordered
+                                    \ like this on-screen:
+                                    \
+                                    \   (x3, y3)
+                                    \   (x2, y2)
+                                    \   (x1, y1)
 
 .trin3
 
- ADD     R11, R1, R1, LSL #2        \ 
- ADD     R12, R12, R11, LSL #6      \ 
- SUBS    R9, R1, R3                 \ 
- BEQ     trin16                     \ 
- STMFD   R13!, {R4-R5}              \ 
- SUBS    R14, R2, R0                \ 
- RSBMI   R14, R2, R0                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
- BHS     trin4                      \ 
- LDR     R10, divisionTableAddr     \ 
- ADD     R10, R10, R14, LSL #8      \ 
- LDR     R6, [R10, R9, LSL #2]      \ 
- B       trin6                      \ 
+ ADD     R11, R1, R1, LSL #2        \ Set R11 = R1 + R1 * 4
+                                    \         = 5 * y1
+
+ ADD     R12, R12, R11, LSL #6      \ Set R12 = R12 + R11 * 64
+                                    \         = screenAddr + 5 * y1 * 64
+                                    \         = screenAddr + 320 * y1
+                                    \
+                                    \ So R12 is the screen address of the start
+                                    \ of the pixel row containing (x1, y1), at
+                                    \ the bottom of the triangle on-screen
+
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 2 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: Calculate the slope of (x1, y1) to (x2, y2)
+\
+\ ******************************************************************************
+
+                                    \ We now calculate the slope of the first
+                                    \ side of the triangle, from (x1, y1) to
+                                    \ (x2, y2), as follows:
+                                    \
+                                    \   R6 = (y1 - y2) / (x2 - x1)
+
+ SUBS    R9, R1, R3                 \ Set R9 = R1 - R3
+                                    \        = y1 - y2
+                                    \
+                                    \ So this is the horizontal distance between
+                                    \ (x1, y1) and (x2, y2), i.e. the delta
+                                    \ y-coordinate between the two points
+                                    \
+                                    \ We know this is positive because y1 >= y2
+
+ BEQ     trin16                     \ If the (x1, y1) and (x2, y2) share the
+                                    \ same y-coordinate then the triangle has a
+                                    \ vertical edge between (x1, y1) and
+                                    \ (x2, y2), so jump to part ??? to process
+                                    \ this special case
+
+ STMFD   R13!, {R4-R5}              \ Store the third corner's coordinates in
+                                    \ (x3, y3) on the stack to we can retrieve
+                                    \ them later
+
+ SUBS    R14, R2, R0                \ Set R14 = R2 - R0
+                                    \         = x2 - x1
+                                    \
+                                    \ So this is the vertical distance between
+                                    \ (x1, y1) and (x2, y2), i.e. the delta
+                                    \ x-coordinate between the two points
+                                    \
+                                    \ This will be positive if the line from
+                                    \ (x1, y1) and (x2, y2) slopes up and to the
+                                    \ right, or negative if the line slopes up
+                                    \ and to the left
+
+ RSBMI   R14, R2, R0                \ If R14 is negative, set R14 = x1 - x2, so
+                                    \ we have the following:
+                                    \
+                                    \   R14 = |x2 - x1|
+
+ CMP     R14, #64                   \ If either R14 >= 64 or R9 >= 64, then at
+ CMPLO   R9, #64                    \ least one of these is true:
+ BHS     trin4                      \
+                                    \   R14 = |x2 - x1| >= 64
+                                    \
+                                    \   R9  = (y1 - y2) >= 64
+                                    \
+                                    \ so jump to trin4 to calculate the slope
+                                    \ using the shift-and-subtract alsorithm
+
+ LDR     R10, divisionTableAddr     \ Set R10 to the address of the division
+                                    \ tables
+
+ ADD     R10, R10, R14, LSL #8      \ Set R10 to the address of the division
+                                    \ table containing n / R14, for n = 0 to 63
+                                    \
+                                    \ This works because each division table
+                                    \ contains 64 words, or 256 bytes, so the
+                                    \ address of table n / d is:
+                                    \
+                                    \   divisionTable + d * 256
+
+ LDR     R6, [R10, R9, LSL #2]      \ Set R6 to the R9-th word in the division
+                                    \ table containing n / R14, so this
+                                    \ calculates the following:
+                                    \
+                                    \   R6 = R9 / R14
+                                    \
+                                    \      = (y1 - y2) / |x2 - x1|
+
+ B       trin6                      \ Jump to trin6 to skip the following and
+                                    \ keep going
 
 .trin4
 
- MOV     R9, R9, LSL #16            \ 
- MOV     R6, #0                     \ 
- MOV     R10, #&80000000            \ 
+                                    \ If we get here then at least one of these
+                                    \ is true:
+                                    \
+                                    \   R14 = |x2 - x1| >= 64
+                                    \
+                                    \   R9  = (y1 - y2) >= 64
+                                    \
+                                    \ We now calculate R2 = R9 / R14 using the
+                                    \ shift-and-subtract division algorithm
+
+ MOV     R9, R9, LSL #16            \ First we scale R9 up as far as we can, to
+                                    \ make the result as accurate as possible
+
+ MOV     R6, #0                     \ Set R6 = 0 to contain the result
+
+ MOV     R10, #&80000000            \ Set bit 31 of R10 so we can shift it to
+                                    \ the right in each iteration, using it as a
+                                    \ counter
 
 .trin5
 
- MOVS    R14, R14, LSL #1           \ 
- CMPLO   R14, R9                    \ 
- SUBHS   R14, R14, R9               \ 
- ORRHS   R6, R6, R10                \ 
- MOVS    R10, R10, LSR #1           \ 
- BLO     trin5                      \ 
+ MOVS    R14, R14, LSL #1           \ Shift R14 left, moving the top bit into
+                                    \ the C flag
+
+ CMPCC   R14, R9                    \ If we shifted a 0 out of the top of R14,
+                                    \ test for a possible subtraction
+
+ SUBCS   R14, R14, R9               \ If we shifted a 1 out of the top of R14 or
+ ORRCS   R6, R6, R10                \ R14 >= R9, then do the subtraction:
+                                    \
+                                    \   R14 = R14 - R9
+                                    \
+                                    \ and set the relevant bit in the result
+                                    \ (i.e. apply the set bit in R10 to the
+                                    \ result in R6)
+
+ MOVS    R10, R10, LSR #1           \ Shift R10 to the right, moving bit 0 into
+                                    \ the C flag
+
+ BCC     trin5                      \ Loop back until we shift the 1 out of the
+                                    \ right end of R10 (after 32 shifts)
+
+                                    \ So we now have the following result:
+                                    \
+                                    \   R6 = R9 / R14
+                                    \
+                                    \      = (y1 - y2) / |x2 - x1|
 
 .trin6
 
- CMP     R2, R0                     \ 
- RSBMI   R6, R6, #0                 \ 
- SUBS    R9, R1, R5                 \ 
- SUBS    R14, R4, R0                \ 
- RSBMI   R14, R4, R0                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
- BHS     trin7                      \ 
- LDR     R10, divisionTableAddr     \ 
- ADD     R10, R10, R14, LSL #8      \ 
- LDR     R7, [R10, R9, LSL #2]      \ 
- B       trin9                      \ 
+ CMP     R2, R0                     \ If R2 - R0 < 0 then:
+ RSBMI   R6, R6, #0                 \
+                                    \   x2 - x1 < 0
+                                    \
+                                    \ so negate R6 to give R6 the correct sign
+                                    \ for the following calculation:
+                                    \
+                                    \   R6 = (y1 - y2) / (x2 - x1)
+                                    \
+                                    \ So R6 contains the slope of the first side
+                                    \ of the triangle, from (x1, y1) to (x2, y2)
+
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 3 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: Calculate the slope of (x1, y1) to (x3, y3)
+\
+\ ******************************************************************************
+
+                                    \ We now calculate the slope for the second
+                                    \ side of the trangle, from (x1, y1) to
+                                    \ (x3, y3), as follows:
+                                    \
+                                    \   R7 = (y1 - y3) / (x3 - x1)
+
+ SUBS    R9, R1, R5                 \ Set R9 = R1 - R5
+                                    \        = y1 - y3
+
+ SUBS    R14, R4, R0                \ Set R14 = R4 - R0
+                                    \         = x3 - x1
+
+ RSBMI   R14, R4, R0                \ If R14 is negative, set R4 = x1 - x3, so
+                                    \ we have the following:
+                                    \
+                                    \   R14 = |x3 - x1|
+
+ CMP     R14, #64                   \ If either R14 >= 64 or R9 >= 64, then at
+ CMPLO   R9, #64                    \ least one of these is true:
+ BHS     trin7                      \
+                                    \   R14 = |x3 - x1| >= 64
+                                    \
+                                    \   R9  = (y1 - y3) >= 64
+                                    \
+                                    \ so jump to trin7 to calculate the slope
+                                    \ using the shift-and-subtract alsorithm
+
+ LDR     R10, divisionTableAddr     \ Set R10 to the address of the division
+                                    \ tables
+
+ ADD     R10, R10, R14, LSL #8      \ Set R10 to the address of the division
+                                    \ table containing n / R14, for n = 0 to 63
+                                    \
+                                    \ This works because each division table
+                                    \ contains 64 words, or 256 bytes, so the
+                                    \ address of table n / d is:
+                                    \
+                                    \   divisionTable + d * 256
+
+ LDR     R7, [R10, R9, LSL #2]      \ Set R7 to the R9-th word in the division
+                                    \ table containing n / R14, so this
+                                    \ calculates the following:
+                                    \
+                                    \   R7 = R9 / R14
+                                    \
+                                    \      = (y1 - y3) / |x3 - x1|
+
+ B       trin9                      \ Jump to trin9 to skip the following and
+                                    \ keep going
 
 .trin7
 
- MOV     R9, R9, LSL #16            \ 
- MOV     R7, #0                     \ 
- MOV     R10, #&80000000            \ 
+                                    \ If we get here then at least one of these
+                                    \ is true:
+                                    \
+                                    \   R14 = |x3 - x1| >= 64
+                                    \
+                                    \   R9  = (y1 - y3) >= 64
+                                    \
+                                    \ We now calculate R2 = R9 / R14 using the
+                                    \ shift-and-subtract division algorithm
+
+
+ MOV     R9, R9, LSL #16            \ First we scale R9 up as far as we can, to
+                                    \ make the result as accurate as possible
+
+ MOV     R7, #0                     \ Set R7 = 0 to contain the result
+
+ MOV     R10, #&80000000            \ Set bit 31 of R10 so we can shift it to
+                                    \ the right in each iteration, using it as a
+                                    \ counter
 
 .trin8
 
- MOVS    R14, R14, LSL #1           \ 
- CMPLO   R14, R9                    \ 
- SUBHS   R14, R14, R9               \ 
- ORRHS   R7, R7, R10                \ 
- MOVS    R10, R10, LSR #1           \ 
- BLO     trin8                      \ 
+ MOVS    R14, R14, LSL #1           \ Shift R14 left, moving the top bit into
+                                    \ the C flag
+
+ CMPCC   R14, R9                    \ If we shifted a 0 out of the top of R14,
+                                    \ test for a possible subtraction
+
+ SUBCS   R14, R14, R9               \ If we shifted a 1 out of the top of R14 or
+ ORRCS   R7, R7, R10                \ R14 >= R9, then do the subtraction:
+                                    \
+                                    \   R14 = R14 - R9
+                                    \
+                                    \ and set the relevant bit in the result
+                                    \ (i.e. apply the set bit in R10 to the
+                                    \ result in R7)
+
+ MOVS    R10, R10, LSR #1           \ Shift R10 to the right, moving bit 0 into
+                                    \ the C flag
+
+ BCC     trin8                      \ Loop back until we shift the 1 out of the
+                                    \ right end of R10 (after 32 shifts)
+
+                                    \ So we now have the following result:
+                                    \
+                                    \   R7 = R9 / R14
+                                    \
+                                    \      = (y1 - y3) / |x3 - x1|
 
 .trin9
 
- CMP     R4, R0                     \ 
- RSBMI   R7, R7, #0                 \ 
+ CMP     R4, R0                     \ If R4 - R0 < 0 then:
+ RSBMI   R7, R7, #0                 \
+                                    \   x3 - x1 < 0
+                                    \
+                                    \ so negate R7 to give R7 the correct sign
+                                    \ for the following calculation:
+                                    \
+                                    \   R7 = (y1 - y3) / (x3 - x1)
+                                    \
+                                    \ So R7 contains the slope of the second
+                                    \ side of the triangle, from (x1, y1) to
+                                    \ (x3, y3)
+
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 4 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: ???
+\
+\ ******************************************************************************
+
  SUBS    R9, R1, R3                 \ 
  MOV     R4, R0, LSL #16            \ 
  ORR     R4, R4, #&8000             \ 
@@ -9006,8 +9256,8 @@
  LDMEQIA R13!, {PC}                 \ 
  SUBS    R14, R0, R2                \ 
  RSBMI   R14, R0, R2                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
+ CMP     R14, #64                   \ 
+ CMPLO   R9, #64                    \ 
  BHS     trin11                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
@@ -9072,10 +9322,10 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 1 of ???)
+\       Name: DrawTriangle (Part ??? of ???)
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: Draw a triangle
+\    Summary: Draw a triangle with a vertical edge between (x1, y1) and (x2, y2)
 \
 \ ******************************************************************************
 
@@ -9083,10 +9333,11 @@
 
  SUBS    R9, R3, R5                 \ 
  LDMEQIA R13!, {PC}                 \ 
+
  SUBS    R14, R0, R4                \ 
  RSBMI   R14, R0, R4                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
+ CMP     R14, #64                   \ 
+ CMPLO   R9, #64                    \ 
  BHS     trin17                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
@@ -9115,8 +9366,8 @@
  SUB     R9, R3, R5                 \ 
  SUBS    R14, R2, R4                \ 
  RSBMI   R14, R2, R4                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
+ CMP     R14, #64                   \ 
+ CMPLO   R9, #64                    \ 
  BHS     trin20                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
@@ -9158,10 +9409,10 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 1 of ???)
+\       Name: DrawTriangle (Part ??? of ???)
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: Draw a triangle that's partly off-screen
+\    Summary: Draw a clipped triangle that's partly off-screen
 \
 \ ******************************************************************************
 
@@ -9221,8 +9472,8 @@
  STMFD   R13!, {R4-R5}              \ 
  SUBS    R14, R2, R0                \ 
  RSBMI   R14, R2, R0                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
+ CMP     R14, #64                   \ 
+ CMPLO   R9, #64                    \ 
  BHS     trin27                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
@@ -9251,8 +9502,8 @@
  SUBS    R9, R1, R5                 \ 
  SUBS    R14, R4, R0                \ 
  RSBMI   R14, R4, R0                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
+ CMP     R14, #64                   \ 
+ CMPLO   R9, #64                    \ 
  BHS     trin30                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
@@ -9292,8 +9543,8 @@
  LDMEQIA R13!, {PC}                 \ 
  SUBS    R14, R0, R2                \ 
  RSBMI   R14, R0, R2                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
+ CMP     R14, #64                   \ 
+ CMPLO   R9, #64                    \ 
  BHS     trin33                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
@@ -9359,8 +9610,8 @@
  LDMEQIA R13!, {PC}                 \ 
  SUBS    R14, R0, R4                \ 
  RSBMI   R14, R0, R4                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
+ CMP     R14, #64                   \ 
+ CMPLO   R9, #64                    \ 
  BHS     trin39                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
@@ -9389,8 +9640,8 @@
  SUB     R9, R3, R5                 \ 
  SUBS    R14, R2, R4                \ 
  RSBMI   R14, R2, R4                \ 
- CMP     R14, #&40                  \ 
- CMPLO   R9, #&40                   \ 
+ CMP     R14, #64                   \ 
+ CMPLO   R9, #64                    \ 
  BHS     trin42                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
@@ -11725,6 +11976,10 @@
 \   65536 * n / d
 \
 \ For n = 0 to 63 (the value is &FFFFFFFF when n = 0)
+\
+\ The address of the table containing the values of n / d is:
+\
+\   divisionTable + d * 256
 \
 \ ******************************************************************************
 

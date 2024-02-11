@@ -2201,8 +2201,8 @@ trin3:
  STMFD   R13!, {R4-R5}
  SUBS    R14, R2, R0
  RSBMI   R14, R2, R0
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin4
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2214,19 +2214,19 @@ trin4:
  MOV     R10, #0x80000000
 trin5:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R6, R6, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R6, R6, R10
  MOVS    R10, R10, LSR #1
- BLO     trin5
+ BCC     trin5
 trin6:
  CMP     R2, R0
  RSBMI   R6, R6, #0
  SUBS    R9, R1, R5
  SUBS    R14, R4, R0
  RSBMI   R14, R4, R0
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin7
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2238,11 +2238,11 @@ trin7:
  MOV     R10, #0x80000000
 trin8:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R7, R7, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R7, R7, R10
  MOVS    R10, R10, LSR #1
- BLO     trin8
+ BCC     trin8
 trin9:
  CMP     R4, R0
  RSBMI   R7, R7, #0
@@ -2269,8 +2269,8 @@ trin10:
  LDMEQIA R13!, {PC}
  SUBS    R14, R0, R2
  RSBMI   R14, R0, R2
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin11
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2327,8 +2327,8 @@ trin16:
  LDMEQIA R13!, {PC}
  SUBS    R14, R0, R4
  RSBMI   R14, R0, R4
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin17
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2351,8 +2351,8 @@ trin19:
  SUB     R9, R3, R5
  SUBS    R14, R2, R4
  RSBMI   R14, R2, R4
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin20
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2429,8 +2429,8 @@ trin26:
  STMFD   R13!, {R4-R5}
  SUBS    R14, R2, R0
  RSBMI   R14, R2, R0
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin27
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2453,8 +2453,8 @@ trin29:
  SUBS    R9, R1, R5
  SUBS    R14, R4, R0
  RSBMI   R14, R4, R0
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin30
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2488,8 +2488,8 @@ trin32:
  LDMEQIA R13!, {PC}
  SUBS    R14, R0, R2
  RSBMI   R14, R0, R2
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin33
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2539,8 +2539,8 @@ trin38:
  LDMEQIA R13!, {PC}
  SUBS    R14, R0, R4
  RSBMI   R14, R0, R4
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin39
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
@@ -2563,8 +2563,8 @@ trin41:
  SUB     R9, R3, R5
  SUBS    R14, R2, R4
  RSBMI   R14, R2, R4
- CMP     R14, #0x40
- CMPLO   R9, #0x40
+ CMP     R14, #64
+ CMPLO   R9, #64
  BHS     trin42
  LDR     R10, divisionTableAddr
  ADD     R10, R10, R14, LSL #8
