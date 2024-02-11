@@ -8847,7 +8847,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 1 of ???)
+\       Name: DrawTriangle (Part 1 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a triangle, starting by ordering the coordinates and jumping
@@ -8951,7 +8951,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 2 of ???)
+\       Name: DrawTriangle (Part 2 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Calculate the slope of (x1, y1) to (x2, y2)
@@ -9099,7 +9099,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 3 of ???)
+\       Name: DrawTriangle (Part 3 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Calculate the slope of (x1, y1) to (x3, y3)
@@ -9224,10 +9224,10 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 4 of ???)
+\       Name: DrawTriangle (Part 4 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: ???
+\    Summary: Draw a triangle that isn't clipped and has a sloping first side
 \
 \ ******************************************************************************
 
@@ -9339,7 +9339,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 5 of ???)
+\       Name: DrawTriangle (Part 5 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a triangle with a vertical edge between (x1, y1) and (x2, y2)
@@ -9426,7 +9426,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 6 of ???)
+\       Name: DrawTriangle (Part 6 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a clipped triangle that's partly off-screen
@@ -9487,7 +9487,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 7 of ???)
+\       Name: DrawTriangle (Part 7 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: ???
@@ -9559,7 +9559,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 8 of ???)
+\       Name: DrawTriangle (Part 8 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: ???
@@ -9610,7 +9610,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 10 of ???)
+\       Name: DrawTriangle (Part 9 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: ???
@@ -9653,7 +9653,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part 11 of ???)
+\       Name: DrawTriangle (Part 10 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: ???
