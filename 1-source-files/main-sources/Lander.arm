@@ -3908,7 +3908,7 @@
                                     \   * Bit 19 set = bounce on ground
                                     \   * Bit 20 set = apply gravity to particle
                                     \   * Bit 21 set = can destroy objects
-                                    \   * Bit 23 set = splash size (big when set)
+                                    \   * Bit 23 set = splash size is big
                                     \   * Bit 24 set = explode on hitting ground
 
  LDMFD   R13!, {R0-R2}              \ Retrieve the particle coordinates that we
@@ -4713,13 +4713,13 @@
  MVNMI   R4, R4                     \        = |x|
                                     \
                                     \ If R0 is negative then R4 is actually set
-                                    \ ~x, which is -(x+1), but it's close enough 
+                                    \ ~x, which is -(x+1), but it's close enough
 
  MOVS    R5, R1                     \ Set R5 = |R1|
  MVNMI   R5, R5                     \        = |y|
                                     \
                                     \ If R1 is negative then R5 is actually set
-                                    \ ~y, which is -(y+1), but it's close enough 
+                                    \ ~y, which is -(y+1), but it's close enough
 
  ORR     R4, R4, R5                 \ Set R4 = |R0| OR |R1| OR R2
  ORR     R4, R4, R2                 \        = |x| OR |y| OR z
@@ -8250,9 +8250,13 @@
 \ words that match the arguments for the DrawTriangle routine:
 \
 \   * Command number (18)
+\
 \   * Pixel coordinate of corner 1 (x1, y1)
+\
 \   * Pixel coordinate of corner 2 (x2, y2)
+\
 \   * Pixel coordinate of corner 3 (x3, y3)
+\
 \   * Colour
 \
 \ ------------------------------------------------------------------------------
@@ -8355,16 +8359,20 @@
 \ DrawTriangleShadowToBuffer, so shadows never overlap their corresponding
 \ triangles).
 \
-\ This command is used for drawing triangles, while DrawTriangleShadowToBuffer is
-\ used for drawing their shadows.
+\ This command is used for drawing triangles, while DrawTriangleShadowToBuffer
+\ is used to draw their shadows.
 \
 \ The command number for drawing a triangle is 18, followed by seven parameter
 \ words that match the arguments for the DrawTriangle routine:
 \
 \   * Command number (18)
+\
 \   * Pixel coordinate of corner 1 (x1, y1)
+\
 \   * Pixel coordinate of corner 2 (x2, y2)
+\
 \   * Pixel coordinate of corner 3 (x3, y3)
+\
 \   * Colour
 \
 \ ------------------------------------------------------------------------------
@@ -9531,41 +9539,59 @@
                                     \ drawing horizontal lines in the triangle
                                     \ between y-coordinates y2 and y3
 
- SUBS    R14, R2, R4, LSR #16       \ Set R14 = R2 - R4 >> 16
-                                    \         = x2 - left edge of horizontal line
+ SUBS    R14, R2, R4, LSR #16       \ Set:
+                                    \
+                                    \   R14 = R2 - R4 >> 16
+                                    \       = x2 - left edge of horizontal line
+                                    \
+                                    \ So this will be zero if (x2, y2) is at the
+                                    \ left edge of the horizontal line
 
  SUBNES  R10, R2, R5, LSR #16       \ If the above is non-zero, set:
                                     \
                                     \   R10 = R2 - R5 >> 16
                                     \       = x2 - right edge of horizontal line
+                                    \
+                                    \ So this will be zero if (x2, y2) is at the
+                                    \ right edge of the horizontal line
 
  BNE     trin15                     \ If both of the above are non-zero, jump to
-                                    \ trin15, as ???
+                                    \ trin15, as (x2, y2) doesn't match either
+                                    \ edge of the horizontal line we just drew
 
  CMP     R2, R4, LSR #16            \ Set the flags on R2 - R4 >> 16
 
  MOVEQ   R6, R11                    \ If R2 = R4 >> 16, then x2 = left edge, so:
- BICEQ   R4, R4, #&FF00             \
- BICEQ   R4, R4, #&00FF             \   Set R6 = R11
- ORREQ   R4, R4, #&8000             \          = slope of (x2, y2) to (x3, y3)
+ BICEQ   R4, R4, #&FF00             \ so x2 must be at the left edge, so we set
+ BICEQ   R4, R4, #&00FF             \ the slope of the left edge in R6 to R11,
+ ORREQ   R4, R4, #&8000             \ as it's the left edge that is changing
+                                    \ slope as we move into the top part of the
+                                    \ triangle:
                                     \
-                                    \   Reset the fractional part of R4 (the
-                                    \   left edge x-coordinate) to just the
-                                    \   top bit set
+                                    \   R6 = R11
+                                    \      = slope of (x2, y2) to (x3, y3)
+                                    \
+                                    \ We also reset the fractional part of R4
+                                    \ (the left edge x-coordinate) to just the
+                                    \ top bit set
                                     \
                                     \ So this sets the slope of the left edge
                                     \ and leaves the slope of the right edge as
                                     \ before
 
  MOVNE   R7, R11                    \ If R2 <> R4 >> 16, then x2 <> left edge, 
- BICNE   R5, R5, #&FF00             \ so:
- BICNE   R5, R5, #&00FF             \ 
- ORRNE   R5, R5, #&8000             \   Set R7 = R11
-                                    \          = slope of (x2, y2) to (x3, y3)
+ BICNE   R5, R5, #&FF00             \ so x2 must be at the right edge, so we set
+ BICNE   R5, R5, #&00FF             \ the slope of the right edge in R7 to R11,
+ ORRNE   R5, R5, #&8000             \ as it's the right edge that is changing
+                                    \ slope as we move into the top part of the
+                                    \ triangle:
+                                    \ 
+                                    \   R7 = R11
+                                    \      = slope of (x2, y2) to (x3, y3)
                                     \
-                                    \   Reset the fractional part of R5 (the
-                                    \   right edge x-coordinate) to just the
-                                    \   top bit set
+                                    \ We also reset the fractional part of R5
+                                    \ (the right edge x-coordinate) to just the
+                                    \ top bit set
                                     \
                                     \ So this sets the slope of the right edge
                                     \ and leaves the slope of the left edge as
@@ -9622,13 +9648,54 @@
 
 .trin15
 
- RSBMI   R10, R10, #0               \ ???
- CMP     R14, #0                    \ 
- RSBMI   R14, R14, #0               \ 
- CMP     R14, R10                   \ 
- MOVHS   R6, R11                    \ 
- MOVLO   R7, R11                    \ 
- B       trin14                     \ 
+                                    \ We jump here following these two
+                                    \ calculations, if neither of them are zero:
+                                    \
+                                    \   R14 = R2 - R4 >> 16
+                                    \       = x2 - left edge of horizontal line
+                                    \
+                                    \   R10 = R2 - R5 >> 16
+                                    \       = x2 - right edge of horizontal line
+                                    \
+                                    \ I am not sure what this signifies!
+
+ RSBMI   R10, R10, #0               \ The last calculation was for R10, so this
+                                    \ makes R10 positive if the above result is
+                                    \ negative, so it does this:
+                                    \
+                                    \   R10 = |R10|
+
+ CMP     R14, #0                    \ Set the following:
+ RSBMI   R14, R14, #0               \
+                                    \   R14 = |R14|
+
+                                    \ So R10 and R14 are set to the magnitudes
+                                    \ of the distances between (x2, y2) and each
+                                    \ edge of the horizontal line (R14 for left,
+                                    \ R10 for right)
+
+ CMP     R14, R10                   \ If |R14| >= |R10| then (x2, y2) is nearer
+ MOVHS   R6, R11                    \ the right edge, so set:
+                                    \
+                                    \   R6 = R11
+                                    \      = slope of (x2, y2) to (x3, y3)
+                                    \
+                                    \ So this sets the slope of the left edge
+                                    \ and leaves the slope of the right edge as
+                                    \ before (though I'm not sure why?)
+
+ MOVLO   R7, R11                    \ Otherwise |R14| < |R10| and (x2, y2) is
+                                    \ nearer the left edge, so set:
+                                    \
+                                    \   R7 = R11
+                                    \      = slope of (x2, y2) to (x3, y3)
+                                    \
+                                    \ So this sets the slope of the right edge
+                                    \ and leaves the slope of the left edge as
+                                    \ before (though I'm not sure why?)
+
+ B       trin14                     \ Jump up to trin14 to draw the top part of
+                                    \ the triangle
 
 \ ******************************************************************************
 \
