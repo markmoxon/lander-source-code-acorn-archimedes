@@ -8976,7 +8976,7 @@
  BEQ     trin16                     \ If the (x1, y1) and (x2, y2) share the
                                     \ same y-coordinate then the triangle has a
                                     \ vertical edge between (x1, y1) and
-                                    \ (x2, y2), so jump to part ??? to process
+                                    \ (x2, y2), so jump to part 5 to process
                                     \ this special case
 
  STMFD   R13!, {R4-R5}              \ Store the third corner's coordinates in
@@ -9244,21 +9244,31 @@
 
  ADD     R4, R4, R6                 \ 
  ADD     R5, R5, R7                 \ 
+
  ADD     R11, R12, R4, LSR #16      \ 
+
  MOV     R10, R5, LSR #16           \ 
  SUBS    R10, R10, R4, LSR #16      \ 
  BLPL    DrawHorizontalLine         \ 
+
  SUB     R12, R12, #320             \ 
+
  SUBS    R9, R9, #1                 \ 
+
  BNE     trin10                     \ 
+
  LDMFD   R13!, {R0-R1}              \ 
+
  SUBS    R9, R3, R1                 \ 
  LDMEQIA R13!, {PC}                 \ 
+
  SUBS    R14, R0, R2                \ 
  RSBMI   R14, R0, R2                \ 
+
  CMP     R14, #64                   \ 
  CMPLO   R9, #64                    \ 
  BHS     trin11                     \ 
+
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R11, [R10, R9, LSL #2]     \ 
@@ -9301,13 +9311,20 @@
 
  ADD     R4, R4, R6                 \ 
  ADD     R5, R5, R7                 \ 
+
  ADD     R11, R12, R4, LSR #16      \ 
+
  MOV     R10, R5, LSR #16           \ 
  SUBS    R10, R10, R4, LSR #16      \ 
+
  BLPL    DrawHorizontalLine         \ 
+
  SUB     R12, R12, #320             \ 
+
  SUBS    R9, R9, #1                 \ 
+
  BNE     trin14                     \ 
+
  LDMFD   R13!, {PC}                 \ 
 
 .trin15
@@ -9322,7 +9339,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part ??? of ???)
+\       Name: DrawTriangle (Part 5 of ???)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a triangle with a vertical edge between (x1, y1) and (x2, y2)
@@ -9409,7 +9426,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle (Part ??? of ???)
+\       Name: DrawTriangle (Part 6 of ???)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a clipped triangle that's partly off-screen
@@ -9467,6 +9484,16 @@
 .trin26
 
  MOV     R11, R1                    \ 
+
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 7 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: ???
+\
+\ ******************************************************************************
+
  SUBS    R9, R1, R3                 \ 
  BEQ     trin38                     \ 
  STMFD   R13!, {R4-R5}              \ 
@@ -9529,6 +9556,16 @@
 
  CMP     R4, R0                     \ 
  RSBMI   R7, R7, #0                 \ 
+
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 8 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: ???
+\
+\ ******************************************************************************
+
  SUBS    R9, R1, R3                 \ 
  MOV     R4, R0, LSL #16            \ 
  ORR     R4, R4, #&8000             \ 
@@ -9570,6 +9607,16 @@
 
  CMP     R0, R2                     \ 
  RSBMI   R12, R12, #0               \ 
+
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 10 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: ???
+\
+\ ******************************************************************************
+
  SUB     R9, R3, R1                 \ 
  SUBS    R14, R2, R4, ASR #16       \ 
  SUBNES  R10, R2, R5, ASR #16       \ 
@@ -9603,6 +9650,15 @@
  MOVHS   R6, R12                    \ 
  MOVLO   R7, R12                    \ 
  B       trin36                     \ 
+
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 11 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: ???
+\
+\ ******************************************************************************
 
 .trin38
 
