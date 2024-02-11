@@ -8967,7 +8967,7 @@
  SUBS    R9, R1, R3                 \ Set R9 = R1 - R3
                                     \        = y1 - y2
                                     \
-                                    \ So this is the horizontal distance between
+                                    \ So this is the vertical distance between
                                     \ (x1, y1) and (x2, y2), i.e. the delta
                                     \ y-coordinate between the two points
                                     \
@@ -9168,7 +9168,6 @@
                                     \ We now calculate R2 = R9 / R14 using the
                                     \ shift-and-subtract division algorithm
 
-
  MOV     R9, R9, LSL #16            \ First we scale R9 up as far as we can, to
                                     \ make the result as accurate as possible
 
@@ -9231,105 +9230,399 @@
 \
 \ ******************************************************************************
 
- SUBS    R9, R1, R3                 \ 
- MOV     R4, R0, LSL #16            \ 
- ORR     R4, R4, #&8000             \ 
- MOV     R5, R4                     \ 
- CMP     R6, R7                     \ 
- MOVGT   R14, R6                    \ 
- MOVGT   R6, R7                     \ 
- MOVGT   R7, R14                    \ 
+                                    \ By this point we have the following:
+                                    \
+                                    \   (R0, R1) = (x1, y1)
+                                    \
+                                    \   (R2, R3) = (x2, y2)
+                                    \
+                                    \   (x3, y3) is on the stack
+                                    \
+                                    \   R6 = (y1 - y2) / (x2 - x1)
+                                    \      = slope of (x1, y1) to (x2, y2)
+                                    \
+                                    \   R7 = (y1 - y3) / (x3 - x1)
+                                    \      = slope of (x1, y1) to (x3, y3)
+                                    \
+                                    \   R12 = screen address of the start of the
+                                    \         pixel row containing (x1, y1)
+                                    \
+                                    \ (x1, y1) is the point lowest down the
+                                    \ screen and (x3, y3) is the highest up the
+                                    \ screen, with (x2, y2) the point in the
+                                    \ middle (in terms of y-coordinate)
+                                    \
+                                    \ We now draw the triangle in two parts,
+                                    \ effectively slicing the triangle in half
+                                    \ with a horizontal line at y-coordinate y2,
+                                    \ leaving two triangles to draw:
+                                    \
+                                    \   1. The triangle from (x1, y1) at the
+                                    \      bottom up to the horizontal line with
+                                    \      (x2, y2) at one end
+                                    \
+                                    \   2. The triangle from the horizontal line
+                                    \      with (x2, y2) at one end, up to
+                                    \      (x3, y3) at the top
+                                    \
+                                    \ We start at the bottom of the triangle, at
+                                    \ (x1, y1), and step upwards by one pixel
+                                    \ row at a time, drawing a horizontal line
+                                    \ between the two sides, until we reach the
+                                    \ level of (x2, y2)
+                                    \
+                                    \ As we step up each pixel row, we calculate
+                                    \ the x-coordinates of each row we draw by
+                                    \ adding the slopes in R6 and R7
+                                    \
+                                    \ We store the x-coordinates of the current
+                                    \ horizontal line in R4 and R5, so these are
+                                    \ the registers we update with the slope
+                                    \ values
+
+ SUBS    R9, R1, R3                 \ Set R9 = R1 - R3
+                                    \        = y1 - y2
+                                    \
+                                    \ So this is the vertical distance between
+                                    \ (x1, y1) and (x2, y2), i.e. the delta
+                                    \ y-coordinate between the two points
+                                    \
+                                    \ We know this is positive because y1 >= y2,
+                                    \ so we can use this as a loop counter for
+                                    \ drawing horizontal lines in the triangle
+                                    \ between y-coordinates y1 and y2
+
+ MOV     R4, R0, LSL #16            \ Set R4 = R0 << 16
+                                    \        = x1 << 16
+                                    \
+                                    \ We scale up R4 so that it can contain a
+                                    \ fractional result - we will treat the
+                                    \ bottom 16 bits as the fraction, so
+                                    \ R4 >> 16 gives us the integral part
+                                    \
+                                    \ We use R4 as the x-coordinate of the left
+                                    \ end of the horizontal line to draw
+
+ ORR     R4, R4, #&8000             \ Set R5 to x1, with the top bit of its
+ MOV     R5, R4                     \ fractional part bumped up to 1
+                                    \
+                                    \ We use R4 as the x-coordinate of the right
+                                    \ end of the horizontal line to draw
+
+ CMP     R6, R7                     \ If R6 > R7, swap R6 and R7, so we know
+ MOVGT   R14, R6                    \ that R6 <= R7, i.e. R6 contains the side
+ MOVGT   R6, R7                     \ with the lesser slope, which will be the
+ MOVGT   R7, R14                    \ slope along the left edge of the triangle
 
 .trin10
 
- ADD     R4, R4, R6                 \ 
- ADD     R5, R5, R7                 \ 
+ ADD     R4, R4, R6                 \ Set R4 = R4 + R6
+                                    \        = R4 + slope of left edge
+                                    \
+                                    \ So this moves the x-coordinate of the left
+                                    \ edge by the correct slope as we move up by
+                                    \ one pixel row
 
- ADD     R11, R12, R4, LSR #16      \ 
+ ADD     R5, R5, R7                 \ Set R5 = R5 + R7
+                                    \        = R5 + slope of right edge
+                                    \
+                                    \ So this moves the x-coordinate of the
+                                    \ right edge by the correct slope as we move
+                                    \ up by one pixel row
 
- MOV     R10, R5, LSR #16           \ 
- SUBS    R10, R10, R4, LSR #16      \ 
- BLPL    DrawHorizontalLine         \ 
+ ADD     R11, R12, R4, LSR #16      \ Set R11 = R12 + R4 >> 16
+                                    \         = screen address of row + x1
+                                    \
+                                    \ So R11 contains the screen address of the
+                                    \ left end of the line to draw
 
- SUB     R12, R12, #320             \ 
+ MOV     R10, R5, LSR #16           \ Set R10 = R5 >> 16 - R4 >> 16
+ SUBS    R10, R10, R4, LSR #16      \         =   x-coordinate of right edge
+                                    \           - x-coordinate of left edge
+                                    \
+                                    \ So R10 contains the length of the line
+                                    \ from the left edge to the right edge
 
- SUBS    R9, R9, #1                 \ 
+ BLPL    DrawHorizontalLine         \ If R10 is positive then we draw a line
+                                    \ from the left edge to the right edge,
+                                    \ using the colour word that was passed to
+                                    \ the DrawTriangle routine in R8
 
- BNE     trin10                     \ 
+ SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
+                                    \ points to the start of the pixel row above
+                                    \ the one we just drew
 
- LDMFD   R13!, {R0-R1}              \ 
+ SUBS    R9, R9, #1                 \ Decrement the pixel row counter in R9,
+                                    \ which contains the number of pixel rows
+                                    \ between y1 and y2
 
- SUBS    R9, R3, R1                 \ 
- LDMEQIA R13!, {PC}                 \ 
+ BNE     trin10                     \ Loop back until we have drawn all the
+                                    \ horizontal lines in the first part of the
+                                    \ triangle, from (x1, y1) at the bottom, up
+                                    \ to the level of (x2, y2)
 
- SUBS    R14, R0, R2                \ 
- RSBMI   R14, R0, R2                \ 
+                                    \ So now we need to draw the rest of the
+                                    \ triangle, from (x2, y2) up to (x3, y3)
 
- CMP     R14, #64                   \ 
- CMPLO   R9, #64                    \ 
- BHS     trin11                     \ 
+ LDMFD   R13!, {R0-R1}              \ Fetch the coordinates for the third point
+                                    \ (x3, y3) from the stack and into (R0, R1)
 
- LDR     R10, divisionTableAddr     \ 
- ADD     R10, R10, R14, LSL #8      \ 
- LDR     R11, [R10, R9, LSL #2]     \ 
- B       trin13                     \ 
+ SUBS    R9, R3, R1                 \ Set R9 = R3 - R1
+                                    \        = y2 - y3
+                                    \
+                                    \ So this is the vertical distance between
+                                    \ (x2, y2) and (x3, y3), i.e. the delta
+                                    \ y-coordinate between the two points
+                                    \
+                                    \ We know this is positive because y2 >= y3,
+                                    \ so we can use this as a loop counter for
+                                    \ drawing horizontal lines in the triangle
+                                    \ between y-coordinates y2 and y3
+
+ LDMEQIA R13!, {PC}                 \ If R9 is zero then (x2, y2) and (x3, y3)
+                                    \ are at the same y-coordinate, so there is
+                                    \ nothing to draw in the top part of the
+                                    \ triangle, so return from the subroutine as
+                                    \ we are done
+
+                                    \ We now calculate the slope for the third
+                                    \ side of the trangle, from (x2, y2) to
+                                    \ (x3, y3), as follows:
+                                    \
+                                    \   R14 = (y2 - y3) / (x2 - x1)
+
+ SUBS    R14, R0, R2                \ Set R14 = R0 - R2
+                                    \         = x3 - x2
+
+ RSBMI   R14, R0, R2                \ If R14 is negative, set R4 = x2 - x3, so
+                                    \ we have the following:
+                                    \
+                                    \   R14 = |x3 - x2|
+
+
+ CMP     R14, #64                   \ If either R14 >= 64 or R9 >= 64, then at
+ CMPLO   R9, #64                    \ least one of these is true:
+ BHS     trin11                     \
+                                    \   R14 = |x3 - x2| >= 64
+                                    \
+                                    \   R9  = (y2 - y3) >= 64
+                                    \
+                                    \ so jump to trin11 to calculate the slope
+                                    \ using the shift-and-subtract alsorithm
+
+ LDR     R10, divisionTableAddr     \ Set R10 to the address of the division
+                                    \ tables
+
+ ADD     R10, R10, R14, LSL #8      \ Set R10 to the address of the division
+                                    \ table containing n / R14, for n = 0 to 63
+                                    \
+                                    \ This works because each division table
+                                    \ contains 64 words, or 256 bytes, so the
+                                    \ address of table n / d is:
+                                    \
+                                    \   divisionTable + d * 256
+
+ LDR     R11, [R10, R9, LSL #2]     \ Set R11 to the R9-th word in the division
+                                    \ table containing n / R14, so this
+                                    \ calculates the following:
+                                    \
+                                    \   R11 = R9 / R14
+                                    \
+                                    \       = (y2 - y3) / |x3 - x2|
+
+ B       trin13                     \ Jump to trin13 to skip the following and
+                                    \ keep going
 
 .trin11
 
- MOV     R9, R9, LSL #16            \ 
- MOV     R11, #0                    \ 
- MOV     R10, #&80000000            \ 
+                                    \ If we get here then at least one of these
+                                    \ is true:
+                                    \
+                                    \   R14 = |x3 - x2| >= 64
+                                    \
+                                    \   R9  = (y2 - y3) >= 64
+                                    \
+                                    \ We now calculate R11 = R9 / R14 using the
+                                    \ shift-and-subtract division algorithm
+
+ MOV     R9, R9, LSL #16            \ First we scale R9 up as far as we can, to
+                                    \ make the result as accurate as possible
+
+ MOV     R11, #0                    \ Set R11 = 0 to contain the result
+
+ MOV     R10, #&80000000            \ Set bit 31 of R10 so we can shift it to
+                                    \ the right in each iteration, using it as a
+                                    \ counter
 
 .trin12
 
- MOVS    R14, R14, LSL #1           \ 
- CMPLO   R14, R9                    \ 
- SUBHS   R14, R14, R9               \ 
- ORRHS   R11, R11, R10              \ 
- MOVS    R10, R10, LSR #1           \ 
- BLO     trin12                     \ 
+ MOVS    R14, R14, LSL #1           \ Shift R14 left, moving the top bit into
+                                    \ the C flag
+
+ CMPCC   R14, R9                    \ If we shifted a 0 out of the top of R14,
+                                    \ test for a possible subtraction
+
+ SUBCS   R14, R14, R9               \ If we shifted a 1 out of the top of R14 or
+ ORRCS   R11, R11, R10              \ R14 >= R9, then do the subtraction:
+                                    \
+                                    \   R14 = R14 - R9
+                                    \
+                                    \ and set the relevant bit in the result
+                                    \ (i.e. apply the set bit in R10 to the
+                                    \ result in R11)
+
+ MOVS    R10, R10, LSR #1           \ Shift R10 to the right, moving bit 0 into
+                                    \ the C flag
+
+ BLO     trin12                     \ Loop back until we shift the 1 out of the
+                                    \ right end of R10 (after 32 shifts)
+
+                                    \ So we now have the following result:
+                                    \
+                                    \   R11 = R9 / R14
+                                    \
+                                    \       = (y2 - y3) / |x3 - x2|
 
 .trin13
 
- CMP     R0, R2                     \ 
- RSBMI   R11, R11, #0               \ 
- SUB     R9, R3, R1                 \ 
- SUBS    R14, R2, R4, LSR #16       \ 
- SUBNES  R10, R2, R5, LSR #16       \ 
- BNE     trin15                     \ 
- CMP     R2, R4, LSR #16            \ 
- MOVEQ   R6, R11                    \ 
- BICEQ   R4, R4, #&FF00             \ 
- BICEQ   R4, R4, #&FF               \ 
- ORREQ   R4, R4, #&8000             \ 
- MOVNE   R7, R11                    \ 
- BICNE   R5, R5, #&FF00             \ 
- BICNE   R5, R5, #&FF               \ 
- ORRNE   R5, R5, #&8000             \ 
+ CMP     R0, R2                     \ If R0 - R2 < 0 then:
+ RSBMI   R11, R11, #0               \
+                                    \   x3 - x2 < 0
+                                    \
+                                    \ so negate R11 to give R11 the correct sign
+                                    \ for the following calculation:
+                                    \
+                                    \   R11 = (y2 - y3) / (x3 - x2)
+                                    \
+                                    \ So R11 contains the slope of the third
+                                    \ side of the triangle, from (x2, y2) to
+                                    \ (x3, y3)
+
+                                    \ By this point we have the following:
+                                    \
+                                    \   (R0, R1) = (x3, y3)
+                                    \
+                                    \   (R2, R3) = (x2, y2)
+                                    \
+                                    \   R4 = x-coordinate of the left edge for
+                                    \        the last line that we drew
+                                    \
+                                    \   R5 = x-coordinate of the right edge for
+                                    \        the last line that we drew
+                                    \
+                                    \   R7 = (y1 - y3) / (x3 - x1)
+                                    \      = slope of (x1, y1) to (x3, y3)
+                                    \
+                                    \   R11 = (y2 - y3) / (x3 - x2)
+                                    \       = slope of (x2, y2) to (x3, y3)
+                                    \
+                                    \   R12 = screen address of the start of the
+                                    \         pixel row containing (x2, y2)
+
+ SUB     R9, R3, R1                 \ Set R9 = R3 - R1
+                                    \        = y2 - y3
+                                    \
+                                    \ So this is the vertical distance between
+                                    \ (x2, y2) and (x3, y3), i.e. the delta
+                                    \ y-coordinate between the two points
+                                    \
+                                    \ We know this is positive because y2 >= y3,
+                                    \ so we can use this as a loop counter for
+                                    \ drawing horizontal lines in the triangle
+                                    \ between y-coordinates y2 and y3
+
+ SUBS    R14, R2, R4, LSR #16       \ Set R14 = R2 - R4 >> 16
+                                    \         = x2 - left edge of horizontal line
+
+ SUBNES  R10, R2, R5, LSR #16       \ If the above is non-zero, set:
+                                    \
+                                    \   R10 = R2 - R5 >> 16
+                                    \       = x2 - right edge of horizontal line
+
+ BNE     trin15                     \ If both of the above are non-zero, jump to
+                                    \ trin15, as ???
+
+ CMP     R2, R4, LSR #16            \ Set the flags on R2 - R4 >> 16
+
+ MOVEQ   R6, R11                    \ If R2 = R4 >> 16, then x2 = left edge, so:
+ BICEQ   R4, R4, #&FF00             \
+ BICEQ   R4, R4, #&00FF             \   Set R6 = R11
+ ORREQ   R4, R4, #&8000             \          = slope of (x2, y2) to (x3, y3)
+                                    \
+                                    \   Reset the fractional part of R4 (the
+                                    \   left edge x-coordinate) to just the
+                                    \   top bit set
+                                    \
+                                    \ So this sets the slope of the left edge
+                                    \ and leaves the slope of the right edge as
+                                    \ before
+
+ MOVNE   R7, R11                    \ If R2 <> R4 >> 16, then x2 <> left edge, 
+ BICNE   R5, R5, #&FF00             \ so:
+ BICNE   R5, R5, #&00FF             \ 
+ ORRNE   R5, R5, #&8000             \   Set R7 = R11
+                                    \          = slope of (x2, y2) to (x3, y3)
+                                    \
+                                    \   Reset the fractional part of R5 (the
+                                    \   right edge x-coordinate) to just the
+                                    \   top bit set
+                                    \
+                                    \ So this sets the slope of the right edge
+                                    \ and leaves the slope of the left edge as
+                                    \ before
 
 .trin14
 
- ADD     R4, R4, R6                 \ 
- ADD     R5, R5, R7                 \ 
+ ADD     R4, R4, R6                 \ Set R4 = R4 + R6
+                                    \        = R4 + slope of left edge
+                                    \
+                                    \ So this moves the x-coordinate of the left
+                                    \ edge by the correct slope as we move up by
+                                    \ one pixel row
 
- ADD     R11, R12, R4, LSR #16      \ 
+ ADD     R5, R5, R7                 \ Set R5 = R5 + R7
+                                    \        = R5 + slope of right edge
+                                    \
+                                    \ So this moves the x-coordinate of the
+                                    \ right edge by the correct slope as we move
+                                    \ up by one pixel row
 
- MOV     R10, R5, LSR #16           \ 
- SUBS    R10, R10, R4, LSR #16      \ 
+ ADD     R11, R12, R4, LSR #16      \ Set R11 = R12 + R4 >> 16
+                                    \         = screen address of row + x1
+                                    \
+                                    \ So R11 contains the screen address of the
+                                    \ left end of the line to draw
 
- BLPL    DrawHorizontalLine         \ 
+ MOV     R10, R5, LSR #16           \ Set R10 = R5 >> 16 - R4 >> 16
+ SUBS    R10, R10, R4, LSR #16      \         =   x-coordinate of right edge
+                                    \           - x-coordinate of left edge
+                                    \
+                                    \ So R10 contains the length of the line
+                                    \ from the left edge to the right edge
 
- SUB     R12, R12, #320             \ 
+ BLPL    DrawHorizontalLine         \ If R10 is positive then we draw a line
+                                    \ from the left edge to the right edge,
+                                    \ using the colour word that was passed to
+                                    \ the DrawTriangle routine in R8
 
- SUBS    R9, R9, #1                 \ 
+ SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
+                                    \ points to the start of the pixel row above
+                                    \ the one we just drew
 
- BNE     trin14                     \ 
+ SUBS    R9, R9, #1                 \ Decrement the pixel row counter in R9,
+                                    \ which contains the number of pixel rows
+                                    \ between y1 and y2
 
- LDMFD   R13!, {PC}                 \ 
+ BNE     trin14                     \ Loop back until we have drawn all the
+                                    \ horizontal lines in the second part of
+                                    \ the triangle, from (x2, y2) at the bottom,
+                                    \ up to the level of (x3, y3)
+
+ LDMFD   R13!, {PC}                 \ Return from the subroutine
 
 .trin15
 
- RSBMI   R10, R10, #0               \ 
+ RSBMI   R10, R10, #0               \ ???
  CMP     R14, #0                    \ 
  RSBMI   R14, R14, #0               \ 
  CMP     R14, R10                   \ 
@@ -9847,7 +10140,7 @@
 \
 \   R10                             Line length
 \
-\   R11                             Screen address of left end of line
+\   R11                             Screen address of the left end of the line
 \
 \ ******************************************************************************
 
