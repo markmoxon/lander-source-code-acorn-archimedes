@@ -1393,7 +1393,7 @@
                                     \   tileCornerRow + slope >> 22
                                     \
                                     \ where tileCornerRow is the number of the
-                                    \ tile  orner row that we're processing (so
+                                    \ tile corner row that we're processing (so
                                     \ it goes from 0 at the back to 11 at the
                                     \ front)
                                     \
@@ -2200,7 +2200,7 @@
                                     \   * Bit 20 set = apply gravity to particle
                                     \   * Bit 21 set = can destroy objects
                                     \   * Bit 23 set = splash size is big
-                                    \   * Bit 24 set = explode on ground impact
+                                    \   * Bit 24 set = explode on hitting ground
 
  ORR     R7, R7, #&FF               \ Set the particle colour to white in bits 0
                                     \ to 7 of the particle flag
@@ -3112,7 +3112,7 @@
 \       Name: SplashParticleIntoSea
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: Splash a particle into the sea
+\    Summary: Splash a particle into the sea, creating a spray particle
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3131,7 +3131,7 @@
                                     \ particle without splashing
 
  TST     R7, #&00800000             \ If bit 23 of the particle flags is set,
- MOVNE   R8, #65                    \ set the number of splash particles in R8
+ MOVNE   R8, #65                    \ set the number of spray particles in R8
  MOVEQ   R8, #4                     \ to 65, otherwise set it to 4
 
  SUB     R1, R1, #&00100000         \ Set R1 to a point just above the sea's
@@ -3141,13 +3141,13 @@
 
 .psea1
 
- BL      AddSplashParticleToBuffer  \ Add a splash particle to the particle data
+ BL      AddSprayParticleToBuffer   \ Add a spray particle to the particle data
                                     \ buffer
 
  SUBS    R8, R8, #1                 \ Decrement the particle counter in R8
 
  BNE     psea1                      \ Loop back until we have added all the
-                                    \ splash particles
+                                    \ spray particles
 
                                     \ Fall through into DeleteParticleData to
                                     \ delete the particle and return from the
@@ -3310,11 +3310,11 @@
 \                                     * Bit 16 set = colour fades white to red
 \                                     * Bit 17 set = particle is a rock
 \                                     * Bit 18 set = splash on impact with sea
-\                                     * Bit 19 set = bounce on ground impact
+\                                     * Bit 19 set = bounce on hitting ground
 \                                     * Bit 20 set = apply gravity to particle
 \                                     * Bit 21 set = can destroy objects
 \                                     * Bit 23 set = splash size (big when set)
-\                                     * Bit 24 set = explode on ground impact
+\                                     * Bit 24 set = explode on hitting ground
 \
 \   R8                              Magnitude of the random element that's added
 \                                   to the velocity, with a larger figure giving
@@ -3365,11 +3365,11 @@
 \                                     * Bit 16 set = colour fades white to red
 \                                     * Bit 17 set = particle is a rock
 \                                     * Bit 18 set = splash on impact with sea
-\                                     * Bit 19 set = bounce on ground impact
+\                                     * Bit 19 set = bounce on hitting ground
 \                                     * Bit 20 set = apply gravity to particle
 \                                     * Bit 21 set = can destroy objects
 \                                     * Bit 23 set = splash size (big when set)
-\                                     * Bit 24 set = explode on ground impact
+\                                     * Bit 24 set = explode on hitting ground
 \
 \   R8                              Magnitude of the random element that's added
 \                                   to the velocity, with a larger figure giving
@@ -3421,11 +3421,11 @@
 \                                     * Bit 16 set = colour fades white to red
 \                                     * Bit 17 set = particle is a rock
 \                                     * Bit 18 set = splash on impact with sea
-\                                     * Bit 19 set = bounce on ground impact
+\                                     * Bit 19 set = bounce on hitting ground
 \                                     * Bit 20 set = apply gravity to particle
 \                                     * Bit 21 set = can destroy objects
 \                                     * Bit 23 set = splash size (big when set)
-\                                     * Bit 24 set = explode on ground impact
+\                                     * Bit 24 set = explode on hitting ground
 \
 \   R8                              Magnitude of the random element that's added
 \                                   to the velocity, with a larger figure giving
@@ -3909,7 +3909,7 @@
                                     \   * Bit 20 set = apply gravity to particle
                                     \   * Bit 21 set = can destroy objects
                                     \   * Bit 23 set = splash size (big when set)
-                                    \   * Bit 24 set = explode on ground impact
+                                    \   * Bit 24 set = explode on hitting ground
 
  LDMFD   R13!, {R0-R2}              \ Retrieve the particle coordinates that we
                                     \ stored above into (R0, R1, R2)
@@ -3981,10 +3981,10 @@
 
 \ ******************************************************************************
 \
-\       Name: AddSplashParticleToBuffer
+\       Name: AddSprayParticleToBuffer
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: Add a splash particle to the particle data buffer
+\    Summary: Add a spray particle to the particle data buffer
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3994,7 +3994,7 @@
 \
 \ ******************************************************************************
 
-.AddSplashParticleToBuffer
+.AddSprayParticleToBuffer
 
  STMFD   R13!, {R0-R2, R8, R14}     \ Store the particle coordinates on the
                                     \ stack so we can retrieve them below, and
@@ -8846,7 +8846,7 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawTriangle
+\       Name: DrawTriangle (Part 1 of ???)
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a triangle
@@ -8867,13 +8867,16 @@
 
 .DrawTriangle
 
- CMP     R0, #320                   \ 
- CMPLO   R1, #&EF                   \ 
- CMPLO   R2, #320                   \ 
- CMPLO   R3, #&EF                   \ 
- CMPLO   R4, #320                   \ 
- CMPLO   R5, #&EF                   \ 
- BHS     lab_A110                   \ 
+ CMP     R0, #320                   \ Check to see whether any of the triangle
+ CMPLO   R1, #239                   \ corners are off-screen (in which case the
+ CMPLO   R2, #320                   \ x-coordinate will be >= 320, or the
+ CMPLO   R3, #239                   \ y-coordinate will be >= 239)
+ CMPLO   R4, #320
+ CMPLO   R5, #239
+
+ BHS     trin23                     \ If any of the corners are off-screen, jump
+                                    \ to trin23 to draw a clipped triangle
+
  STMFD   R13!, {R14}                \ 
 
  LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
@@ -8882,7 +8885,7 @@
                                     \ screen
 
  CMP     R1, R3                     \ 
- BHS     lab_9E20                   \ 
+ BHS     trin1                      \ 
  MOV     R6, R0                     \ 
  MOV     R0, R2                     \ 
  MOV     R2, R6                     \ 
@@ -8890,10 +8893,10 @@
  MOV     R1, R3                     \ 
  MOV     R3, R6                     \ 
 
-.lab_9E20
+.trin1
 
  CMP     R1, R5                     \ 
- BHS     lab_9E40                   \ 
+ BHS     trin2                      \ 
  MOV     R6, R0                     \ 
  MOV     R0, R4                     \ 
  MOV     R4, R6                     \ 
@@ -8901,10 +8904,10 @@
  MOV     R1, R5                     \ 
  MOV     R5, R6                     \ 
 
-.lab_9E40
+.trin2
 
  CMP     R3, R5                     \ 
- BHS     lab_9E60                   \ 
+ BHS     trin3                      \ 
  MOV     R6, R2                     \ 
  MOV     R2, R4                     \ 
  MOV     R4, R6                     \ 
@@ -8912,39 +8915,39 @@
  MOV     R3, R5                     \ 
  MOV     R5, R6                     \ 
 
-.lab_9E60
+.trin3
 
  ADD     R11, R1, R1, LSL #2        \ 
  ADD     R12, R12, R11, LSL #6      \ 
  SUBS    R9, R1, R3                 \ 
- BEQ     lab_A030                   \ 
+ BEQ     trin16                     \ 
  STMFD   R13!, {R4-R5}              \ 
  SUBS    R14, R2, R0                \ 
  RSBMI   R14, R2, R0                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_9E98                   \ 
+ BHS     trin4                      \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R6, [R10, R9, LSL #2]      \ 
- B       lab_9EBC                   \ 
+ B       trin6                      \ 
 
-.lab_9E98
+.trin4
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R6, #0                     \ 
  MOV     R10, #&80000000            \ 
 
-.lab_9EA4
+.trin5
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R6, R6, R10                \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_9EA4                   \ 
+ BLO     trin5                      \ 
 
-.lab_9EBC
+.trin6
 
  CMP     R2, R0                     \ 
  RSBMI   R6, R6, #0                 \ 
@@ -8953,28 +8956,28 @@
  RSBMI   R14, R4, R0                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_9EEC                   \ 
+ BHS     trin7                      \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R7, [R10, R9, LSL #2]      \ 
- B       lab_9F10                   \ 
+ B       trin9                      \ 
 
-.lab_9EEC
+.trin7
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R7, #0                     \ 
  MOV     R10, #&80000000            \ 
 
-.lab_9EF8
+.trin8
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R7, R7, R10                \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_9EF8                   \ 
+ BLO     trin8                      \ 
 
-.lab_9F10
+.trin9
 
  CMP     R4, R0                     \ 
  RSBMI   R7, R7, #0                 \ 
@@ -8987,7 +8990,7 @@
  MOVGT   R6, R7                     \ 
  MOVGT   R7, R14                    \ 
 
-.lab_9F38
+.trin10
 
  ADD     R4, R4, R6                 \ 
  ADD     R5, R5, R7                 \ 
@@ -8997,7 +9000,7 @@
  BLPL    DrawHorizontalLine         \ 
  SUB     R12, R12, #320             \ 
  SUBS    R9, R9, #1                 \ 
- BNE     lab_9F38                   \ 
+ BNE     trin10                     \ 
  LDMFD   R13!, {R0-R1}              \ 
  SUBS    R9, R3, R1                 \ 
  LDMEQIA R13!, {PC}                 \ 
@@ -9005,35 +9008,35 @@
  RSBMI   R14, R0, R2                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_9F8C                   \ 
+ BHS     trin11                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R11, [R10, R9, LSL #2]     \ 
- B       lab_9FB0                   \ 
+ B       trin13                     \ 
 
-.lab_9F8C
+.trin11
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R11, #0                    \ 
  MOV     R10, #&80000000            \ 
 
-.lab_9F98
+.trin12
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R11, R11, R10              \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_9F98                   \ 
+ BLO     trin12                     \ 
 
-.lab_9FB0
+.trin13
 
  CMP     R0, R2                     \ 
  RSBMI   R11, R11, #0               \ 
  SUB     R9, R3, R1                 \ 
  SUBS    R14, R2, R4, LSR #16       \ 
  SUBNES  R10, R2, R5, LSR #16       \ 
- BNE     lab_A014                   \ 
+ BNE     trin15                     \ 
  CMP     R2, R4, LSR #16            \ 
  MOVEQ   R6, R11                    \ 
  BICEQ   R4, R4, #&FF00             \ 
@@ -9044,7 +9047,7 @@
  BICNE   R5, R5, #&FF               \ 
  ORRNE   R5, R5, #&8000             \ 
 
-.lab_9FEC
+.trin14
 
  ADD     R4, R4, R6                 \ 
  ADD     R5, R5, R7                 \ 
@@ -9054,10 +9057,10 @@
  BLPL    DrawHorizontalLine         \ 
  SUB     R12, R12, #320             \ 
  SUBS    R9, R9, #1                 \ 
- BNE     lab_9FEC                   \ 
+ BNE     trin14                     \ 
  LDMFD   R13!, {PC}                 \ 
 
-.lab_A014
+.trin15
 
  RSBMI   R10, R10, #0               \ 
  CMP     R14, #0                    \ 
@@ -9065,9 +9068,18 @@
  CMP     R14, R10                   \ 
  MOVHS   R6, R11                    \ 
  MOVLO   R7, R11                    \ 
- B       lab_9FEC                   \ 
+ B       trin14                     \ 
 
-.lab_A030
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 1 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: Draw a triangle
+\
+\ ******************************************************************************
+
+.trin16
 
  SUBS    R9, R3, R5                 \ 
  LDMEQIA R13!, {PC}                 \ 
@@ -9075,28 +9087,28 @@
  RSBMI   R14, R0, R4                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_A05C                   \ 
+ BHS     trin17                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R6, [R10, R9, LSL #2]      \ 
- B       lab_A080                   \ 
+ B       trin19                     \ 
 
-.lab_A05C
+.trin17
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R6, #0                     \ 
  MOV     R10, #&80000000            \ 
 
-.lab_A068
+.trin18
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R6, R6, R10                \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_A068                   \ 
+ BLO     trin18                     \ 
 
-.lab_A080
+.trin19
 
  CMP     R4, R0                     \ 
  RSBMI   R6, R6, #0                 \ 
@@ -9105,28 +9117,28 @@
  RSBMI   R14, R2, R4                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_A0B0                   \ 
+ BHS     trin20                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R7, [R10, R9, LSL #2]      \ 
- B       lab_A0D4                   \ 
+ B       trin22                     \ 
 
-.lab_A0B0
+.trin20
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R7, #0                     \ 
  MOV     R10, #&80000000            \ 
 
-.lab_A0BC
+.trin21
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R7, R7, R10                \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_A0BC                   \ 
+ BLO     trin21                     \ 
 
-.lab_A0D4
+.trin22
 
  CMP     R4, R2                     \ 
  RSBMI   R7, R7, #0                 \ 
@@ -9142,13 +9154,22 @@
  MOVHS   R14, R4                    \ 
  MOVHS   R4, R5                     \ 
  MOVHS   R5, R14                    \ 
- B       lab_9FEC                   \ 
+ B       trin14                     \ 
 
-.lab_A110
+\ ******************************************************************************
+\
+\       Name: DrawTriangle (Part 1 of ???)
+\       Type: Subroutine
+\   Category: Drawing triangles
+\    Summary: Draw a triangle that's partly off-screen
+\
+\ ******************************************************************************
 
- CMP     R1, #&EF                   \ 
- CMPHS   R3, #&EF                   \ 
- CMPHS   R5, #&EF                   \ 
+.trin23
+
+ CMP     R1, #239                   \ 
+ CMPHS   R3, #239                   \ 
+ CMPHS   R5, #239                   \ 
  MOVHS   PC, R14                    \ 
  CMP     R0, #320                   \ 
  CMPHS   R2, #320                   \ 
@@ -9162,7 +9183,7 @@
                                     \ screen
 
  CMP     R1, R3                     \ 
- BGT     lab_A158                   \ 
+ BGT     trin24                     \ 
  MOV     R6, R0                     \ 
  MOV     R0, R2                     \ 
  MOV     R2, R6                     \ 
@@ -9170,10 +9191,10 @@
  MOV     R1, R3                     \ 
  MOV     R3, R6                     \ 
 
-.lab_A158
+.trin24
 
  CMP     R1, R5                     \ 
- BGT     lab_A178                   \ 
+ BGT     trin25                     \ 
  MOV     R6, R0                     \ 
  MOV     R0, R4                     \ 
  MOV     R4, R6                     \ 
@@ -9181,10 +9202,10 @@
  MOV     R1, R5                     \ 
  MOV     R5, R6                     \ 
 
-.lab_A178
+.trin25
 
  CMP     R3, R5                     \ 
- BGT     lab_A198                   \ 
+ BGT     trin26                     \ 
  MOV     R6, R2                     \ 
  MOV     R2, R4                     \ 
  MOV     R4, R6                     \ 
@@ -9192,38 +9213,38 @@
  MOV     R3, R5                     \ 
  MOV     R5, R6                     \ 
 
-.lab_A198
+.trin26
 
  MOV     R11, R1                    \ 
  SUBS    R9, R1, R3                 \ 
- BEQ     lab_A328                   \ 
+ BEQ     trin38                     \ 
  STMFD   R13!, {R4-R5}              \ 
  SUBS    R14, R2, R0                \ 
  RSBMI   R14, R2, R0                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_A1CC                   \ 
+ BHS     trin27                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R6, [R10, R9, LSL #2]      \ 
- B       lab_A1F0                   \ 
+ B       trin29                     \ 
 
-.lab_A1CC
+.trin27
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R6, #0                     \ 
  MOV     R10, #&80000000            \ 
 
-.lab_A1D8
+.trin28
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R6, R6, R10                \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_A1D8                   \ 
+ BLO     trin28                     \ 
 
-.lab_A1F0
+.trin29
 
  CMP     R2, R0                     \ 
  RSBMI   R6, R6, #0                 \ 
@@ -9232,28 +9253,28 @@
  RSBMI   R14, R4, R0                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_A220                   \ 
+ BHS     trin30                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R7, [R10, R9, LSL #2]      \ 
- B       lab_A244                   \ 
+ B       trin32                     \ 
 
-.lab_A220
+.trin30
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R7, #0                     \ 
  MOV     R10, #&80000000            \ 
 
-.lab_A22C
+.trin31
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R7, R7, R10                \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_A22C                   \ 
+ BLO     trin31                     \ 
 
-.lab_A244
+.trin32
 
  CMP     R4, R0                     \ 
  RSBMI   R7, R7, #0                 \ 
@@ -9273,35 +9294,35 @@
  RSBMI   R14, R0, R2                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_A2A0                   \ 
+ BHS     trin33                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R12, [R10, R9, LSL #2]     \ 
- B       lab_A2C4                   \ 
+ B       trin35                     \ 
 
-.lab_A2A0
+.trin33
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R12, #0                    \ 
  MOV     R10, #&80000000            \ 
 
-.lab_A2AC
+.trin34
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R12, R12, R10              \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_A2AC                   \ 
+ BLO     trin34                     \ 
 
-.lab_A2C4
+.trin35
 
  CMP     R0, R2                     \ 
  RSBMI   R12, R12, #0               \ 
  SUB     R9, R3, R1                 \ 
  SUBS    R14, R2, R4, ASR #16       \ 
  SUBNES  R10, R2, R5, ASR #16       \ 
- BNE     lab_A30C                   \ 
+ BNE     trin37                     \ 
  CMP     R2, R4, ASR #16            \ 
  MOVEQ   R6, R12                    \ 
  BICEQ   R4, R4, #&FF00             \ 
@@ -9312,7 +9333,7 @@
  BICNE   R5, R5, #&FF               \ 
  ORRNE   R5, R5, #&8000             \ 
 
-.lab_A300
+.trin36
 
  LDR     R12, screenAddr            \ Set R12 to the address of the screen bank
                                     \ we are drawing in, pointing just below
@@ -9322,7 +9343,7 @@
  BL      FillTriangle               \ 
  LDMFD   R13!, {PC}                 \ 
 
-.lab_A30C
+.trin37
 
  RSBMI   R10, R10, #0               \ 
  CMP     R14, #0                    \ 
@@ -9330,9 +9351,9 @@
  CMP     R14, R10                   \ 
  MOVHS   R6, R12                    \ 
  MOVLO   R7, R12                    \ 
- B       lab_A300                   \ 
+ B       trin36                     \ 
 
-.lab_A328
+.trin38
 
  SUBS    R9, R3, R5                 \ 
  LDMEQIA R13!, {PC}                 \ 
@@ -9340,28 +9361,28 @@
  RSBMI   R14, R0, R4                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_A354                   \ 
+ BHS     trin39                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R6, [R10, R9, LSL #2]      \ 
- B       lab_A378                   \ 
+ B       trin41                     \ 
 
-.lab_A354
+.trin39
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R6, #0                     \ 
  MOV     R10, #&80000000            \ 
 
-.lab_A360
+.trin40
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R6, R6, R10                \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_A360                   \ 
+ BLO     trin40                     \ 
 
-.lab_A378
+.trin41
 
  CMP     R4, R0                     \ 
  RSBMI   R6, R6, #0                 \ 
@@ -9370,28 +9391,28 @@
  RSBMI   R14, R2, R4                \ 
  CMP     R14, #&40                  \ 
  CMPLO   R9, #&40                   \ 
- BHS     lab_A3A8                   \ 
+ BHS     trin42                     \ 
  LDR     R10, divisionTableAddr     \ 
  ADD     R10, R10, R14, LSL #8      \ 
  LDR     R7, [R10, R9, LSL #2]      \ 
- B       lab_A3CC                   \ 
+ B       trin44                     \ 
 
-.lab_A3A8
+.trin42
 
  MOV     R9, R9, LSL #16            \ 
  MOV     R7, #0                     \ 
  MOV     R10, #&80000000            \ 
 
-.lab_A3B4
+.trin43
 
  MOVS    R14, R14, LSL #1           \ 
  CMPLO   R14, R9                    \ 
  SUBHS   R14, R14, R9               \ 
  ORRHS   R7, R7, R10                \ 
  MOVS    R10, R10, LSR #1           \ 
- BLO     lab_A3B4                   \ 
+ BLO     trin43                     \ 
 
-.lab_A3CC
+.trin44
 
  CMP     R4, R2                     \ 
  RSBMI   R7, R7, #0                 \ 
@@ -9407,7 +9428,7 @@
  MOVGT   R14, R4                    \ 
  MOVGT   R4, R5                     \ 
  MOVGT   R5, R14                    \ 
- B       lab_A300                   \ 
+ B       trin36                     \ 
 
 \ ******************************************************************************
 \
@@ -9422,42 +9443,55 @@
 
  CMP     R9, #&100                  \ 
  MOVHS   PC, R14                    \ 
+
  STMFD   R13!, {R14}                \ 
 
-.lab_A414
+.fill1
 
  ADD     R4, R4, R6                 \ 
  ADD     R5, R5, R7                 \ 
+
  CMP     R11, #0                    \ 
  LDMMIIA R13!, {PC}                 \ 
- CMP     R11, #&EF                  \ 
- BHS     lab_A470                   \ 
+
+ CMP     R11, #239                  \ 
+ BHS     fill3                      \ 
+
  STMFD   R13!, {R11}                \ 
+
  ADD     R11, R11, R11, LSL #2      \ 
  ADD     R11, R12, R11, LSL #6      \ 
+
  CMP     R4, #&01400000             \ 
- BPL     lab_A46C                   \ 
+ BPL     fill2                      \ 
+
  CMP     R5, #0                     \ 
- BMI     lab_A46C                   \ 
+ BMI     fill2                      \ 
+
  CMP     R4, #0                     \ 
  MOVPL   R0, R4, LSR #16            \ 
  ADDPL   R11, R11, R4, LSR #16      \ 
  MOVMI   R0, #0                     \ 
+
  CMP     R5, #&01400000             \ 
  RSBLO   R10, R0, R5, LSR #16       \ 
  RSBHS   R10, R0, #320              \ 
+
  CMP     R10, #0                    \ 
  BLPL    DrawHorizontalLine         \ 
 
-.lab_A46C
+.fill2
 
  LDMFD   R13!, {R11}                \ 
 
-.lab_A470
+.fill3
 
  SUB     R11, R11, #1               \ 
+
  SUBS    R9, R9, #1                 \ 
- BNE     lab_A414                   \ 
+
+ BNE     fill1                      \ 
+
  LDMFD   R13!, {PC}                 \ 
 
 \ ******************************************************************************

@@ -811,7 +811,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008A44 0480A003        	   784:  MOVEQ   R8, #4
 00:00008A48 011641E2        	   785:  SUB     R1, R1, #0x00100000
                             	   786: psea1:
-00:00008A4C 810000EB        	   787:  BL      AddSplashParticleToBuffer
+00:00008A4C 810000EB        	   787:  BL      AddSprayParticleToBuffer
 00:00008A50 018058E2        	   788:  SUBS    R8, R8, #1
 00:00008A54 FCFFFF1A        	   789:  BNE     psea1
                             	   790: DeleteParticleData:
@@ -954,7 +954,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00008C4C 0880A0E3        	   927:  MOV     R8, #8
 00:00008C50 0860A0E3        	   928:  MOV     R6, #8
 00:00008C54 8EFFFFEA        	   929:  B       AddStaticParticleToBuffer
-                            	   930: AddSplashParticleToBuffer:
+                            	   930: AddSprayParticleToBuffer:
 00:00008C58 07412DE9        	   931:  STMFD   R13!, {R0-R2, R8, R14}
 00:00008C5C 770300EB        	   932:  BL      GetRandomNumbers
 00:00008C60 032000E2        	   933:  AND     R2, R0, #3
@@ -2186,67 +2186,67 @@ Source: "3-assembled-output/Lander.arm"
 00:00009DD8 009EBDE8        	  2159:  LDMFD   R13!, {R9-R12, PC}
                             	  2160: DrawTriangle:
 00:00009DDC 050D50E3        	  2161:  CMP     R0, #320
-00:00009DE0 EF005133        	  2162:  CMPLO   R1, #0xEF
+00:00009DE0 EF005133        	  2162:  CMPLO   R1, #239
 00:00009DE4 050D5233        	  2163:  CMPLO   R2, #320
-00:00009DE8 EF005333        	  2164:  CMPLO   R3, #0xEF
+00:00009DE8 EF005333        	  2164:  CMPLO   R3, #239
 00:00009DEC 050D5433        	  2165:  CMPLO   R4, #320
-00:00009DF0 EF005533        	  2166:  CMPLO   R5, #0xEF
-00:00009DF4 C500002A        	  2167:  BHS     lab_A110
+00:00009DF0 EF005533        	  2166:  CMPLO   R5, #239
+00:00009DF4 C500002A        	  2167:  BHS     trin23
 00:00009DF8 00402DE9        	  2168:  STMFD   R13!, {R14}
 00:00009DFC 98C31FE5        	  2169:  LDR     R12, screenAddr
 00:00009E00 030051E1        	  2170:  CMP     R1, R3
-00:00009E04 0500002A        	  2171:  BHS     lab_9E20
+00:00009E04 0500002A        	  2171:  BHS     trin1
 00:00009E08 0060A0E1        	  2172:  MOV     R6, R0
 00:00009E0C 0200A0E1        	  2173:  MOV     R0, R2
 00:00009E10 0620A0E1        	  2174:  MOV     R2, R6
 00:00009E14 0160A0E1        	  2175:  MOV     R6, R1
 00:00009E18 0310A0E1        	  2176:  MOV     R1, R3
 00:00009E1C 0630A0E1        	  2177:  MOV     R3, R6
-                            	  2178: lab_9E20:
+                            	  2178: trin1:
 00:00009E20 050051E1        	  2179:  CMP     R1, R5
-00:00009E24 0500002A        	  2180:  BHS     lab_9E40
+00:00009E24 0500002A        	  2180:  BHS     trin2
 00:00009E28 0060A0E1        	  2181:  MOV     R6, R0
 00:00009E2C 0400A0E1        	  2182:  MOV     R0, R4
 00:00009E30 0640A0E1        	  2183:  MOV     R4, R6
 00:00009E34 0160A0E1        	  2184:  MOV     R6, R1
 00:00009E38 0510A0E1        	  2185:  MOV     R1, R5
 00:00009E3C 0650A0E1        	  2186:  MOV     R5, R6
-                            	  2187: lab_9E40:
+                            	  2187: trin2:
 00:00009E40 050053E1        	  2188:  CMP     R3, R5
-00:00009E44 0500002A        	  2189:  BHS     lab_9E60
+00:00009E44 0500002A        	  2189:  BHS     trin3
 00:00009E48 0260A0E1        	  2190:  MOV     R6, R2
 00:00009E4C 0420A0E1        	  2191:  MOV     R2, R4
 00:00009E50 0640A0E1        	  2192:  MOV     R4, R6
 00:00009E54 0360A0E1        	  2193:  MOV     R6, R3
 00:00009E58 0530A0E1        	  2194:  MOV     R3, R5
 00:00009E5C 0650A0E1        	  2195:  MOV     R5, R6
-                            	  2196: lab_9E60:
+                            	  2196: trin3:
 00:00009E60 01B181E0        	  2197:  ADD     R11, R1, R1, LSL #2
 00:00009E64 0BC38CE0        	  2198:  ADD     R12, R12, R11, LSL #6
 00:00009E68 039051E0        	  2199:  SUBS    R9, R1, R3
-00:00009E6C 6F00000A        	  2200:  BEQ     lab_A030
+00:00009E6C 6F00000A        	  2200:  BEQ     trin16
 00:00009E70 30002DE9        	  2201:  STMFD   R13!, {R4-R5}
 00:00009E74 00E052E0        	  2202:  SUBS    R14, R2, R0
 00:00009E78 00E06240        	  2203:  RSBMI   R14, R2, R0
 00:00009E7C 40005EE3        	  2204:  CMP     R14, #0x40
 00:00009E80 40005933        	  2205:  CMPLO   R9, #0x40
-00:00009E84 0300002A        	  2206:  BHS     lab_9E98
+00:00009E84 0300002A        	  2206:  BHS     trin4
 00:00009E88 58A11FE5        	  2207:  LDR     R10, divisionTableAddr
 00:00009E8C 0EA48AE0        	  2208:  ADD     R10, R10, R14, LSL #8
 00:00009E90 09619AE7        	  2209:  LDR     R6, [R10, R9, LSL #2]
-00:00009E94 080000EA        	  2210:  B       lab_9EBC
-                            	  2211: lab_9E98:
+00:00009E94 080000EA        	  2210:  B       trin6
+                            	  2211: trin4:
 00:00009E98 0998A0E1        	  2212:  MOV     R9, R9, LSL #16
 00:00009E9C 0060A0E3        	  2213:  MOV     R6, #0
 00:00009EA0 02A1A0E3        	  2214:  MOV     R10, #0x80000000
-                            	  2215: lab_9EA4:
+                            	  2215: trin5:
 00:00009EA4 8EE0B0E1        	  2216:  MOVS    R14, R14, LSL #1
 00:00009EA8 09005E31        	  2217:  CMPLO   R14, R9
 00:00009EAC 09E04E20        	  2218:  SUBHS   R14, R14, R9
 00:00009EB0 0A608621        	  2219:  ORRHS   R6, R6, R10
 00:00009EB4 AAA0B0E1        	  2220:  MOVS    R10, R10, LSR #1
-00:00009EB8 F9FFFF3A        	  2221:  BLO     lab_9EA4
-                            	  2222: lab_9EBC:
+00:00009EB8 F9FFFF3A        	  2221:  BLO     trin5
+                            	  2222: trin6:
 00:00009EBC 000052E1        	  2223:  CMP     R2, R0
 00:00009EC0 00606642        	  2224:  RSBMI   R6, R6, #0
 00:00009EC4 059051E0        	  2225:  SUBS    R9, R1, R5
@@ -2254,23 +2254,23 @@ Source: "3-assembled-output/Lander.arm"
 00:00009ECC 00E06440        	  2227:  RSBMI   R14, R4, R0
 00:00009ED0 40005EE3        	  2228:  CMP     R14, #0x40
 00:00009ED4 40005933        	  2229:  CMPLO   R9, #0x40
-00:00009ED8 0300002A        	  2230:  BHS     lab_9EEC
+00:00009ED8 0300002A        	  2230:  BHS     trin7
 00:00009EDC ACA11FE5        	  2231:  LDR     R10, divisionTableAddr
 00:00009EE0 0EA48AE0        	  2232:  ADD     R10, R10, R14, LSL #8
 00:00009EE4 09719AE7        	  2233:  LDR     R7, [R10, R9, LSL #2]
-00:00009EE8 080000EA        	  2234:  B       lab_9F10
-                            	  2235: lab_9EEC:
+00:00009EE8 080000EA        	  2234:  B       trin9
+                            	  2235: trin7:
 00:00009EEC 0998A0E1        	  2236:  MOV     R9, R9, LSL #16
 00:00009EF0 0070A0E3        	  2237:  MOV     R7, #0
 00:00009EF4 02A1A0E3        	  2238:  MOV     R10, #0x80000000
-                            	  2239: lab_9EF8:
+                            	  2239: trin8:
 00:00009EF8 8EE0B0E1        	  2240:  MOVS    R14, R14, LSL #1
 00:00009EFC 09005E31        	  2241:  CMPLO   R14, R9
 00:00009F00 09E04E20        	  2242:  SUBHS   R14, R14, R9
 00:00009F04 0A708721        	  2243:  ORRHS   R7, R7, R10
 00:00009F08 AAA0B0E1        	  2244:  MOVS    R10, R10, LSR #1
-00:00009F0C F9FFFF3A        	  2245:  BLO     lab_9EF8
-                            	  2246: lab_9F10:
+00:00009F0C F9FFFF3A        	  2245:  BLO     trin8
+                            	  2246: trin9:
 00:00009F10 000054E1        	  2247:  CMP     R4, R0
 00:00009F14 00706742        	  2248:  RSBMI   R7, R7, #0
 00:00009F18 039051E0        	  2249:  SUBS    R9, R1, R3
@@ -2281,7 +2281,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009F2C 06E0A0C1        	  2254:  MOVGT   R14, R6
 00:00009F30 0760A0C1        	  2255:  MOVGT   R6, R7
 00:00009F34 0E70A0C1        	  2256:  MOVGT   R7, R14
-                            	  2257: lab_9F38:
+                            	  2257: trin10:
 00:00009F38 064084E0        	  2258:  ADD     R4, R4, R6
 00:00009F3C 075085E0        	  2259:  ADD     R5, R5, R7
 00:00009F40 24B88CE0        	  2260:  ADD     R11, R12, R4, LSR #16
@@ -2290,7 +2290,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009F4C 5D01005B        	  2263:  BLPL    DrawHorizontalLine
 00:00009F50 05CD4CE2        	  2264:  SUB     R12, R12, #320
 00:00009F54 019059E2        	  2265:  SUBS    R9, R9, #1
-00:00009F58 F6FFFF1A        	  2266:  BNE     lab_9F38
+00:00009F58 F6FFFF1A        	  2266:  BNE     trin10
 00:00009F5C 0300BDE8        	  2267:  LDMFD   R13!, {R0-R1}
 00:00009F60 019053E0        	  2268:  SUBS    R9, R3, R1
 00:00009F64 0080BD08        	  2269:  LDMEQIA R13!, {PC}
@@ -2298,29 +2298,29 @@ Source: "3-assembled-output/Lander.arm"
 00:00009F6C 02E06040        	  2271:  RSBMI   R14, R0, R2
 00:00009F70 40005EE3        	  2272:  CMP     R14, #0x40
 00:00009F74 40005933        	  2273:  CMPLO   R9, #0x40
-00:00009F78 0300002A        	  2274:  BHS     lab_9F8C
+00:00009F78 0300002A        	  2274:  BHS     trin11
 00:00009F7C 4CA21FE5        	  2275:  LDR     R10, divisionTableAddr
 00:00009F80 0EA48AE0        	  2276:  ADD     R10, R10, R14, LSL #8
 00:00009F84 09B19AE7        	  2277:  LDR     R11, [R10, R9, LSL #2]
-00:00009F88 080000EA        	  2278:  B       lab_9FB0
-                            	  2279: lab_9F8C:
+00:00009F88 080000EA        	  2278:  B       trin13
+                            	  2279: trin11:
 00:00009F8C 0998A0E1        	  2280:  MOV     R9, R9, LSL #16
 00:00009F90 00B0A0E3        	  2281:  MOV     R11, #0
 00:00009F94 02A1A0E3        	  2282:  MOV     R10, #0x80000000
-                            	  2283: lab_9F98:
+                            	  2283: trin12:
 00:00009F98 8EE0B0E1        	  2284:  MOVS    R14, R14, LSL #1
 00:00009F9C 09005E31        	  2285:  CMPLO   R14, R9
 00:00009FA0 09E04E20        	  2286:  SUBHS   R14, R14, R9
 00:00009FA4 0AB08B21        	  2287:  ORRHS   R11, R11, R10
 00:00009FA8 AAA0B0E1        	  2288:  MOVS    R10, R10, LSR #1
-00:00009FAC F9FFFF3A        	  2289:  BLO     lab_9F98
-                            	  2290: lab_9FB0:
+00:00009FAC F9FFFF3A        	  2289:  BLO     trin12
+                            	  2290: trin13:
 00:00009FB0 020050E1        	  2291:  CMP     R0, R2
 00:00009FB4 00B06B42        	  2292:  RSBMI   R11, R11, #0
 00:00009FB8 019043E0        	  2293:  SUB     R9, R3, R1
 00:00009FBC 24E852E0        	  2294:  SUBS    R14, R2, R4, LSR #16
 00:00009FC0 25A85210        	  2295:  SUBNES  R10, R2, R5, LSR #16
-00:00009FC4 1200001A        	  2296:  BNE     lab_A014
+00:00009FC4 1200001A        	  2296:  BNE     trin15
 00:00009FC8 240852E1        	  2297:  CMP     R2, R4, LSR #16
 00:00009FCC 0B60A001        	  2298:  MOVEQ   R6, R11
 00:00009FD0 FF4CC403        	  2299:  BICEQ   R4, R4, #0xFF00
@@ -2330,7 +2330,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00009FE0 FF5CC513        	  2303:  BICNE   R5, R5, #0xFF00
 00:00009FE4 FF50C513        	  2304:  BICNE   R5, R5, #0xFF
 00:00009FE8 02598513        	  2305:  ORRNE   R5, R5, #0x8000
-                            	  2306: lab_9FEC:
+                            	  2306: trin14:
 00:00009FEC 064084E0        	  2307:  ADD     R4, R4, R6
 00:00009FF0 075085E0        	  2308:  ADD     R5, R5, R7
 00:00009FF4 24B88CE0        	  2309:  ADD     R11, R12, R4, LSR #16
@@ -2339,40 +2339,40 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A000 3001005B        	  2312:  BLPL    DrawHorizontalLine
 00:0000A004 05CD4CE2        	  2313:  SUB     R12, R12, #320
 00:0000A008 019059E2        	  2314:  SUBS    R9, R9, #1
-00:0000A00C F6FFFF1A        	  2315:  BNE     lab_9FEC
+00:0000A00C F6FFFF1A        	  2315:  BNE     trin14
 00:0000A010 0080BDE8        	  2316:  LDMFD   R13!, {PC}
-                            	  2317: lab_A014:
+                            	  2317: trin15:
 00:0000A014 00A06A42        	  2318:  RSBMI   R10, R10, #0
 00:0000A018 00005EE3        	  2319:  CMP     R14, #0
 00:0000A01C 00E06E42        	  2320:  RSBMI   R14, R14, #0
 00:0000A020 0A005EE1        	  2321:  CMP     R14, R10
 00:0000A024 0B60A021        	  2322:  MOVHS   R6, R11
 00:0000A028 0B70A031        	  2323:  MOVLO   R7, R11
-00:0000A02C EEFFFFEA        	  2324:  B       lab_9FEC
-                            	  2325: lab_A030:
+00:0000A02C EEFFFFEA        	  2324:  B       trin14
+                            	  2325: trin16:
 00:0000A030 059053E0        	  2326:  SUBS    R9, R3, R5
 00:0000A034 0080BD08        	  2327:  LDMEQIA R13!, {PC}
 00:0000A038 04E050E0        	  2328:  SUBS    R14, R0, R4
 00:0000A03C 04E06040        	  2329:  RSBMI   R14, R0, R4
 00:0000A040 40005EE3        	  2330:  CMP     R14, #0x40
 00:0000A044 40005933        	  2331:  CMPLO   R9, #0x40
-00:0000A048 0300002A        	  2332:  BHS     lab_A05C
+00:0000A048 0300002A        	  2332:  BHS     trin17
 00:0000A04C 1CA31FE5        	  2333:  LDR     R10, divisionTableAddr
 00:0000A050 0EA48AE0        	  2334:  ADD     R10, R10, R14, LSL #8
 00:0000A054 09619AE7        	  2335:  LDR     R6, [R10, R9, LSL #2]
-00:0000A058 080000EA        	  2336:  B       lab_A080
-                            	  2337: lab_A05C:
+00:0000A058 080000EA        	  2336:  B       trin19
+                            	  2337: trin17:
 00:0000A05C 0998A0E1        	  2338:  MOV     R9, R9, LSL #16
 00:0000A060 0060A0E3        	  2339:  MOV     R6, #0
 00:0000A064 02A1A0E3        	  2340:  MOV     R10, #0x80000000
-                            	  2341: lab_A068:
+                            	  2341: trin18:
 00:0000A068 8EE0B0E1        	  2342:  MOVS    R14, R14, LSL #1
 00:0000A06C 09005E31        	  2343:  CMPLO   R14, R9
 00:0000A070 09E04E20        	  2344:  SUBHS   R14, R14, R9
 00:0000A074 0A608621        	  2345:  ORRHS   R6, R6, R10
 00:0000A078 AAA0B0E1        	  2346:  MOVS    R10, R10, LSR #1
-00:0000A07C F9FFFF3A        	  2347:  BLO     lab_A068
-                            	  2348: lab_A080:
+00:0000A07C F9FFFF3A        	  2347:  BLO     trin18
+                            	  2348: trin19:
 00:0000A080 000054E1        	  2349:  CMP     R4, R0
 00:0000A084 00606642        	  2350:  RSBMI   R6, R6, #0
 00:0000A088 059043E0        	  2351:  SUB     R9, R3, R5
@@ -2380,23 +2380,23 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A090 04E06240        	  2353:  RSBMI   R14, R2, R4
 00:0000A094 40005EE3        	  2354:  CMP     R14, #0x40
 00:0000A098 40005933        	  2355:  CMPLO   R9, #0x40
-00:0000A09C 0300002A        	  2356:  BHS     lab_A0B0
+00:0000A09C 0300002A        	  2356:  BHS     trin20
 00:0000A0A0 70A31FE5        	  2357:  LDR     R10, divisionTableAddr
 00:0000A0A4 0EA48AE0        	  2358:  ADD     R10, R10, R14, LSL #8
 00:0000A0A8 09719AE7        	  2359:  LDR     R7, [R10, R9, LSL #2]
-00:0000A0AC 080000EA        	  2360:  B       lab_A0D4
-                            	  2361: lab_A0B0:
+00:0000A0AC 080000EA        	  2360:  B       trin22
+                            	  2361: trin20:
 00:0000A0B0 0998A0E1        	  2362:  MOV     R9, R9, LSL #16
 00:0000A0B4 0070A0E3        	  2363:  MOV     R7, #0
 00:0000A0B8 02A1A0E3        	  2364:  MOV     R10, #0x80000000
-                            	  2365: lab_A0BC:
+                            	  2365: trin21:
 00:0000A0BC 8EE0B0E1        	  2366:  MOVS    R14, R14, LSL #1
 00:0000A0C0 09005E31        	  2367:  CMPLO   R14, R9
 00:0000A0C4 09E04E20        	  2368:  SUBHS   R14, R14, R9
 00:0000A0C8 0A708721        	  2369:  ORRHS   R7, R7, R10
 00:0000A0CC AAA0B0E1        	  2370:  MOVS    R10, R10, LSR #1
-00:0000A0D0 F9FFFF3A        	  2371:  BLO     lab_A0BC
-                            	  2372: lab_A0D4:
+00:0000A0D0 F9FFFF3A        	  2371:  BLO     trin21
+                            	  2372: trin22:
 00:0000A0D4 020054E1        	  2373:  CMP     R4, R2
 00:0000A0D8 00706742        	  2374:  RSBMI   R7, R7, #0
 00:0000A0DC 059043E0        	  2375:  SUB     R9, R3, R5
@@ -2411,11 +2411,11 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A100 04E0A021        	  2384:  MOVHS   R14, R4
 00:0000A104 0540A021        	  2385:  MOVHS   R4, R5
 00:0000A108 0E50A021        	  2386:  MOVHS   R5, R14
-00:0000A10C B6FFFFEA        	  2387:  B       lab_9FEC
-                            	  2388: lab_A110:
-00:0000A110 EF0051E3        	  2389:  CMP     R1, #0xEF
-00:0000A114 EF005323        	  2390:  CMPHS   R3, #0xEF
-00:0000A118 EF005523        	  2391:  CMPHS   R5, #0xEF
+00:0000A10C B6FFFFEA        	  2387:  B       trin14
+                            	  2388: trin23:
+00:0000A110 EF0051E3        	  2389:  CMP     R1, #239
+00:0000A114 EF005323        	  2390:  CMPHS   R3, #239
+00:0000A118 EF005523        	  2391:  CMPHS   R5, #239
 00:0000A11C 0EF0A021        	  2392:  MOVHS   PC, R14
 00:0000A120 050D50E3        	  2393:  CMP     R0, #320
 00:0000A124 050D5223        	  2394:  CMPHS   R2, #320
@@ -2424,57 +2424,57 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A130 00402DE9        	  2397:  STMFD   R13!, {R14}
 00:0000A134 D0C61FE5        	  2398:  LDR     R12, screenAddr
 00:0000A138 030051E1        	  2399:  CMP     R1, R3
-00:0000A13C 050000CA        	  2400:  BGT     lab_A158
+00:0000A13C 050000CA        	  2400:  BGT     trin24
 00:0000A140 0060A0E1        	  2401:  MOV     R6, R0
 00:0000A144 0200A0E1        	  2402:  MOV     R0, R2
 00:0000A148 0620A0E1        	  2403:  MOV     R2, R6
 00:0000A14C 0160A0E1        	  2404:  MOV     R6, R1
 00:0000A150 0310A0E1        	  2405:  MOV     R1, R3
 00:0000A154 0630A0E1        	  2406:  MOV     R3, R6
-                            	  2407: lab_A158:
+                            	  2407: trin24:
 00:0000A158 050051E1        	  2408:  CMP     R1, R5
-00:0000A15C 050000CA        	  2409:  BGT     lab_A178
+00:0000A15C 050000CA        	  2409:  BGT     trin25
 00:0000A160 0060A0E1        	  2410:  MOV     R6, R0
 00:0000A164 0400A0E1        	  2411:  MOV     R0, R4
 00:0000A168 0640A0E1        	  2412:  MOV     R4, R6
 00:0000A16C 0160A0E1        	  2413:  MOV     R6, R1
 00:0000A170 0510A0E1        	  2414:  MOV     R1, R5
 00:0000A174 0650A0E1        	  2415:  MOV     R5, R6
-                            	  2416: lab_A178:
+                            	  2416: trin25:
 00:0000A178 050053E1        	  2417:  CMP     R3, R5
-00:0000A17C 050000CA        	  2418:  BGT     lab_A198
+00:0000A17C 050000CA        	  2418:  BGT     trin26
 00:0000A180 0260A0E1        	  2419:  MOV     R6, R2
 00:0000A184 0420A0E1        	  2420:  MOV     R2, R4
 00:0000A188 0640A0E1        	  2421:  MOV     R4, R6
 00:0000A18C 0360A0E1        	  2422:  MOV     R6, R3
 00:0000A190 0530A0E1        	  2423:  MOV     R3, R5
 00:0000A194 0650A0E1        	  2424:  MOV     R5, R6
-                            	  2425: lab_A198:
+                            	  2425: trin26:
 00:0000A198 01B0A0E1        	  2426:  MOV     R11, R1
 00:0000A19C 039051E0        	  2427:  SUBS    R9, R1, R3
-00:0000A1A0 6000000A        	  2428:  BEQ     lab_A328
+00:0000A1A0 6000000A        	  2428:  BEQ     trin38
 00:0000A1A4 30002DE9        	  2429:  STMFD   R13!, {R4-R5}
 00:0000A1A8 00E052E0        	  2430:  SUBS    R14, R2, R0
 00:0000A1AC 00E06240        	  2431:  RSBMI   R14, R2, R0
 00:0000A1B0 40005EE3        	  2432:  CMP     R14, #0x40
 00:0000A1B4 40005933        	  2433:  CMPLO   R9, #0x40
-00:0000A1B8 0300002A        	  2434:  BHS     lab_A1CC
+00:0000A1B8 0300002A        	  2434:  BHS     trin27
 00:0000A1BC 8CA41FE5        	  2435:  LDR     R10, divisionTableAddr
 00:0000A1C0 0EA48AE0        	  2436:  ADD     R10, R10, R14, LSL #8
 00:0000A1C4 09619AE7        	  2437:  LDR     R6, [R10, R9, LSL #2]
-00:0000A1C8 080000EA        	  2438:  B       lab_A1F0
-                            	  2439: lab_A1CC:
+00:0000A1C8 080000EA        	  2438:  B       trin29
+                            	  2439: trin27:
 00:0000A1CC 0998A0E1        	  2440:  MOV     R9, R9, LSL #16
 00:0000A1D0 0060A0E3        	  2441:  MOV     R6, #0
 00:0000A1D4 02A1A0E3        	  2442:  MOV     R10, #0x80000000
-                            	  2443: lab_A1D8:
+                            	  2443: trin28:
 00:0000A1D8 8EE0B0E1        	  2444:  MOVS    R14, R14, LSL #1
 00:0000A1DC 09005E31        	  2445:  CMPLO   R14, R9
 00:0000A1E0 09E04E20        	  2446:  SUBHS   R14, R14, R9
 00:0000A1E4 0A608621        	  2447:  ORRHS   R6, R6, R10
 00:0000A1E8 AAA0B0E1        	  2448:  MOVS    R10, R10, LSR #1
-00:0000A1EC F9FFFF3A        	  2449:  BLO     lab_A1D8
-                            	  2450: lab_A1F0:
+00:0000A1EC F9FFFF3A        	  2449:  BLO     trin28
+                            	  2450: trin29:
 00:0000A1F0 000052E1        	  2451:  CMP     R2, R0
 00:0000A1F4 00606642        	  2452:  RSBMI   R6, R6, #0
 00:0000A1F8 059051E0        	  2453:  SUBS    R9, R1, R5
@@ -2482,23 +2482,23 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A200 00E06440        	  2455:  RSBMI   R14, R4, R0
 00:0000A204 40005EE3        	  2456:  CMP     R14, #0x40
 00:0000A208 40005933        	  2457:  CMPLO   R9, #0x40
-00:0000A20C 0300002A        	  2458:  BHS     lab_A220
+00:0000A20C 0300002A        	  2458:  BHS     trin30
 00:0000A210 E0A41FE5        	  2459:  LDR     R10, divisionTableAddr
 00:0000A214 0EA48AE0        	  2460:  ADD     R10, R10, R14, LSL #8
 00:0000A218 09719AE7        	  2461:  LDR     R7, [R10, R9, LSL #2]
-00:0000A21C 080000EA        	  2462:  B       lab_A244
-                            	  2463: lab_A220:
+00:0000A21C 080000EA        	  2462:  B       trin32
+                            	  2463: trin30:
 00:0000A220 0998A0E1        	  2464:  MOV     R9, R9, LSL #16
 00:0000A224 0070A0E3        	  2465:  MOV     R7, #0
 00:0000A228 02A1A0E3        	  2466:  MOV     R10, #0x80000000
-                            	  2467: lab_A22C:
+                            	  2467: trin31:
 00:0000A22C 8EE0B0E1        	  2468:  MOVS    R14, R14, LSL #1
 00:0000A230 09005E31        	  2469:  CMPLO   R14, R9
 00:0000A234 09E04E20        	  2470:  SUBHS   R14, R14, R9
 00:0000A238 0A708721        	  2471:  ORRHS   R7, R7, R10
 00:0000A23C AAA0B0E1        	  2472:  MOVS    R10, R10, LSR #1
-00:0000A240 F9FFFF3A        	  2473:  BLO     lab_A22C
-                            	  2474: lab_A244:
+00:0000A240 F9FFFF3A        	  2473:  BLO     trin31
+                            	  2474: trin32:
 00:0000A244 000054E1        	  2475:  CMP     R4, R0
 00:0000A248 00706742        	  2476:  RSBMI   R7, R7, #0
 00:0000A24C 039051E0        	  2477:  SUBS    R9, R1, R3
@@ -2517,29 +2517,29 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A280 02E06040        	  2490:  RSBMI   R14, R0, R2
 00:0000A284 40005EE3        	  2491:  CMP     R14, #0x40
 00:0000A288 40005933        	  2492:  CMPLO   R9, #0x40
-00:0000A28C 0300002A        	  2493:  BHS     lab_A2A0
+00:0000A28C 0300002A        	  2493:  BHS     trin33
 00:0000A290 60A51FE5        	  2494:  LDR     R10, divisionTableAddr
 00:0000A294 0EA48AE0        	  2495:  ADD     R10, R10, R14, LSL #8
 00:0000A298 09C19AE7        	  2496:  LDR     R12, [R10, R9, LSL #2]
-00:0000A29C 080000EA        	  2497:  B       lab_A2C4
-                            	  2498: lab_A2A0:
+00:0000A29C 080000EA        	  2497:  B       trin35
+                            	  2498: trin33:
 00:0000A2A0 0998A0E1        	  2499:  MOV     R9, R9, LSL #16
 00:0000A2A4 00C0A0E3        	  2500:  MOV     R12, #0
 00:0000A2A8 02A1A0E3        	  2501:  MOV     R10, #0x80000000
-                            	  2502: lab_A2AC:
+                            	  2502: trin34:
 00:0000A2AC 8EE0B0E1        	  2503:  MOVS    R14, R14, LSL #1
 00:0000A2B0 09005E31        	  2504:  CMPLO   R14, R9
 00:0000A2B4 09E04E20        	  2505:  SUBHS   R14, R14, R9
 00:0000A2B8 0AC08C21        	  2506:  ORRHS   R12, R12, R10
 00:0000A2BC AAA0B0E1        	  2507:  MOVS    R10, R10, LSR #1
-00:0000A2C0 F9FFFF3A        	  2508:  BLO     lab_A2AC
-                            	  2509: lab_A2C4:
+00:0000A2C0 F9FFFF3A        	  2508:  BLO     trin34
+                            	  2509: trin35:
 00:0000A2C4 020050E1        	  2510:  CMP     R0, R2
 00:0000A2C8 00C06C42        	  2511:  RSBMI   R12, R12, #0
 00:0000A2CC 019043E0        	  2512:  SUB     R9, R3, R1
 00:0000A2D0 44E852E0        	  2513:  SUBS    R14, R2, R4, ASR #16
 00:0000A2D4 45A85210        	  2514:  SUBNES  R10, R2, R5, ASR #16
-00:0000A2D8 0B00001A        	  2515:  BNE     lab_A30C
+00:0000A2D8 0B00001A        	  2515:  BNE     trin37
 00:0000A2DC 440852E1        	  2516:  CMP     R2, R4, ASR #16
 00:0000A2E0 0C60A001        	  2517:  MOVEQ   R6, R12
 00:0000A2E4 FF4CC403        	  2518:  BICEQ   R4, R4, #0xFF00
@@ -2549,42 +2549,42 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A2F4 FF5CC513        	  2522:  BICNE   R5, R5, #0xFF00
 00:0000A2F8 FF50C513        	  2523:  BICNE   R5, R5, #0xFF
 00:0000A2FC 02598513        	  2524:  ORRNE   R5, R5, #0x8000
-                            	  2525: lab_A300:
+                            	  2525: trin36:
 00:0000A300 9CC81FE5        	  2526:  LDR     R12, screenAddr
 00:0000A304 3F0000EB        	  2527:  BL      FillTriangle
 00:0000A308 0080BDE8        	  2528:  LDMFD   R13!, {PC}
-                            	  2529: lab_A30C:
+                            	  2529: trin37:
 00:0000A30C 00A06A42        	  2530:  RSBMI   R10, R10, #0
 00:0000A310 00005EE3        	  2531:  CMP     R14, #0
 00:0000A314 00E06E42        	  2532:  RSBMI   R14, R14, #0
 00:0000A318 0A005EE1        	  2533:  CMP     R14, R10
 00:0000A31C 0C60A021        	  2534:  MOVHS   R6, R12
 00:0000A320 0C70A031        	  2535:  MOVLO   R7, R12
-00:0000A324 F5FFFFEA        	  2536:  B       lab_A300
-                            	  2537: lab_A328:
+00:0000A324 F5FFFFEA        	  2536:  B       trin36
+                            	  2537: trin38:
 00:0000A328 059053E0        	  2538:  SUBS    R9, R3, R5
 00:0000A32C 0080BD08        	  2539:  LDMEQIA R13!, {PC}
 00:0000A330 04E050E0        	  2540:  SUBS    R14, R0, R4
 00:0000A334 04E06040        	  2541:  RSBMI   R14, R0, R4
 00:0000A338 40005EE3        	  2542:  CMP     R14, #0x40
 00:0000A33C 40005933        	  2543:  CMPLO   R9, #0x40
-00:0000A340 0300002A        	  2544:  BHS     lab_A354
+00:0000A340 0300002A        	  2544:  BHS     trin39
 00:0000A344 14A61FE5        	  2545:  LDR     R10, divisionTableAddr
 00:0000A348 0EA48AE0        	  2546:  ADD     R10, R10, R14, LSL #8
 00:0000A34C 09619AE7        	  2547:  LDR     R6, [R10, R9, LSL #2]
-00:0000A350 080000EA        	  2548:  B       lab_A378
-                            	  2549: lab_A354:
+00:0000A350 080000EA        	  2548:  B       trin41
+                            	  2549: trin39:
 00:0000A354 0998A0E1        	  2550:  MOV     R9, R9, LSL #16
 00:0000A358 0060A0E3        	  2551:  MOV     R6, #0
 00:0000A35C 02A1A0E3        	  2552:  MOV     R10, #0x80000000
-                            	  2553: lab_A360:
+                            	  2553: trin40:
 00:0000A360 8EE0B0E1        	  2554:  MOVS    R14, R14, LSL #1
 00:0000A364 09005E31        	  2555:  CMPLO   R14, R9
 00:0000A368 09E04E20        	  2556:  SUBHS   R14, R14, R9
 00:0000A36C 0A608621        	  2557:  ORRHS   R6, R6, R10
 00:0000A370 AAA0B0E1        	  2558:  MOVS    R10, R10, LSR #1
-00:0000A374 F9FFFF3A        	  2559:  BLO     lab_A360
-                            	  2560: lab_A378:
+00:0000A374 F9FFFF3A        	  2559:  BLO     trin40
+                            	  2560: trin41:
 00:0000A378 000054E1        	  2561:  CMP     R4, R0
 00:0000A37C 00606642        	  2562:  RSBMI   R6, R6, #0
 00:0000A380 059043E0        	  2563:  SUB     R9, R3, R5
@@ -2592,23 +2592,23 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A388 04E06240        	  2565:  RSBMI   R14, R2, R4
 00:0000A38C 40005EE3        	  2566:  CMP     R14, #0x40
 00:0000A390 40005933        	  2567:  CMPLO   R9, #0x40
-00:0000A394 0300002A        	  2568:  BHS     lab_A3A8
+00:0000A394 0300002A        	  2568:  BHS     trin42
 00:0000A398 68A61FE5        	  2569:  LDR     R10, divisionTableAddr
 00:0000A39C 0EA48AE0        	  2570:  ADD     R10, R10, R14, LSL #8
 00:0000A3A0 09719AE7        	  2571:  LDR     R7, [R10, R9, LSL #2]
-00:0000A3A4 080000EA        	  2572:  B       lab_A3CC
-                            	  2573: lab_A3A8:
+00:0000A3A4 080000EA        	  2572:  B       trin44
+                            	  2573: trin42:
 00:0000A3A8 0998A0E1        	  2574:  MOV     R9, R9, LSL #16
 00:0000A3AC 0070A0E3        	  2575:  MOV     R7, #0
 00:0000A3B0 02A1A0E3        	  2576:  MOV     R10, #0x80000000
-                            	  2577: lab_A3B4:
+                            	  2577: trin43:
 00:0000A3B4 8EE0B0E1        	  2578:  MOVS    R14, R14, LSL #1
 00:0000A3B8 09005E31        	  2579:  CMPLO   R14, R9
 00:0000A3BC 09E04E20        	  2580:  SUBHS   R14, R14, R9
 00:0000A3C0 0A708721        	  2581:  ORRHS   R7, R7, R10
 00:0000A3C4 AAA0B0E1        	  2582:  MOVS    R10, R10, LSR #1
-00:0000A3C8 F9FFFF3A        	  2583:  BLO     lab_A3B4
-                            	  2584: lab_A3CC:
+00:0000A3C8 F9FFFF3A        	  2583:  BLO     trin43
+                            	  2584: trin44:
 00:0000A3CC 020054E1        	  2585:  CMP     R4, R2
 00:0000A3D0 00706742        	  2586:  RSBMI   R7, R7, #0
 00:0000A3D4 059043E0        	  2587:  SUB     R9, R3, R5
@@ -2623,25 +2623,25 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A3F8 04E0A0C1        	  2596:  MOVGT   R14, R4
 00:0000A3FC 0540A0C1        	  2597:  MOVGT   R4, R5
 00:0000A400 0E50A0C1        	  2598:  MOVGT   R5, R14
-00:0000A404 BDFFFFEA        	  2599:  B       lab_A300
+00:0000A404 BDFFFFEA        	  2599:  B       trin36
                             	  2600: FillTriangle:
 00:0000A408 010C59E3        	  2601:  CMP     R9, #0x100
 00:0000A40C 0EF0A021        	  2602:  MOVHS   PC, R14
 00:0000A410 00402DE9        	  2603:  STMFD   R13!, {R14}
-                            	  2604: lab_A414:
+                            	  2604: fill1:
 00:0000A414 064084E0        	  2605:  ADD     R4, R4, R6
 00:0000A418 075085E0        	  2606:  ADD     R5, R5, R7
 00:0000A41C 00005BE3        	  2607:  CMP     R11, #0
 00:0000A420 0080BD48        	  2608:  LDMMIIA R13!, {PC}
-00:0000A424 EF005BE3        	  2609:  CMP     R11, #0xEF
-00:0000A428 1000002A        	  2610:  BHS     lab_A470
+00:0000A424 EF005BE3        	  2609:  CMP     R11, #239
+00:0000A428 1000002A        	  2610:  BHS     fill3
 00:0000A42C 00082DE9        	  2611:  STMFD   R13!, {R11}
 00:0000A430 0BB18BE0        	  2612:  ADD     R11, R11, R11, LSL #2
 00:0000A434 0BB38CE0        	  2613:  ADD     R11, R12, R11, LSL #6
 00:0000A438 050554E3        	  2614:  CMP     R4, #0x01400000
-00:0000A43C 0A00005A        	  2615:  BPL     lab_A46C
+00:0000A43C 0A00005A        	  2615:  BPL     fill2
 00:0000A440 000055E3        	  2616:  CMP     R5, #0
-00:0000A444 0800004A        	  2617:  BMI     lab_A46C
+00:0000A444 0800004A        	  2617:  BMI     fill2
 00:0000A448 000054E3        	  2618:  CMP     R4, #0
 00:0000A44C 2408A051        	  2619:  MOVPL   R0, R4, LSR #16
 00:0000A450 24B88B50        	  2620:  ADDPL   R11, R11, R4, LSR #16
@@ -2651,12 +2651,12 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A460 05AD6022        	  2624:  RSBHS   R10, R0, #320
 00:0000A464 00005AE3        	  2625:  CMP     R10, #0
 00:0000A468 1600005B        	  2626:  BLPL    DrawHorizontalLine
-                            	  2627: lab_A46C:
+                            	  2627: fill2:
 00:0000A46C 0008BDE8        	  2628:  LDMFD   R13!, {R11}
-                            	  2629: lab_A470:
+                            	  2629: fill3:
 00:0000A470 01B04BE2        	  2630:  SUB     R11, R11, #1
 00:0000A474 019059E2        	  2631:  SUBS    R9, R9, #1
-00:0000A478 E5FFFF1A        	  2632:  BNE     lab_A414
+00:0000A478 E5FFFF1A        	  2632:  BNE     fill1
 00:0000A47C 0080BDE8        	  2633:  LDMFD   R13!, {PC}
                             	  2634: lineJump:
 00:0000A480 68A50000        	  2635: .long    DrawLineSegment + 17 * 4
@@ -10259,7 +10259,7 @@ AddSmallExplosionToBuffer        A:00008A28
 AddSmokeParticleToBuffer         A:00008B0C
 AddSparkCloudToBuffer            A:00008CFC
 AddSparkParticleToBuffer         A:00008C40
-AddSplashParticleToBuffer        A:00008C58
+AddSprayParticleToBuffer         A:00008C58
 AddStaticParticleToBuffer        A:00008A94
 AddTerminatorsToBuffers          A:00009CFC
 AddVectorToVertices              A:0000991C
@@ -10377,6 +10377,9 @@ dpar4                            A:00008904
 endCode                          A:00011A10
 entr1                            A:0000A6E4
 expl1                            A:00008CC0
+fill1                            A:0000A414
+fill2                            A:0000A46C
+fill3                            A:0000A470
 fuelBarColour                    A:000091EC
 fuelBurnRate                     S:0000015C
 fuelLevel                        S:00000128
@@ -10394,53 +10397,6 @@ initialFuelLevel                 A:0000A580
 initialHighScore                 A:0000A57C
 initialScore                     A:0000A578
 labOffset                        S:0000006C
-lab_9E20                         A:00009E20
-lab_9E40                         A:00009E40
-lab_9E60                         A:00009E60
-lab_9E98                         A:00009E98
-lab_9EA4                         A:00009EA4
-lab_9EBC                         A:00009EBC
-lab_9EEC                         A:00009EEC
-lab_9EF8                         A:00009EF8
-lab_9F10                         A:00009F10
-lab_9F38                         A:00009F38
-lab_9F8C                         A:00009F8C
-lab_9F98                         A:00009F98
-lab_9FB0                         A:00009FB0
-lab_9FEC                         A:00009FEC
-lab_A014                         A:0000A014
-lab_A030                         A:0000A030
-lab_A05C                         A:0000A05C
-lab_A068                         A:0000A068
-lab_A080                         A:0000A080
-lab_A0B0                         A:0000A0B0
-lab_A0BC                         A:0000A0BC
-lab_A0D4                         A:0000A0D4
-lab_A110                         A:0000A110
-lab_A158                         A:0000A158
-lab_A178                         A:0000A178
-lab_A198                         A:0000A198
-lab_A1CC                         A:0000A1CC
-lab_A1D8                         A:0000A1D8
-lab_A1F0                         A:0000A1F0
-lab_A220                         A:0000A220
-lab_A22C                         A:0000A22C
-lab_A244                         A:0000A244
-lab_A2A0                         A:0000A2A0
-lab_A2AC                         A:0000A2AC
-lab_A2C4                         A:0000A2C4
-lab_A300                         A:0000A300
-lab_A30C                         A:0000A30C
-lab_A328                         A:0000A328
-lab_A354                         A:0000A354
-lab_A360                         A:0000A360
-lab_A378                         A:0000A378
-lab_A3A8                         A:0000A3A8
-lab_A3B4                         A:0000A3B4
-lab_A3CC                         A:0000A3CC
-lab_A414                         A:0000A414
-lab_A46C                         A:0000A46C
-lab_A470                         A:0000A470
 land1                            A:000080DC
 land2                            A:00008114
 land3                            A:0000816C
@@ -10565,6 +10521,50 @@ stringBuffer                     S:00000200
 term1                            A:00009D10
 tileCornerRow                    S:000000E4
 tileRowOddEven                   S:000000F8
+trin1                            A:00009E20
+trin10                           A:00009F38
+trin11                           A:00009F8C
+trin12                           A:00009F98
+trin13                           A:00009FB0
+trin14                           A:00009FEC
+trin15                           A:0000A014
+trin16                           A:0000A030
+trin17                           A:0000A05C
+trin18                           A:0000A068
+trin19                           A:0000A080
+trin2                            A:00009E40
+trin20                           A:0000A0B0
+trin21                           A:0000A0BC
+trin22                           A:0000A0D4
+trin23                           A:0000A110
+trin24                           A:0000A158
+trin25                           A:0000A178
+trin26                           A:0000A198
+trin27                           A:0000A1CC
+trin28                           A:0000A1D8
+trin29                           A:0000A1F0
+trin3                            A:00009E60
+trin30                           A:0000A220
+trin31                           A:0000A22C
+trin32                           A:0000A244
+trin33                           A:0000A2A0
+trin34                           A:0000A2AC
+trin35                           A:0000A2C4
+trin36                           A:0000A300
+trin37                           A:0000A30C
+trin38                           A:0000A328
+trin39                           A:0000A354
+trin4                            A:00009E98
+trin40                           A:0000A360
+trin41                           A:0000A378
+trin42                           A:0000A3A8
+trin43                           A:0000A3B4
+trin44                           A:0000A3CC
+trin5                            A:00009EA4
+trin6                            A:00009EBC
+trin7                            A:00009EEC
+trin8                            A:00009EF8
+trin9                            A:00009F10
 typeOffset                       S:000000CC
 unusedConfig                     S:000000F0
 varOffset                        S:00000054
@@ -10738,7 +10738,7 @@ Symbols by value:
 00008B70 AddDebrisParticleToBuffer
 00008BD8 DropARockFromTheSky
 00008C40 AddSparkParticleToBuffer
-00008C58 AddSplashParticleToBuffer
+00008C58 AddSprayParticleToBuffer
 00008CBC AddExplosionToBuffer
 00008CC0 expl1
 00008CDC AddShipExplosionToBuffer
@@ -10846,54 +10846,54 @@ Symbols by value:
 00009DAC bank1
 00009DC8 DrawQuadrilateral
 00009DDC DrawTriangle
-00009E20 lab_9E20
-00009E40 lab_9E40
-00009E60 lab_9E60
-00009E98 lab_9E98
-00009EA4 lab_9EA4
-00009EBC lab_9EBC
-00009EEC lab_9EEC
-00009EF8 lab_9EF8
-00009F10 lab_9F10
-00009F38 lab_9F38
-00009F8C lab_9F8C
-00009F98 lab_9F98
-00009FB0 lab_9FB0
-00009FEC lab_9FEC
-0000A014 lab_A014
-0000A030 lab_A030
-0000A05C lab_A05C
-0000A068 lab_A068
-0000A080 lab_A080
-0000A0B0 lab_A0B0
-0000A0BC lab_A0BC
-0000A0D4 lab_A0D4
-0000A110 lab_A110
-0000A158 lab_A158
-0000A178 lab_A178
-0000A198 lab_A198
-0000A1CC lab_A1CC
-0000A1D8 lab_A1D8
-0000A1F0 lab_A1F0
-0000A220 lab_A220
-0000A22C lab_A22C
-0000A244 lab_A244
-0000A2A0 lab_A2A0
-0000A2AC lab_A2AC
-0000A2C4 lab_A2C4
-0000A300 lab_A300
-0000A30C lab_A30C
-0000A328 lab_A328
-0000A354 lab_A354
-0000A360 lab_A360
-0000A378 lab_A378
-0000A3A8 lab_A3A8
-0000A3B4 lab_A3B4
-0000A3CC lab_A3CC
+00009E20 trin1
+00009E40 trin2
+00009E60 trin3
+00009E98 trin4
+00009EA4 trin5
+00009EBC trin6
+00009EEC trin7
+00009EF8 trin8
+00009F10 trin9
+00009F38 trin10
+00009F8C trin11
+00009F98 trin12
+00009FB0 trin13
+00009FEC trin14
+0000A014 trin15
+0000A030 trin16
+0000A05C trin17
+0000A068 trin18
+0000A080 trin19
+0000A0B0 trin20
+0000A0BC trin21
+0000A0D4 trin22
+0000A110 trin23
+0000A158 trin24
+0000A178 trin25
+0000A198 trin26
+0000A1CC trin27
+0000A1D8 trin28
+0000A1F0 trin29
+0000A220 trin30
+0000A22C trin31
+0000A244 trin32
+0000A2A0 trin33
+0000A2AC trin34
+0000A2C4 trin35
+0000A300 trin36
+0000A30C trin37
+0000A328 trin38
+0000A354 trin39
+0000A360 trin40
+0000A378 trin41
+0000A3A8 trin42
+0000A3B4 trin43
+0000A3CC trin44
 0000A408 FillTriangle
-0000A414 lab_A414
-0000A46C lab_A46C
-0000A470 lab_A470
+0000A414 fill1
+0000A46C fill2
+0000A470 fill3
 0000A480 lineJump
 0000A4C8 DrawHorizontalLine
 0000A4F4 hlin1
