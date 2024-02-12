@@ -373,7 +373,7 @@
 
 \ ******************************************************************************
 \
-\ LANDER
+\ LANDER MAIN GAME CODE
 \
 \ Produces the binary file GameCode.bin.
 \
@@ -7128,7 +7128,7 @@
 \ ******************************************************************************
 \
 \       Name: AddVectors
-\       Type: Variable
+\       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: An unused routine that adds two vectors and uses self-modifying
 \             code to store the results in a specified location
@@ -7232,6 +7232,12 @@
 \   R0                              The address of the 3D vector to add in the
 \                                   above calculation
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   AddVectorToVertices+8           Enter the routine with R0 to R3 already set
+\
 \ ******************************************************************************
 
 .AddVectorToVertices
@@ -7268,7 +7274,7 @@
 \ ******************************************************************************
 \
 \       Name: MultiplyVectorByConstant
-\       Type: Variable
+\       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: An unused routine that multiplies a vector by a constant value
 \
@@ -7338,7 +7344,7 @@
 
  MOV     R8, R0                     \ Set R8 = R0
 
- EOR     R4, R8, R2                 \ Calculate R6 = R8 * R2 using the same algorithm
+ EOR     R4, R8, R2                 \ Set R6 = R8 * R2 using the same algorithm
  TEQ     R8, #0                     \ as above
  RSBMI   R8, R8, #0                 \
  MOVS    R8, R8, LSL #2             \ This is the first part of the algorithm
@@ -7361,7 +7367,7 @@
 
  MOV     R8, R0                     \ Set R8 = R0
 
- EOR     R4, R8, R3                 \ Calculate R7 = R8 * R3 using the same algorithm
+ EOR     R4, R8, R3                 \ Set R7 = R8 * R3 using the same algorithm
  TEQ     R8, #0                     \ as above
  RSBMI   R8, R8, #0                 \
  MOVS    R8, R8, LSL #2             \ This is the first part of the algorithm
@@ -8102,8 +8108,9 @@
                                     \ buffer
 
  STR     R1, [R9], #4               \ Store the parameter word in R1 in the
-                                    \ graphics buffer and increment the address in R9
-                                    \ to point to the next word in the buffer
+                                    \ graphics buffer and increment the address
+                                    \ in R9 to point to the next word in the
+                                    \ buffer
 
  STR     R9, [R12, R14, LSR #22]    \ Update the end address in the table at R12
                                     \ to point to the new end address of the
@@ -13488,5 +13495,3 @@
  EQUD     &00013627, &0001304D, &00012AAA, &0001253C
  EQUD     &00012000, &00011AF2, &00011611, &0001115B
  EQUD     &00010CCC, &00010864, &00010421, &00010000
-
-.endCode
