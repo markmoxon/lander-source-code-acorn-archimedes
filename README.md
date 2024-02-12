@@ -75,7 +75,7 @@ If you want to browse the source in an IDE, you might find the following useful.
 
   * The main game's source code is in the [Lander.arm](1-source-files/main-sources/Lander.arm) file - this is the motherlode and probably contains all the stuff you're interested in. It produces a file called `GameCode` that contains the entire game.
 
-  * The RISC OS application bundles up the game into a `!RunImage`, whose source is in the [RunImage.arm](1-source-files/main-sources/RunImage.arm) file.
+  * The RISC OS application bundles up the game into a `!RunImage`, whose source is in the [RunImage.arm](1-source-files/main-sources/RunImage.arm) file. In the version on the RISC OS application disc the `!RunImage` binary is encrypted, but in this version the game binary is simply wrapped in a relocation routine (though encryption may be added later).
 
 * It's probably worth skimming through the [notes on terminology and notations](https://lander.bbcelite.com/terminology/) on the accompanying website, as this explains a number of terms used in the commentary, without which it might be a bit tricky to follow at times.
 
