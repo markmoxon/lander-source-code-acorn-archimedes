@@ -6,6 +6,12 @@
 #
 # Written by Mark Moxon
 #
+# This script decrypts the !RunImage file from the RISC OS variant of Lander and
+# saves the results into 3-assembled-output/!RunImage.decrypt.bin
+#
+# This file is identical to the Arthur variant's GameCode binary, proving that
+# the two variants are identical in terms of game code
+#
 # ******************************************************************************
 
 
@@ -189,7 +195,7 @@ lander_code = bytearray()
 
 # Load assembled code file
 
-lander_file = open("4-reference-binaries/riscos2/!RunImage", "rb")
+lander_file = open("../4-reference-binaries/!RunImage.bin", "rb")
 lander_code.extend(lander_file.read())
 lander_file.close()
 
@@ -198,7 +204,7 @@ lander_file.close()
 lander_code.extend(bytearray(0x20000 - 0x8000 - len(lander_code)))
 
 print()
-print("[ Read    ] 4-reference-binaries/riscos2/!RunImage")
+print("[ Read    ] 4-reference-binaries/!RunImage.bin")
 
 # Do decryption
 
@@ -337,13 +343,13 @@ while True:
         r4 = 1                              # 0000EEC4 MOV     R4, #1
         continue                            # 0000EEC8 B       0x0000EDFC
 
-print("[ Decrypt ] 4-reference-binaries/riscos2/!RunImage")
+print("[ Decrypt ] 4-reference-binaries/!RunImage.bin")
 
 # Write output file for !RunImage.decrypt
 
-output_file = open("3-assembled-output/!RunImage.unprot.bin", "wb")
+output_file = open("../3-assembled-output/!RunImage.decrypt.bin", "wb")
 output_file.write(lander_code[0: 0x9A10])
 output_file.close()
 
-print("[ Save    ] 3-assembled-output/!RunImage.unprot.bin")
+print("[ Save    ] 3-assembled-output/!RunImage.decrypt.bin")
 print()

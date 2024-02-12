@@ -41,17 +41,17 @@ It is a companion to the [lander.bbcelite.com website](https://lander.bbcelite.c
 
 * If you want to browse the source and read about how Lander works under the hood, you will probably find [the website](https://lander.bbcelite.com) is a better place to start than this repository.
 
-* If you would rather explore the source code in your favourite IDE, then the [annotated source](1-source-files/main-sources/lander-source.asm) is what you're looking for. It contains the exact same content as the website, so you won't be missing out (the website is generated from the source files, so they are guaranteed to be identical). You might also like to read the section on [Browsing the source in an IDE](#browsing-the-source-in-an-ide) for some tips.
+* If you would rather explore the source code in your favourite IDE, then the [annotated source](1-source-files/main-sources/Lander.arm) is what you're looking for. It contains the exact same content as the website, so you won't be missing out (the website is generated from the source files, so they are guaranteed to be identical). You might also like to read the section on [Browsing the source in an IDE](#browsing-the-source-in-an-ide) for some tips.
 
 * If you want to build Lander from the source on a modern computer, to produce a working game disc that can be loaded into a Acorn Archimedes or an emulator, then you want the section on [Building Lander from the source](#building-lander-from-the-source).
 
-My hope is that this repository will be useful for those who want to learn more about Lander and what makes it tick. It is provided on an educational and non-profit basis, with the aim of helping people appreciate the magic of David Braben's second masterpiece (after Elite), and the first ever game for the ARM platform.
+My hope is that this repository will be useful for those who want to learn more about Lander and what makes it tick. It is provided on an educational and non-profit basis, with the aim of helping people appreciate the magic of David Braben's 32-bit masterpiece, and the first ever game for the ARM platform.
 
 ## Acknowledgements
 
-Lander was written by David Braben and is copyright &copy; DJ Braben 1987.
+Lander was written by David Braben and is copyright &copy; D.J.Braben 1987.
 
-The code on this site has been reconstructed from a disassembly of the version released on the application discs for Arthur and RISC OS.
+The code on this site has been reconstructed from a disassembly of the version released on the [application discs for Arthur and RISC OS](http://www.lewisgilbert.co.uk/archiology/osdiscs.html).
 
 The commentary is copyright &copy; Mark Moxon. Any misunderstandings or mistakes in the documentation are entirely my fault.
 
@@ -65,7 +65,7 @@ The reason for this is that my commentary is intertwined with the original Lande
 
 Under GitHub's rules, you have the right to read and fork this repository... but that's it. No other use is permitted, I'm afraid.
 
-My hope is that the educational and non-profit intentions of this repository will enable it to stay hosted and available, but the original copyright holders do have the right to ask for it to be taken down, in which case I will comply without hesitation.  I do hope, though, that along with the various other disassemblies and commentaries of Acornsoft's games for the Acorn Archimedes, it will remain viable.
+My hope is that the educational and non-profit intentions of this repository will enable it to stay hosted and available, but the original copyright holders do have the right to ask for it to be taken down, in which case I will comply without hesitation.  I do hope, though, that along with the various other disassemblies and commentaries of Acornsoft's games for the BBC Micro and Archimedes, it will remain viable.
 
 ## Browsing the source in an IDE
 
@@ -75,7 +75,7 @@ If you want to browse the source in an IDE, you might find the following useful.
 
   * The main game's source code is in the [Lander.arm](1-source-files/main-sources/Lander.arm) file - this is the motherlode and probably contains all the stuff you're interested in. It produces a file called `GameCode` that contains the entire game.
 
-  * The RISC OS application bundles up the game into a !RunImage, whose source is in the [RunImage.arm](1-source-files/main-sources/RunImage.arm) file.
+  * The RISC OS application bundles up the game into a `!RunImage`, whose source is in the [RunImage.arm](1-source-files/main-sources/RunImage.arm) file.
 
 * It's probably worth skimming through the [notes on terminology and notations](https://lander.bbcelite.com/terminology/) on the accompanying website, as this explains a number of terms used in the commentary, without which it might be a bit tricky to follow at times.
 
@@ -109,7 +109,7 @@ You will need the following to build Lander from the source:
 
 * vasm, which can be downloaded from the [vasm homepage](http://sun.hasenbraten.de/vasm/).
 
-* Python. Both versions 2.7 and 3.x should work.
+* Python. The build process has only been tested on 3.x, but 2.7 should work.
 
 * Mac and Linux users may need to install `make` if it isn't already present (for Windows users, `make.exe` is included in this repository).
 
@@ -117,7 +117,7 @@ Let's look at how to build Lander from the source.
 
 ### Windows
 
-For Windows users, there is a batch file called `make.bat` to which you can pass one of the build targets above. Before this will work, you should edit the batch file and change the values of the `VASM` and `PYTHON` variables to point to the locations of your `vasmarm_std.exe` and `python.exe` executables (you need the vasmarm_std executable). You also need to change directory to the repository folder (i.e. the same folder as `make.bat`).
+For Windows users, there is a batch file called `make.bat` that builds the project. Before this will work, you should edit the batch file and change the values of the `VASM` and `PYTHON` variables to point to the locations of your `vasmarm_std.exe` and `python.exe` executables (you need the `vasmarm_std` executable). You also need to change directory to the repository folder (i.e. the same folder as `make.bat`).
 
 All being well, entering the following into a command window:
 
@@ -129,7 +129,7 @@ will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs`
 
 ### Mac and Linux
 
-The build process uses a standard GNU `Makefile`, so you just need to install `make` if your system doesn't already have it. If vasm or Python are not on your path, then you can either fix this, or you can edit the `Makefile` and change the `VASM` and `PYTHON` variables in the first two lines to point to their locations (you need the vasmarm_std executable). You also need to change directory to the repository folder (i.e. the same folder as `Makefile`).
+The build process uses a standard GNU `Makefile`, so you just need to install `make` if your system doesn't already have it. If vasm or Python are not on your path, then you can either fix this, or you can edit the `Makefile` and change the `VASM` and `PYTHON` variables in the first two lines to point to their locations (you need the `vasmarm_std` executable). You also need to change directory to the repository folder (i.e. the same folder as `Makefile`).
 
 All being well, entering the following into a terminal window:
 
@@ -157,6 +157,8 @@ aa7f1052  39440  aa7f1052  39440   Yes   GameCode.bin
 ```
 
 The compiled binary matches the original, so we know we are producing the same final game as the release version.
+
+Note that the build process does not encrypt the `!RunImage` binary, though this may be added later (this is why there is no match for the encrypted `!RunImage.bin` file in the verification process).
 
 ### Log files
 
