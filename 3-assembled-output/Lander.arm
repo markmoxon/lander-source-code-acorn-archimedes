@@ -2286,7 +2286,7 @@ trin12:
  SUBCS   R14, R14, R9
  ORRCS   R11, R11, R10
  MOVS    R10, R10, LSR #1
- BLO     trin12
+ BCC     trin12
 trin13:
  CMP     R0, R2
  RSBMI   R11, R11, #0
@@ -2340,11 +2340,11 @@ trin17:
  MOV     R10, #0x80000000
 trin18:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R6, R6, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R6, R6, R10
  MOVS    R10, R10, LSR #1
- BLO     trin18
+ BCC     trin18
 trin19:
  CMP     R4, R0
  RSBMI   R6, R6, #0
@@ -2364,11 +2364,11 @@ trin20:
  MOV     R10, #0x80000000
 trin21:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R7, R7, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R7, R7, R10
  MOVS    R10, R10, LSR #1
- BLO     trin21
+ BCC     trin21
 trin22:
  CMP     R4, R2
  RSBMI   R7, R7, #0
@@ -2442,11 +2442,11 @@ trin27:
  MOV     R10, #0x80000000
 trin28:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R6, R6, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R6, R6, R10
  MOVS    R10, R10, LSR #1
- BLO     trin28
+ BCC     trin28
 trin29:
  CMP     R2, R0
  RSBMI   R6, R6, #0
@@ -2466,11 +2466,11 @@ trin30:
  MOV     R10, #0x80000000
 trin31:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R7, R7, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R7, R7, R10
  MOVS    R10, R10, LSR #1
- BLO     trin31
+ BCC     trin31
 trin32:
  CMP     R4, R0
  RSBMI   R7, R7, #0
@@ -2482,7 +2482,7 @@ trin32:
  MOVGT   R14, R6
  MOVGT   R6, R7
  MOVGT   R7, R14
- BL      FillTriangle
+ BL      trin45
  LDMFD   R13!, {R0-R1}
  SUBS    R9, R3, R1
  LDMEQIA R13!, {PC}
@@ -2501,11 +2501,11 @@ trin33:
  MOV     R10, #0x80000000
 trin34:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R12, R12, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R12, R12, R10
  MOVS    R10, R10, LSR #1
- BLO     trin34
+ BCC     trin34
 trin35:
  CMP     R0, R2
  RSBMI   R12, R12, #0
@@ -2516,15 +2516,15 @@ trin35:
  CMP     R2, R4, ASR #16
  MOVEQ   R6, R12
  BICEQ   R4, R4, #0xFF00
- BICEQ   R4, R4, #0xFF
+ BICEQ   R4, R4, #0x00FF
  ORREQ   R4, R4, #0x8000
  MOVNE   R7, R12
  BICNE   R5, R5, #0xFF00
- BICNE   R5, R5, #0xFF
+ BICNE   R5, R5, #0x00FF
  ORRNE   R5, R5, #0x8000
 trin36:
  LDR     R12, screenAddr
- BL      FillTriangle
+ BL      trin45
  LDMFD   R13!, {PC}
 trin37:
  RSBMI   R10, R10, #0
@@ -2552,11 +2552,11 @@ trin39:
  MOV     R10, #0x80000000
 trin40:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R6, R6, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R6, R6, R10
  MOVS    R10, R10, LSR #1
- BLO     trin40
+ BCC     trin40
 trin41:
  CMP     R4, R0
  RSBMI   R6, R6, #0
@@ -2576,11 +2576,11 @@ trin42:
  MOV     R10, #0x80000000
 trin43:
  MOVS    R14, R14, LSL #1
- CMPLO   R14, R9
- SUBHS   R14, R14, R9
- ORRHS   R7, R7, R10
+ CMPCC   R14, R9
+ SUBCS   R14, R14, R9
+ ORRCS   R7, R7, R10
  MOVS    R10, R10, LSR #1
- BLO     trin43
+ BCC     trin43
 trin44:
  CMP     R4, R2
  RSBMI   R7, R7, #0
@@ -2597,24 +2597,24 @@ trin44:
  MOVGT   R4, R5
  MOVGT   R5, R14
  B       trin36
-FillTriangle:
- CMP     R9, #0x100
+trin45:
+ CMP     R9, #256
  MOVHS   PC, R14
  STMFD   R13!, {R14}
-fill1:
+trin46:
  ADD     R4, R4, R6
  ADD     R5, R5, R7
  CMP     R11, #0
  LDMMIIA R13!, {PC}
  CMP     R11, #239
- BHS     fill3
+ BHS     trin48
  STMFD   R13!, {R11}
  ADD     R11, R11, R11, LSL #2
  ADD     R11, R12, R11, LSL #6
  CMP     R4, #0x01400000
- BPL     fill2
+ BPL     trin47
  CMP     R5, #0
- BMI     fill2
+ BMI     trin47
  CMP     R4, #0
  MOVPL   R0, R4, LSR #16
  ADDPL   R11, R11, R4, LSR #16
@@ -2624,12 +2624,12 @@ fill1:
  RSBHS   R10, R0, #320
  CMP     R10, #0
  BLPL    DrawHorizontalLine
-fill2:
+trin47:
  LDMFD   R13!, {R11}
-fill3:
+trin48:
  SUB     R11, R11, #1
  SUBS    R9, R9, #1
- BNE     fill1
+ BNE     trin46
  LDMFD   R13!, {PC}
 lineJump:
 .long    DrawLineSegment + 17 * 4
