@@ -83,7 +83,7 @@
                                     \ 512 32-bit entries)
 
  workspace = stack + 4              \ The variable workspace starts just after
-                                    \ the top of the the stack
+                                    \ the top of the stack
 
                                     \ R11 typically contains the address of the
                                     \ workspace, so each of the variables in the
@@ -234,7 +234,7 @@
                                     \ on-screen
 
  objectData = &110                  \ The address of the data block for the
-                                    \ object currentlt being drawn
+                                    \ object currently being drawn
 
  objectFlags = &114                 \ The flags of the object currently being
                                     \ drawn
@@ -633,7 +633,8 @@
 
  MOV     R6, #0                     \ Set R6 = 0 to use as the address of the
                                     \ previous row's coordinates, which we set
-                                    \ to zero as we don't havea previous row yet
+                                    \ to zero as we don't have a previous row
+                                    \ yet
 
  ADD     R7, R11, #cornerStore1     \ Set R7 to the address of cornerStore1
 
@@ -921,7 +922,7 @@
 
  SUBS    R0, R0, #2                 \ Subtract 2 from the corner row to get the
                                     \ number of the row that's two tile rows
-                                    \ behind the the current row
+                                    \ behind the current row
 
  BLPL    DrawGraphicsBuffer         \ If this results in a valid graphics buffer
                                     \ number, i.e. one that is positive, draw
@@ -1534,7 +1535,7 @@
  STREQB  R14, [R11, #fuelBurnRate]  \ we don't have
 
                                     \ At the start of each new life, the mouse
-                                    \ is initalised to coordinates (511, 511)
+                                    \ is initialised to coordinates (511, 511)
 
  CMP     R0, #1024                  \ Cap the mouse x-coordinate in R0 so it's
  MOVHS   R0, #1024                  \ in the range 0 to 1023
@@ -2192,7 +2193,7 @@
  MOV     R6, #20                    \ Set the bullet particle's existence
                                     \ counter to 20 iterations of the main loop
 
- MOV     R7, #&01BC0000             \ Set bits 18, 19, 20, 21, 23 amd 24 of the
+ MOV     R7, #&01BC0000             \ Set bits 18, 19, 20, 21, 23 and 24 of the
                                     \ particle flags, so that's:
                                     \
                                     \   * Bit 18 set = splash on impact with sea
@@ -2365,8 +2366,8 @@
 
                                     \ We start by setting up the rotation matrix
                                     \ for the particle clouds, using the main
-                                    \ loopcounter to generate rotation angles
-                                    \ thatchange along with the main loop (so
+                                    \ loop counter to generate rotation angles
+                                    \ that change along with the main loop (so
                                     \ the clouds rotate at a nice steady speed)
 
  LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24
@@ -3051,7 +3052,7 @@
  LDREQ   PC, [R11, #objectType]     \ is no object on the map at the particle's
                                     \ location, so we haven't hit anything, so
                                     \ return from the subroutine by fetching the
-                                    \ return address thet we stored above
+                                    \ return address that we stored above
 
  CMP     R8, #12                    \ If the object being hit by the particle is
  BHS     AddSmallExplosionToBuffer  \ 12 or greater, then the object has already
@@ -3281,7 +3282,7 @@
 
  B       AddMovingParticleToBuffer  \ Add a moving particle to the particle data
                                     \ buffer that starts off moving along the
-                                    \ echaust vector, and with a random element
+                                    \ exhaust vector, and with a random element
                                     \ being added to its velocity and existence
                                     \ counter, returning from the subroutine
                                     \ using a tail call
@@ -4771,9 +4772,9 @@
  CMP     R3, R4                     \ rotation matrix at rotationMatrix, copy
  LDMNEIA R3!, {R0-R2}               \ the nine-word matrix from the address in
  STMNEIA R4!, {R0-R2}               \ R3 into rotationMatrix, so rotationMatrix
- LDMNEIA R3!, {R0-R2}               \ now contains the the object's rotation
- STMNEIA R4!, {R0-R2}               \ matrix, which is made up of the three
- LDMNEIA R3!, {R0-R2}               \ orientation vectors in:
+ LDMNEIA R3!, {R0-R2}               \ now contains the object's rotation matrix,
+ STMNEIA R4!, {R0-R2}               \ which is made up of the three orientation
+ LDMNEIA R3!, {R0-R2}               \ vectors in:
  STMNEIA R4!, {R0-R2}               \
                                     \   (xNoseV, xRoofV, xSideV)
                                     \   (yNoseV, yRoofV, ySideV)
@@ -4792,7 +4793,7 @@
                                     \
                                     \   * The object's rotation matrix at
                                     \     rotationMatrix, which is made up of
-                                    \     the orientataion vectors as follows:
+                                    \     the orientation vectors as follows:
                                     \
                                     \     (xNoseV, xRoofV, xSideV)
                                     \     (yNoseV, yRoofV, ySideV)
@@ -5866,7 +5867,7 @@
 \       Name: TransposeRotationMatrix
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: An unused routine that transposes the rotation matriz
+\    Summary: An unused routine that transposes the rotation matrix
 \
 \ ******************************************************************************
 
@@ -6483,7 +6484,7 @@
                                     \   R14 = |yMouse| ^ 2
                                     \
                                     \ So now we can apply Pythagoras to find the
-                                    \ length of the hypoteneuse, which is the
+                                    \ length of the hypotenuse, which is the
                                     \ distance in our polar coordinate, as in
                                     \ the example where x >= y:
                                     \
@@ -6511,7 +6512,7 @@
  LDR     R0, [R14, R2, LSR #20]     \ Set R0 = SQRT(R2)
                                     \        = SQRT(|xMouse| ^ 2 + |yMouse| ^ 2)
                                     \
-                                    \ which is the length of the hypoteneuse and
+                                    \ which is the length of the hypotenuse and
                                     \ the distance in our polar coordinate
 
  LDMFD   R13!, {PC}                 \ Return from the subroutine
@@ -7198,7 +7199,7 @@
 
  LDR     R1, vmod2                  \ Revert the eighth instruction in the
  STR     R1, AddVectorToVertices+28 \ AddVectorToVertices routine to the
-                                    \ instruction in vmod2 (thoughh note that
+                                    \ instruction in vmod2 (though note that
                                     \ this doesn't actually revert the
                                     \ instruction, it corrupts it, for the
                                     \ reasons noted above)
@@ -8062,7 +8063,7 @@
                                     \ This ensures that more distant particles
                                     \ are drawn into lower-numbered graphics
                                     \ buffers, so higher z-coordinates map to
-                                    \ lower buffer numbers and vice verse (so
+                                    \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
@@ -8181,7 +8182,7 @@
                                     \ This ensures that more distant particles
                                     \ are drawn into lower-numbered graphics
                                     \ buffers, so higher z-coordinates map to
-                                    \ lower buffer numbers and vice verse (so
+                                    \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
@@ -8212,7 +8213,7 @@
                                     \ commands)
 
  ADD     R1, R1, R0, LSL #20        \ Encode the two pixel coordinates in R0 and
-                                    \ R1 into one parameterword in R1, by
+                                    \ R1 into one parameter word in R1, by
                                     \ inserting the value of R0 into bits 20-31
                                     \ of R1
                                     \
@@ -8306,7 +8307,7 @@
                                     \ This ensures that more distant triangles
                                     \ are drawn into lower-numbered graphics
                                     \ buffers, so higher z-coordinates map to
-                                    \ lower buffer numbers and vice verse (so
+                                    \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
@@ -8422,7 +8423,7 @@
                                     \ This ensures that more distant triangles
                                     \ are drawn into lower-numbered graphics
                                     \ buffers, so higher z-coordinates map to
-                                    \ lower buffer numbers and vice verse (so
+                                    \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
@@ -8904,7 +8905,7 @@
                                     \ screen
 
                                     \ We start by ordering the triangle corners
-                                    \ by y-coordinte, so (x1, y1) is the
+                                    \ by y-coordinate, so (x1, y1) is the
                                     \ furthest down the screen with the highest
                                     \ y-coordinate, followed by (x2, y2) then
                                     \ (x3, y3), at the same or higher level, and
@@ -9122,7 +9123,7 @@
 \ ******************************************************************************
 
                                     \ We now calculate the slope for the second
-                                    \ side of the trangle, from (x1, y1) to
+                                    \ side of the triangle, from (x1, y1) to
                                     \ (x3, y3), as follows:
                                     \
                                     \   R7 = (y1 - y3) / (x3 - x1)
@@ -9401,7 +9402,7 @@
                                     \ we are done
 
                                     \ We now calculate the slope for the third
-                                    \ side of the trangle, from (x2, y2) to
+                                    \ side of the triangle, from (x2, y2) to
                                     \ (x3, y3), as follows:
                                     \
                                     \   R14 = (y2 - y3) / (x2 - x1)
@@ -9857,7 +9858,7 @@
                                     \ of the triangle, from (x1, y1) to (x3, y3)
 
                                     \ We now calculate the slope for the second
-                                    \ side of the trangle, from (x2, y2) to
+                                    \ side of the triangle, from (x2, y2) to
                                     \ (x3, y3), as follows:
                                     \
                                     \   R7 = (y2 - y3) / (x2 - x3)
@@ -10042,7 +10043,7 @@
                                     \ screen
 
                                     \ We start by ordering the triangle corners
-                                    \ by y-coordinte, so (x1, y1) is the
+                                    \ by y-coordinate, so (x1, y1) is the
                                     \ furthest down the screen with the highest
                                     \ y-coordinate, followed by (x2, y2) then
                                     \ (x3, y3), at the same or higher level, and
@@ -10247,7 +10248,7 @@
                                     \ of the triangle, from (x1, y1) to (x2, y2)
 
                                     \ We now calculate the slope for the second
-                                    \ side of the trangle, from (x1, y1) to
+                                    \ side of the triangle, from (x1, y1) to
                                     \ (x3, y3), as follows:
                                     \
                                     \   R7 = (y1 - y3) / (x3 - x1)
@@ -10481,7 +10482,7 @@
                                     \ we are done
 
                                     \ We now calculate the slope for the third
-                                    \ side of the trangle, from (x2, y2) to
+                                    \ side of the triangle, from (x2, y2) to
                                     \ (x3, y3), as follows:
                                     \
                                     \   R14 = (y2 - y3) / (x2 - x1)
@@ -10912,7 +10913,7 @@
                                     \ of the triangle, from (x1, y1) to (x3, y3)
 
                                     \ We now calculate the slope for the second
-                                    \ side of the trangle, from (x2, y2) to
+                                    \ side of the triangle, from (x2, y2) to
                                     \ (x3, y3), as follows:
                                     \
                                     \   R7 = (y2 - y3) / (x2 - x3)
@@ -12089,9 +12090,9 @@
  SWI     OS_Byte                    \ returning the result in R2
 
  TEQ     R2, #&1B                   \ If R2 = &1B then an escape condition
- BEQ     EndGame                    \ occured during the keyboard scan (in other
-                                    \ words, Escape was pressed), so jump to
-                                    \ EndGame to acknowledge the escape
+ BEQ     EndGame                    \ occurred during the keyboard scan (in
+                                    \ other words, Escape was pressed), so jump
+                                    \ to EndGame to acknowledge the escape
                                     \ condition and quit the game
 
  BL      MoveAndDrawPlayer          \ Move the player's ship and draw it into
