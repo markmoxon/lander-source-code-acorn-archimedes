@@ -8988,9 +8988,9 @@
                                     \
                                     \ We know this is positive because y1 >= y2
 
- BEQ     trin16                     \ If the (x1, y1) and (x2, y2) share the
-                                    \ same y-coordinate then the triangle has a
-                                    \ vertical edge between (x1, y1) and
+ BEQ     trin16                     \ If (x1, y1) and (x2, y2) share the same
+                                    \ y-coordinate then the triangle has a
+                                    \ horizontal edge between (x1, y1) and
                                     \ (x2, y2), so jump to part 5 to process
                                     \ this special case
 
@@ -9006,7 +9006,7 @@
                                     \ x-coordinate between the two points
                                     \
                                     \ This will be positive if the line from
-                                    \ (x1, y1) and (x2, y2) slopes up and to the
+                                    \ (x1, y1) to (x2, y2) slopes up and to the
                                     \ right, or negative if the line slopes up
                                     \ and to the left
 
@@ -9709,17 +9709,51 @@
 \       Name: DrawTriangle (Part 5 of 10)
 \       Type: Subroutine
 \   Category: Drawing triangles
-\    Summary: Draw a triangle with a vertical edge between (x1, y1) and (x2, y2)
+\    Summary: Draw a triangle with a horizontal edge between (x1, y1) and
+\             (x2, y2)
 \
 \ ******************************************************************************
 
 .trin16
 
- SUBS    R9, R3, R5                 \ 
- LDMEQIA R13!, {PC}                 \ 
+                                    \ If we get here then y1 = y2, so (x1, y1)
+                                    \ and (x2, y2) share the same y-coordinate
+                                    \ and the triangle has a horizontal edge
+                                    \ between (x1, y1) and (x2, y2)
 
- SUBS    R14, R0, R4                \ 
- RSBMI   R14, R0, R4                \ 
+ SUBS    R9, R3, R5                 \ Set R9 = R3 - R5
+                                    \        = y2 - y3
+                                    \
+                                    \ So this is the vertical distance between
+                                    \ (x2, y2) and (x3, y3), i.e. the delta
+                                    \ y-coordinate between the two points
+                                    \
+                                    \ We know this is positive because y2 >= y3
+
+ LDMEQIA R13!, {PC}                 \ If R9 = 0 then y2 = y3, which means all
+                                    \ three corners share the same y-coordinate
+                                    \ and are at the same height on-screen
+                                    \
+                                    \ This means there is no triangle to draw,
+                                    \ so return from the subroutine
+
+ SUBS    R14, R0, R4                \ Set R14 = R0 - R4
+                                    \         = x1 - x3
+                                    \
+                                    \ So this is the vertical distance between
+                                    \ (x1, y1) and (x3, y3), i.e. the delta
+                                    \ x-coordinate between the two points
+                                    \
+                                    \ This will be negative if the line from
+                                    \ (x1, y1) to (x3, y3) slopes up and to the
+                                    \ right, or negative if the line slopes up
+                                    \ and to the left
+
+ RSBMI   R14, R0, R4                \ If R14 is negative, set R14 = x1 - x3, so
+                                    \ we have the following:
+                                    \
+                                    \   R14 = |x1 - x3|
+
  CMP     R14, #64                   \ 
  CMPLO   R9, #64                    \ 
  BHS     trin17                     \ 
