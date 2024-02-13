@@ -152,11 +152,26 @@ The binaries in the `4-reference-binaries` folder are those extracted from the r
 Checksum   Size  Checksum   Size  Match  Filename
 -----------------------------------------------------------
 26b5e51a  28703  -             -    -    !RunImage.bin
+aa7f1052  39440  aa7f1052  39440   Yes   !RunImage.decrypt.bin
 9985364c  39488  9985364c  39488   Yes   !RunImage.unprot.bin
 aa7f1052  39440  aa7f1052  39440   Yes   GameCode.bin
 ```
 
-The compiled binary matches the original, so we know we are producing the same final game as the release version.
+Of these, the following are produced by the build process:
+
+* GameCode.bin contains the game binary from the Arthur variant, as found on the Arthur applications disc
+
+* !RunImage.unprot.bin contains the game binary wrapped up into an Absolute file
+
+This binary is produced by the [lander-decrypt.py](2-build-files/lander-decrypt.py) script:
+
+* !RunImage.decrypt.bin contains a decrypted version of !RunImage.bin, so this exactly matches GameCode.bin
+
+This binary is not yet produced by the build process:
+
+* !RunImage.bin contains the encrypted game binary from the RISC OS variant, as found on the RISC OS 2 applications disc
+
+In the above example, the compiled GameCode.bin and !RunImage.unprot.bin binaries match the original, so we know we are producing the same final game as the release version.
 
 Note that the build process does not encrypt the `!RunImage` binary, though this may be added later (this is why there is no match for the encrypted `!RunImage.bin` file in the verification process).
 
