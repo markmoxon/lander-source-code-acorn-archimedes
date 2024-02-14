@@ -14,6 +14,7 @@
 .set SEA_LEVEL, 0x05500000
 .set LANDING_SPEED, 0x00200000
 .set SMOKE_RISING_SPEED, 0x00080000
+.set MAX_PARTICLES, 484
 .set TILE_SIZE, 0x01000000
 .set TILE_SIZE_x_0_06, 0x00100000
 .set TILE_SIZE_x_0_31, 0x00500000
@@ -841,7 +842,7 @@ AddMovingParticleToBuffer:
  LDMFD   R13!, {R0-R1}
 StoreParticleData:
  LDR     R8, [R11, #particleCount]
- CMP     R8, #484
+ CMP     R8, #MAX_PARTICLES
  LDMHSFD R13!, {R8, PC}
  ADD     R8, R8, #1
  STR     R8, [R11, #particleCount]
