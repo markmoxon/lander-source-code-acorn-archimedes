@@ -78,9 +78,9 @@
                                     \ doesn't let us include constants in
                                     \ instruction expressions
 
- TILE_SIZE_x_0_06 = &00100000       \ The size of 1/16 tiles
+ TILE_SIZE_x_0_06 = &00100000       \ The size of 1/16-th of a tile
 
- TILE_SIZE_x_0_31 = &00500000       \ The size of 0.3125 tiles
+ TILE_SIZE_x_0_31 = &00500000       \ The size of 5/16-th of a tile
 
  TILE_SIZE_x_0_4 = &00640000        \ The size of 0.4 tiles
 
@@ -2395,7 +2395,7 @@
  ADD     R0, R11, #xPlayer          \ Set (R0, R1, R2) to the coordinate in
  LDMIA   R0, {R0-R2}                \ xPlayer
 
- SUB     R1, R1, #TILE_SIZE_x_0_31  \ Subtract 0.3125 tile sizes from the ship's
+ SUB     R1, R1, #TILE_SIZE_x_0_31  \ Subtract 5/16 tile sizes from the ship's
                                     \ y-coordinate so the explosion occurs just
                                     \ above the player's ship
 
