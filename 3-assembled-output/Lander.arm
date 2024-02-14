@@ -21,14 +21,15 @@
 .set TILE_SIZE_x_0_75, 0x00C00000
 .set TILE_SIZE_x_1_5, 0x01800000
 .set TILE_SIZE_x_5, TILE_SIZE * 5
-.set TILE_SIZE_x_5_5, 0x05800000
 .set TILE_SIZE_x_6, TILE_SIZE * 6
 .set TILE_SIZE_x_10, TILE_SIZE * 10
 .set TILE_SIZE_x_11, TILE_SIZE * 11
 .set TILE_SIZE_x_15, TILE_SIZE * 15
 .set TILE_SIZE_x_16, TILE_SIZE * 16
-.set TILE_SIZE_x_20, TILE_SIZE * 20
 .set TILE_SIZE_x_32, TILE_SIZE * 32
+.set LANDSCAPE_X, 0x05800000
+.set LANDSCAPE_Y, 0
+.set LANDSCAPE_Z, TILE_SIZE * 20
 .set stack, 0x000121FC
 .set workspace, stack + 4
 .set xObject, 0x00
@@ -108,9 +109,9 @@
 .set objectMap, 0x4400
 .org     CODE
 landscapeOffset:
-.long    -TILE_SIZE_x_5_5
-.long    0
-.long    TILE_SIZE_x_20
+.long    -LANDSCAPE_X
+.long    LANDSCAPE_Y
+.long    LANDSCAPE_Z
 landscapeOffsetAddr:
 .long    landscapeOffset
 landscapeConfig:
@@ -187,7 +188,7 @@ land1:
  ADD     R4, R11, #xLandscapeCol
  STMIA   R4, {R0-R2}
  LDR     R8, [R11, #xCameraTile]
- SUB     R8, R8, #TILE_SIZE_x_5_5
+ SUB     R8, R8, #LANDSCAPE_X
  MOV     R0, #0x80000000
  STR     R0, [R11, #previousColumn]
 land2:
@@ -305,7 +306,7 @@ GetLandscapeBelowVertex:
  LDR     R9, [R0, #8]
  LDR     R1, [R11, #zCamera]
  ADD     R9, R9, R1
- SUB     R9, R9, #TILE_SIZE_x_20
+ SUB     R9, R9, #LANDSCAPE_Z
  BL      GetLandscapeAltitude
  LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
@@ -674,10 +675,10 @@ dpar2:
  SUB     R0, R0, R8
  LDR     R8, [R11, #zCamera]
  SUB     R2, R2, R8
- ADD     R2, R2, #TILE_SIZE_x_20
+ ADD     R2, R2, #LANDSCAPE_Z
  LDR     R8, [R11, #yCamera]
  SUB     R1, R1, R8
- CMP     R2, #TILE_SIZE_x_20
+ CMP     R2, #LANDSCAPE_Z
  BHS     dpar1
  CMP     R2, #TILE_SIZE_x_10
  BLO     dpar1
@@ -1056,7 +1057,7 @@ DrawObjects:
  AND     R8, R0, #0xFF000000
  LDR     R1, [R11, #zCamera]
  AND     R9, R1, #0xFF000000
- SUB     R8, R8, #TILE_SIZE_x_5_5
+ SUB     R8, R8, #LANDSCAPE_X
  STR     R8, [R11, #xCameraTile]
  MOV     R7, #11
 dobs1:
@@ -1091,7 +1092,7 @@ dobs4:
  SUB     R0, R8, R14
  LDR     R14, [R11, #zCamera]
  SUB     R2, R9, R14
- ADD     R2, R2, #TILE_SIZE_x_20
+ ADD     R2, R2, #LANDSCAPE_Z
  LDR     R14, [R11, #yCamera]
  SUB     R1, R1, R14
  LDRB    R14, [R11, #objectType]
@@ -2021,7 +2022,7 @@ DrawTriangleFromBuffer:
  B       DrawNextFromGraphicsBuffer
 DrawParticleToBuffer:
  STMFD   R13!, {R9, R14}
- RSB     R14, R8, #TILE_SIZE_x_20
+ RSB     R14, R8, #LANDSCAPE_Z
  ADD     R14, R14, #TILE_SIZE
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
@@ -2037,7 +2038,7 @@ DrawParticleToBuffer:
  LDMFD   R13!, {R9, PC}
 DrawParticleShadowToBuffer:
  STMFD   R13!, {R9, R14}
- RSB     R14, R8, #TILE_SIZE_x_20
+ RSB     R14, R8, #LANDSCAPE_Z
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R8, R8, LSR #25
@@ -2052,7 +2053,7 @@ DrawParticleShadowToBuffer:
 DrawTriangleShadowToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
- RSB     R14, R14, #TILE_SIZE_x_20
+ RSB     R14, R14, #LANDSCAPE_Z
  CMP     R14, #TILE_SIZE_x_11
  MOVHS   R14, #TILE_SIZE_x_10
  BIC     R14, R14, #0x00C00000
@@ -2065,7 +2066,7 @@ DrawTriangleShadowToBuffer:
 DrawTriangleToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
- RSB     R14, R14, #TILE_SIZE_x_20
+ RSB     R14, R14, #LANDSCAPE_Z
  ADD     R14, R14, #TILE_SIZE
  CMP     R14, #TILE_SIZE_x_11
  MOVHS   R14, #TILE_SIZE_x_10

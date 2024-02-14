@@ -90,8 +90,6 @@
 
  TILE_SIZE_x_5 = TILE_SIZE * 5      \ The size of 5 tiles
 
- TILE_SIZE_x_5_5 = &05800000        \ The size of 5.5 tiles
-
  TILE_SIZE_x_6 = TILE_SIZE * 6      \ The size of 6 tiles
 
  TILE_SIZE_x_10 = TILE_SIZE * 10    \ The size of 10 tiles
@@ -102,9 +100,18 @@
 
  TILE_SIZE_x_16 = TILE_SIZE * 16    \ The size of 16 tiles
 
- TILE_SIZE_x_20 = TILE_SIZE * 20    \ The size of 20 tiles
-
  TILE_SIZE_x_32 = TILE_SIZE * 32    \ The size of 32 tiles
+
+ LANDSCAPE_X = &05800000            \ The x-coordinate of the landscape offset,
+                                    \ which is set to the size of 5.5 tiles, and
+                                    \ is negated to move the landscape to the
+                                    \ left
+
+ LANDSCAPE_Y = 0                    \ The y-coordinate of the landscape offset
+
+ LANDSCAPE_Z = TILE_SIZE * 20       \ The z-coordinate of the landscape offset,
+                                    \ which is set to the size of 20 tiles and
+                                    \ moves the landscape away from the viewer
 
 \ ******************************************************************************
 \
@@ -326,7 +333,9 @@
                                     \ actually at the back of the on-screen
                                     \ landscape, not the front, so the camera's
                                     \ z-coordinate is larger than it would be
-                                    \ for a more traditional camera position)
+                                    \ for a more traditional camera position;
+                                    \ it is more like the camera's focal point
+                                    \ than position, in a sense)
 
  xCameraTile = &148                 \ The 3D x-coordinate of the camera, clipped
                                     \ to the nearest tile
@@ -428,9 +437,9 @@
 
 .landscapeOffset
 
- EQUD    -TILE_SIZE_x_5_5
- EQUD    0
- EQUD    TILE_SIZE_x_20
+ EQUD    -LANDSCAPE_X
+ EQUD    LANDSCAPE_Y
+ EQUD    LANDSCAPE_Z
 
 \ ******************************************************************************
 \
@@ -793,13 +802,12 @@
                                     \ yLandscapeCol with the landscape height as
                                     \ we go
 
- LDR     R8, [R11, #xCameraTile]    \ Set R8 = xCameraTile - 5.5 tile sizes, so
- SUB     R8, R8, #TILE_SIZE_x_5_5   \ R8 is now the coordinate of the tile
+ LDR     R8, [R11, #xCameraTile]    \ Set R8 = xCameraTile - LANDSCAPE_X, so
+ SUB     R8, R8, #LANDSCAPE_X       \ R8 is now the coordinate of the tile
                                     \ corner at the left end of the corner row,
-                                    \ as after rounding down the x-coordinate to
-                                    \ the nearest tile, half of the remaining 11
-                                    \ tiles is 5.5 tile sizes (as the landscape
-                                    \ is 12 tiles wide in total)
+                                    \ as subtracting the offset of the landscape
+                                    \ effectively moves the camera to the left
+                                    \ by that amount
 
  MOV     R0, #&80000000             \ Set previousColumn = &80000000 to denote
  STR     R0, [R11, #previousColumn] \ that we don't have corner coordinates from
@@ -1311,17 +1319,16 @@
  LDR     R1, [R11, #zCamera]        \ get the vertex position in the game's
  ADD     R9, R9, R1                 \ coordinate system
 
- SUB     R9, R9, #TILE_SIZE_x_20    \ Move the coordinate forward by 20 tiles,
-                                    \ as DrawObjects moves objects back by 14
-                                    \ tiles before drawing them, and the
-                                    \ altitude calculation needs the coordinate
-                                    \ to be relative to the front-centre point
-                                    \ of the landscape, not the back
+ SUB     R9, R9, #LANDSCAPE_Z       \ Move the z-coordinate forward by the
+                                    \ landscape offset, as the altitude
+                                    \ calculation needs the coordinate to be
+                                    \ relative to the front-centre point of the
+                                    \ landscape
 
                                     \ The (x, z) coordinate in (R8, R9) is now
                                     \ relative to the game's coordinate system,
-                                    \ rather than the camera or the back of the
-                                    \ landscape, which is what we need in order
+                                    \ rather than the camera or the landscape
+                                    \ offset, which is what we need in order
                                     \ to calculate the altitude of the landscape
                                     \ at this point
 
@@ -2668,10 +2675,10 @@
                                     \ So R2 contains the z-coordinate of the
                                     \ particle relative to camera
 
- ADD     R2, R2, #TILE_SIZE_x_20    \ Move the coordinate back by 20 tiles, so
-                                    \ (R0, R2) contains the coordinate of the
-                                    \ particle relative to the back-centre point
-                                    \ of the landscape
+ ADD     R2, R2, #LANDSCAPE_Z       \ Move the coordinate back by the landscape
+                                    \ offset, so (R0, R2) contains the
+                                    \ coordinate of the particle relative to the
+                                    \ back-centre point of the landscape
 
  LDR     R8, [R11, #yCamera]        \ Set R1 = R1 - yCamera
  SUB     R1, R1, R8                 \        = y - yCamera
@@ -2679,11 +2686,12 @@
                                     \ So R1 contains the y-coordinate of the
                                     \ particle relative to the camera
 
- CMP     R2, #TILE_SIZE_x_20        \ If the z-coordinate of the particle in R2
- BHS     dpar1                      \ R2 is more than 20 tiles into the screen,
-                                    \ which is too far away from us to be
-                                    \ visible on-screen, so jump to dpar1 to
-                                    \ move on to the next particle in the buffer
+ CMP     R2, #LANDSCAPE_Z           \ If the z-coordinate of the particle in R2
+ BHS     dpar1                      \ R2 is further into the screen than the
+                                    \ landscape offset, then it is too far away
+                                    \ from us to be above the visible landscape,
+                                    \ so jump to dpar1 to move on to the next
+                                    \ particle in the buffer
 
  CMP     R2, #TILE_SIZE_x_10        \ If R2 < 10 tile sizes, then the particle
  BLO     dpar1                      \ is too far towards us to be visible
@@ -4460,16 +4468,18 @@
                                     \ of the tile containing zCamera, i.e. the
                                     \ tile directly below our viewpoint
 
- SUB     R8, R8, #TILE_SIZE_x_5_5   \ Set xCameraTile = R8 - 5.5 tile sizes
+ SUB     R8, R8, #LANDSCAPE_X       \ Set xCameraTile = R8 - LANDSCAPE_X
  STR     R8, [R11, #xCameraTile]    \
                                     \ We already rounded xCamera down to the
-                                    \ nearest tile, so half of the remaining 11
-                                    \ tiles is 5.5 tile sizes (as the landscape
-                                    \ is 12 tiles wide in total), so this
-                                    \ subtracts exactly half of the landscape's
-                                    \ width from xCamera and stores the result
-                                    \ in xCameraTile, giving the x-coordinate of
-                                    \ the left end of the tile row
+                                    \ nearest tile, so this moves us to the
+                                    \ coordinate of the tile corner at the left
+                                    \ end of the corner row, as subtracting the
+                                    \ landscape offset effectively moves the
+                                    \ camera to the left by that amount
+                                    \
+                                    \ We store the result in xCameraTile, so
+                                    \ this is set to the x-coordinate of the
+                                    \ left end of the tile row
                                     \
                                     \ As we only take the top byte of the
                                     \ x-coordinate when reading the object map,
@@ -4603,10 +4613,10 @@
                                     \ So R2 contains the z-coordinate of the
                                     \ object relative to camera
 
- ADD     R2, R2, #TILE_SIZE_x_20    \ Move the coordinate back by 20 tiles, so
-                                    \ (R0, R2) contains the coordinate of the
-                                    \ object relative to the back-centre point
-                                    \ of the landscape
+ ADD     R2, R2, #LANDSCAPE_Z       \ Move the coordinate back by the landscape
+                                    \ offset, so (R0, R2) contains the
+                                    \ coordinate of the particle relative to the
+                                    \ back-centre point of the landscape
 
  LDR     R14, [R11, #yCamera]       \ Set R1 = R1 - yCamera
  SUB     R1, R1, R14                \        = y - yCamera
@@ -8096,7 +8106,7 @@
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- RSB     R14, R8, #TILE_SIZE_x_20   \ Set R14 = 20 tile sizes - R8
+ RSB     R14, R8, #LANDSCAPE_Z      \ Set R14 = landscape offset - R8
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -8215,7 +8225,7 @@
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- RSB     R14, R8, #TILE_SIZE_x_20   \ Set R14 = 20 tile sizes - R8
+ RSB     R14, R8, #LANDSCAPE_Z      \ Set R14 = landscape offset - R8
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -8340,7 +8350,7 @@
  LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the
                                     \ triangle
 
- RSB     R14, R14, #TILE_SIZE_x_20  \ Set R14 = 20 tile sizes - R14
+ RSB     R14, R14, #LANDSCAPE_Z     \ Set R14 = landscape offset - R14
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -8456,7 +8466,7 @@
  LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the
                                     \ triangle
 
- RSB     R14, R14, #TILE_SIZE_x_20  \ Set R14 = 20 tile sizes - R14
+ RSB     R14, R14, #LANDSCAPE_Z     \ Set R14 = landscape offset - R14
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
