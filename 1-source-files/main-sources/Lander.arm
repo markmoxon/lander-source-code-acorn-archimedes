@@ -71,6 +71,9 @@
  SMOKE_RISING_SPEED = &00080000     \ The speed at which smoke particles rise up
                                     \ from a destroyed object
 
+ MAX_PARTICLES = 484                \ The maximum number of particles at any one
+                                    \ time
+
  TILE_SIZE = &01000000              \ The length of one side of a square
                                     \ landscape tile in 3D coordinates
 
@@ -3578,10 +3581,10 @@
  LDR     R8, [R11, #particleCount]  \ Set R8 to the number of particles that are
                                     \ already on-screen
 
- CMP     R8, #484                   \ If R8 >= 484 then we already have the
- LDMHSFD R13!, {R8, PC}             \ maximum number of particles on-screen, so
-                                    \ restore the value of R8 from the stack and
-                                    \ return from the subroutine
+ CMP     R8, #MAX_PARTICLES         \ If R8 >= MAX_PARTICLES then we already
+ LDMHSFD R13!, {R8, PC}             \ have the maximum number of particles
+                                    \ on-screen, so restore the value of R8 from
+                                    \ the stack and return from the subroutine
 
  ADD     R8, R8, #1                 \ Increment the particle counter to record
  STR     R8, [R11, #particleCount]  \ that we have added a new particle
