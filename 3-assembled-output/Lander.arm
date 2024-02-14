@@ -10,10 +10,25 @@
 .set LAUNCHPAD_SIZE, 0x08000000
 .set LAUNCHPAD_Y, 0x02EC0000
 .set LAUNCHPAD_ALTITUDE, 0x03500000
+.set HIGHEST_ALTITUDE, 0x34000000
 .set SEA_LEVEL, 0x05500000
+.set LANDING_SPEED, 0x00200000
+.set SMOKE_RISING_SPEED, 0x00080000
 .set TILE_SIZE, 0x01000000
-.set TILE_SIZE_5_5, 0x05800000
-.set TILE_SIZE_20, 0x14000000
+.set TILE_SIZE_x_0_06, 0x00100000
+.set TILE_SIZE_x_0_31, 0x00500000
+.set TILE_SIZE_x_0_4, 0x00640000
+.set TILE_SIZE_x_0_75, 0x00C00000
+.set TILE_SIZE_x_1_5, 0x01800000
+.set TILE_SIZE_x_5, TILE_SIZE * 5
+.set TILE_SIZE_x_5_5, 0x05800000
+.set TILE_SIZE_x_6, TILE_SIZE * 6
+.set TILE_SIZE_x_10, TILE_SIZE * 10
+.set TILE_SIZE_x_11, TILE_SIZE * 11
+.set TILE_SIZE_x_15, TILE_SIZE * 15
+.set TILE_SIZE_x_16, TILE_SIZE * 16
+.set TILE_SIZE_x_20, TILE_SIZE * 20
+.set TILE_SIZE_x_32, TILE_SIZE * 32
 .set stack, 0x000121FC
 .set workspace, stack + 4
 .set xObject, 0x00
@@ -93,7 +108,9 @@
 .set objectMap, 0x4400
 .org     CODE
 landscapeOffset:
-.long    0xFA800000, 0x00000000, TILE_SIZE_20
+.long    -TILE_SIZE_x_5_5
+.long    0
+.long    TILE_SIZE_x_20
 landscapeOffsetAddr:
 .long    landscapeOffset
 landscapeConfig:
@@ -170,7 +187,7 @@ land1:
  ADD     R4, R11, #xLandscapeCol
  STMIA   R4, {R0-R2}
  LDR     R8, [R11, #xCameraTile]
- SUB     R8, R8, #TILE_SIZE_5_5
+ SUB     R8, R8, #TILE_SIZE_x_5_5
  MOV     R0, #0x80000000
  STR     R0, [R11, #previousColumn]
 land2:
@@ -272,7 +289,7 @@ GetLandscapeAltitude:
  BIC     R1, R1, #0x00300000
  LDR     R1, [R2, R1, LSR #20]
  ADD     R0, R0, R1, ASR #8
- RSB     R0, R0, #0x05000000
+ RSB     R0, R0, #TILE_SIZE_x_5
  CMP     R0, #SEA_LEVEL
  MOVGT   R0, #SEA_LEVEL
  CMP     R8, #LAUNCHPAD_SIZE
@@ -288,7 +305,7 @@ GetLandscapeBelowVertex:
  LDR     R9, [R0, #8]
  LDR     R1, [R11, #zCamera]
  ADD     R9, R9, R1
- SUB     R9, R9, #TILE_SIZE_20
+ SUB     R9, R9, #TILE_SIZE_x_20
  BL      GetLandscapeAltitude
  LDR     R14, [R11, #yCamera]
  SUB     R0, R0, R14
@@ -388,7 +405,7 @@ ship4:
  BL      CalculateRotationMatrix
  ADD     R14, R11, #xPlayer
  LDMIA   R14, {R0-R5}
- CMN     R1, #0x34000000
+ CMN     R1, #HIGHEST_ALTITUDE
  LDRLTB  R9, [R11, #fuelBurnRate]
  BICLT   R9, R9, #0x6
  STRLTB  R9, [R11, #fuelBurnRate]
@@ -415,17 +432,17 @@ ship4:
  STMIA   R14, {R0-R8}
  CMP     R1, #0
  MOVPL   R1, #0
- ADD     R2, R2, #0x05000000
+ ADD     R2, R2, #TILE_SIZE_x_5
  ADD     R14, R11, #xCamera
  STMIA   R14, {R0-R2}
  MOV     R8, R0
  MOV     R9, R2
- SUB     R9, R9, #0x05000000
+ SUB     R9, R9, #TILE_SIZE_x_5
  BL      GetLandscapeAltitude
- SUB     R0, R0, #0x00640000
+ SUB     R0, R0, #TILE_SIZE_x_0_4
  LDR     R1, [R11, #yPlayer]
  SUB     R14, R0, R1
- CMP     R14, #0x01800000
+ CMP     R14, #TILE_SIZE_x_1_5
  BHS     ship6
  STMFD   R13!, {R0}
  ADD     R14, R11, #objectMap
@@ -449,7 +466,7 @@ ship6:
  LDR     R14, objectPlayerAddr
  STR     R14, [R11, #objectData]
  MOV     R0, #0
- MOV     R2, #0x0F000000
+ MOV     R2, #TILE_SIZE_x_15
  BL      DrawObject
  LDRB    R10, [R11, #crashedFlag]
  CMP     R10, #0
@@ -539,7 +556,7 @@ LandOnLaunchpad:
  RSBMI   R5, R5, #0
  ADD     R3, R3, R4
  ADD     R3, R3, R5
- CMP     R3, #0x00200000
+ CMP     R3, #LANDING_SPEED
  MOVHS   PC, R14
  MOV     R1, #LAUNCHPAD_Y
  LDR     R3, [R11, #fuelLevel]
@@ -564,7 +581,7 @@ LoseLife:
  MOV     R8, #81
  ADD     R0, R11, #xPlayer
  LDMIA   R0, {R0-R2}
- SUB     R1, R1, #0x00500000
+ SUB     R1, R1, #TILE_SIZE_x_0_31
  BL      AddExplosionToBuffer
 lose1:
  LDR     R0, [R11, #mainLoopCount]
@@ -657,16 +674,16 @@ dpar2:
  SUB     R0, R0, R8
  LDR     R8, [R11, #zCamera]
  SUB     R2, R2, R8
- ADD     R2, R2, #TILE_SIZE_20
+ ADD     R2, R2, #TILE_SIZE_x_20
  LDR     R8, [R11, #yCamera]
  SUB     R1, R1, R8
- CMP     R2, #TILE_SIZE_20
+ CMP     R2, #TILE_SIZE_x_20
  BHS     dpar1
- CMP     R2, #0x0A000000
+ CMP     R2, #TILE_SIZE_x_10
  BLO     dpar1
  MOVS    R14, R0
  RSBMI   R14, R0, #0
- CMP     R14, #0x06000000
+ CMP     R14, #TILE_SIZE_x_6
  BHS     dpar1
  TST     R7, #0x00020000
  BEQ     dpar4
@@ -676,7 +693,7 @@ dpar2:
  BEQ     dpar3
  CMP     R0, #0
  RSBMI   R0, R0, #0
- SUBS    R2, R2, #0x0F000000
+ SUBS    R2, R2, #TILE_SIZE_x_15
  RSBMI   R2, R2, #0
  CMP     R0, #TILE_SIZE
  CMPLO   R2, #TILE_SIZE
@@ -749,7 +766,7 @@ BounceParticle:
  MOV     PC, R14
 ProcessObjectDestruction:
  SUB     R8, R9, R1
- CMP     R8, #0x01800000
+ CMP     R8, #TILE_SIZE_x_1_5
  MOVHS   PC, R14
  STMFD   R13!, {R2}
  STR     R14, [R11, #objectType]
@@ -782,7 +799,7 @@ SplashParticleIntoSea:
  TST     R7, #0x00800000
  MOVNE   R8, #65
  MOVEQ   R8, #4
- SUB     R1, R1, #0x00100000
+ SUB     R1, R1, #TILE_SIZE_x_0_06
 psea1:
  BL      AddSprayParticleToBuffer
  SUBS    R8, R8, #1
@@ -860,7 +877,7 @@ AddSmokeParticleToBuffer:
  TST     R2, #0x8
  ORRNE   R7, R7, #0x80
  ORR     R7, R7, #0x00080000
- MVN     R4, #0x00080000
+ MVN     R4, #SMOKE_RISING_SPEED
  LDMFD   R13!, {R0-R2}
  MOV     R9, #25
  MOV     R8, #13
@@ -969,7 +986,7 @@ AddShipExplosionToBuffer:
  LDR     R0, [R11, #xCamera]
  MOV     R1, #0
  LDR     R2, [R11, #zCamera]
- SUB     R2, R2, #0x06000000
+ SUB     R2, R2, #TILE_SIZE_x_6
  BL      AddExplosionToBuffer
  LDMFD   R13!, {PC}
 AddSparkCloudToBuffer:
@@ -978,7 +995,7 @@ AddSparkCloudToBuffer:
  LDR     R0, [R11, #xCamera]
  MOV     R1, #0
  LDR     R2, [R11, #zCamera]
- SUB     R2, R2, #0x06000000
+ SUB     R2, R2, #TILE_SIZE_x_6
 spcl1:
  BL      AddSparkParticleToBuffer
  SUBS    R8, R8, #1
@@ -987,9 +1004,9 @@ spcl1:
 SpawnRock:
  STMFD   R13!, {R6-R9, R14}
  LDR     R0, [R11, #xCamera]
- MVN     R1, #0x10000000
+ MVN     R1, #TILE_SIZE_x_16
  LDR     R2, [R11, #zCamera]
- SUB     R2, R2, #0x06000000
+ SUB     R2, R2, #TILE_SIZE_x_6
  BL      DropARockFromTheSky
  LDMFD   R13!, {R6-R9, PC}
 DropRocksFromTheSky:
@@ -1002,9 +1019,9 @@ DropRocksFromTheSky:
  CMP     R0, R4
  LDMHSIA R13!, {PC}
  LDR     R0, [R11, #xCamera]
- MVN     R1, #0x20000000
+ MVN     R1, #TILE_SIZE_x_32
  LDR     R2, [R11, #zCamera]
- SUB     R2, R2, #0x06000000
+ SUB     R2, R2, #TILE_SIZE_x_6
  BL      DropARockFromTheSky
  LDMFD   R13!, {PC}
 objectTypes:
@@ -1039,7 +1056,7 @@ DrawObjects:
  AND     R8, R0, #0xFF000000
  LDR     R1, [R11, #zCamera]
  AND     R9, R1, #0xFF000000
- SUB     R8, R8, #TILE_SIZE_5_5
+ SUB     R8, R8, #TILE_SIZE_x_5_5
  STR     R8, [R11, #xCameraTile]
  MOV     R7, #11
 dobs1:
@@ -1074,7 +1091,7 @@ dobs4:
  SUB     R0, R8, R14
  LDR     R14, [R11, #zCamera]
  SUB     R2, R9, R14
- ADD     R2, R2, #TILE_SIZE_20
+ ADD     R2, R2, #TILE_SIZE_x_20
  LDR     R14, [R11, #yCamera]
  SUB     R1, R1, R14
  LDRB    R14, [R11, #objectType]
@@ -1093,7 +1110,7 @@ dobs6:
  ADD     R1, R1, R14
  MOV     R0, R8
  MOV     R2, R9
- SUB     R1, R1, #0x00C00000
+ SUB     R1, R1, #TILE_SIZE_x_0_75
  BL      AddSmokeParticleToBuffer
  LDMFD   R13!, {R0-R7, R9}
  B       dobs5
@@ -1631,7 +1648,7 @@ pole6:
  LDMIA   R0, {R0-R2}
 ProjectParticleOntoScreen:
  CMN     R2, #0x80000000
- MOVCS   PC, R14
+ MOVHS   PC, R14
  MOVS    R3, R0
  RSBMI   R3, R3, #0
  MVNMI   R5, R3
@@ -1690,7 +1707,7 @@ ppar3:
 ProjectVertexOntoScreen:
  LDMIA   R0, {R0-R2}
  CMN     R2, #0x80000000
- MOVCS   PC, R14
+ MOVHS   PC, R14
  STMFD   R13!, {R5-R7, R14}
  MOVS    R3, R0
  RSBMI   R3, R3, #0
@@ -2004,7 +2021,7 @@ DrawTriangleFromBuffer:
  B       DrawNextFromGraphicsBuffer
 DrawParticleToBuffer:
  STMFD   R13!, {R9, R14}
- RSB     R14, R8, #TILE_SIZE_20
+ RSB     R14, R8, #TILE_SIZE_x_20
  ADD     R14, R14, #TILE_SIZE
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
@@ -2020,7 +2037,7 @@ DrawParticleToBuffer:
  LDMFD   R13!, {R9, PC}
 DrawParticleShadowToBuffer:
  STMFD   R13!, {R9, R14}
- RSB     R14, R8, #TILE_SIZE_20
+ RSB     R14, R8, #TILE_SIZE_x_20
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R8, R8, LSR #25
@@ -2035,9 +2052,9 @@ DrawParticleShadowToBuffer:
 DrawTriangleShadowToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
- RSB     R14, R14, #TILE_SIZE_20
- CMP     R14, #0x0B000000
- MOVHS   R14, #0x0A000000
+ RSB     R14, R14, #TILE_SIZE_x_20
+ CMP     R14, #TILE_SIZE_x_11
+ MOVHS   R14, #TILE_SIZE_x_10
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R7, #18
@@ -2048,10 +2065,10 @@ DrawTriangleShadowToBuffer:
 DrawTriangleToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
- RSB     R14, R14, #TILE_SIZE_20
+ RSB     R14, R14, #TILE_SIZE_x_20
  ADD     R14, R14, #TILE_SIZE
- CMP     R14, #0x0B000000
- MOVHS   R14, #0x0A000000
+ CMP     R14, #TILE_SIZE_x_11
+ MOVHS   R14, #TILE_SIZE_x_10
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R7, #18

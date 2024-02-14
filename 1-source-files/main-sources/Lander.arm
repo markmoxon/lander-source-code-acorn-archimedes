@@ -60,16 +60,51 @@
 
  LAUNCHPAD_ALTITUDE = &03500000     \ Altitude of the launchpad
 
+ HIGHEST_ALTITUDE = &34000000       \ Highest altitude for the engines to work
+                                    \ (as a positive number, as the altitude is
+                                    \ actually -&34000000)
+
  SEA_LEVEL = &05500000              \ Sea level
 
- TILE_SIZE = &01000000              \ The size of a landscape tile in 3D
-                                    \ coordinates
+ LANDING_SPEED = &00200000          \ The maximum safe landing speed
 
- TILE_SIZE_5_5 = &05800000          \ The size of 5.5 tiles (which is half of
-                                    \ the landscape width once we have rounded
-                                    \ a coordinate down to the nearest tile)
+ SMOKE_RISING_SPEED = &00080000     \ The speed at which smoke particles rise up
+                                    \ from a destroyed object
 
- TILE_SIZE_20 = &14000000           \ The size of 20 tiles
+ TILE_SIZE = &01000000              \ The length of one side of a square
+                                    \ landscape tile in 3D coordinates
+
+                                    \ We need to calculate the following as vasm
+                                    \ doesn't let us include constants in
+                                    \ instruction expressions
+
+ TILE_SIZE_x_0_06 = &00100000       \ The size of 1/16 tiles
+
+ TILE_SIZE_x_0_31 = &00500000       \ The size of 0.3125 tiles
+
+ TILE_SIZE_x_0_4 = &00640000        \ The size of 0.4 tiles
+
+ TILE_SIZE_x_0_75 = &00C00000       \ The size of 0.75 tiles
+
+ TILE_SIZE_x_1_5 = &01800000        \ The size of 1.5 tiles
+
+ TILE_SIZE_x_5 = TILE_SIZE * 5      \ The size of 5 tiles
+
+ TILE_SIZE_x_5_5 = &05800000        \ The size of 5.5 tiles
+
+ TILE_SIZE_x_6 = TILE_SIZE * 6      \ The size of 6 tiles
+
+ TILE_SIZE_x_10 = TILE_SIZE * 10    \ The size of 10 tiles
+
+ TILE_SIZE_x_11 = TILE_SIZE * 11    \ The size of 11 tiles
+
+ TILE_SIZE_x_15 = TILE_SIZE * 15    \ The size of 15 tiles
+
+ TILE_SIZE_x_16 = TILE_SIZE * 16    \ The size of 16 tiles
+
+ TILE_SIZE_x_20 = TILE_SIZE * 20    \ The size of 20 tiles
+
+ TILE_SIZE_x_32 = TILE_SIZE * 32    \ The size of 32 tiles
 
 \ ******************************************************************************
 \
@@ -393,7 +428,9 @@
 
 .landscapeOffset
 
- EQUD    &FA800000, &00000000, TILE_SIZE_20
+ EQUD    -TILE_SIZE_x_5_5
+ EQUD    0
+ EQUD    TILE_SIZE_x_20
 
 \ ******************************************************************************
 \
@@ -756,12 +793,12 @@
                                     \ yLandscapeCol with the landscape height as
                                     \ we go
 
- LDR     R8, [R11, #xCameraTile]    \ Set R8 = xCameraTile - TILE_SIZE_5_5, so
- SUB     R8, R8, #TILE_SIZE_5_5     \ R8 is now the coordinate of the tile
+ LDR     R8, [R11, #xCameraTile]    \ Set R8 = xCameraTile - 5.5 tile sizes, so
+ SUB     R8, R8, #TILE_SIZE_x_5_5   \ R8 is now the coordinate of the tile
                                     \ corner at the left end of the corner row,
                                     \ as after rounding down the x-coordinate to
                                     \ the nearest tile, half of the remaining 11
-                                    \ tiles is 5.5 tile widths (as the landscape
+                                    \ tiles is 5.5 tile sizes (as the landscape
                                     \ is 12 tiles wide in total)
 
  MOV     R0, #&80000000             \ Set previousColumn = &80000000 to denote
@@ -1015,9 +1052,9 @@
 \
 \ The altitude at landscape coordinate (x, z) is calculated as follows:
 \
-\ &05000000 - (   2*sin(x - 2z)  + 2*sin(4x + 3z)  + 2*sin(3z - 5x)
-\               + 2*sin(3x + 3z) +   sin(5x + 11z) +   sin(10x + 7z)
-\             ) / 256
+\   TILE_SIZE_x_5 - (   2*sin(x - 2z)  + 2*sin(4x + 3z)  + 2*sin(3z - 5x)
+\                     + 2*sin(3x + 3z) +   sin(5x + 11z) +   sin(10x + 7z)
+\                   ) / 256
 \
 \ Note that the object map is flat, like a paper map, so the x- and z-axes on
 \ the map correspond to the x- and z-axes in the three-dimensional space when
@@ -1214,9 +1251,9 @@
                                     \      +
                                     \      (sin(5x + 11z) + sin(10x + 7z)) / 256
 
- RSB     R0, R0, #&05000000         \ R0 = &05000000- R0
+ RSB     R0, R0, #TILE_SIZE_x_5     \ R0 = TILE_SIZE_x_5 - R0
                                     \
-                                    \    = &05000000-
+                                    \    = TILE_SIZE_x_5 -
                                     \      (2*sin(x - 2z) + 2*sin(4x + 3z)
                                     \                     + 2*sin(3z - 5x)
                                     \                     + 2*sin(3x + 3z)
@@ -1274,7 +1311,7 @@
  LDR     R1, [R11, #zCamera]        \ get the vertex position in the game's
  ADD     R9, R9, R1                 \ coordinate system
 
- SUB     R9, R9, #TILE_SIZE_20      \ Move the coordinate forward by 20 tiles,
+ SUB     R9, R9, #TILE_SIZE_x_20    \ Move the coordinate forward by 20 tiles,
                                     \ as DrawObjects moves objects back by 14
                                     \ tiles before drawing them, and the
                                     \ altitude calculation needs the coordinate
@@ -1662,9 +1699,9 @@
                                     \ various factors such as friction, thrust
                                     \ and gravity
 
- CMN     R1, #&34000000             \ If R1 < -&34000000, clear bits 2 and 3 of
- LDRLTB  R9, [R11, #fuelBurnRate]   \ the fuel burn rate, as the ship's altitude
- BICLT   R9, R9, #%00000110         \ is too high for the engines to work
+ CMN     R1, #HIGHEST_ALTITUDE      \ If R1 is higher than the altitude where
+ LDRLTB  R9, [R11, #fuelBurnRate]   \ the engines cut out, clear bits 2 and 3 of
+ BICLT   R9, R9, #%00000110         \ the fuel burn rate to cut the engines
  STRLTB  R9, [R11, #fuelBurnRate]
 
  LDR     R6, [R11, #xRoofV]         \ Set (R6, R7, R8) to the roof vector from
@@ -1827,7 +1864,7 @@
                                     \ rising up with the ship as it takes off
                                     \ until the ship is at a reasonable height
 
- ADD     R2, R2, #&05000000         \ Set R2 to the z-coordinate that's five
+ ADD     R2, R2, #TILE_SIZE_x_5     \ Set R2 to the z-coordinate that's five
                                     \ tiles into the screen from the player
 
  ADD     R14, R11, #xCamera         \ Set (xCamera, yCamera, zCamera) to the
@@ -1841,14 +1878,16 @@
                                     \ visible screen
 
  MOV     R8, R0                     \ Set (R8, R9) to the point on the landscape
- MOV     R9, R2                     \ that's directly below the player
- SUB     R9, R9, #&05000000
+ MOV     R9, R2                     \ that's directly below the player, by
+ SUB     R9, R9, #TILE_SIZE_x_5     \ setting (R8, R9) to the ship's (x, z)
+                                    \ coordinates in (R0, R2) and subtracting
+                                    \ the five tiles we added above
 
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9)
 
- SUB     R0, R0, #&00640000         \ Set R0 to the altitude of a point that's
-                                    \ 0.625 tile sizes above the point on the
+ SUB     R0, R0, #TILE_SIZE_x_0_4   \ Set R0 to the altitude of a point that's
+                                    \ 0.4 tile sizes above the point on the
                                     \ landscape beneath the player, which is the
                                     \ lowest altitude the player can be without
                                     \ being in danger of hitting the ground
@@ -1857,17 +1896,17 @@
                                     \ in yPlayer
 
  SUB     R14, R0, R1                \ If R0 - yPlayer >= 1.5 tile sizes then
- CMP     R14, #&01800000            \ jump to ship6 to skip the following set of
+ CMP     R14, #TILE_SIZE_x_1_5      \ jump to ship6 to skip the following set of
  BHS     ship6                      \ collision checks, so this means the player
                                     \ is safely clear of objects on the ground
                                     \ if they are at least 1.5 tiles above the
                                     \ coordinates of those objects (and that's
-                                    \ on top of the 0.625-tile gap that they
-                                    \ need below them)
+                                    \ on top of the 0.4-tile gap that they need
+                                    \ below them)
                                     \
                                     \ To put it another way, objects can be up
                                     \ to 1.5 tiles tall, and the ship height is
-                                    \ 2 * 0.625 = 1.25 tiles (as the ship's
+                                    \ 2 * 0.4 = 0.8 tiles (as the ship's
                                     \ coordinates are in the centre of the ship)
 
  STMFD   R13!, {R0}                 \ Store R0 on the stack so we can retrieve
@@ -1946,7 +1985,7 @@
  STR     R14, [R11, #objectData]    \ for the player's ship
 
  MOV     R0, #0                     \ Set the coordinates in (R0, R1, R2) so
- MOV     R2, #&0F000000             \ the ship gets drawn in the middle of the
+ MOV     R2, #TILE_SIZE_x_15        \ the ship gets drawn in the middle of the
                                     \ screen or slightly below if the ship is
                                     \ near the ground (as R0 = 0 and R1 is set
                                     \ as described above), at a position into
@@ -2268,9 +2307,9 @@
  CMP     R5, #0                     \ Set R5 = |R5|
  RSBMI   R5, R5, #0                 \        = |zVelocity|
 
- ADD     R3, R3, R4                 \ If R3 + R4 + R5 >= &00200000, then:
+ ADD     R3, R3, R4                 \ If R3 + R4 + R5 >= LANDING_SPEED, then:
  ADD     R3, R3, R5                 \ 
- CMP     R3, #&00200000             \   |xVelocity| + |yVelocity| + |zVelocity|
+ CMP     R3, #LANDING_SPEED         \   |xVelocity| + |yVelocity| + |zVelocity|
  MOVHS   PC, R14                    \
                                     \ is greater than the safe landing speed, so
                                     \ we can't be performing a safe landing, so
@@ -2349,9 +2388,9 @@
  ADD     R0, R11, #xPlayer          \ Set (R0, R1, R2) to the coordinate in
  LDMIA   R0, {R0-R2}                \ xPlayer
 
- SUB     R1, R1, #&00500000         \ Subtract &00500000 from the y-coordinate
-                                    \ so the explosion occurs just above the
-                                    \ player's ship
+ SUB     R1, R1, #TILE_SIZE_x_0_31  \ Subtract 0.3125 tile sizes from the ship's
+                                    \ y-coordinate so the explosion occurs just
+                                    \ above the player's ship
 
  BL      AddExplosionToBuffer       \ Draw a large explosion in place of the
                                     \ player's ship
@@ -2629,7 +2668,7 @@
                                     \ So R2 contains the z-coordinate of the
                                     \ particle relative to camera
 
- ADD     R2, R2, #TILE_SIZE_20      \ Move the coordinate back by 20 tiles, so
+ ADD     R2, R2, #TILE_SIZE_x_20    \ Move the coordinate back by 20 tiles, so
                                     \ (R0, R2) contains the coordinate of the
                                     \ particle relative to the back-centre point
                                     \ of the landscape
@@ -2640,23 +2679,23 @@
                                     \ So R1 contains the y-coordinate of the
                                     \ particle relative to the camera
 
- CMP     R2, #TILE_SIZE_20          \ If the z-coordinate of the particle in R2
+ CMP     R2, #TILE_SIZE_x_20        \ If the z-coordinate of the particle in R2
  BHS     dpar1                      \ R2 is more than 20 tiles into the screen,
                                     \ which is too far away from us to be
                                     \ visible on-screen, so jump to dpar1 to
                                     \ move on to the next particle in the buffer
 
- CMP     R2, #&0A000000             \ If R2 < &0A000000 then the z-coordinate
- BLO     dpar1                      \ of the particle is too far towards us to
-                                    \ be visible on-screen, so jump to dpar1 to
-                                    \ move on to the next particle in the buffer
+ CMP     R2, #TILE_SIZE_x_10        \ If R2 < 10 tile sizes, then the particle
+ BLO     dpar1                      \ is too far towards us to be visible
+                                    \ on-screen, so jump to dpar1 to move on to
+                                    \ the next particle in the buffer
 
  MOVS    R14, R0                    \ Set R14 = |R0|
  RSBMI   R14, R0, #0                \         = |particle x-coordinate|
 
- CMP     R14, #&06000000            \ If R14 >= &06000000 then the x-coordinate
- BHS     dpar1                      \ of the particle is more than six tiles to
-                                    \ the left or right, which is too far to fit
+ CMP     R14, #TILE_SIZE_x_6        \ If the x-coordinate of the particle in R14
+ BHS     dpar1                      \ is more than six tiles to the left or
+                                    \ right, then it is too far to fit
                                     \ on-screen, so jump to dpar1 to move on to
                                     \ the next particle in the buffer
 
@@ -2694,7 +2733,7 @@
  CMP     R0, #0                     \ Set R0 = |R0|
  RSBMI   R0, R0, #0                 \        = |rock x-coordinate|
 
- SUBS    R2, R2, #&0F000000         \ Set R2 = |R2 - &0F000000|
+ SUBS    R2, R2, #TILE_SIZE_x_15    \ Set R2 = |R2 - TILE_SIZE_x_15|
  RSBMI   R2, R2, #0                 \        = |rock z-coordinate - 15 tiles|
                                     \
                                     \ Because the player's ship is always at
@@ -3014,9 +3053,10 @@
                                     \ So R8 contains the vertical distance
                                     \ between the particle and the ground
 
- CMP     R8, #&01800000             \ If R8 >= &01800000 then return from the
- MOVHS   PC, R14                    \ subroutine as the particle is too high off
-                                    \ the ground to be hitting any objects
+ CMP     R8, #TILE_SIZE_x_1_5       \ If R8 is higher than 1.5 tile sizes then
+ MOVHS   PC, R14                    \ return from the subroutine as the particle
+                                    \ is too high off the ground to be hitting
+                                    \ any objects
 
  STMFD   R13!, {R2}                 \ Store R2 on the stack so we can retrieve
                                     \ it below
@@ -3135,7 +3175,7 @@
  MOVNE   R8, #65                    \ set the number of spray particles in R8
  MOVEQ   R8, #4                     \ to 65, otherwise set it to 4
 
- SUB     R1, R1, #&00100000         \ Set R1 to a point just above the sea's
+ SUB     R1, R1, #TILE_SIZE_x_0_06  \ Set R1 to a point just above the sea's
                                     \ surface (as R1 is on the surface, so this
                                     \ moves it to 1/16 of a tile size above the
                                     \ waves)
@@ -3661,10 +3701,11 @@
                                     \ the particle bounces on the ground should
                                     \ it ever reach it
 
- MVN     R4, #&00080000             \ Set R4 = -&00080001 to pass as the y-axis
-                                    \ velocity in the particle adding routine
-                                    \ below, so the particle drifts slowly up
-                                    \ and away from the ground
+ MVN     R4, #SMOKE_RISING_SPEED    \ Set R4 to the speed of the smoke rising
+                                    \ to pass as the y-axis velocity in the
+                                    \ particle adding routine below, so the
+                                    \ particle drifts slowly up and away from
+                                    \ the ground
 
  LDMFD   R13!, {R0-R2}              \ Retrieve the particle coordinates that we
                                     \ stored above into (R0, R1, R2)
@@ -4170,8 +4211,8 @@
 
  MOV     R1, #0                     \ Set R1 = 0
 
- LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
- SUB     R2, R2, #&06000000
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
+ SUB     R2, R2, #TILE_SIZE_x_6
 
  BL      AddExplosionToBuffer       \ Add an explosion into the particle data
                                     \ buffers
@@ -4210,8 +4251,8 @@
 
  MOV     R1, #0                     \ Set R1 = 0
 
- LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
- SUB     R2, R2, #&06000000
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
+ SUB     R2, R2, #TILE_SIZE_x_6
 
 .spcl1
 
@@ -4251,10 +4292,10 @@
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
- MVN     R1, #&10000000             \ Set R1 = -&10000001
+ MVN     R1, #TILE_SIZE_x_16        \ Set R1 = -(16 tile sizes)
 
- LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
- SUB     R2, R2, #&06000000
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
+ SUB     R2, R2, #TILE_SIZE_x_6
 
  BL      DropARockFromTheSky        \ Drop a rock from the coordinates in
                                     \ (R0, R1, R2)
@@ -4307,10 +4348,10 @@
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
- MVN     R1, #&20000000             \ Set R1 = -&20000001
+ MVN     R1, #TILE_SIZE_x_32        \ Set R1 = -(32 tile sizes)
 
- LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - &06000000
- SUB     R2, R2, #&06000000
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
+ SUB     R2, R2, #TILE_SIZE_x_6
 
  BL      DropARockFromTheSky        \ Drop a rock from the coordinates in
                                     \ (R0, R1, R2) by spawning it as a
@@ -4419,11 +4460,11 @@
                                     \ of the tile containing zCamera, i.e. the
                                     \ tile directly below our viewpoint
 
- SUB     R8, R8, #TILE_SIZE_5_5     \ Set xCameraTile = R8 - TILE_SIZE_5_5
+ SUB     R8, R8, #TILE_SIZE_x_5_5   \ Set xCameraTile = R8 - 5.5 tile sizes
  STR     R8, [R11, #xCameraTile]    \
                                     \ We already rounded xCamera down to the
                                     \ nearest tile, so half of the remaining 11
-                                    \ tiles is 5.5 tile widths (as the landscape
+                                    \ tiles is 5.5 tile sizes (as the landscape
                                     \ is 12 tiles wide in total), so this
                                     \ subtracts exactly half of the landscape's
                                     \ width from xCamera and stores the result
@@ -4562,7 +4603,7 @@
                                     \ So R2 contains the z-coordinate of the
                                     \ object relative to camera
 
- ADD     R2, R2, #TILE_SIZE_20      \ Move the coordinate back by 20 tiles, so
+ ADD     R2, R2, #TILE_SIZE_x_20    \ Move the coordinate back by 20 tiles, so
                                     \ (R0, R2) contains the coordinate of the
                                     \ object relative to the back-centre point
                                     \ of the landscape
@@ -4619,8 +4660,8 @@
 
  MOV     R0, R8                     \ Set (R0, R1, R2) to (x, y - &C00000, z)
  MOV     R2, R9                     \
- SUB     R1, R1, #&00C00000         \ So this is the coordinate that's &C00000
-                                    \ above the base of the object (as the
+ SUB     R1, R1, #TILE_SIZE_x_0_75  \ So this is the coordinate that's 0.75 tile
+                                    \ sizes above the base of the object (as the
                                     \ y-axis points downwards), which is where
                                     \ we add our smoke particles, one on each
                                     \ iteration around the main loop
@@ -5771,7 +5812,7 @@
 
  AND     R4, R4, #&FE000000         \ Zero all but the top byte of R4, ensuring
  ORR     R4, R4, #&01000000         \ that bit 0 of the top byte is set so the
-                                    \ value of the top byte is at least 1
+                                    \ value of the fractional part is set to 0.5
 
  MOV     R3, #0                     \ Set R3 = 0 to use for building the sum in
                                     \ our shift-and-add multiplication result
@@ -6064,7 +6105,7 @@
 
  AND     R2, R2, #&FE000000         \ Zero all but the top byte of R2, ensuring
  ORR     R2, R2, #&01000000         \ that bit 0 of the top byte is set so the
-                                    \ value of the top byte is at least 1
+                                    \ value of the fractional part is set to 0.5
 
  MOV     R4, #0                     \ Set R4 = 0 to use for building the sum in
                                     \ our shift-and-add multiplication result
@@ -6434,7 +6475,7 @@
 
  AND     R3, R3, #&FE000000         \ Zero all but the top byte of R3, ensuring
  ORR     R3, R3, #&01000000         \ that bit 0 of the top byte is set so the
-                                    \ value of the top byte is at least 1
+                                    \ value of the fractional part is set to 0.5
 
  MOV     R4, #0                     \ Set R4 = 0 to use for building the sum in
                                     \ our shift-and-add multiplication result
@@ -6568,7 +6609,7 @@
 .ProjectParticleOntoScreen
 
  CMN     R2, #&80000000             \ If R2 >= -&80000000 then the particle is
- MOVCS   PC, R14                    \ too far away to be visible, so return from
+ MOVHS   PC, R14                    \ too far away to be visible, so return from
                                     \ the subroutine with the C flag set
 
  MOVS    R3, R0                     \ Set R3 = |R0|
@@ -6799,7 +6840,7 @@
                                     \ (x, y, z) in the following
 
  CMN     R2, #&80000000             \ If R2 >= -&80000000 then the particle is
- MOVCS   PC, R14                    \ too far away to be visible, so return from
+ MOVHS   PC, R14                    \ too far away to be visible, so return from
                                     \ the subroutine with the C flag set
 
  STMFD   R13!, {R5-R7, R14}         \ Store the registers that we want to use on
@@ -7321,7 +7362,7 @@
 
  AND     R8, R8, #&FE000000         \ Zero all but the top byte of R8, ensuring
  ORR     R8, R8, #&01000000         \ that bit 0 of the top byte is set so the
-                                    \ value of the top byte is at least 1
+                                    \ value of the fractional part is set to 0.5
 
  MOV     R5, #0                     \ Set R5 = 0 to use for building the sum in
                                     \ our shift-and-add multiplication result
@@ -8055,7 +8096,7 @@
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- RSB     R14, R8, #TILE_SIZE_20     \ Set R14 = TILE_SIZE_20 - R8
+ RSB     R14, R8, #TILE_SIZE_x_20   \ Set R14 = 20 tile sizes - R8
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -8174,7 +8215,7 @@
  STMFD   R13!, {R9, R14}            \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- RSB     R14, R8, #TILE_SIZE_20     \ Set R14 = TILE_SIZE_20 - R8
+ RSB     R14, R8, #TILE_SIZE_x_20   \ Set R14 = 20 tile sizes - R8
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -8299,7 +8340,7 @@
  LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the
                                     \ triangle
 
- RSB     R14, R14, #TILE_SIZE_20    \ Set R14 = TILE_SIZE_20 - R14
+ RSB     R14, R14, #TILE_SIZE_x_20  \ Set R14 = 20 tile sizes - R14
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -8312,9 +8353,9 @@
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
 
- CMP     R14, #&0B000000            \ Cap R14 to a maximum value of &0A000000,
- MOVHS   R14, #&0A000000            \ so the maximum buffer number we draw into
-                                    \ is 10 (as buffer 11 is not used)
+ CMP     R14, #TILE_SIZE_x_11       \ Cap R14 to a maximum value of 10 tile
+ MOVHS   R14, #TILE_SIZE_x_10       \ sizes, so the maximum buffer number we
+                                    \ draw into is 10 (as buffer 11 is not used)
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
                                     \ the buffer number, and we're going to look
@@ -8415,7 +8456,7 @@
  LDR     R14, [R11, #zObject]       \ Set R14 to the z-coordinate of the
                                     \ triangle
 
- RSB     R14, R14, #TILE_SIZE_20    \ Set R14 = TILE_SIZE_20 - R14
+ RSB     R14, R14, #TILE_SIZE_x_20  \ Set R14 = 20 tile sizes - R14
                                     \
                                     \ We use the top byte of this number as the
                                     \ number of the graphics buffer to draw into
@@ -8432,9 +8473,9 @@
                                     \ the triangle one tile nearer than we would
                                     \ otherwise (i.e. one buffer nearer)
 
- CMP     R14, #&0B000000            \ Cap R14 to a maximum value of &0A000000,
- MOVHS   R14, #&0A000000            \ so the maximum buffer number we draw into
-                                    \ is 10 (as buffer 11 is not used)
+ CMP     R14, #TILE_SIZE_x_11       \ Cap R14 to a maximum value of 10 tile
+ MOVHS   R14, #TILE_SIZE_x_10       \ sizes, so the maximum buffer number we
+                                    \ draw into is 10 (as buffer 11 is not used)
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
                                     \ the buffer number, and we're going to look
@@ -9320,7 +9361,7 @@
                                     \ end of the horizontal line to draw
 
  ORR     R4, R4, #&8000             \ Set R5 to x1, with the top bit of its
- MOV     R5, R4                     \ fractional part bumped up to 1
+ MOV     R5, R4                     \ fractional part set (so that's 0.5)
                                     \
                                     \ We use R5 as the x-coordinate of the right
                                     \ end of the horizontal line to draw
@@ -9581,7 +9622,7 @@
                                     \
                                     \ We also reset the fractional part of R4
                                     \ (the left edge x-coordinate) to just the
-                                    \ top bit set
+                                    \ top bit set (so that's 0.5)
                                     \
                                     \ So this sets the slope of the left edge
                                     \ and leaves the slope of the right edge as
@@ -9599,7 +9640,7 @@
                                     \
                                     \ We also reset the fractional part of R5
                                     \ (the right edge x-coordinate) to just the
-                                    \ top bit set
+                                    \ top bit set (so that's 0.5)
                                     \
                                     \ So this sets the slope of the right edge
                                     \ and leaves the slope of the left edge as
@@ -10001,7 +10042,7 @@
                                     \ swapping the ends below if necessary)
 
  ORR     R4, R4, #&8000             \ Set the top bit of the fractional parts of
- ORR     R5, R5, #&8000             \ both R4 and R5
+ ORR     R5, R5, #&8000             \ both R4 and R5 (so that's 0.5)
 
  CMP     R4, R5                     \ If R4 >= R5 then x1 >= x2, so we need to
  MOVHS   R14, R6                    \ swap R6 and R7, and swap R4 and R5, to
@@ -10446,7 +10487,7 @@
                                     \ end of the horizontal line to draw
 
  ORR     R4, R4, #&8000             \ Set R5 to x1, with the top bit of its
- MOV     R5, R4                     \ fractional part bumped up to 1
+ MOV     R5, R4                     \ fractional part set (so that's 0.5)
                                     \
                                     \ We use R5 as the x-coordinate of the right
                                     \ end of the horizontal line to draw
@@ -10672,7 +10713,7 @@
                                     \
                                     \ We also reset the fractional part of R4
                                     \ (the left edge x-coordinate) to just the
-                                    \ top bit set
+                                    \ top bit set (so that's 0.5)
                                     \
                                     \ So this sets the slope of the left edge
                                     \ and leaves the slope of the right edge as
@@ -10690,7 +10731,7 @@
                                     \
                                     \ We also reset the fractional part of R5
                                     \ (the right edge x-coordinate) to just the
-                                    \ top bit set
+                                    \ top bit set (so that's 0.5)
                                     \
                                     \ So this sets the slope of the right edge
                                     \ and leaves the slope of the left edge as
@@ -11056,7 +11097,7 @@
                                     \ swapping the ends below if necessary)
 
  ORR     R4, R4, #&8000             \ Set the top bit of the fractional parts of
- ORR     R5, R5, #&8000             \ both R4 and R5
+ ORR     R5, R5, #&8000             \ both R4 and R5 (so that's 0.5)
 
  CMP     R4, R5                     \ If R4 > R5 then x1 > x2, so we need to
  MOVGT   R14, R6                    \ swap R6 and R7, and swap R4 and R5, to
