@@ -328,8 +328,14 @@
                                     \ the game is loaded
 
  xCamera = &13C                     \ The 3D x-coordinate of the camera position
+                                    \ (though note that the camera position is
+                                    \ actually at the back of the on-screen
+                                    \ landscape, not the front)
 
  yCamera = &140                     \ The 3D y-coordinate of the camera position
+                                    \ (though note that the camera position is
+                                    \ actually at the back of the on-screen
+                                    \ landscape, not the front)
 
  zCamera = &144                     \ The 3D z-coordinate of the camera position
                                     \ (though note that the camera position is
