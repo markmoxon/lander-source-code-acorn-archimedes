@@ -6124,7 +6124,7 @@
 
  AND     R2, R2, #&FE000000         \ Zero all but the top byte of R2, ensuring
  ORR     R2, R2, #&01000000         \ that bit 0 of the top byte is set so the
-                                    \ value of the fractional part is set to 0.5
+                                    \ value of R2 is non-zero
 
  MOV     R4, #0                     \ Set R4 = 0 to use for building the sum in
                                     \ our shift-and-add multiplication result
