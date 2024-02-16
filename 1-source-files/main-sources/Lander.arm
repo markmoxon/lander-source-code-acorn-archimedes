@@ -2492,8 +2492,8 @@
 
 .GameOver
 
- MOV     R0, #112                   \ Set the hardware and VDU screen banks to
- MOV     R1, #1                     \ screen bank 1
+ MOV     R0, #112                   \ Set the VDU driver screen bank to bank 1
+ MOV     R1, #1
  SWI     OS_Byte
 
  MOV     R0, #31                    \ Print the following VDU command:
@@ -2509,8 +2509,8 @@
  EQUB    0
  ALIGN
 
- MOV     R0, #112                   \ Set the hardware and VDU screen banks to
- MOV     R1, #2                     \ screen bank 1
+ MOV     R0, #112                   \ Set the VDU driver screen bank to bank 2
+ MOV     R1, #2
  SWI     OS_Byte
 
  MOV     R0, #31                    \ Print the following VDU command:
@@ -5480,8 +5480,8 @@
                                     \ preserve them through the following
                                     \ OS_Byte call
 
- MOV     R0, #112                   \ Set the hardware and VDU screen banks to
- MOV     R1, #1                     \ screen bank 1
+ MOV     R0, #112                   \ Set the VDU driver screen bank to bank 1
+ MOV     R1, #1
  SWI     OS_Byte
 
  LDMFD   R13, {R1-R2}               \ Retrieve R1 and R2 from the stack, so R1
@@ -8803,10 +8803,19 @@
                                     \ to the one in screenAddr, i.e. the bank
                                     \ that we should now show on-screen
 
- MOV     R0, #113                   \ Set the hardware and VDU screen banks to
- SWI     OS_Byte                    \ the bank in R1, so the correct bank is
- MOV     R0, #112                   \ shown on-screen
- SWI     OS_Byte
+ MOV     R0, #113                   \ Set the display hardware to display the
+ SWI     OS_Byte                    \ screen bank in R1, so the correct bank is
+                                    \ shown on-screen
+                                    \
+                                    \ This call returns the old bank number in
+                                    \ R1, so R1 now contains the number of the
+                                    \ screen bank that is not being displayed
+
+ MOV     R0, #112                   \ Set the VDU driver screen bank to the bank
+ SWI     OS_Byte                    \ number in R1, so this directs VDU calls
+                                    \ (such as the text routines that update the
+                                    \ score bar) so they update the hidden
+                                    \ screen bank
 
  MOV     R0, #19                    \ Wait for the vertical sync
  SWI     OS_Byte
