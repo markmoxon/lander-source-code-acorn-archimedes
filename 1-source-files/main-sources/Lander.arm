@@ -1060,6 +1060,7 @@
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: Calculate the altitude of the landscape for a given coordinate
+\  Deep dive: Generating the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1298,6 +1299,7 @@
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: Calculate the landscape altitude directly below an object's vertex
+\  Deep dive: Generating the landscape
 \
 \ ------------------------------------------------------------------------------
 \
