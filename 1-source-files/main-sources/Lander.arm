@@ -278,7 +278,7 @@
  particleCount = &10C               \ The number of particles currently
                                     \ on-screen
 
- objectData = &110                  \ The address of the data block for the
+ objectData = &110                  \ The address of the blueprint for the
                                     \ object currently being drawn
 
  objectFlags = &114                 \ The flags of the object currently being
@@ -1999,7 +1999,7 @@
  ADD     R3, R11, #rotationMatrix   \ Set R3 to the address of the ship's
                                     \ rotation matrix to pass to DrawObject
 
- LDR     R14, objectPlayerAddr      \ Set objectData to the object data block
+ LDR     R14, objectPlayerAddr      \ Set objectData to the object blueprint
  STR     R14, [R11, #objectData]    \ for the player's ship
 
  MOV     R0, #0                     \ Set the coordinates in (R0, R1, R2) so
@@ -2799,7 +2799,7 @@
                                     \ dpar3 and R1 < TILE_SIZE
 
  LDR     R14, objectRockAddr        \ Store the address of the rock's object
- STR     R14, [R11, #objectData]    \ data block in objectData to pass to the
+ STR     R14, [R11, #objectData]    \ blueprint in objectData to pass to the
                                     \ DrawObject routine
 
  ADD     R3, R11, #rotationMatrix   \ Set R3 to the address of the rock's
@@ -4384,7 +4384,8 @@
 \       Name: objectTypes
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: A table that maps object types to object data
+\    Summary: A table that maps object types to object blueprints
+\  Deep dive: Object blueprints
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4399,10 +4400,12 @@
 \ so they can't be placed on the object map, but instead are spawned above
 \ ground level.
 \
-\ This table links to the data for each object. Object data is shared, so types
-\ 1, 3 and 4 are all identical small leafy trees, for example. However, when
-\ destroyed, the smoking remains of type 1 bend to the right (type 13), while
-\ the smoking remains of types 3 and 4 bend to the left (types 15 and 16).
+\ This table links to the blueprints for each object. Some types share the same
+\ blueprints, so object types 1, 3 and 4 are all identical small leafy trees,
+\ for example. However, when destroyed, the smoking remains of type 1 bend to
+\ the right (as object type 13 uses the right-leaning blueprint), while the
+\ smoking remains of types 3 and 4 bend to the left (as types 15 and 16 use the
+\ left-leaning blueprint).
 \
 \ ******************************************************************************
 
@@ -4592,9 +4595,9 @@
 
  ADD     R0, PC, R0, LSL #2         \ Set R14 to the address in entry R0 in the
  LDR     R14, [R0, #-typeOffset]    \ objectTypes table, which is the address of
-                                    \ the data block for this object type
+                                    \ the blueprint for this object type
 
- STR     R14, [R11, #objectData]    \ Store the address of the data block in
+ STR     R14, [R11, #objectData]    \ Store the address of the blueprint in
                                     \ objectData
 
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
@@ -4701,7 +4704,8 @@
 \       Name: objectPlayerAddr
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: The address of the object data for the player's ship
+\    Summary: The address of the object blueprint for the player's ship
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -4714,7 +4718,8 @@
 \       Name: objectRockAddr
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: The address of the object data for a rock
+\    Summary: The address of the object blueprint for a rock
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -4728,6 +4733,7 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw a 3D object and its shadow
+\  Deep dive: Object blueprints
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4874,18 +4880,18 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Process the object's vertices
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
- LDR     R0, [R11, #objectData]     \ Set R0 to the address of the data block
+ LDR     R0, [R11, #objectData]     \ Set R0 to the address of the blueprint
                                     \ for the object that is being drawn
 
- LDR     R8, [R0]                   \ Set R8 to the first word of the data
-                                    \ block, which contains the number of
-                                    \ vertices
+ LDR     R8, [R0]                   \ Set R8 to the first word of the blueprint,
+                                    \ which contains the number of vertices
 
  ADD     R9, R0, #16                \ Set R9 to the address of the vertices data
-                                    \ in the data block, which appears from the
+                                    \ in the blueprint, which appears from the
                                     \ 16th byte onwards
 
  ADD     R10, R11, #vertexProjected \ Set R10 to the address of vertexProjected
@@ -4893,11 +4899,11 @@
                                     \ coordinates of the projected vertices
 
  LDRB    R1, [R0, #12]              \ Set objectFlags to the fourth word of the
- STRB    R1, [R11, #objectFlags]    \ data block, which contains the object's
+ STRB    R1, [R11, #objectFlags]    \ blueprint, which contains the object's
                                     \ flags
 
                                     \ We now iterate through the vertices in the
-                                    \ data block, using R8 as a loop counter (as
+                                    \ blueprint, using R8 as a loop counter (as
                                     \ we set it above to the number of vertices)
                                     \
                                     \ As we iterate through the vertices we
@@ -5010,24 +5016,26 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Calculate the visibility of each of the object's faces
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
- LDR     R1, [R11, #objectData]     \ Set R1 to the address of the data block
+ LDR     R1, [R11, #objectData]     \ Set R1 to the address of the blueprint
                                     \ for the object that is being drawn
 
- LDR     R0, [R1, #8]               \ Set R0 to the third word of the data
-                                    \ block, which contains the offset from the
-                                    \ start of the data block to the face data
+ LDR     R0, [R1, #8]               \ Set R0 to the third word of the blueprint,
+                                    \ which contains the offset from the start
+                                    \ of the blueprint to the face data
 
  ADD     R9, R1, R0                 \ Set R9 to the address of the face data in
-                                    \ the data block
+                                    \ the blueprint
 
- LDR     R8, [R1, #4]               \ Set R8 to the second word of the data
-                                    \ block, which contains the number of faces
+ LDR     R8, [R1, #4]               \ Set R8 to the second word of the
+                                    \ blueprint, which contains the number of
+                                    \ faces
 
                                     \ We now iterate through the faces in the
-                                    \ data block, using R8 as a loop counter (as
+                                    \ blueprint, using R8 as a loop counter (as
                                     \ we just set it to the number of faces)
                                     \
                                     \ As we iterate through the faces we check
@@ -5110,6 +5118,7 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw the shadow for each of the object's faces
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -5189,6 +5198,7 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw each of the object's faces
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12375,7 +12385,8 @@
 \       Name: objectRock
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for a rock
+\    Summary: Object blueprint for a rock
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12417,7 +12428,8 @@
 \       Name: objectPyramid
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for a rotating pyramid
+\    Summary: Object blueprint for a pyramid
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12456,7 +12468,8 @@
 \       Name: objectPlayer
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the player's ship
+\    Summary: Object blueprint for the player's ship
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12503,7 +12516,8 @@
 \       Name: objectSmallLeafyTree
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the small leafy tree
+\    Summary: Object blueprint for the small leafy tree
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12547,7 +12561,8 @@
 \       Name: objectTallLeafyTree
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the tall leafy tree
+\    Summary: Object blueprint for the tall leafy tree
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12595,7 +12610,8 @@
 \       Name: objectSmokingRemainsLeft
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the smoking remains that bend to the left
+\    Summary: Object blueprint for the smoking remains that bend to the left
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12630,7 +12646,8 @@
 \       Name: objectSmokingRemainsRight
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the smoking remains that bend to the right
+\    Summary: Object blueprint for the smoking remains that bend to the right
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12665,7 +12682,8 @@
 \       Name: objectFirTree
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the fir tree
+\    Summary: Object blueprint for the fir tree
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12700,7 +12718,8 @@
 \       Name: objectGazebo
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the gazebo
+\    Summary: Object blueprint for the gazebo
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12749,7 +12768,8 @@
 \       Name: objectBuilding
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the building
+\    Summary: Object blueprint for the building
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12805,7 +12825,8 @@
 \       Name: objectSmokingBuilding
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the smoking remains of a building
+\    Summary: Object blueprint for the smoking remains of a building
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12845,7 +12866,8 @@
 \       Name: objectSmokingGazebo
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the smoking remains of a gazebo
+\    Summary: Object blueprint for the smoking remains of a gazebo
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
@@ -12883,7 +12905,8 @@
 \       Name: objectRocket
 \       Type: Variable
 \   Category: 3D objects
-\    Summary: Object data for the rocket
+\    Summary: Object blueprint for the rocket
+\  Deep dive: Object blueprints
 \
 \ ******************************************************************************
 
