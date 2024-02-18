@@ -1300,6 +1300,7 @@
 \   Category: Landscape
 \    Summary: Calculate the landscape altitude directly below an object's vertex
 \  Deep dive: Generating the landscape
+\             Drawing 3D objects
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1868,6 +1869,7 @@
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Check for collisions and draw the ship
+\  Deep dive: Drawing 3D objects
 \
 \ ******************************************************************************
 
@@ -2733,6 +2735,7 @@
 \   Category: Particles
 \    Summary: Process rocks by checking for collisions and drawing them as 3D
 \             objects
+\  Deep dive: Drawing 3D objects
 \
 \ ******************************************************************************
 
@@ -4446,6 +4449,7 @@
 \   Category: 3D objects
 \    Summary: Draw all the objects in the visible portion of the object map,
 \             starting by working our way through the map looking for objects
+\  Deep dive: Drawing 3D objects
 \
 \ ******************************************************************************
 
@@ -4579,6 +4583,7 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw the object that we have found on the object map
+\  Deep dive: Drawing 3D objects
 \
 \ ******************************************************************************
 
@@ -4658,6 +4663,7 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw a destroyed object that we have found on the object map
+\  Deep dive: Drawing 3D objects
 \
 \ ******************************************************************************
 
@@ -4733,7 +4739,8 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw a 3D object and its shadow
-\  Deep dive: Object blueprints
+\  Deep dive: Drawing 3D objects
+\             Object blueprints
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4880,7 +4887,8 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Process the object's vertices
-\  Deep dive: Object blueprints
+\  Deep dive: Drawing 3D objects
+\             Object blueprints
 \
 \ ******************************************************************************
 
@@ -4927,7 +4935,16 @@
                                     \ so (xVertex, yVertex, zVertex) contains
                                     \ the vertex coordinates
 
- BL      MultiplyVectorByMatrix     \ Multiply the coordinates at R0 (i.e. the
+ BL      MultiplyVectorByMatrix     \ If this object is a static object, then
+                                    \ simply copy the vertex into xVertexRotated
+                                    \ as follows:
+                                    \
+                                    \   [xVertexRotated]   [xVertex]
+                                    \   [yVertexRotated] = [yVertex]
+                                    \   [zVertexRotated]   [zVertex]
+                                    \
+                                    \ If this is a rotating object, then
+                                    \ multiply the coordinates at R0 (i.e. the
                                     \ vertex coordinates at xVertex) by the
                                     \ rotation matrix in rotationMatrix, and
                                     \ store the results at R1 (i.e. the rotated
@@ -5016,7 +5033,8 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Calculate the visibility of each of the object's faces
-\  Deep dive: Object blueprints
+\  Deep dive: Drawing 3D objects
+\             Object blueprints
 \
 \ ******************************************************************************
 
@@ -5058,7 +5076,16 @@
                                     \ store the results of the following
                                     \ calculation here
 
- BL      MultiplyVectorByMatrix     \ Calculate the following, multiplying the
+ BL      MultiplyVectorByMatrix     \ If this object is a static object, then
+                                    \ simply copy the normal vector into xVertex
+                                    \ as follows:
+                                    \
+                                    \   [xVertex]   [xNormal]
+                                    \   [yVertex] = [yNormal]
+                                    \   [zVertex]   [zNormal]
+                                    \
+                                    \ If this is a rotating object, then
+                                    \ calculate the following, multiplying the
                                     \ vector in R0 by the rotation matrix in
                                     \ rotationMatrix:
                                     \
@@ -5118,7 +5145,8 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw the shadow for each of the object's faces
-\  Deep dive: Object blueprints
+\  Deep dive: Drawing 3D objects
+\             Object blueprints
 \
 \ ******************************************************************************
 
@@ -5198,7 +5226,8 @@
 \       Type: Subroutine
 \   Category: 3D objects
 \    Summary: Draw each of the object's faces
-\  Deep dive: Object blueprints
+\  Deep dive: Drawing 3D objects
+\             Object blueprints
 \
 \ ******************************************************************************
 
@@ -5709,12 +5738,17 @@
 \       Name: MultiplyVectorByMatrix
 \       Type: Subroutine
 \   Category: Maths (Geometry)
-\    Summary: Multiply a 3D vector by the rotation matrix in rotationMatrix
+\    Summary: Multiply a 3D vector by the rotation matrix in rotationMatrix, if
+\             the object is a rotating object
 \
 \ ------------------------------------------------------------------------------
 \
-\ Multiply the vector at R0 by the rotation matrix at rotationMatrix and store
-\ the result at the address in R1:
+\ If the object currently being processed is static (i.e. bit 0 of objectFlags
+\ is clear), then this routine simply returns the vector in R0 unchanged.
+\
+\ If the object is a rotating object, then this routine multiplies the vector at
+\ R0 by the rotation matrix at rotationMatrix and store the result at the
+\ address in R1:
 \
 \   [ R1   ]                    [ R0   ]
 \   [ R1+4 ] = rotationMatrix . [ R0+4 ]
@@ -5780,14 +5814,15 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Calculate the dot product of two 3D vectors
+\  Deep dive: Drawing 3D objects
 \
 \ ------------------------------------------------------------------------------
 \
 \ Calculate the dot product of the 3D vectors at R0 and R2 as follows:
 \
-\   [ R0   ]   [ R2   ]   [ R0   * R2   ]
-\   [ R0+4 ] . [ R2+4 ] = [ R0+4 * R2+4 ]
-\   [ R0+8 ]   [ R2+8 ]   [ R0+8 * R2*8 ]
+\        [ R0   ]   [ R2   ]
+\   R3 = [ R0+4 ] . [ R2+4 ] = (R0 * R2) + (R0+4 * R2+4) + (R0+8 * R2*8)
+\        [ R0+8 ]   [ R2+8 ]
 \
 \ and set the flags according to the result. R2 is updated to the next vector in
 \ memory, so repeated calls will work through the following multiplication,
@@ -8316,6 +8351,7 @@
 \   Category: Drawing triangles
 \    Summary: Draw a triangle shadow into the correct graphics buffer, according
 \             to its distance
+\  Deep dive: Drawing 3D objects
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8430,6 +8466,7 @@
 \   Category: Drawing triangles
 \    Summary: Draw a coloured triangle into a slightly nearer graphics buffer,
 \             according to its distance
+\  Deep dive: Drawing 3D objects
 \
 \ ------------------------------------------------------------------------------
 \
