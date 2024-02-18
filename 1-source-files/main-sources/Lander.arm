@@ -4388,33 +4388,14 @@
 \       Type: Variable
 \   Category: 3D objects
 \    Summary: A table that maps object types to object blueprints
-\  Deep dive: Object blueprints
-\
-\ ------------------------------------------------------------------------------
-\
-\ Each object in the object map has a type from 0 to 24. Types 0 to 11 are for
-\ intact objects, while adding 12 to get types 12 to 23 gives the object type
-\ when that object has been destroyed. Destroyed objects are shown with clouds
-\ of smoke particles rising up from the detritus.
-\
-\ Objects 0, 12 and 24 do not appear to be used anywhere. There are two
-\ additional objects - the player's ship and the rock - which are defined in
-\ the objectPlayer and objectRock tables, but which do not have assigned types,
-\ so they can't be placed on the object map, but instead are spawned above
-\ ground level.
-\
-\ This table links to the blueprints for each object. Some types share the same
-\ blueprints, so object types 1, 3 and 4 are all identical small leafy trees,
-\ for example. However, when destroyed, the smoking remains of type 1 bend to
-\ the right (as object type 13 uses the right-leaning blueprint), while the
-\ smoking remains of types 3 and 4 bend to the left (as types 15 and 16 use the
-\ left-leaning blueprint).
+\  Deep dive: Placing objects on the map
+\             Object blueprints
 \
 \ ******************************************************************************
 
 .objectTypes
 
- EQUD    objectPyramid              \ 0  = rotating pyramid (unused)
+ EQUD    objectPyramid              \ 0  = pyramid (unused)
  EQUD    objectSmallLeafyTree       \ 1  = small leafy tree
  EQUD    objectTallLeafyTree        \ 2  = tall leafy tree
  EQUD    objectSmallLeafyTree       \ 3  = small leafy tree
@@ -11941,54 +11922,13 @@
 \   Category: 3D objects
 \    Summary: Randomly place a number of objects on the map, avoiding the sea
 \             and the launchpad
+\  Deep dive: Placing objects on the map
 \
 \ ------------------------------------------------------------------------------
 \
 \ The object map at objectMap contains one byte for each tile on the landscape.
-\
 \ This byte determines which object (if any) appears on that tile, where objects
 \ are trees, buildings, rockets and so on.
-\
-\ A byte of &FF indicates that there is no object on that tile, while a value of
-\ 0 to 24 indicates that the tile contains an object of that type.
-\
-\ There can be only one object on each tile.
-\
-\ The object map covers an area of 256 x 256 tiles, and each object is placed on
-\ the front-left corner of the corresponding tile.
-\
-\ The object map shares the same coordinate system as the rest of the game, so
-\ it uses a right-hand coordinate system, with the x-axis going from left to
-\ right, the y-axis going down the screen, and the z-axis going into the screen.
-\
-\ Because the purpose of the object map is to record object positions on the
-\ map, it does not include altitude data, so the y-axis is ignored (as the
-\ altitude of an object on the landscape is determined by the landscape altitude
-\ at that point). You can think of the object map as a paper map that is draped
-\ over the landscape, and whose longitude and latitude values map to the x-axis
-\ and z-axis respectively.
-\
-\ The origin of the object map is at the front-left corner of the launchpad, and
-\ we can talk about coordinates on the map in terms of tiles as (x, z)
-\ coordinates.
-\
-\ So a map coordinate of (7, 1) is 7 tiles to the right and 1 tile into the
-\ screen, starting from the front-left corner of the launchpad; in this example,
-\ that's the coordinate of the front rocket of the three alongside the launchpad
-\ when we start the game.
-\
-\ The object at coordinate (x, z) is stored at offset &zzxx within objectMap, so
-\ the rocket at (7, 1) is at objectMap + &0107.
-\
-\ As the object map stores object locations in terms of tile numbers, we can
-\ think of the coordinates in the object map as &xx000000 and &zz000000 (as
-\ coordinates for the game world are 32-bit), and that's why we only need to
-\ store &xx and &zz.
-\
-\ So to convert from 3D space coordinates to object map coordinates, we can zero
-\ the bottom three bytes of the 3D x-coordinate and z-coordinate to snap the
-\ coordinates to the relevant tile corner, or if we only need to extract the
-\ object map data, we can simply use the top two bytes in the form &zzxx.
 \
 \ ******************************************************************************
 
