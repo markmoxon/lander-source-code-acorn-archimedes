@@ -16,21 +16,25 @@
 .set SMOKE_RISING_SPEED, 0x00080000
 .set MAX_PARTICLES, 484
 .set TILE_SIZE, 0x01000000
-.set TILE_SIZE_x_0_06, 0x00100000
-.set TILE_SIZE_x_0_31, 0x00500000
-.set TILE_SIZE_x_0_4, 0x00640000
-.set TILE_SIZE_x_0_75, 0x00C00000
-.set TILE_SIZE_x_1_5, 0x01800000
+.set SPLASH_HEIGHT, TILE_SIZE / 16
+.set EXPLODE_Y, 5 * TILE_SIZE / 16
+.set UNDERCARRIAGE_Y, 0x00640000
+.set SMOKE_HEIGHT, TILE_SIZE * 3 / 4
+.set SAFE_HEIGHT, TILE_SIZE * 3 / 2
 .set TILE_SIZE_x_5, TILE_SIZE * 5
 .set TILE_SIZE_x_6, TILE_SIZE * 6
-.set TILE_SIZE_x_10, TILE_SIZE * 10
-.set TILE_SIZE_x_11, TILE_SIZE * 11
-.set TILE_SIZE_x_15, TILE_SIZE * 15
-.set TILE_SIZE_x_16, TILE_SIZE * 16
-.set TILE_SIZE_x_32, TILE_SIZE * 32
-.set LANDSCAPE_X, 0x05800000
+.set ROCK_HEIGHT, TILE_SIZE * 32
+.set LANDSCAPE_X, TILE_SIZE * TILES_Z / 2
 .set LANDSCAPE_Y, 0
 .set LANDSCAPE_Z, TILE_SIZE * 20
+.set TILES_X, 13
+.set TILES_Z, 11
+.set HALF_TILES_X, TILES_X / 2
+.set LANDSCAPE_X_HALF, TILE_SIZE * HALF_TILES_X
+.set LANDSCAPE_Z_DEPTH, TILE_SIZE * (TILES_Z - 1)
+.set LANDSCAPE_Z_BEYOND, TILE_SIZE * TILES_Z
+.set LANDSCAPE_Z_FRONT, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH
+.set LANDSCAPE_Z_MID, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH / 2
 .set stack, 0x000121FC
 .set workspace, stack + 4
 .set xObject, 0x00
@@ -116,18 +120,18 @@ landscapeOffset:
 landscapeOffsetAddr:
 .long    landscapeOffset
 landscapeConfig:
-.byte    0x3A, 13
-.byte    0xE3, 13
-.byte    0xE4, 13
-.byte    0xE3, 13
-.byte    0xE4, 13
-.byte    0xE3, 13
-.byte    0xE4, 13
-.byte    0xE3, 13
-.byte    0xE4, 13
-.byte    0xE3, 13
-.byte    0xE4, 13
-.byte    0xE3, 13
+.byte    0x3A, TILES_X
+.byte    0xE3, TILES_X
+.byte    0xE4, TILES_X
+.byte    0xE3, TILES_X
+.byte    0xE4, TILES_X
+.byte    0xE3, TILES_X
+.byte    0xE4, TILES_X
+.byte    0xE3, TILES_X
+.byte    0xE4, TILES_X
+.byte    0xE3, TILES_X
+.byte    0xE4, TILES_X
+.byte    0xE3, TILES_X
 landscapeConfigAddr:
 .long    landscapeConfig
 graphicsBuffers:
@@ -229,7 +233,7 @@ land4:
  BLPL    DrawGraphicsBuffer
  LDRB    R0, [R11, #tileCornerRow]
  ADDS    R0, R0, #1
- CMP     R0, #11
+ CMP     R0, #TILES_Z
  BEQ     land5
  STRB    R0, [R11, #tileCornerRow]
  LDR     R0, [R11, #zLandscapeRow]
@@ -247,9 +251,9 @@ land4:
  ADDNE   R7, R11, #cornerStore2
  B       land1
 land5:
- MOV     R0, #9
+ MOV     R0, #TILES_Z - 2
  BL      DrawGraphicsBuffer
- MOV     R0, #10
+ MOV     R0, #TILES_Z - 1
  BL      DrawGraphicsBuffer
  LDMFD   R13!, {R5-R9, PC}
 GetLandscapeAltitude:
@@ -441,10 +445,10 @@ ship4:
  MOV     R9, R2
  SUB     R9, R9, #TILE_SIZE_x_5
  BL      GetLandscapeAltitude
- SUB     R0, R0, #TILE_SIZE_x_0_4
+ SUB     R0, R0, #UNDERCARRIAGE_Y
  LDR     R1, [R11, #yPlayer]
  SUB     R14, R0, R1
- CMP     R14, #TILE_SIZE_x_1_5
+ CMP     R14, #SAFE_HEIGHT
  BHS     ship6
  STMFD   R13!, {R0}
  ADD     R14, R11, #objectMap
@@ -468,7 +472,7 @@ ship6:
  LDR     R14, objectPlayerAddr
  STR     R14, [R11, #objectData]
  MOV     R0, #0
- MOV     R2, #TILE_SIZE_x_15
+ MOV     R2, #LANDSCAPE_Z_MID
  BL      DrawObject
  LDRB    R10, [R11, #crashedFlag]
  CMP     R10, #0
@@ -583,7 +587,7 @@ LoseLife:
  MOV     R8, #81
  ADD     R0, R11, #xPlayer
  LDMIA   R0, {R0-R2}
- SUB     R1, R1, #TILE_SIZE_x_0_31
+ SUB     R1, R1, #EXPLODE_Y
  BL      AddExplosionToBuffer
 lose1:
  LDR     R0, [R11, #mainLoopCount]
@@ -681,11 +685,11 @@ dpar2:
  SUB     R1, R1, R8
  CMP     R2, #LANDSCAPE_Z
  BHS     dpar1
- CMP     R2, #TILE_SIZE_x_10
+ CMP     R2, #LANDSCAPE_Z_FRONT
  BLO     dpar1
  MOVS    R14, R0
  RSBMI   R14, R0, #0
- CMP     R14, #TILE_SIZE_x_6
+ CMP     R14, #LANDSCAPE_X_HALF
  BHS     dpar1
  TST     R7, #0x00020000
  BEQ     dpar4
@@ -695,7 +699,7 @@ dpar2:
  BEQ     dpar3
  CMP     R0, #0
  RSBMI   R0, R0, #0
- SUBS    R2, R2, #TILE_SIZE_x_15
+ SUBS    R2, R2, #LANDSCAPE_Z_MID
  RSBMI   R2, R2, #0
  CMP     R0, #TILE_SIZE
  CMPLO   R2, #TILE_SIZE
@@ -768,7 +772,7 @@ BounceParticle:
  MOV     PC, R14
 ProcessObjectDestruction:
  SUB     R8, R9, R1
- CMP     R8, #TILE_SIZE_x_1_5
+ CMP     R8, #SAFE_HEIGHT
  MOVHS   PC, R14
  STMFD   R13!, {R2}
  STR     R14, [R11, #objectType]
@@ -801,7 +805,7 @@ SplashParticleIntoSea:
  TST     R7, #0x00800000
  MOVNE   R8, #65
  MOVEQ   R8, #4
- SUB     R1, R1, #TILE_SIZE_x_0_06
+ SUB     R1, R1, #SPLASH_HEIGHT
 psea1:
  BL      AddSprayParticleToBuffer
  SUBS    R8, R8, #1
@@ -1006,7 +1010,7 @@ spcl1:
 SpawnRock:
  STMFD   R13!, {R6-R9, R14}
  LDR     R0, [R11, #xCamera]
- MVN     R1, #TILE_SIZE_x_16
+ MVN     R1, #ROCK_HEIGHT / 2
  LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #TILE_SIZE_x_6
  BL      DropARockFromTheSky
@@ -1021,7 +1025,7 @@ DropRocksFromTheSky:
  CMP     R0, R4
  LDMHSIA R13!, {PC}
  LDR     R0, [R11, #xCamera]
- MVN     R1, #TILE_SIZE_x_32
+ MVN     R1, #ROCK_HEIGHT
  LDR     R2, [R11, #zCamera]
  SUB     R2, R2, #TILE_SIZE_x_6
  BL      DropARockFromTheSky
@@ -1060,9 +1064,9 @@ DrawObjects:
  AND     R9, R1, #0xFF000000
  SUB     R8, R8, #LANDSCAPE_X
  STR     R8, [R11, #xCameraTile]
- MOV     R7, #11
+ MOV     R7, #TILES_Z
 dobs1:
- MOV     R6, #13
+ MOV     R6, #TILES_X
  LDR     R8, [R11, #xCameraTile]
 dobs2:
  ADD     R14, R11, #objectMap
@@ -1112,7 +1116,7 @@ dobs6:
  ADD     R1, R1, R14
  MOV     R0, R8
  MOV     R2, R9
- SUB     R1, R1, #TILE_SIZE_x_0_75
+ SUB     R1, R1, #SMOKE_HEIGHT
  BL      AddSmokeParticleToBuffer
  LDMFD   R13!, {R0-R7, R9}
  B       dobs5
@@ -2055,8 +2059,8 @@ DrawTriangleShadowToBuffer:
  STMFD   R13!, {R9, R14}
  LDR     R14, [R11, #zObject]
  RSB     R14, R14, #LANDSCAPE_Z
- CMP     R14, #TILE_SIZE_x_11
- MOVHS   R14, #TILE_SIZE_x_10
+ CMP     R14, #LANDSCAPE_Z_BEYOND
+ MOVHS   R14, #LANDSCAPE_Z_DEPTH
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R7, #18
@@ -2069,8 +2073,8 @@ DrawTriangleToBuffer:
  LDR     R14, [R11, #zObject]
  RSB     R14, R14, #LANDSCAPE_Z
  ADD     R14, R14, #TILE_SIZE
- CMP     R14, #TILE_SIZE_x_11
- MOVHS   R14, #TILE_SIZE_x_10
+ CMP     R14, #LANDSCAPE_Z_BEYOND
+ MOVHS   R14, #LANDSCAPE_Z_DEPTH
  BIC     R14, R14, #0x00C00000
  LDR     R9, [R12, R14, LSR #22]
  MOV     R7, #18
@@ -2115,7 +2119,7 @@ AddTerminatorsToBuffers:
  STMFD   R13!, {R12, R14}
  LDR     R12, graphicsBufferEndAddr
  LDR     R14, graphicsBufferAddr
- MOV     R0, #11
+ MOV     R0, #TILES_Z
  MOV     R1, #19
 term1:
  LDR     R2, [R12, R0, LSL #2]

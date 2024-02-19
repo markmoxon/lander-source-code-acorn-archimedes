@@ -81,40 +81,81 @@
                                     \ doesn't let us include constants in
                                     \ instruction expressions
 
- TILE_SIZE_x_0_06 = &00100000       \ The size of 1/16-th of a tile
+ SPLASH_HEIGHT = TILE_SIZE / 16     \ The height above the sea at which splash
+                                    \ particles are added when a particle
+                                    \ splashes into the sea (1/16 of a tile)
 
- TILE_SIZE_x_0_31 = &00500000       \ The size of 5/16-th of a tile
+ EXPLODE_Y = 5 * TILE_SIZE / 16     \ The vertical distance above the player's
+                                    \ ship where we add the explosion when they
+                                    \ crash (5/16-th of a tile)
 
- TILE_SIZE_x_0_4 = &00640000        \ The size of 0.4 tiles
+ UNDERCARRIAGE_Y = &00640000        \ The height of the ship's undercarriage
+                                    \ (0.390625 tiles), which is the distance
+                                    \ from the centre of the ship to the bottom
+                                    \ of the ship
 
- TILE_SIZE_x_0_75 = &00C00000       \ The size of 0.75 tiles
+ SMOKE_HEIGHT = TILE_SIZE * 3 / 4   \ The height at which smoke particles are
+                                    \ added above the bottom of a destroyed
+                                    \ object (3/4 of a tile)
 
- TILE_SIZE_x_1_5 = &01800000        \ The size of 1.5 tiles
+ SAFE_HEIGHT = TILE_SIZE * 3 / 2    \ The minimum safe height for avoiding
+                                    \ objects on the ground (1.5 tile sizes)
 
- TILE_SIZE_x_5 = TILE_SIZE * 5      \ The size of 5 tiles
+ TILE_SIZE_x_5 = TILE_SIZE * 5      \ The size of 5 tiles (used in the altitude
+                                    \ calculation, and setting the camera back
+                                    \ stop value - two different constants?)
 
- TILE_SIZE_x_6 = TILE_SIZE * 6      \ The size of 6 tiles
+ TILE_SIZE_x_6 = TILE_SIZE * 6      \ The size of 6 tiles (used to spawn
+                                    \ explosion particles and rocks 6 tiles
+                                    \ from the back of the landscape, just in
+                                    \ front of the ship?)
 
- TILE_SIZE_x_10 = TILE_SIZE * 10    \ The size of 10 tiles
+ ROCK_HEIGHT = TILE_SIZE * 32       \ The height from which we drop rocks from
+                                    \ the sky (32 tile sizes)
 
- TILE_SIZE_x_11 = TILE_SIZE * 11    \ The size of 11 tiles
+ LANDSCAPE_X = TILE_SIZE * TILES_Z / 2  \ The x-coordinate of the landscape
+                                        \ offset, which is set to half the width
+                                        \ of the landscape, so we end up looking
+                                        \ at the middle point of the landscape
 
- TILE_SIZE_x_15 = TILE_SIZE * 15    \ The size of 15 tiles
-
- TILE_SIZE_x_16 = TILE_SIZE * 16    \ The size of 16 tiles
-
- TILE_SIZE_x_32 = TILE_SIZE * 32    \ The size of 32 tiles
-
- LANDSCAPE_X = &05800000            \ The x-coordinate of the landscape offset,
-                                    \ which is set to the size of 5.5 tiles, and
-                                    \ is negated to move the landscape to the
-                                    \ left
-
- LANDSCAPE_Y = 0                    \ The y-coordinate of the landscape offset
+ LANDSCAPE_Y = 0                    \ The y-coordinate of the landscape offset,
+                                    \ which is zero so the landscape remains at
+                                    \ the same height
 
  LANDSCAPE_Z = TILE_SIZE * 20       \ The z-coordinate of the landscape offset,
                                     \ which is set to the size of 20 tiles and
                                     \ moves the landscape away from the viewer
+
+ TILES_X = 13                       \ The number of tile corners in a landscape
+                                    \ row from left to right (i.e. 12 tiles)
+
+ TILES_Z = 11                       \ The number of tile corners in a landscape
+                                    \ row from front to back (i.e. 10 tiles)
+
+ HALF_TILES_X = TILES_X / 2         \ Half the number of tiles from left to
+                                    \ right in the landscape
+
+ LANDSCAPE_X_HALF = TILE_SIZE * HALF_TILES_X    \ The width of half the number
+                                                \ of tiles from left to right in
+                                                \ the landscape in x-coordinates
+
+ LANDSCAPE_Z_DEPTH = TILE_SIZE * (TILES_Z - 1)  \ The depth of the visible
+                                                \ landscape in z-coordinates
+
+ LANDSCAPE_Z_BEYOND = TILE_SIZE * TILES_Z   \ The depth of the visible landscape
+                                            \ in z-coordinates, plus one more
+                                            \ tile
+
+ LANDSCAPE_Z_FRONT = LANDSCAPE_Z - LANDSCAPE_Z_DEPTH    \ The z-coordinate of
+                                                        \ the front of the
+                                                        \ visible landscape
+
+ LANDSCAPE_Z_MID = LANDSCAPE_Z - LANDSCAPE_Z_DEPTH / 2  \ The z-coordinate of
+                                                        \ the mid-point from
+                                                        \ the back of the
+                                                        \ visible landscape to
+                                                        \ the front (15 tile
+                                                        \ sizes)
 
 \ ******************************************************************************
 \
@@ -486,18 +527,18 @@
 
 .landscapeConfig
 
- EQUB    &3A, 13                    \ Tile row 0
- EQUB    &E3, 13                    \ Tile row 1
- EQUB    &E4, 13                    \ Tile row 2
- EQUB    &E3, 13                    \ Tile row 3
- EQUB    &E4, 13                    \ Tile row 4
- EQUB    &E3, 13                    \ Tile row 5
- EQUB    &E4, 13                    \ Tile row 6
- EQUB    &E3, 13                    \ Tile row 7
- EQUB    &E4, 13                    \ Tile row 8
- EQUB    &E3, 13                    \ Tile row 9
- EQUB    &E4, 13                    \ Tile row 10
- EQUB    &E3, 13                    \ Tile row 11 (unused)
+ EQUB    &3A, TILES_X               \ Tile row 0
+ EQUB    &E3, TILES_X               \ Tile row 1
+ EQUB    &E4, TILES_X               \ Tile row 2
+ EQUB    &E3, TILES_X               \ Tile row 3
+ EQUB    &E4, TILES_X               \ Tile row 4
+ EQUB    &E3, TILES_X               \ Tile row 5
+ EQUB    &E4, TILES_X               \ Tile row 6
+ EQUB    &E3, TILES_X               \ Tile row 7
+ EQUB    &E4, TILES_X               \ Tile row 8
+ EQUB    &E3, TILES_X               \ Tile row 9
+ EQUB    &E4, TILES_X               \ Tile row 10
+ EQUB    &E3, TILES_X               \ Tile row 11 (unused)
 
 \ ******************************************************************************
 \
@@ -988,7 +1029,7 @@
  ADDS    R0, R0, #1                 \ Increment the tile row number in R0 to
                                     \ move forwards by one tile row
 
- CMP     R0, #11                    \ If R0 = 11 then we just drew the final
+ CMP     R0, #TILES_Z               \ If R0 = TILES_Z then we just drew the last
  BEQ     land5                      \ tile row, so jump to land5 to finish off
                                     \ by drawing graphics buffers 9 and 10
 
@@ -1045,11 +1086,11 @@
 
 .land5
 
- MOV     R0, #9                     \ Draw the contents of graphics buffer 9
- BL      DrawGraphicsBuffer
+ MOV     R0, #TILES_Z - 2           \ Draw the contents of the penultimate
+ BL      DrawGraphicsBuffer         \ graphics buffer
 
- MOV     R0, #10                    \ Draw the contents of graphics buffer 10
- BL      DrawGraphicsBuffer
+ MOV     R0, #TILES_Z - 1           \ Draw the contents of the last graphics
+ BL      DrawGraphicsBuffer         \ buffer
 
  LDMFD   R13!, {R5-R9, PC}          \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -1906,28 +1947,28 @@
  BL      GetLandscapeAltitude       \ Set R0 to the altitude of the landscape at
                                     \ coordinates (x, z) = (R8, R9)
 
- SUB     R0, R0, #TILE_SIZE_x_0_4   \ Set R0 to the altitude of a point that's
-                                    \ 0.4 tile sizes above the point on the
-                                    \ landscape beneath the player, which is the
-                                    \ lowest altitude the player can be without
-                                    \ being in danger of hitting the ground
+ SUB     R0, R0, #UNDERCARRIAGE_Y   \ Set R0 to the altitude of a point that's
+                                    \ the height of the ship's undercarriage
+                                    \ above the point on the landscape beneath
+                                    \ the player, which is the lowest altitude
+                                    \ the player can be without being in danger
+                                    \ of hitting the ground with the bottom of
+                                    \ the ship
 
  LDR     R1, [R11, #yPlayer]        \ Set R14 to the y-coordinate of the player
                                     \ in yPlayer
 
- SUB     R14, R0, R1                \ If R0 - yPlayer >= 1.5 tile sizes then
- CMP     R14, #TILE_SIZE_x_1_5      \ jump to ship6 to skip the following set of
- BHS     ship6                      \ collision checks, so this means the player
-                                    \ is safely clear of objects on the ground
-                                    \ if they are at least 1.5 tiles above the
-                                    \ coordinates of those objects (and that's
-                                    \ on top of the 0.4-tile gap that they need
-                                    \ below them)
+ SUB     R14, R0, R1                \ If R0 - yPlayer >= SAFE_HEIGHT (1.5 tile
+ CMP     R14, #SAFE_HEIGHT          \ sizes) then this means the bottom of the
+ BHS     ship6                      \ player's ship is safely clear of objects
+                                    \ on the ground, as SAFE_HEIGHT is the
+                                    \ minimum safe height for avoiding objects
+                                    \ on the ground, and the undercarriage of
+                                    \ the player's ship is above this height
                                     \
-                                    \ To put it another way, objects can be up
-                                    \ to 1.5 tiles tall, and the ship height is
-                                    \ 2 * 0.4 = 0.8 tiles (as the ship's
-                                    \ coordinates are in the centre of the ship)
+                                    \ So if this is the case, jump to ship6 to
+                                    \ skip the following set of collision
+                                    \ checks, as we know we are safe
 
  STMFD   R13!, {R0}                 \ Store R0 on the stack so we can retrieve
                                     \ it below
@@ -2005,12 +2046,13 @@
  STR     R14, [R11, #objectData]    \ for the player's ship
 
  MOV     R0, #0                     \ Set the coordinates in (R0, R1, R2) so
- MOV     R2, #TILE_SIZE_x_15        \ the ship gets drawn in the middle of the
+ MOV     R2, #LANDSCAPE_Z_MID       \ the ship gets drawn in the middle of the
                                     \ screen or slightly below if the ship is
                                     \ near the ground (as R0 = 0 and R1 is set
                                     \ as described above), at a position into
-                                    \ the screen of 15 tile sizes, which places
-                                    \ it above the middle of the landscape
+                                    \ the screen of LANDSCAPE_Z_MID, which
+                                    \ places it above the middle of the
+                                    \ landscape
                                     \
                                     \ This works because the landscape offset
                                     \ pushes the far edge of the landscape 20
@@ -2408,9 +2450,10 @@
  ADD     R0, R11, #xPlayer          \ Set (R0, R1, R2) to the coordinate in
  LDMIA   R0, {R0-R2}                \ xPlayer
 
- SUB     R1, R1, #TILE_SIZE_x_0_31  \ Subtract 5/16 tile sizes from the ship's
+ SUB     R1, R1, #EXPLODE_Y         \ Subtract EXPLODE_Y from the ship's
                                     \ y-coordinate so the explosion occurs just
-                                    \ above the player's ship
+                                    \ above the player's ship (5/16 tile sizes
+                                    \ above the ship, to be precise)
 
  BL      AddExplosionToBuffer       \ Draw a large explosion in place of the
                                     \ player's ship
@@ -2700,25 +2743,27 @@
                                     \ particle relative to the camera
 
  CMP     R2, #LANDSCAPE_Z           \ If the z-coordinate of the particle in R2
- BHS     dpar1                      \ R2 is further into the screen than the
-                                    \ landscape offset, then it is too far away
-                                    \ from us to be above the visible landscape,
-                                    \ so jump to dpar1 to move on to the next
-                                    \ particle in the buffer
-
- CMP     R2, #TILE_SIZE_x_10        \ If R2 < 10 tile sizes, then the particle
- BLO     dpar1                      \ is too far towards us to be visible
-                                    \ on-screen, so jump to dpar1 to move on to
+ BHS     dpar1                      \ is further into the screen than the
+                                    \ landscape offset in LANDSCAPE_Z, then it
+                                    \ is beyond the back of the visible
+                                    \ landscape, so jump to dpar1 to move on to
                                     \ the next particle in the buffer
+
+ CMP     R2, #LANDSCAPE_Z_FRONT     \ If the z-coordinate of the particle in R2
+ BLO     dpar1                      \ is closer to us than LANDSCAPE_Z_FRONT,
+                                    \ then it is closed than the front of the
+                                    \ visible landscape, so jump to dpar1 to
+                                    \ move on to the next particle in the buffer
 
  MOVS    R14, R0                    \ Set R14 = |R0|
  RSBMI   R14, R0, #0                \         = |particle x-coordinate|
 
- CMP     R14, #TILE_SIZE_x_6        \ If the x-coordinate of the particle in R14
- BHS     dpar1                      \ is more than six tiles to the left or
-                                    \ right, then it is too far to fit
-                                    \ on-screen, so jump to dpar1 to move on to
-                                    \ the next particle in the buffer
+ CMP     R14, #LANDSCAPE_X_HALF     \ If the x-coordinate of the particle in R14
+ BHS     dpar1                      \ is more than half the x-axis width of the
+                                    \ landscape to the left or right, then it is
+                                    \ past the edge of the landscape and is too
+                                    \ far to be drawn, so jump to dpar1 to move
+                                    \ on to the next particle in the buffer
 
  TST     R7, #&00020000             \ If bit 17 of the particle flags is clear
  BEQ     dpar4                      \ then this is not a rock, so jump to dpar4
@@ -2755,12 +2800,12 @@
  CMP     R0, #0                     \ Set R0 = |R0|
  RSBMI   R0, R0, #0                 \        = |rock x-coordinate|
 
- SUBS    R2, R2, #TILE_SIZE_x_15    \ Set R2 = |R2 - TILE_SIZE_x_15|
+ SUBS    R2, R2, #LANDSCAPE_Z_MID    \ Set R2 = |R2 - LANDSCAPE_Z_MID|
  RSBMI   R2, R2, #0                 \        = |rock z-coordinate - 15 tiles|
                                     \
                                     \ Because the player's ship is always at
-                                    \ x-coordinate 0 and a z-coordinate that's
-                                    \ into the screen by 15 tiles, this works
+                                    \ x-coordinate 0 and the z-coordinate at
+                                    \ the mid-point of the landscape, this works
                                     \ out the rock's coordinate relative to the
                                     \ ship (for the x- and z-coordinates)
                                     \
@@ -3075,10 +3120,12 @@
                                     \ So R8 contains the vertical distance
                                     \ between the particle and the ground
 
- CMP     R8, #TILE_SIZE_x_1_5       \ If R8 is higher than 1.5 tile sizes then
- MOVHS   PC, R14                    \ return from the subroutine as the particle
-                                    \ is too high off the ground to be hitting
-                                    \ any objects
+ CMP     R8, #SAFE_HEIGHT           \ If R8 is higher than the minimum safe
+ MOVHS   PC, R14                    \ height for avoiding objects on the ground
+                                    \ in SAFE_HEIGHT (which is set to 1.5 tile
+                                    \ sizes) then return from the subroutine as
+                                    \ the particle is too high off the ground to
+                                    \ be hitting any objects
 
  STMFD   R13!, {R2}                 \ Store R2 on the stack so we can retrieve
                                     \ it below
@@ -3197,10 +3244,10 @@
  MOVNE   R8, #65                    \ set the number of spray particles in R8
  MOVEQ   R8, #4                     \ to 65, otherwise set it to 4
 
- SUB     R1, R1, #TILE_SIZE_x_0_06  \ Set R1 to a point just above the sea's
-                                    \ surface (as R1 is on the surface, so this
-                                    \ moves it to 1/16 of a tile size above the
-                                    \ waves)
+ SUB     R1, R1, #SPLASH_HEIGHT     \ Set R1 to a point just above the sea's
+                                    \ surface (R1 is on the surface, so this
+                                    \ moves it to SPLASH_HEIGHT above the waves,
+                                    \ or 1/16 of a tile size)
 
 .psea1
 
@@ -4294,8 +4341,8 @@
 \       Name: SpawnRock
 \       Type: Subroutine
 \   Category: Particles
-\    Summary: An unused routine that spawns a rock in the sky, but not as high
-\             as the rocks in the DropRocksFromTheSky routine
+\    Summary: An unused routine that spawns a rock in the sky, at half the
+\             altitude of the rocks in the DropRocksFromTheSky routine
 \
 \ ******************************************************************************
 
@@ -4306,15 +4353,15 @@
 
                                     \ Drop a rock from the sky, spawning the
                                     \ rock at coordinates (R0, R1, R2), which
-                                    \ are set to 16 tiles above and 6 tiles
-                                    \ forwards from the camera coordinates,
-                                    \ which is fairly high in the sky above the
-                                    \ ship's current position and one tile in
-                                    \ front of the ship
+                                    \ are set to half the height of a normal
+                                    \ rock and 6 tiles forwards from the camera
+                                    \ coordinates, which is fairly high in the
+                                    \ sky above the ship's current position and
+                                    \ one tile in front of the ship
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
- MVN     R1, #TILE_SIZE_x_16        \ Set R1 = -(16 tile sizes)
+ MVN     R1, #ROCK_HEIGHT / 2       \ Set R1 = -(16 tile sizes)
 
  LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
  SUB     R2, R2, #TILE_SIZE_x_6
@@ -4362,15 +4409,15 @@
 
                                     \ If we get here then we drop a rock from
                                     \ the sky, spawning the rock at coordinates
-                                    \ (R0, R1, R2), which are set to 32 tiles
-                                    \ above and 6 tiles forwards from the camera
-                                    \ coordinates, which is very high in the sky
-                                    \ above the ship's current position and one
-                                    \ tile in front of the ship
+                                    \ (R0, R1, R2), which are set to ROCK_HEIGHT
+                                    \ tiles above and 6 tiles forwards from the
+                                    \ camera coordinates, which is very high in
+                                    \ the sky above the ship's current position
+                                    \ and one tile in front of the ship
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
- MVN     R1, #TILE_SIZE_x_32        \ Set R1 = -(32 tile sizes)
+ MVN     R1, #ROCK_HEIGHT           \ Set R1 = -(32 tile sizes)
 
  LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
  SUB     R2, R2, #TILE_SIZE_x_6
@@ -4495,15 +4542,15 @@
                                     \ R6 as the counter to work through the
                                     \ x-axis for each row from left to right
 
- MOV     R7, #11                    \ Set R7 = 11 to act as a loop counter as we
-                                    \ work our way along the 11 tiles on the
+ MOV     R7, #TILES_Z               \ Set R7 = TILES_Z to act as a loop counter
+                                    \ as we work our way along the tiles on the
                                     \ z-axis (i.e. from back to front on the
                                     \ screen)
 
 .dobs1
 
- MOV     R6, #13                    \ Set R6 = 13 to act as a loop counter as we
-                                    \ work our way along the 13 tiles on the
+ MOV     R6, #TILES_X               \ Set R6 = TILES_X to act as a loop counter
+                                    \ as we work our way along the tiles on the
                                     \ x-axis (i.e. from left to right on the
                                     \ screen)
 
@@ -4669,13 +4716,13 @@
                                     \ This reverts R1 to the altitude of the
                                     \ landscape at the object
 
- MOV     R0, R8                     \ Set (R0, R1, R2) to (x, y - &C00000, z)
+ MOV     R0, R8                     \ Set (R0, R1, R2) = (x, y-SMOKE_HEIGHT, z)
  MOV     R2, R9                     \
- SUB     R1, R1, #TILE_SIZE_x_0_75  \ So this is the coordinate that's 0.75 tile
-                                    \ sizes above the base of the object (as the
-                                    \ y-axis points downwards), which is where
-                                    \ we add our smoke particles, one on each
-                                    \ iteration around the main loop
+ SUB     R1, R1, #SMOKE_HEIGHT      \ So this coordinate is SMOKE_HEIGHT above
+                                    \ the base of the object, or 3/4 of the tile
+                                    \ size (as the y-axis points downwards),
+                                    \ which is where we add our smoke particles,
+                                    \ one on each iteration around the main loop
 
  BL      AddSmokeParticleToBuffer   \ Call AddSmokeParticleToBuffer to draw a
                                     \ smoke particle rising from the destroyed
@@ -8401,9 +8448,12 @@
                                     \ and buffer 11 is for the closest objects
                                     \ to the viewer)
 
- CMP     R14, #TILE_SIZE_x_11       \ Cap R14 to a maximum value of 10 tile
- MOVHS   R14, #TILE_SIZE_x_10       \ sizes, so the maximum buffer number we
-                                    \ draw into is 10 (as buffer 11 is not used)
+ CMP     R14, #LANDSCAPE_Z_BEYOND   \ If R14 is a z-distance beyond the back of
+ MOVHS   R14, #LANDSCAPE_Z_DEPTH    \ the visible landscape, cap it to the depth
+                                    \ of the landscape so it fits into the range
+                                    \ of graphics buffers (as there is one
+                                    \ buffer for each tile row, going into the
+                                    \ screen)
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
                                     \ the buffer number, and we're going to look
@@ -8522,9 +8572,12 @@
                                     \ the triangle one tile nearer than we would
                                     \ otherwise (i.e. one buffer nearer)
 
- CMP     R14, #TILE_SIZE_x_11       \ Cap R14 to a maximum value of 10 tile
- MOVHS   R14, #TILE_SIZE_x_10       \ sizes, so the maximum buffer number we
-                                    \ draw into is 10 (as buffer 11 is not used)
+ CMP     R14, #LANDSCAPE_Z_BEYOND   \ If R14 is a z-distance beyond the back of
+ MOVHS   R14, #LANDSCAPE_Z_DEPTH    \ the visible landscape, cap it to the depth
+                                    \ of the landscape so it fits into the range
+                                    \ of graphics buffers (as there is one
+                                    \ buffer for each tile row, going into the
+                                    \ screen)
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
                                     \ the buffer number, and we're going to look
@@ -8700,8 +8753,12 @@
                                     \ contains the start addresses of the
                                     \ graphics buffers
 
- MOV     R0, #11                    \ We are going to loop through all 12 of the
+ MOV     R0, #TILES_Z               \ We are going to loop through all of the
                                     \ graphics buffers, so set a counter in R0
+                                    \ to the number of tile corners in the
+                                    \ visible landscape, going back to front (as
+                                    \ there is one graphics buffer for each
+                                    \ corner row)
 
  MOV     R1, #19                    \ The command number for terminating a
                                     \ graphics buffer is 19, so put this in R1
