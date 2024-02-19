@@ -93,20 +93,22 @@
  SAFE_HEIGHT = TILE_SIZE * 3 / 2    \ The minimum safe height for avoiding
                                     \ objects on the ground (1.5 tile sizes)
 
- CAMERA_PLAYER_Z = TILE_SIZE * 5    \ The distance along the z-axis between the
-                                    \ player and the camera position (which is
-                                    \ five tiles behind the player)
+ CAMERA_PLAYER_Z = (TILES_Z - 6) * TILE_SIZE    \ The distance along the z-axis
+                                                \ between the player and the
+                                                \ camera position (which is
+                                                \ five tiles behind the player)
 
  LAND_MID_HEIGHT = TILE_SIZE * 5    \ The altitude of the mid-point of the
                                     \ generated landscape, to which the height
                                     \ of +/- 5 tiles is added by the Fourier
                                     \ synthesis in GetLandscapeAltitude
 
- PLAYER_FRONT_Z = TILE_SIZE * 6     \ The distance along the z-axis between the
-                                    \ tile in front of the player and the
-                                    \ camera, which is where we spawn explosions
-                                    \ and falling rocks (set to six tiles
-                                    \ forwards from the camera)
+ PLAYER_FRONT_Z = (TILES_Z - 5) * TILE_SIZE \ The distance along the z-axis
+                                            \ between the tile in front of the
+                                            \ player and the camera, which is
+                                            \ where we spawn explosions and
+                                            \ falling rocks (set to six tiles
+                                            \ forwards from the camera)
 
  ROCK_HEIGHT = TILE_SIZE * 32       \ The height from which we drop rocks from
                                     \ the sky (32 tile sizes)
@@ -127,9 +129,10 @@
                                     \ which is zero so the landscape remains at
                                     \ the same height
 
- LANDSCAPE_Z = TILE_SIZE * 20       \ The z-coordinate of the landscape offset,
-                                    \ which is set to the size of 20 tiles and
-                                    \ moves the landscape away from the viewer
+ LANDSCAPE_Z = (TILES_Z + 9) * TILE_SIZE    \ The z-coordinate of the landscape
+                                            \ offset, which is set to the size
+                                            \ of 20 tiles and moves the
+                                            \ landscape away from the viewer
 
  HALF_TILES_X = TILES_X / 2         \ Half the number of tiles from left to
                                     \ right in the landscape
@@ -195,7 +198,10 @@
 
  buffersAddr = &00026600            \ The address of the graphics buffers
 
- bufferSize = &10D4                 \ The address of the graphics buffers
+ bufferSize = (4308 * 12 / (TILES_Z + 1)) && &FFFC  \ The size of each of the
+                                                    \ graphics buffers in words,
+                                                    \ keeping the total size of
+                                                    \ all the buffers constant
 
  workspace = stack + 4              \ The variable workspace starts just after
                                     \ the top of the stack
@@ -556,18 +562,21 @@
 
 .landscapeConfig
 
- EQUB    &3A, TILES_X               \ Tile row 0
- EQUB    &E3, TILES_X               \ Tile row 1
- EQUB    &E4, TILES_X               \ Tile row 2
- EQUB    &E3, TILES_X               \ Tile row 3
- EQUB    &E4, TILES_X               \ Tile row 4
- EQUB    &E3, TILES_X               \ Tile row 5
- EQUB    &E4, TILES_X               \ Tile row 6
- EQUB    &E3, TILES_X               \ Tile row 7
- EQUB    &E4, TILES_X               \ Tile row 8
- EQUB    &E3, TILES_X               \ Tile row 9
- EQUB    &E4, TILES_X               \ Tile row 10
- EQUB    &E3, TILES_X               \ Tile row 11 (unused)
+                                    \ We need a configuration for each tile
+                                    \ corner row
+
+ EQUB    &3A, TILES_X               \ Tile row #0
+
+ FOR I%, 0, (TILES_Z - 1) / 2
+
+  EQUB   &E3, TILES_X               \ Tile row data (even)
+  EQUB   &E4, TILES_X               \ Tile row data (odd)
+
+ NEXT
+
+ EQUB    &E3, TILES_X               \ Tile row #TILES_X
+
+ ALIGN
 
 \ ******************************************************************************
 \
@@ -603,7 +612,7 @@
 
  FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
 
-  EQUD buffer                       \ Insert the address of the buffer
+  EQUD   buffer                     \ Insert the address of the buffer
 
   buffer = buffer + bufferSize      \ Move on to the next buffer
 
@@ -631,7 +640,7 @@
 
  FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
 
-  EQUD buffer                       \ Insert the address of the buffer
+  EQUD   buffer                     \ Insert the address of the buffer
 
   buffer = buffer + bufferSize      \ Move on to the next buffer
 
