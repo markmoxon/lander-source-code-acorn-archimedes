@@ -26,11 +26,27 @@
 
  CODE = &00008000
 
+\ ******************************************************************************
+\
+\ Configuration variables
+\
+\ ******************************************************************************
+
+ Entry = &0000A614                  \ The execution address of GameCode
+
+\ ******************************************************************************
+\
+\ LANDER !RunImage CODE
+\
+\ Produces the binary file !RunImage.unprot.bin.
+\
+\ ******************************************************************************
+
  ORG CODE
 
 \ ******************************************************************************
 \
-\       Name: Entry
+\       Name: RunImageEntry
 \       Type: Subroutine
 \   Category: Copy protection
 \    Summary: Entry point for the !RunImage Absolute file
@@ -88,7 +104,7 @@
  CMP     R0, R2                     \ Loop back until we have copied the whole
  BNE     decr1                      \ game
 
- B       &0000A614                  \ Start the game, which has execution
+ B       Entry                      \ Start the game, which has execution
                                     \ address (the Entry routine)
 
 \ ******************************************************************************

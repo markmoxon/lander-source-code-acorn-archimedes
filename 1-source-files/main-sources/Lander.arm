@@ -193,6 +193,10 @@
                                     \ down to &00012000 (to give a stack size of
                                     \ 512 32-bit entries)
 
+ buffersAddr = &00026600            \ The address of the graphics buffers
+
+ bufferSize = &10D4                 \ The address of the graphics buffers
+
  workspace = stack + 4              \ The variable workspace starts just after
                                     \ the top of the stack
 
@@ -590,18 +594,21 @@
 
 .graphicsBuffers
 
- EQUD    &00026600                  \ Address of graphics buffer 0
- EQUD    &000276D4                  \ Address of graphics buffer 1
- EQUD    &000287A8                  \ Address of graphics buffer 2
- EQUD    &0002987C                  \ Address of graphics buffer 3
- EQUD    &0002A950                  \ Address of graphics buffer 4
- EQUD    &0002BA24                  \ Address of graphics buffer 5
- EQUD    &0002CAF8                  \ Address of graphics buffer 6
- EQUD    &0002DBCC                  \ Address of graphics buffer 7
- EQUD    &0002ECA0                  \ Address of graphics buffer 8
- EQUD    &0002FD74                  \ Address of graphics buffer 9
- EQUD    &00030E48                  \ Address of graphics buffer 10
- EQUD    &00031F1C                  \ Address of graphics buffer 11 (unused)
+                                    \ We need a graphics buffer for each tile
+                                    \ corner row (and the game also adds an
+                                    \ unused spare buffer)
+
+ buffer = buffersAddr               \ The graphics buffers live at the address
+                                    \ given in the buffersAddr variable
+
+ FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
+
+  EQUD buffer                       \ Insert the address of the buffer
+
+  buffer = buffer + bufferSize      \ Move on to the next buffer
+
+ NEXT                               \ Repeat until we have inserted addresses of
+                                    \ all the graphics buffers
 
 \ ******************************************************************************
 \
@@ -615,18 +622,21 @@
 
 .graphicsBuffersEnd
 
- EQUD    &00026600                  \ Address of graphics buffer 0
- EQUD    &000276D4                  \ Address of graphics buffer 1
- EQUD    &000287A8                  \ Address of graphics buffer 2
- EQUD    &0002987C                  \ Address of graphics buffer 3
- EQUD    &0002A950                  \ Address of graphics buffer 4
- EQUD    &0002BA24                  \ Address of graphics buffer 5
- EQUD    &0002CAF8                  \ Address of graphics buffer 6
- EQUD    &0002DBCC                  \ Address of graphics buffer 7
- EQUD    &0002ECA0                  \ Address of graphics buffer 8
- EQUD    &0002FD74                  \ Address of graphics buffer 9
- EQUD    &00030E48                  \ Address of graphics buffer 10
- EQUD    &00031F1C                  \ Address of graphics buffer 11 (unused)
+                                    \ We need a graphics buffer for each tile
+                                    \ corner row (and the game also adds an
+                                    \ unused spare buffer)
+
+ buffer = buffersAddr               \ The graphics buffers live at the address
+                                    \ given in the buffersAddr variable
+
+ FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
+
+  EQUD buffer                       \ Insert the address of the buffer
+
+  buffer = buffer + bufferSize      \ Move on to the next buffer
+
+ NEXT                               \ Repeat until we have inserted addresses of
+                                    \ all the graphics buffers
 
 \ ******************************************************************************
 \

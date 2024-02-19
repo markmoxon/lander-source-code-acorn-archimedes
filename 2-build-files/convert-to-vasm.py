@@ -25,13 +25,19 @@ def convert(input_file, output_file):
         line = re.sub(r"^\.([^ \n]+)", r"\1:", line)
 
         # x = y -> .set x, y
-        line = re.sub(r"^ ?(.+) = (.+)$", r".set \1, \2", line)
+        line = re.sub(r"^ *(.+) = (.+)$", r".set \1, \2", line)
 
         # ORG -> .org
-        line = re.sub(r"^ ?ORG ", ".org ", line)
+        line = re.sub(r"^ *ORG ", ".org ", line)
 
         # SKIP -> .skip
-        line = re.sub(r"^ ?SKIP ", ".skip ", line)
+        line = re.sub(r"^ *SKIP ", ".skip ", line)
+
+        # FOR loop -> .rept
+        line = re.sub(r"^ *FOR I%, 0, ", ".rept ", line)
+
+        # NEXT -> .endr
+        line = re.sub(r"^ *NEXT", ".endr", line)
 
         # P% -> $
         line = re.sub(r"P%", "$", line)
@@ -46,31 +52,31 @@ def convert(input_file, output_file):
         line = re.sub(r"&", "0x", line)
 
         # EQUD -> .long
-        line = re.sub(r"^ ?EQUD ", ".long ", line)
+        line = re.sub(r"^ *EQUD ", ".long ", line)
 
         # EQUW -> .word
-        line = re.sub(r"^ ?EQUW ", ".word ", line)
+        line = re.sub(r"^ *EQUW ", ".word ", line)
 
         # EQUS -> .byte
-        line = re.sub(r"^ ?EQUS ", ".byte ", line)
+        line = re.sub(r"^ *EQUS ", ".byte ", line)
 
         # EQUB -> .byte
-        line = re.sub(r"^ ?EQUB ", ".byte ", line)
+        line = re.sub(r"^ *EQUB ", ".byte ", line)
 
         # ALIGN -> .balign
-        line = re.sub(r"^ ?ALIGN", ".balign 4", line)
+        line = re.sub(r"^ *ALIGN", ".balign 4", line)
 
         # IF -> .ifdef
-        line = re.sub(r"^ ?IF ", ".ifdef ", line)
+        line = re.sub(r"^ *IF ", ".ifdef ", line)
 
         # ENDIF -> .endif
-        line = re.sub(r"^ ?ENDIF", ".endif", line)
+        line = re.sub(r"^ *ENDIF", ".endif", line)
 
         # ELSE -> .else
-        line = re.sub(r"^ ?ELSE", ".else", line)
+        line = re.sub(r"^ *ELSE", ".else", line)
 
         # INCBIN -> .incbin
-        line = re.sub(r"^ ?INCBIN", ".incbin", line)
+        line = re.sub(r"^ *INCBIN", ".incbin", line)
 
         # Write updated line
         if line.strip():

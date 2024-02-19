@@ -38,6 +38,8 @@
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
 .set stack, 0x000121FC
+.set buffersAddr, 0x00026600
+.set bufferSize, 0x10D4
 .set workspace, stack + 4
 .set xObject, 0x00
 .set yObject, 0x04
@@ -137,31 +139,17 @@ landscapeConfig:
 landscapeConfigAddr:
 .long    landscapeConfig
 graphicsBuffers:
-.long    0x00026600
-.long    0x000276D4
-.long    0x000287A8
-.long    0x0002987C
-.long    0x0002A950
-.long    0x0002BA24
-.long    0x0002CAF8
-.long    0x0002DBCC
-.long    0x0002ECA0
-.long    0x0002FD74
-.long    0x00030E48
-.long    0x00031F1C
+.set buffer, buffersAddr
+.rept TILES_Z + 1
+.long buffer
+.set buffer, buffer + bufferSize
+.endr
 graphicsBuffersEnd:
-.long    0x00026600
-.long    0x000276D4
-.long    0x000287A8
-.long    0x0002987C
-.long    0x0002A950
-.long    0x0002BA24
-.long    0x0002CAF8
-.long    0x0002DBCC
-.long    0x0002ECA0
-.long    0x0002FD74
-.long    0x00030E48
-.long    0x00031F1C
+.set buffer, buffersAddr
+.rept TILES_Z + 1
+.long buffer
+.set buffer, buffer + bufferSize
+.endr
 DrawLandscapeAndBuffers:
  STMFD   R13!, {R5-R9, R14}
  LDR     R3, [R11, #zCamera]

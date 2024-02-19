@@ -4,10 +4,11 @@ Sections:
 
 Source: "3-assembled-output/RunImage.arm"
                             	     1: .set CODE, 0x00008000
-                            	     2: .org CODE
-00:00008000 832600EA        	     3:  B       DecryptGameBinary
-                            	     4: gameCode:
-00:00008004 000080FA00000000	     5: .incbin "3-assembled-output/GameCode.bin"
+                            	     2: .set Entry, 0x0000A614
+                            	     3: .org CODE
+00:00008000 832600EA        	     4:  B       DecryptGameBinary
+                            	     5: gameCode:
+00:00008004 000080FA00000000	     6: .incbin "3-assembled-output/GameCode.bin"
 00:0000800C 0000001400800000
 00:00008014 3A0DE30DE40DE30D
 00:0000801C E40DE30DE40DE30D
@@ -4937,29 +4938,30 @@ Source: "3-assembled-output/RunImage.arm"
 00:000119FC 111601005B110100
 00:00011A04 CC0C010064080100
 00:00011A0C 2104010000000100
-                            	     6: gameCodeEnd:
-                            	     7: DecryptGameBinary:
-00:00011A14 1C009FE5        	     8:  LDR     R0, gameCodeAddr
-00:00011A18 14109FE5        	     9:  LDR     R1, absoluteAddr
-00:00011A1C 18209FE5        	    10:  LDR     R2, gameCodeEndAddr
-                            	    11: decr1:
-00:00011A20 04C090E4        	    12:  LDR     R12, [R0], #4
-00:00011A24 04C081E4        	    13:  STR     R12, [R1], #4
-00:00011A28 020050E1        	    14:  CMP     R0, R2
-00:00011A2C FBFFFF1A        	    15:  BNE     decr1
-00:00011A30 F7E2FFEA        	    16:  B       0x0000A614
-                            	    17: absoluteAddr:
-00:00011A34 00800000        	    18: .long    CODE
-                            	    19: gameCodeAddr:
-00:00011A38 04800000        	    20: .long    gameCode
-                            	    21: gameCodeEndAddr:
-00:00011A3C 141A0100        	    22: .long    gameCodeEnd
-                            	    23: 
+                            	     7: gameCodeEnd:
+                            	     8: DecryptGameBinary:
+00:00011A14 1C009FE5        	     9:  LDR     R0, gameCodeAddr
+00:00011A18 14109FE5        	    10:  LDR     R1, absoluteAddr
+00:00011A1C 18209FE5        	    11:  LDR     R2, gameCodeEndAddr
+                            	    12: decr1:
+00:00011A20 04C090E4        	    13:  LDR     R12, [R0], #4
+00:00011A24 04C081E4        	    14:  STR     R12, [R1], #4
+00:00011A28 020050E1        	    15:  CMP     R0, R2
+00:00011A2C FBFFFF1A        	    16:  BNE     decr1
+00:00011A30 F7E2FFEA        	    17:  B       Entry
+                            	    18: absoluteAddr:
+00:00011A34 00800000        	    19: .long    CODE
+                            	    20: gameCodeAddr:
+00:00011A38 04800000        	    21: .long    gameCode
+                            	    22: gameCodeEndAddr:
+00:00011A3C 141A0100        	    23: .long    gameCodeEnd
+                            	    24: 
 
 
 Symbols by name:
 CODE                             S:00008000
 DecryptGameBinary                A:00011A14
+Entry                            S:0000A614
 absoluteAddr                     A:00011A34
 decr1                            A:00011A20
 gameCode                         A:00008004
@@ -4970,6 +4972,7 @@ gameCodeEndAddr                  A:00011A3C
 Symbols by value:
 00008000 CODE
 00008004 gameCode
+0000A614 Entry
 00011A14 DecryptGameBinary
 00011A14 gameCodeEnd
 00011A20 decr1

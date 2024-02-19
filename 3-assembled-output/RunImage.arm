@@ -1,4 +1,5 @@
 .set CODE, 0x00008000
+.set Entry, 0x0000A614
 .org CODE
  B       DecryptGameBinary
 gameCode:
@@ -13,7 +14,7 @@ decr1:
  STR     R12, [R1], #4
  CMP     R0, R2
  BNE     decr1
- B       0x0000A614
+ B       Entry
 absoluteAddr:
 .long    CODE
 gameCodeAddr:
