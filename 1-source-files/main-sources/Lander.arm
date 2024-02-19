@@ -111,10 +111,17 @@
  ROCK_HEIGHT = TILE_SIZE * 32       \ The height from which we drop rocks from
                                     \ the sky (32 tile sizes)
 
- LANDSCAPE_X = TILE_SIZE * TILES_Z / 2  \ The x-coordinate of the landscape
-                                        \ offset, which is set to half the width
-                                        \ of the landscape, so we end up looking
-                                        \ at the middle point of the landscape
+ LANDSCAPE_X_WIDTH = TILE_SIZE * (TILES_X - 2)  \ The width of the visible
+                                                \ landscape in x-coordinates,
+                                                \ counting whole tiles only,
+                                                \ and ignoring the centre tile
+
+ LANDSCAPE_X = LANDSCAPE_X_WIDTH / 2    \ The x-coordinate of the landscape
+                                        \ offset, which is set to the whole
+                                        \ number of tiles that fit into the half
+                                        \ the width of the landscape, so we end
+                                        \ up looking at the middle point of the
+                                        \ landscape
 
  LANDSCAPE_Y = 0                    \ The y-coordinate of the landscape offset,
                                     \ which is zero so the landscape remains at
@@ -132,7 +139,8 @@
                                                 \ the landscape in x-coordinates
 
  LANDSCAPE_Z_DEPTH = TILE_SIZE * (TILES_Z - 1)  \ The depth of the visible
-                                                \ landscape in z-coordinates
+                                                \ landscape in z-coordinates,
+                                                \ counting whole tiles only
 
  LANDSCAPE_Z_BEYOND = TILE_SIZE * TILES_Z   \ The depth of the visible landscape
                                             \ in z-coordinates, plus one more
