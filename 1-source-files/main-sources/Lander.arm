@@ -32,67 +32,59 @@
 \
 \ ******************************************************************************
 
- OS_WriteC = &00                    \ The operating system call to write a
-                                    \ character to all the output streams
+ TILE_SIZE = &01000000              \ The length of one side of a square
+                                    \ landscape tile in 3D coordinates
 
- OS_WriteS = &01                    \ The operating system call to write a
-                                    \ string to all the output streams
+ TILES_X = 13                       \ The number of tile corners in a landscape
+                                    \ row from left to right (i.e. 12 tiles)
 
- OS_ReadC = &04                     \ The operating system call to read a key
-                                    \ press
+ TILES_Z = 11                       \ The number of tile corners in a landscape
+                                    \ row from front to back (i.e. 10 tiles)
 
- OS_Byte = &06                      \ General-purpose operating system calls
-
- OS_Word = &07                      \ General-purpose operating system calls
-
- OS_Mouse = &1C                     \ The operating system call to read the
-                                    \ mouse status
-
- OS_BinaryToDecimal = &28           \ The operating system call to convert a
-                                    \ number into a string
+ MAX_PARTICLES = 484                \ The maximum number of particles at any one
+                                    \ time
 
  LAUNCHPAD_OBJECT = 9               \ The type of object along the right edge of
                                     \ the launchpad (i.e. the three rockets)
 
- LAUNCHPAD_SIZE = &08000000         \ Size of the launchpad
+ LAUNCHPAD_ALTITUDE = &03500000     \ The altitude of the launchpad
 
- LAUNCHPAD_Y = &02EC0000            \ The y-coordinate of the launchpad
-
- LAUNCHPAD_ALTITUDE = &03500000     \ Altitude of the launchpad
-
- HIGHEST_ALTITUDE = &34000000       \ Highest altitude for the engines to work
-                                    \ (as a positive number, as the altitude is
-                                    \ actually -&34000000)
-
- SEA_LEVEL = &05500000              \ Sea level
+ SEA_LEVEL = &05500000              \ The altitude of sea level
 
  LANDING_SPEED = &00200000          \ The maximum safe landing speed
 
  SMOKE_RISING_SPEED = &00080000     \ The speed at which smoke particles rise up
                                     \ from a destroyed object
 
- MAX_PARTICLES = 484                \ The maximum number of particles at any one
-                                    \ time
+ UNDERCARRIAGE_Y = &00640000        \ The height of the ship's undercarriage
+                                    \ (0.390625 tiles), which is the distance
+                                    \ from the centre of the ship to the bottom
+                                    \ of the ship
 
- TILE_SIZE = &01000000              \ The length of one side of a square
-                                    \ landscape tile in 3D coordinates
+\ ******************************************************************************
+\
+\ Calculated constants
+\
+\ ******************************************************************************
 
-                                    \ We need to calculate the following as vasm
-                                    \ doesn't let us include constants in
-                                    \ instruction expressions
+ LAUNCHPAD_Y = LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y \ The y-coordinate of the
+                                                    \ ship as it sits on the
+                                                    \ launchpad, and on top of
+                                                    \ its undercarriage
+
+ LAUNCHPAD_SIZE = TILE_SIZE * 8     \ Size of the launchpad (8 tile sizes)
+
+ HIGHEST_ALTITUDE = TILE_SIZE * 52  \ Highest altitude for the engines to work
+                                    \ (52 tile sizes, but as a positive number;
+                                    \ the altitude is actually -TILE_SIZE * 52)
 
  SPLASH_HEIGHT = TILE_SIZE / 16     \ The height above the sea at which splash
                                     \ particles are added when a particle
                                     \ splashes into the sea (1/16 of a tile)
 
- EXPLODE_Y = 5 * TILE_SIZE / 16     \ The vertical distance above the player's
+ EXPLODE_Y = TILE_SIZE * 5 / 16     \ The vertical distance above the player's
                                     \ ship where we add the explosion when they
                                     \ crash (5/16-th of a tile)
-
- UNDERCARRIAGE_Y = &00640000        \ The height of the ship's undercarriage
-                                    \ (0.390625 tiles), which is the distance
-                                    \ from the centre of the ship to the bottom
-                                    \ of the ship
 
  SMOKE_HEIGHT = TILE_SIZE * 3 / 4   \ The height at which smoke particles are
                                     \ added above the bottom of a destroyed
@@ -101,14 +93,20 @@
  SAFE_HEIGHT = TILE_SIZE * 3 / 2    \ The minimum safe height for avoiding
                                     \ objects on the ground (1.5 tile sizes)
 
- TILE_SIZE_x_5 = TILE_SIZE * 5      \ The size of 5 tiles (used in the altitude
-                                    \ calculation, and setting the camera back
-                                    \ stop value - two different constants?)
+ CAMERA_PLAYER_Z = TILE_SIZE * 5    \ The distance along the z-axis between the
+                                    \ player and the camera position (which is
+                                    \ five tiles behind the player)
 
- TILE_SIZE_x_6 = TILE_SIZE * 6      \ The size of 6 tiles (used to spawn
-                                    \ explosion particles and rocks 6 tiles
-                                    \ from the back of the landscape, just in
-                                    \ front of the ship?)
+ LAND_MID_HEIGHT = TILE_SIZE * 5    \ The altitude of the mid-point of the
+                                    \ generated landscape, to which the height
+                                    \ of +/- 5 tiles is added by the Fourier
+                                    \ synthesis in GetLandscapeAltitude
+
+ PLAYER_FRONT_Z = TILE_SIZE * 6     \ The distance along the z-axis between the
+                                    \ tile in front of the player and the
+                                    \ camera, which is where we spawn explosions
+                                    \ and falling rocks (set to six tiles
+                                    \ forwards from the camera)
 
  ROCK_HEIGHT = TILE_SIZE * 32       \ The height from which we drop rocks from
                                     \ the sky (32 tile sizes)
@@ -125,12 +123,6 @@
  LANDSCAPE_Z = TILE_SIZE * 20       \ The z-coordinate of the landscape offset,
                                     \ which is set to the size of 20 tiles and
                                     \ moves the landscape away from the viewer
-
- TILES_X = 13                       \ The number of tile corners in a landscape
-                                    \ row from left to right (i.e. 12 tiles)
-
- TILES_Z = 11                       \ The number of tile corners in a landscape
-                                    \ row from front to back (i.e. 10 tiles)
 
  HALF_TILES_X = TILES_X / 2         \ Half the number of tiles from left to
                                     \ right in the landscape
@@ -156,6 +148,31 @@
                                                         \ visible landscape to
                                                         \ the front (15 tile
                                                         \ sizes)
+
+\ ******************************************************************************
+\
+\ Operating system SWI numbers
+\
+\ ******************************************************************************
+
+ OS_WriteC = &00                    \ The operating system call to write a
+                                    \ character to all the output streams
+
+ OS_WriteS = &01                    \ The operating system call to write a
+                                    \ string to all the output streams
+
+ OS_ReadC = &04                     \ The operating system call to read a key
+                                    \ press
+
+ OS_Byte = &06                      \ General-purpose operating system calls
+
+ OS_Word = &07                      \ General-purpose operating system calls
+
+ OS_Mouse = &1C                     \ The operating system call to read the
+                                    \ mouse status
+
+ OS_BinaryToDecimal = &28           \ The operating system call to convert a
+                                    \ number into a string
 
 \ ******************************************************************************
 \
@@ -1111,9 +1128,9 @@
 \
 \ The altitude at landscape coordinate (x, z) is calculated as follows:
 \
-\   TILE_SIZE_x_5 - (   2*sin(x - 2z)  + 2*sin(4x + 3z)  + 2*sin(3z - 5x)
-\                     + 2*sin(3x + 3z) +   sin(5x + 11z) +   sin(10x + 7z)
-\                   ) / 256
+\   LAND_MID_HEIGHT - (   2*sin(x - 2z)  + 2*sin(4x + 3z)  + 2*sin(3z - 5x)
+\                       + 2*sin(3x + 3z) +   sin(5x + 11z) +   sin(10x + 7z)
+\                     ) / 256
 \
 \ Note that the object map is flat, like a paper map, so the x- and z-axes on
 \ the map correspond to the x- and z-axes in the three-dimensional space when
@@ -1310,9 +1327,9 @@
                                     \      +
                                     \      (sin(5x + 11z) + sin(10x + 7z)) / 256
 
- RSB     R0, R0, #TILE_SIZE_x_5     \ R0 = TILE_SIZE_x_5 - R0
+ RSB     R0, R0, #LAND_MID_HEIGHT   \ R0 = LAND_MID_HEIGHT - R0
                                     \
-                                    \    = TILE_SIZE_x_5 -
+                                    \    = LAND_MID_HEIGHT -
                                     \      (2*sin(x - 2z) + 2*sin(4x + 3z)
                                     \                     + 2*sin(3z - 5x)
                                     \                     + 2*sin(3x + 3z)
@@ -1925,8 +1942,9 @@
                                     \ rising up with the ship as it takes off
                                     \ until the ship is at a reasonable height
 
- ADD     R2, R2, #TILE_SIZE_x_5     \ Set R2 to the z-coordinate that's five
-                                    \ tiles into the screen from the player
+ ADD     R2, R2, #CAMERA_PLAYER_Z   \ Set R2 to the z-coordinate we want to use
+                                    \ for the camera, which is five tiles into
+                                    \ the screen from the player
 
  ADD     R14, R11, #xCamera         \ Set (xCamera, yCamera, zCamera) to the
  STMIA   R14, {R0-R2}               \ coordinates in (R0, R1, R2), which is
@@ -1940,7 +1958,7 @@
 
  MOV     R8, R0                     \ Set (R8, R9) to the point on the landscape
  MOV     R9, R2                     \ that's directly below the player, by
- SUB     R9, R9, #TILE_SIZE_x_5     \ setting (R8, R9) to the ship's (x, z)
+ SUB     R9, R9, #CAMERA_PLAYER_Z   \ setting (R8, R9) to the ship's (x, z)
                                     \ coordinates in (R0, R2) and subtracting
                                     \ the five tiles we added above
 
@@ -2385,8 +2403,10 @@
                                     \
                                     \ So now we start refuelling
 
- MOV     R1, #LAUNCHPAD_Y           \ Set R1 to the y-coordinate of the
-                                    \ launchpad
+ MOV     R1, #LAUNCHPAD_Y           \ Set R1 to the y-coordinate of the player's
+                                    \ ship as it sits on the launchpad (which is
+                                    \ set to the launchpad altitude plus the
+                                    \ height of the ship's undercarriage)
 
  LDR     R3, [R11, #fuelLevel]      \ Bump up the fuel level by 1/160 of a full
  ADD     R3, R3, #&20               \ tank
@@ -4269,19 +4289,19 @@
 
                                     \ Now we add an explosion to the particle
                                     \ buffer at coordinates (R0, R1, R2), which
-                                    \ are set to 6 tiles forwards from the
-                                    \ camera coordinates, so that's just in
-                                    \ front of the ship (when the ship is not
-                                    \ close to the ground, in which case the
-                                    \ explosion would be above the ship as the
-                                    \ ship moves down the screen)
+                                    \ are set to PLAYER_FRONT_Z tiles forwards
+                                    \ from the camera coordinates, so that's
+                                    \ just in front of the ship (when the ship
+                                    \ is not close to the ground, in which case
+                                    \ the explosion would be above the ship as
+                                    \ the ship moves down the screen)
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
  MOV     R1, #0                     \ Set R1 = 0
 
- LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
- SUB     R2, R2, #TILE_SIZE_x_6
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - PLAYER_FRONT_Z
+ SUB     R2, R2, #PLAYER_FRONT_Z
 
  BL      AddExplosionToBuffer       \ Add an explosion into the particle data
                                     \ buffers
@@ -4309,19 +4329,19 @@
 
                                     \ Now we add an explosion to the particle
                                     \ buffer at coordinates (R0, R1, R2), which
-                                    \ are set to 6 tiles forwards from the
-                                    \ camera coordinates, so that's just in
-                                    \ front of the ship (when the ship is not
-                                    \ close to the ground, in which case the
-                                    \ explosion would be above the ship as the
-                                    \ ship moves down the screen)
+                                    \ are set to PLAYER_FRONT_Z tiles forwards
+                                    \ from the camera coordinates, so that's
+                                    \ just in front of the ship (when the ship
+                                    \ is not close to the ground, in which case
+                                    \ the explosion would be above the ship as
+                                    \ the ship moves down the screen)
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
  MOV     R1, #0                     \ Set R1 = 0
 
- LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
- SUB     R2, R2, #TILE_SIZE_x_6
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - PLAYER_FRONT_Z
+ SUB     R2, R2, #PLAYER_FRONT_Z
 
 .spcl1
 
@@ -4354,17 +4374,18 @@
                                     \ Drop a rock from the sky, spawning the
                                     \ rock at coordinates (R0, R1, R2), which
                                     \ are set to half the height of a normal
-                                    \ rock and 6 tiles forwards from the camera
-                                    \ coordinates, which is fairly high in the
-                                    \ sky above the ship's current position and
-                                    \ one tile in front of the ship
+                                    \ rock and PLAYER_FRONT_Z tiles forwards
+                                    \ from the camera coordinates, which is
+                                    \ fairly high in the sky above the ship's
+                                    \ current position and one tile in front of
+                                    \ the ship
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
  MVN     R1, #ROCK_HEIGHT / 2       \ Set R1 = -(16 tile sizes)
 
- LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
- SUB     R2, R2, #TILE_SIZE_x_6
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - PLAYER_FRONT_Z
+ SUB     R2, R2, #PLAYER_FRONT_Z
 
  BL      DropARockFromTheSky        \ Drop a rock from the coordinates in
                                     \ (R0, R1, R2)
@@ -4410,17 +4431,18 @@
                                     \ If we get here then we drop a rock from
                                     \ the sky, spawning the rock at coordinates
                                     \ (R0, R1, R2), which are set to ROCK_HEIGHT
-                                    \ tiles above and 6 tiles forwards from the
-                                    \ camera coordinates, which is very high in
-                                    \ the sky above the ship's current position
-                                    \ and one tile in front of the ship
+                                    \ tiles above and PLAYER_FRONT_Z tiles
+                                    \ forwards from the camera coordinates,
+                                    \ which is very high in the sky above the
+                                    \ ship's current position and one tile in
+                                    \ front of the ship
 
  LDR     R0, [R11, #xCamera]        \ Set R0 = xCamera
 
  MVN     R1, #ROCK_HEIGHT           \ Set R1 = -(32 tile sizes)
 
- LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - 6 tile sizes
- SUB     R2, R2, #TILE_SIZE_x_6
+ LDR     R2, [R11, #zCamera]        \ Set R2 = zCamera - PLAYER_FRONT_Z
+ SUB     R2, R2, #PLAYER_FRONT_Z
 
  BL      DropARockFromTheSky        \ Drop a rock from the coordinates in
                                     \ (R0, R1, R2) by spawning it as a
