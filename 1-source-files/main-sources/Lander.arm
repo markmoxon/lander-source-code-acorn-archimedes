@@ -82,6 +82,13 @@
 \
 \ ******************************************************************************
 
+ STORE = 256 * (TILES_X / 32)       \ We need 256 bytes of cornerStore for every
+                                    \ 32 tiles across the landscape, so STORE
+                                    \ contains the number of extra bytes of data
+                                    \ we need for each extra set of 32 tiles on
+                                    \ top of the default 256 byte buffers (so
+                                    \ STORE is zero for the default landscape)
+
  LAUNCHPAD_Y = LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y \ The y-coordinate of the
                                                     \ ship as it sits on the
                                                     \ launchpad, and on top of
@@ -492,21 +499,21 @@
  cornerStore1 = &400                \ Storage for coordinates of tile corners as
                                     \ we work our way through the landscape
 
- cornerStore2 = &500                \ Storage for coordinates of tile corners as
+ cornerStore2 = &500 + STORE        \ Storage for coordinates of tile corners as
                                     \ we work our way through the landscape
 
- vertexProjected = &600             \ Storage for projected vertices
+ vertexProjected = &600 + STORE * 2 \ Storage for projected vertices
 
- particleData = &700                \ The particle data buffer, which stores
+ particleData = &700 + STORE * 2    \ The particle data buffer, which stores
                                     \ eight data bytes for each on-screen
                                     \ particle
 
- objectMap = &4400                  \ The object map determines which objects
+ objectMap = &4400 + STORE * 2      \ The object map determines which objects
                                     \ appear on the landscape, where objects are
                                     \ trees, buildings, rockets and so on (size
                                     \ of object map is 256 * 256 bytes = &10000)
 
- buffers = &14400                   \ The graphics buffers, one for each tile
+ buffers = &14400 + STORE * 2       \ The graphics buffers, one for each tile
                                     \ corner row (so there are TILE_Z of them)
 
 \ ******************************************************************************
