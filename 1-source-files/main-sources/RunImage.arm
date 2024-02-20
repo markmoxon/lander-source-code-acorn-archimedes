@@ -32,7 +32,15 @@
 \
 \ ******************************************************************************
 
- Entry = &0000A614                  \ The execution address of GameCode
+                                    \ --- Mod: Code removed for more tiles: --->
+
+\Entry = &0000A614                  \ The execution address of GameCode
+
+                                    \ --- And replaced by: -------------------->
+
+ Entry = &0000A66C                  \ The execution address of GameCode
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \

@@ -35,11 +35,23 @@
  TILE_SIZE = &01000000              \ The length of one side of a square
                                     \ landscape tile in 3D coordinates
 
- TILES_X = 13                       \ The number of tile corners in a landscape
+                                    \ --- Mod: Code removed for more tiles: --->
+
+\TILES_X = 13                       \ The number of tile corners in a landscape
+\                                   \ row from left to right (i.e. 12 tiles)
+\
+\TILES_Z = 11                       \ The number of tile corners in a landscape
+\                                   \ row from front to back (i.e. 10 tiles)
+
+                                    \ --- And replaced by: -------------------->
+
+ TILES_X = 33                       \ The number of tile corners in a landscape
                                     \ row from left to right (i.e. 12 tiles)
 
- TILES_Z = 11                       \ The number of tile corners in a landscape
+ TILES_Z = 19                       \ The number of tile corners in a landscape
                                     \ row from front to back (i.e. 10 tiles)
+
+                                    \ --- End of replacement ------------------>
 
  MAX_PARTICLES = 484                \ The maximum number of particles at any one
                                     \ time
@@ -1531,6 +1543,13 @@
                                     \ row that we're processing (so it goes from
                                     \ 0 at the back to TILES_Z - 1 at the front,
                                     \ or 0 to 10)
+
+                                    \ --- Mod: Code added for more tiles: ----->
+
+ SUBS R8, R8, #TILES_Z-11           \ Set correct colour for bigger depth
+ MOVLT R8, #0
+
+                                    \ --- End of added code ------------------->
 
  ADD     R3, R8, R14, LSR #22       \ Set the tile's brightness in R3 to:
                                     \
