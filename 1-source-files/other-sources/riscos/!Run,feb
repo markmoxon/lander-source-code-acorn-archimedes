@@ -4,5 +4,5 @@ RMEnsure MemAlloc 0 RMLoad <Obey$Dir>.MemAlloc
 Echo <22><141>
 ScreenSize 160 Error Not enough memory to run Lander
 Echo <22><141>
-WimpSlot -min 168K -max 168K
+WimpSlot -min 868K -max 868K
 Run <Obey$Dir>.!RunImage

@@ -38,7 +38,7 @@
 
                                     \ --- And replaced by: -------------------->
 
- Entry = &0000A66C                  \ The execution address of GameCode
+ Entry = &0000A7C0                  \ The execution address of GameCode
 
                                     \ --- End of replacement ------------------>
 
