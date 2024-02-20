@@ -14,113 +14,113 @@ Source: "3-assembled-output/Lander.arm"
                             	     9: .set LANDING_SPEED, 0x00200000
                             	    10: .set SMOKE_RISING_SPEED, 0x00080000
                             	    11: .set UNDERCARRIAGE_Y, 0x00640000
-                            	    12: .set LAUNCHPAD_Y, LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y
-                            	    13: .set LAUNCHPAD_SIZE, TILE_SIZE * 8
-                            	    14: .set HIGHEST_ALTITUDE, TILE_SIZE * 52
-                            	    15: .set SPLASH_HEIGHT, TILE_SIZE / 16
-                            	    16: .set EXPLODE_Y, TILE_SIZE * 5 / 16
-                            	    17: .set SMOKE_HEIGHT, TILE_SIZE * 3 / 4
-                            	    18: .set SAFE_HEIGHT, TILE_SIZE * 3 / 2
-                            	    19: .set CAMERA_PLAYER_Z, (TILES_Z - 6) * TILE_SIZE
-                            	    20: .set LAND_MID_HEIGHT, TILE_SIZE * 5
-                            	    21: .set PLAYER_FRONT_Z, (TILES_Z - 5) * TILE_SIZE
-                            	    22: .set ROCK_HEIGHT, TILE_SIZE * 32
-                            	    23: .set LANDSCAPE_X_WIDTH, TILE_SIZE * (TILES_X - 2)
-                            	    24: .set LANDSCAPE_X, LANDSCAPE_X_WIDTH / 2
-                            	    25: .set LANDSCAPE_Y, 0
-                            	    26: .set LANDSCAPE_Z, (TILES_Z + 9) * TILE_SIZE
-                            	    27: .set HALF_TILES_X, TILES_X / 2
-                            	    28: .set LANDSCAPE_X_HALF, TILE_SIZE * HALF_TILES_X
-                            	    29: .set LANDSCAPE_Z_DEPTH, TILE_SIZE * (TILES_Z - 1)
-                            	    30: .set LANDSCAPE_Z_BEYOND, TILE_SIZE * TILES_Z
-                            	    31: .set LANDSCAPE_Z_FRONT, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH
-                            	    32: .set LANDSCAPE_Z_MID, LANDSCAPE_Z - CAMERA_PLAYER_Z
-                            	    33: .set OS_WriteC, 0x00
-                            	    34: .set OS_WriteS, 0x01
-                            	    35: .set OS_ReadC, 0x04
-                            	    36: .set OS_Byte, 0x06
-                            	    37: .set OS_Word, 0x07
-                            	    38: .set OS_Mouse, 0x1C
-                            	    39: .set OS_BinaryToDecimal, 0x28
-                            	    40: .set stack, 0x000121FC
-                            	    41: .set buffersAddr, 0x00026600
-                            	    42: .set bufferSize, (4308 * 12 / (TILES_Z + 1)) 0x0x 0xFFFC
-                            	    43: .set workspace, stack + 4
-                            	    44: .set xObject, 0x00
-                            	    45: .set yObject, 0x04
-                            	    46: .set zObject, 0x08
-                            	    47: .set rotationMatrix, 0x30
-                            	    48: .set xNoseV, 0x30
-                            	    49: .set xRoofV, 0x34
-                            	    50: .set xSideV, 0x38
-                            	    51: .set yNoseV, 0x3C
-                            	    52: .set yRoofV, 0x40
-                            	    53: .set ySideV, 0x44
-                            	    54: .set zNoseV, 0x48
-                            	    55: .set zRoofV, 0x4C
-                            	    56: .set zSideV, 0x50
-                            	    57: .set xVertex, 0x54
-                            	    58: .set yVertex, 0x58
-                            	    59: .set zVertex, 0x5C
-                            	    60: .set xVertexRotated, 0x64
-                            	    61: .set yVertexRotated, 0x68
-                            	    62: .set zVertexRotated, 0x6C
-                            	    63: .set xCoord, 0x74
-                            	    64: .set yCoord, 0x78
-                            	    65: .set zCoord, 0x7C
-                            	    66: .set xObjectScaled, 0x84
-                            	    67: .set yObjectScaled, 0x88
-                            	    68: .set zObjectScaled, 0x8C
-                            	    69: .set xPlayer, 0x94
-                            	    70: .set yPlayer, 0x98
-                            	    71: .set zPlayer, 0x9C
-                            	    72: .set xVelocity, 0xA0
-                            	    73: .set yVelocity, 0xA4
-                            	    74: .set zVelocity, 0xA8
-                            	    75: .set xThrust, 0xAC
-                            	    76: .set yThrust, 0xB0
-                            	    77: .set zThrust, 0xB4
-                            	    78: .set previousColumn, 0xC4
-                            	    79: .set tileCornerRow, 0xE4
-                            	    80: .set unusedConfig, 0xF0
-                            	    81: .set objectType, 0xF4
-                            	    82: .set tileRowOddEven, 0xF8
-                            	    83: .set altitude, 0x100
-                            	    84: .set prevAltitude, 0x104
-                            	    85: .set particleEnd, 0x108
-                            	    86: .set particleCount, 0x10C
-                            	    87: .set objectData, 0x110
-                            	    88: .set objectFlags, 0x114
-                            	    89: .set mainLoopCount, 0x118
-                            	    90: .set crashLoopCount, 0x11C
-                            	    91: .set crashedFlag, 0x120
-                            	    92: .set currentScore, 0x124
-                            	    93: .set fuelLevel, 0x128
-                            	    94: .set gravity, 0x12C
-                            	    95: .set playingGame, 0x130
-                            	    96: .set remainingLives, 0x134
-                            	    97: .set highScore, 0x138
-                            	    98: .set xCamera, 0x13C
-                            	    99: .set yCamera, 0x140
-                            	   100: .set zCamera, 0x144
-                            	   101: .set xCameraTile, 0x148
-                            	   102: .set yCameraTile, 0x14C
-                            	   103: .set zCameraTile, 0x150
-                            	   104: .set shipDirection, 0x154
-                            	   105: .set shipPitch, 0x158
-                            	   106: .set fuelBurnRate, 0x15C
-                            	   107: .set xLandscapeRow, 0x160
-                            	   108: .set yLandscapeRow, 0x164
-                            	   109: .set zLandscapeRow, 0x168
-                            	   110: .set xLandscapeCol, 0x170
-                            	   111: .set yLandscapeCol, 0x174
-                            	   112: .set zLandscapeCol, 0x178
-                            	   113: .set stringBuffer, 0x200
-                            	   114: .set cornerStore1, 0x400
-                            	   115: .set cornerStore2, 0x500
-                            	   116: .set vertexProjected, 0x600
-                            	   117: .set particleData, 0x700
-                            	   118: .set objectMap, 0x4400
+                            	    12: .set BUFFER_SIZE, 4308
+                            	    13: .set LAUNCHPAD_Y, LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y
+                            	    14: .set LAUNCHPAD_SIZE, TILE_SIZE * 8
+                            	    15: .set HIGHEST_ALTITUDE, TILE_SIZE * 52
+                            	    16: .set SPLASH_HEIGHT, TILE_SIZE / 16
+                            	    17: .set EXPLODE_Y, TILE_SIZE * 5 / 16
+                            	    18: .set SMOKE_HEIGHT, TILE_SIZE * 3 / 4
+                            	    19: .set SAFE_HEIGHT, TILE_SIZE * 3 / 2
+                            	    20: .set CAMERA_PLAYER_Z, (TILES_Z - 6) * TILE_SIZE
+                            	    21: .set LAND_MID_HEIGHT, TILE_SIZE * 5
+                            	    22: .set PLAYER_FRONT_Z, (TILES_Z - 5) * TILE_SIZE
+                            	    23: .set ROCK_HEIGHT, TILE_SIZE * 32
+                            	    24: .set LANDSCAPE_X_WIDTH, TILE_SIZE * (TILES_X - 2)
+                            	    25: .set LANDSCAPE_X, LANDSCAPE_X_WIDTH / 2
+                            	    26: .set LANDSCAPE_Y, 0
+                            	    27: .set LANDSCAPE_Z, (TILES_Z + 9) * TILE_SIZE
+                            	    28: .set HALF_TILES_X, TILES_X / 2
+                            	    29: .set LANDSCAPE_X_HALF, TILE_SIZE * HALF_TILES_X
+                            	    30: .set LANDSCAPE_Z_DEPTH, TILE_SIZE * (TILES_Z - 1)
+                            	    31: .set LANDSCAPE_Z_BEYOND, TILE_SIZE * TILES_Z
+                            	    32: .set LANDSCAPE_Z_FRONT, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH
+                            	    33: .set LANDSCAPE_Z_MID, LANDSCAPE_Z - CAMERA_PLAYER_Z
+                            	    34: .set OS_WriteC, 0x00
+                            	    35: .set OS_WriteS, 0x01
+                            	    36: .set OS_ReadC, 0x04
+                            	    37: .set OS_Byte, 0x06
+                            	    38: .set OS_Word, 0x07
+                            	    39: .set OS_Mouse, 0x1C
+                            	    40: .set OS_BinaryToDecimal, 0x28
+                            	    41: .set stack, 0x000121FC
+                            	    42: .set workspace, stack + 4
+                            	    43: .set xObject, 0x00
+                            	    44: .set yObject, 0x04
+                            	    45: .set zObject, 0x08
+                            	    46: .set rotationMatrix, 0x30
+                            	    47: .set xNoseV, 0x30
+                            	    48: .set xRoofV, 0x34
+                            	    49: .set xSideV, 0x38
+                            	    50: .set yNoseV, 0x3C
+                            	    51: .set yRoofV, 0x40
+                            	    52: .set ySideV, 0x44
+                            	    53: .set zNoseV, 0x48
+                            	    54: .set zRoofV, 0x4C
+                            	    55: .set zSideV, 0x50
+                            	    56: .set xVertex, 0x54
+                            	    57: .set yVertex, 0x58
+                            	    58: .set zVertex, 0x5C
+                            	    59: .set xVertexRotated, 0x64
+                            	    60: .set yVertexRotated, 0x68
+                            	    61: .set zVertexRotated, 0x6C
+                            	    62: .set xCoord, 0x74
+                            	    63: .set yCoord, 0x78
+                            	    64: .set zCoord, 0x7C
+                            	    65: .set xObjectScaled, 0x84
+                            	    66: .set yObjectScaled, 0x88
+                            	    67: .set zObjectScaled, 0x8C
+                            	    68: .set xPlayer, 0x94
+                            	    69: .set yPlayer, 0x98
+                            	    70: .set zPlayer, 0x9C
+                            	    71: .set xVelocity, 0xA0
+                            	    72: .set yVelocity, 0xA4
+                            	    73: .set zVelocity, 0xA8
+                            	    74: .set xThrust, 0xAC
+                            	    75: .set yThrust, 0xB0
+                            	    76: .set zThrust, 0xB4
+                            	    77: .set previousColumn, 0xC4
+                            	    78: .set tileCornerRow, 0xE4
+                            	    79: .set unusedConfig, 0xF0
+                            	    80: .set objectType, 0xF4
+                            	    81: .set tileRowOddEven, 0xF8
+                            	    82: .set altitude, 0x100
+                            	    83: .set prevAltitude, 0x104
+                            	    84: .set particleEnd, 0x108
+                            	    85: .set particleCount, 0x10C
+                            	    86: .set objectData, 0x110
+                            	    87: .set objectFlags, 0x114
+                            	    88: .set mainLoopCount, 0x118
+                            	    89: .set crashLoopCount, 0x11C
+                            	    90: .set crashedFlag, 0x120
+                            	    91: .set currentScore, 0x124
+                            	    92: .set fuelLevel, 0x128
+                            	    93: .set gravity, 0x12C
+                            	    94: .set playingGame, 0x130
+                            	    95: .set remainingLives, 0x134
+                            	    96: .set highScore, 0x138
+                            	    97: .set xCamera, 0x13C
+                            	    98: .set yCamera, 0x140
+                            	    99: .set zCamera, 0x144
+                            	   100: .set xCameraTile, 0x148
+                            	   101: .set yCameraTile, 0x14C
+                            	   102: .set zCameraTile, 0x150
+                            	   103: .set shipDirection, 0x154
+                            	   104: .set shipPitch, 0x158
+                            	   105: .set fuelBurnRate, 0x15C
+                            	   106: .set xLandscapeRow, 0x160
+                            	   107: .set yLandscapeRow, 0x164
+                            	   108: .set zLandscapeRow, 0x168
+                            	   109: .set xLandscapeCol, 0x170
+                            	   110: .set yLandscapeCol, 0x174
+                            	   111: .set zLandscapeCol, 0x178
+                            	   112: .set stringBuffer, 0x200
+                            	   113: .set cornerStore1, 0x400
+                            	   114: .set cornerStore2, 0x500
+                            	   115: .set vertexProjected, 0x600
+                            	   116: .set particleData, 0x700
+                            	   117: .set objectMap, 0x4400
+                            	   118: .set buffers, 0x14400
                             	   119: .org     CODE
                             	   120: landscapeOffset:
 00:00008000 000080FA        	   121: .long    -LANDSCAPE_X
@@ -161,65 +161,65 @@ Source: "3-assembled-output/Lander.arm"
                             	   134: landscapeConfigAddr:
 00:00008028 10800000        	   135: .long    landscapeConfig
                             	   136: graphicsBuffers:
-                            	   137: .set buffer, buffersAddr
+                            	   137: .set buffer, workspace + buffers
                             	   138: .rept TILES_Z + 1
                             	   139: .long   buffer
-                            	   140: .set buffer, buffer + bufferSize
+                            	   140: .set buffer, buffer + BUFFER_SIZE
                             	   141: .endr
 00:0000802C 00660200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008030 D4760200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008034 A8870200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008038 7C980200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:0000803C 50A90200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008040 24BA0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008044 F8CA0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008048 CCDB0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:0000804C A0EC0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008050 74FD0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008054 480E0300        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008058 1C1F0300        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
                             	   142: graphicsBuffersEnd:
-                            	   143: .set buffer, buffersAddr
+                            	   143: .set buffer, workspace + buffers
                             	   144: .rept TILES_Z + 1
                             	   145: .long   buffer
-                            	   146: .set buffer, buffer + bufferSize
+                            	   146: .set buffer, buffer + BUFFER_SIZE
                             	   147: .endr
 00:0000805C 00660200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008060 D4760200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008064 A8870200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008068 7C980200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:0000806C 50A90200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008070 24BA0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008074 F8CA0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008078 CCDB0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:0000807C A0EC0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008080 74FD0200        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008084 480E0300        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
 00:00008088 1C1F0300        	     1R .long   buffer
-                            	     2R .set buffer, buffer + bufferSize
+                            	     2R .set buffer, buffer + BUFFER_SIZE
                             	   148: DrawLandscapeAndBuffers:
 00:0000808C E0432DE9        	   149:  STMFD   R13!, {R5-R9, R14}
 00:00008090 44319BE5        	   150:  LDR     R3, [R11, #zCamera]
@@ -10328,6 +10328,7 @@ AddTerminatorsToBuffers          A:00009CFC
 AddVectorToVertices              A:0000991C
 AddVectors                       A:000098F8
 AddVectorsWithFeedback           A:000093B4
+BUFFER_SIZE                      S:000010D4
 BounceParticle                   A:00008998
 CAMERA_PLAYER_Z                  S:05000000
 CODE                             S:00008000
@@ -10435,8 +10436,7 @@ arctanTableAddr                  A:000091F4
 bank1                            A:00009DAC
 buffer                           S:00032FF0
 bufferJump                       A:00009C8C
-bufferSize                       S:000010D4
-buffersAddr                      S:00026600
+buffers                          S:00014400
 cornerStore1                     S:00000400
 cornerStore2                     S:00000500
 crashLoopCount                   S:0000011C
@@ -10700,13 +10700,13 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 OS_WriteC
 00000000 LANDSCAPE_Y
 00000000 xObject
+00000000 OS_WriteC
 00000001 OS_WriteS
 00000004 OS_ReadC
-00000006 HALF_TILES_X
 00000006 OS_Byte
+00000006 HALF_TILES_X
 00000007 OS_Word
 00000008 zObject
 00000009 LAUNCHPAD_OBJECT
@@ -10714,8 +10714,8 @@ Symbols by value:
 0000000D TILES_X
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 xNoseV
 00000030 rotationMatrix
+00000030 xNoseV
 00000034 xRoofV
 00000038 xSideV
 0000003C yNoseV
@@ -10724,8 +10724,8 @@ Symbols by value:
 00000048 zNoseV
 0000004C zRoofV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10776,10 +10776,10 @@ Symbols by value:
 00000500 cornerStore2
 00000600 vertexProjected
 00000700 particleData
-000010D4 bufferSize
+000010D4 BUFFER_SIZE
 00004400 objectMap
-00008000 CODE
 00008000 landscapeOffset
+00008000 CODE
 0000800C landscapeOffsetAddr
 00008010 landscapeConfig
 00008028 landscapeConfigAddr
@@ -11061,7 +11061,7 @@ Symbols by value:
 0000DA10 divisionTable
 000121FC stack
 00012200 workspace
-00026600 buffersAddr
+00014400 buffers
 00032FF0 buffer
 00080000 SMOKE_RISING_SPEED
 00100000 SPLASH_HEIGHT
