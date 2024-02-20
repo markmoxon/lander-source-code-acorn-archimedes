@@ -9,6 +9,7 @@
 .set LANDING_SPEED, 0x00200000
 .set SMOKE_RISING_SPEED, 0x00080000
 .set UNDERCARRIAGE_Y, 0x00640000
+.set BUFFER_SIZE, 4308
 .set LAUNCHPAD_Y, LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y
 .set LAUNCHPAD_SIZE, TILE_SIZE * 8
 .set HIGHEST_ALTITUDE, TILE_SIZE * 52
@@ -38,8 +39,6 @@
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
 .set stack, 0x000121FC
-.set buffersAddr, 0x00026600
-.set bufferSize, (4308 * 12 / (TILES_Z + 1)) 0x0x 0xFFFC
 .set workspace, stack + 4
 .set xObject, 0x00
 .set yObject, 0x04
@@ -116,6 +115,7 @@
 .set vertexProjected, 0x600
 .set particleData, 0x700
 .set objectMap, 0x4400
+.set buffers, 0x14400
 .org     CODE
 landscapeOffset:
 .long    -LANDSCAPE_X
@@ -134,16 +134,16 @@ landscapeConfig:
 landscapeConfigAddr:
 .long    landscapeConfig
 graphicsBuffers:
-.set buffer, buffersAddr
+.set buffer, workspace + buffers
 .rept TILES_Z + 1
 .long   buffer
-.set buffer, buffer + bufferSize
+.set buffer, buffer + BUFFER_SIZE
 .endr
 graphicsBuffersEnd:
-.set buffer, buffersAddr
+.set buffer, workspace + buffers
 .rept TILES_Z + 1
 .long   buffer
-.set buffer, buffer + bufferSize
+.set buffer, buffer + BUFFER_SIZE
 .endr
 DrawLandscapeAndBuffers:
  STMFD   R13!, {R5-R9, R14}

@@ -61,6 +61,9 @@
                                     \ from the centre of the ship to the bottom
                                     \ of the ship
 
+ BUFFER_SIZE = 4308                 \ The size of each of the graphics buffers
+                                    \ in bytes
+
 \ ******************************************************************************
 \
 \ Calculated constants
@@ -192,13 +195,6 @@
                                     \ game code and descends from this address
                                     \ down to &00012000 (to give a stack size of
                                     \ 512 32-bit entries)
-
- buffersAddr = &00026600            \ The address of the graphics buffers
-
- bufferSize = (4308 * 12 / (TILES_Z + 1)) && &FFFC  \ The size of each of the
-                                                    \ graphics buffers in words,
-                                                    \ keeping the total size of
-                                                    \ all the buffers constant
 
  workspace = stack + 4              \ The variable workspace starts just after
                                     \ the top of the stack
@@ -487,7 +483,7 @@
  cornerStore2 = &500                \ Storage for coordinates of tile corners as
                                     \ we work our way through the landscape
 
- vertexProjected = &600             \ Projected vertices
+ vertexProjected = &600             \ Storage for projected vertices
 
  particleData = &700                \ The particle data buffer, which stores
                                     \ eight data bytes for each on-screen
@@ -495,7 +491,11 @@
 
  objectMap = &4400                  \ The object map determines which objects
                                     \ appear on the landscape, where objects are
-                                    \ trees, buildings, rockets and so on
+                                    \ trees, buildings, rockets and so on (size
+                                    \ of object map is 256 * 256 bytes = &10000)
+
+ buffers = &14400                   \ The graphics buffers, one for each tile
+                                    \ corner row (so there are TILE_Z of them)
 
 \ ******************************************************************************
 \
@@ -604,14 +604,14 @@
                                     \ corner row (and the game also adds an
                                     \ unused spare buffer)
 
- buffer = buffersAddr               \ The graphics buffers live at the address
+ buffer = workspace + buffers       \ The graphics buffers live at the address
                                     \ given in the buffersAddr variable
 
  FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
 
   EQUD   buffer                     \ Insert the address of the buffer
 
-  buffer = buffer + bufferSize      \ Move on to the next buffer
+  buffer = buffer + BUFFER_SIZE     \ Move on to the next buffer
 
  NEXT                               \ Repeat until we have inserted addresses of
                                     \ all the graphics buffers
@@ -632,14 +632,14 @@
                                     \ corner row (and the game also adds an
                                     \ unused spare buffer)
 
- buffer = buffersAddr               \ The graphics buffers live at the address
+ buffer = workspace + buffers       \ The graphics buffers live at the address
                                     \ given in the buffersAddr variable
 
  FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
 
   EQUD   buffer                     \ Insert the address of the buffer
 
-  buffer = buffer + bufferSize      \ Move on to the next buffer
+  buffer = buffer + BUFFER_SIZE     \ Move on to the next buffer
 
  NEXT                               \ Repeat until we have inserted addresses of
                                     \ all the graphics buffers
