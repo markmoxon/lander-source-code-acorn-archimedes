@@ -10,6 +10,7 @@
 .set SMOKE_RISING_SPEED, 0x00080000
 .set UNDERCARRIAGE_Y, 0x00640000
 .set BUFFER_SIZE, 4308
+.set STORE, 256 * (TILES_X / 32)
 .set LAUNCHPAD_Y, LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y
 .set LAUNCHPAD_SIZE, TILE_SIZE * 8
 .set HIGHEST_ALTITUDE, TILE_SIZE * 52
@@ -111,11 +112,11 @@
 .set zLandscapeCol, 0x178
 .set stringBuffer, 0x200
 .set cornerStore1, 0x400
-.set cornerStore2, 0x500
-.set vertexProjected, 0x600
-.set particleData, 0x700
-.set objectMap, 0x4400
-.set buffers, 0x14400
+.set cornerStore2, 0x500 + STORE
+.set vertexProjected, 0x600 + STORE * 2
+.set particleData, 0x700 + STORE * 2
+.set objectMap, 0x4400 + STORE * 2
+.set buffers, 0x14400 + STORE * 2
 .org     CODE
 landscapeOffset:
 .long    -LANDSCAPE_X
