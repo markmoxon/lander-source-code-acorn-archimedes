@@ -1,5 +1,5 @@
 .set CODE, 0x00008000
-.set Entry, 0x0000A614
+.set Entry, 0x0000A824
 .org CODE
  B       DecryptGameBinary
 gameCode:
