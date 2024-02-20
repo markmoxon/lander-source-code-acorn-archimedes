@@ -45,10 +45,10 @@
 
                                     \ --- And replaced by: -------------------->
 
- TILES_X = 53                       \ The number of tile corners in a landscape
+ TILES_X = 63                       \ The number of tile corners in a landscape
                                     \ row from left to right (i.e. 12 tiles)
 
- TILES_Z = 53                       \ The number of tile corners in a landscape
+ TILES_Z = 63                       \ The number of tile corners in a landscape
                                     \ row from front to back (i.e. 10 tiles)
 
                                     \ --- End of replacement ------------------>
