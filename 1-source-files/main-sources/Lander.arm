@@ -153,12 +153,9 @@
                                                         \ the front of the
                                                         \ visible landscape
 
- LANDSCAPE_Z_MID = LANDSCAPE_Z - LANDSCAPE_Z_DEPTH / 2  \ The z-coordinate of
-                                                        \ the mid-point from
-                                                        \ the back of the
-                                                        \ visible landscape to
-                                                        \ the front (15 tile
-                                                        \ sizes)
+ LANDSCAPE_Z_MID = LANDSCAPE_Z - CAMERA_PLAYER_Z    \ The z-coordinate of the
+                                                    \ mid-point of the landscape
+                                                    \ depth (i.e. the player)
 
 \ ******************************************************************************
 \
@@ -1530,14 +1527,17 @@
  MOVEQ   R2, #4                     \ red and green are zero
  MOVEQ   R0, #0
 
- LDRB    R8, [R11, #tileCornerRow]  \ Set the tile's brightness in R3 to:
- ADD     R3, R8, R14, LSR #22       \
+ LDRB    R8, [R11, #tileCornerRow]  \ Set R8 to the number of the tile corner
+                                    \ row that we're processing (so it goes from
+                                    \ 0 at the back to TILES_Z - 1 at the front,
+                                    \ or 0 to 10)
+
+ ADD     R3, R8, R14, LSR #22       \ Set the tile's brightness in R3 to:
+                                    \
                                     \   tileCornerRow + slope >> 22
                                     \
-                                    \ where tileCornerRow is the number of the
-                                    \ tile corner row that we're processing (so
-                                    \ it goes from 0 at the back to 11 at the
-                                    \ front)
+                                    \ where tileCornerRow is 0 at the back and
+                                    \ TILES_Z - 1 at the front
                                     \
                                     \ As we draw the landscape from back to
                                     \ front and left to right, this means that:

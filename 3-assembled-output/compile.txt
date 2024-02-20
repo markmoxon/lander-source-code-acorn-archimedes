@@ -34,7 +34,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    29: .set LANDSCAPE_Z_DEPTH, TILE_SIZE * (TILES_Z - 1)
                             	    30: .set LANDSCAPE_Z_BEYOND, TILE_SIZE * TILES_Z
                             	    31: .set LANDSCAPE_Z_FRONT, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH
-                            	    32: .set LANDSCAPE_Z_MID, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH / 2
+                            	    32: .set LANDSCAPE_Z_MID, LANDSCAPE_Z - CAMERA_PLAYER_Z
                             	    33: .set OS_WriteC, 0x00
                             	    34: .set OS_WriteS, 0x01
                             	    35: .set OS_ReadC, 0x04
