@@ -578,7 +578,7 @@
 
  NEXT
 
- EQUB    &E3, TILES_X               \ Tile row #TILES_X
+ EQUB    &E3, TILES_X               \ Tile row #TILES_Z
 
  ALIGN
 
@@ -1626,7 +1626,8 @@
 
  ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
  ORR     R8, R8, R8, LSL #16        \ other three bytes in the word to produce
- ORR     R8, R8, R8, LSL #24        \ a VIDC palette word
+ ORR     R8, R8, R8, LSL #24        \ a four-pixel colour word containing four
+                                    \ pixels of this colour
 
  LDMFD   R13!, {R0-R4, PC}          \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -5441,7 +5442,8 @@
 
  ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
  ORR     R8, R8, R8, LSL #16        \ other three bytes in the word to produce
- ORR     R8, R8, R8, LSL #24        \ a VIDC palette word
+ ORR     R8, R8, R8, LSL #24        \ a four-pixel colour word containing four
+                                    \ pixels of this colour
 
                                     \ Finally we can draw the face, using the
                                     \ colour in R8
@@ -5663,7 +5665,7 @@
 \       Name: fuelBarColour
 \       Type: Variable
 \   Category: Score bar
-\    Summary: A pixel word for the colour of the fuel bar
+\    Summary: A four-pixel colour word for the colour of the fuel bar
 \
 \ ******************************************************************************
 
@@ -5744,9 +5746,10 @@
  ADD     R11, R7, #320              \ Set R11 to the address in R7, plus 320 to
                                     \ move it down by one pixel line
 
- LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
-                                    \ poke into screen memory to draw a pixel in
-                                    \ the correct colour for the fuel bar
+ LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+                                    \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
 
  MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
                                     \         = fuel level * 16
@@ -5759,9 +5762,10 @@
  ADD     R11, R7, #2*320            \ Set R11 to the address in R7, plus 640 to
                                     \ move it down by two pixel lines
 
- LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
-                                    \ poke into screen memory to draw a pixel in
-                                    \ the correct colour for the fuel bar
+ LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+                                    \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
 
  MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
                                     \         = fuel level * 16
@@ -5774,9 +5778,10 @@
  ADD     R11, R7, #3*320            \ Set R11 to the address in R7, plus 960 to
                                     \ move it down by two pixel lines
 
- LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
-                                    \ poke into screen memory to draw a pixel in
-                                    \ the correct colour for the fuel bar
+ LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+                                    \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
 
  MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
                                     \         = fuel level * 16
@@ -7695,7 +7700,7 @@
 \       Name: greyColourWords
 \       Type: Variable
 \   Category: Drawing the screen
-\    Summary: An unused table of grey colour words
+\    Summary: An unused table of grey four-pixel colour words
 \
 \ ******************************************************************************
 
@@ -7727,7 +7732,8 @@
 \       Name: greyColourWordsAddr
 \       Type: Variable
 \   Category: Drawing the screen
-\    Summary: The unused address of the unused table of grey colour words
+\    Summary: The unused address of the unused table of grey four-pixel colour
+\             words
 \
 \ ******************************************************************************
 
@@ -9573,8 +9579,8 @@
 
  BLPL    DrawHorizontalLine         \ If R10 is positive then we draw a line
                                     \ from the left edge to the right edge,
-                                    \ using the colour word that was passed to
-                                    \ the DrawTriangle routine in R8
+                                    \ using the four-pixel colour word that was
+                                    \ passed to the DrawTriangle routine in R8
 
  SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
                                     \ points to the start of the pixel row above
@@ -9848,8 +9854,8 @@
 
  BLPL    DrawHorizontalLine         \ If R10 is positive then we draw a line
                                     \ from the left edge to the right edge,
-                                    \ using the colour word that was passed to
-                                    \ the DrawTriangle routine in R8
+                                    \ using the four-pixel colour word that was
+                                    \ passed to the DrawTriangle routine in R8
 
  SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
                                     \ points to the start of the pixel row above
@@ -11309,7 +11315,7 @@
                                     \
                                     \   R7 = right edge slope
                                     \
-                                    \   R8 = colour word
+                                    \   R8 = four-pixel colour word
                                     \
                                     \   R9 = the delta y-coordinate between
                                     \        (x1, y1) and (x2, y2), which
@@ -11433,8 +11439,8 @@
 
  CMP     R10, #0                    \ If R10 is positive then we draw a line
  BLPL    DrawHorizontalLine         \ from the left edge to the right edge,
-                                    \ using the colour word that was passed to
-                                    \ the DrawTriangle routine in R8
+                                    \ using the four-pixel colour word that was
+                                    \ passed to the DrawTriangle routine in R8
 
 .trin47
 
@@ -11499,7 +11505,8 @@
 \
 \ Arguments:
 \
-\   R8                              Line colour (in the form of a pixel word)
+\   R8                              Line colour (in the form of a four-pixel
+\                                   colour word)
 \
 \   R10                             Line length
 \
@@ -11640,7 +11647,8 @@
 \
 \ Arguments:
 \
-\   R8                              Line colour (in the form of a pixel word)
+\   R8                              Line colour (in the form of a four-pixel
+\                                   colour word)
 \
 \   R11                             Screen address of left end of line
 \
