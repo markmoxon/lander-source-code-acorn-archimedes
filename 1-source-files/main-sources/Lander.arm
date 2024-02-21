@@ -5751,8 +5751,8 @@
                                     \ four pixels in the correct colour for the
                                     \ fuel bar
 
- MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
-                                    \         = fuel level * 16
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+                                    \         = fuel level / 16
 
  BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
                                     \ starting at screen address R11 and drawing
@@ -5767,8 +5767,8 @@
                                     \ four pixels in the correct colour for the
                                     \ fuel bar
 
- MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
-                                    \         = fuel level * 16
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+                                    \         = fuel level / 16
 
  BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
                                     \ starting at screen address R11 and drawing
@@ -5783,8 +5783,8 @@
                                     \ four pixels in the correct colour for the
                                     \ fuel bar
 
- MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
-                                    \         = fuel level * 16
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+                                    \         = fuel level / 16
 
  BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
                                     \ starting at screen address R11 and drawing
