@@ -658,6 +658,7 @@
 \   Category: Landscape
 \    Summary: Draw the landscape and the contents of the graphics buffers, from
 \             the back of the screen to the front
+\  Deep dive: Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -857,6 +858,7 @@
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: Draw a row of landscape tiles
+\  Deep dive: Drawing the landscape
 \
 \ ******************************************************************************
 
@@ -949,7 +951,10 @@
  STMIA   R7!, {R0-R1}               \ Store the corner coordinates in (R0, R1)
                                     \ in R7, updating R7 as we go, as R7 is
                                     \ where we store the tile corner pixel
-                                    \ coordinates as we go
+                                    \ coordinates as we go (so this stores the
+                                    \ corner coordinates in either cornerStore1
+                                    \ or cornerStore2, so we can fetch them when
+                                    \ we process the next tile corner row)
 
  CMP     R6, #0                     \ If R6 = 0 then this is either the very
  BEQ     land4                      \ first tile corner row, or we have already
@@ -966,7 +971,9 @@
                                     \ into (R2, R3), updating R6 as we go, so
                                     \ this fetches the corresponding corner
                                     \ pixel coordinates from the previous tile
-                                    \ corner row
+                                    \ corner row (i.e. from the opposite corner
+                                    \ store to the one where we just stored this
+                                    \ row's coordinate)
 
  CMP     R2, #&80000000             \ If R2 = &80000000 then we have reached the
  MOVEQ   R6, #0                     \ end of the storage in R6, so set R6 = 0
@@ -1057,6 +1064,7 @@
 \   Category: Landscape
 \    Summary: Draw the objects in the graphics buffers for two rows behind the
 \             current corner row
+\  Deep dive: Drawing the landscape
 \
 \ ******************************************************************************
 
@@ -1129,6 +1137,7 @@
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: Draw the remaining graphics buffers
+\  Deep dive: Drawing the landscape
 \
 \ ******************************************************************************
 
@@ -1150,6 +1159,7 @@
 \   Category: Landscape
 \    Summary: Calculate the altitude of the landscape for a given coordinate
 \  Deep dive: Generating the landscape
+\             Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1449,6 +1459,7 @@
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: Calculate the colour of the landscape tile currently being drawn
+\  Deep dive: Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1476,17 +1487,18 @@
                                     \
                                     \   R14 = min(0, prevAltitude - altitude)
                                     \
-                                    \ So if the slope is going down from the
-                                    \ previous point to the current one, then
-                                    \ the slope will be non-zero, but if it is
-                                    \ going up from the previous point to the
-                                    \ current one, it will be zero
+                                    \ The y-axis that measures altitude goes
+                                    \ down the screen (counterintuitively), so
+                                    \ if prevAltitude has a bigger value than
+                                    \ altitude, this means the previous point
+                                    \ is lower down than the current point
                                     \
                                     \ As we draw the landscape from left to
-                                    \ right, this means the slope will be large
-                                    \ for tiles that face left, with a greater
-                                    \ value for steeper slopes, while tiles that
-                                    \ face right will have a slope value of zero
+                                    \ right, this means the slope value will be
+                                    \ non-zero for tiles that face left, with a
+                                    \ greater value for steeper slopes, while
+                                    \ tiles that face right will have a slope
+                                    \ value of zero
 
                                     \ We now calculate the colour, with the red,
                                     \ green and blue channels in R0, R1 and R2
@@ -1535,15 +1547,18 @@
  MOVEQ   R0, #0
 
  LDRB    R8, [R11, #tileCornerRow]  \ Set R8 to the number of the tile corner
-                                    \ row that we're processing (so it goes from
-                                    \ 0 at the back to TILES_Z - 1 at the front,
-                                    \ or 0 to 10)
+                                    \ row that we're processing, so it goes from
+                                    \ 1 at the back to TILES_Z - 1 at the front,
+                                    \ or 1 to 10 (it doesn't start at zero as we
+                                    \ don't draw any tiles for the very first
+                                    \ row of tile corners, so we don't call this
+                                    \ routine)
 
  ADD     R3, R8, R14, LSR #22       \ Set the tile's brightness in R3 to:
                                     \
                                     \   tileCornerRow + slope >> 22
                                     \
-                                    \ where tileCornerRow is 0 at the back and
+                                    \ where tileCornerRow is 1 at the back and
                                     \ TILES_Z - 1 at the front
                                     \
                                     \ As we draw the landscape from back to
@@ -2652,7 +2667,7 @@
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawParticles (Part 1 of 2)
+\       Name: MoveAndDrawParticles (Part 1 of 4)
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Process particle movement and draw the particles into the graphics
@@ -2768,7 +2783,7 @@
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawParticles (Part 2 of 2)
+\       Name: MoveAndDrawParticles (Part 2 of 4)
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Draw particles (including rocks) into the graphics buffers
@@ -2806,7 +2821,7 @@
 
  CMP     R2, #LANDSCAPE_Z_FRONT     \ If the z-coordinate of the particle in R2
  BLO     dpar1                      \ is closer to us than LANDSCAPE_Z_FRONT,
-                                    \ then it is closed than the front of the
+                                    \ then it is closer than the front of the
                                     \ visible landscape, so jump to dpar1 to
                                     \ move on to the next particle in the buffer
 
@@ -4700,11 +4715,21 @@
 
  CMP     R0, #SEA_LEVEL             \ If the object is on the sea, jump back to
  BEQ     dobs3                      \ dobs3 to move on to the next object, as
-                                    \ there are no objects on the sea (though
-                                    \ there shouldn't be any objects in the sea
-                                    \ in the object map anyway, as this check is
-                                    \ also performed when populating the object
-                                    \ map)
+                                    \ there are no objects on the sea
+                                    \
+                                    \ This check sounds unnecessary as there
+                                    \ shouldn't be any objects in the sea in the
+                                    \ object map anyway, as this check is also
+                                    \ performed when populating the object map
+                                    \
+                                    \ However, because the landscape in Lander
+                                    \ is infinite but the object map is finite,
+                                    \ the object map gets repeated every 256
+                                    \ tiles in each direction, and objects that
+                                    \ appear on land in one instance of the
+                                    \ object may well appear in the sea in
+                                    \ another instance, so this check prevents
+                                    \ that from happening
 
  LDR     R14, [R11, #xCamera]       \ Set R0 = R8 - xCamera
  SUB     R0, R8, R14                \        = x - xCamera
@@ -6948,6 +6973,8 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Project a vertex coordinate from a 3D object onto the screen
+\  Deep dive: Drawing 3D objects
+\             Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -9026,6 +9053,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a quadrilateral (i.e. two triangles)
+\  Deep dive: Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
