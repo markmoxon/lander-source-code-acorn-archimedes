@@ -2217,7 +2217,7 @@
                                     \   * Bit 19 set = bounce on ground
                                     \   * Bit 20 set = apply gravity to particle
 
- MOV     R6, #8                     \ Set the particle's existence counter to 8
+ MOV     R6, #8                     \ Set the particle's lifespan counter to 8
                                     \ iterations of the main loop
 
  MOV     R8, #10                    \ Set the random element of the particle's
@@ -2225,7 +2225,7 @@
                                     \ i.e. -&400000 to +&400000
 
  MOV     R9, #29                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 29),
+                                    \ lifespan to the range 0 to 2^(32 - 29),
                                     \ i.e. 0 to 8
 
  STMFD   R13!, {R0-R9}              \ Store R0 to R9 on the stack so we can
@@ -2359,7 +2359,7 @@
                                     \ vector, so the bullet fires out of the end
                                     \ of the gun
 
- MOV     R6, #20                    \ Set the bullet particle's existence
+ MOV     R6, #20                    \ Set the bullet particle's lifespan
                                     \ counter to 20 iterations of the main loop
 
  MOV     R7, #&01BC0000             \ Set bits 18, 19, 20, 21, 23 and 24 of the
@@ -2717,7 +2717,7 @@
                                     \
                                     \   (R3, R4, R5) = particle velocity
                                     \
-                                    \   R6 = particle existence counter
+                                    \   R6 = particle lifespan counter
                                     \
                                     \   R7 = particle flags
 
@@ -2729,7 +2729,7 @@
 
 .dpar2
 
- SUBS    R6, R6, #1                 \ Decrement the particle's existence counter
+ SUBS    R6, R6, #1                 \ Decrement the particle's lifespan counter
                                     \ in R6
 
  BEQ     DeleteParticleData         \ If R6 is now zero then the particle just
@@ -3019,7 +3019,7 @@
 \
 \ Arguments:
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3405,7 +3405,7 @@
 \
 \   (R3, R4, R5)                    Particle velocity
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3417,7 +3417,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3451,7 +3451,7 @@
 \
 \   (R3, R4, R5)                    Particle velocity
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3463,7 +3463,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3479,7 +3479,7 @@
  B       AddMovingParticleToBuffer  \ Add a moving particle to the particle data
                                     \ buffer that starts off moving along the
                                     \ exhaust vector, and with a random element
-                                    \ being added to its velocity and existence
+                                    \ being added to its velocity and lifespan
                                     \ counter, returning from the subroutine
                                     \ using a tail call
 
@@ -3489,7 +3489,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a particle to the particle data buffer that starts off static,
-\             adding a random element to its velocity and existence counter
+\             adding a random element to its velocity and lifespan counter
 \  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
@@ -3498,7 +3498,7 @@
 \
 \   (R0, R1, R2)                    Particle coordinate
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3520,7 +3520,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3543,7 +3543,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a particle to the particle data buffer that initially drifts
-\             up, with a random element to its velocity and existence counter
+\             up, with a random element to its velocity and lifespan counter
 \  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
@@ -3554,7 +3554,7 @@
 \
 \   R4                              Particle velocity in the y-axis (up-down)
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3576,7 +3576,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3600,7 +3600,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a moving particle to the particle data buffer, adding a random
-\             element to its velocity and existence counter
+\             element to its velocity and lifespan counter
 \  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
@@ -3611,7 +3611,7 @@
 \
 \   (R3, R4, R5)                    Particle velocity
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3633,7 +3633,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3675,7 +3675,7 @@
                                     \ increase or decrease R5
 
                                     \ We now add a random positive element to
-                                    \ the particle's existence counter in R6,
+                                    \ the particle's lifespan counter in R6,
                                     \ with the scale determined by R9 (so a
                                     \ larger R9 adds a smaller random element
                                     \ to the particle's lifespan)
@@ -3706,7 +3706,7 @@
 \
 \   (R3, R4, R5)                    Particle velocity
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3865,20 +3865,20 @@
                                     \ stored above into (R0, R1, R2)
 
  MOV     R9, #25                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 25),
+                                    \ lifespan to the range 0 to 2^(32 - 25),
                                     \ i.e. 0 to 128
 
  MOV     R8, #13                    \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 13),
                                     \ i.e. -&80000 to +&80000
 
- MOV     R6, #15                    \ Set the particle's existence counter to 15
+ MOV     R6, #15                    \ Set the particle's lifespan counter to 15
                                     \ iterations of the main loop
 
  B       AddRisingParticleToBuffer  \ Add a particle to the particle data buffer
                                     \ that initially drifts upwards, and with a
                                     \ random element being added to its velocity
-                                    \ and existence counter, returning from the
+                                    \ and lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -3986,20 +3986,20 @@
                                     \ stored above into (R0, R1, R2)
 
  MOV     R9, #26                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 26),
+                                    \ lifespan to the range 0 to 2^(32 - 26),
                                     \ i.e. 0 to 64
 
  MOV     R8, #10                    \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 10),
                                     \ i.e. -&400000 to +&400000
 
- MOV     R6, #15                    \ Set the particle's existence counter to 15
+ MOV     R6, #15                    \ Set the particle's lifespan counter to 15
                                     \ iterations of the main loop
 
  B       AddStaticParticleToBuffer  \ Add a particle to the particle data buffer
                                     \ that starts off static, and with a random
                                     \ element being added to its velocity and
-                                    \ existence counter, returning from the
+                                    \ lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -4113,21 +4113,21 @@
                                     \ stored above into (R0, R1, R2)
 
  MOV     R9, #27                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 27),
+                                    \ lifespan to the range 0 to 2^(32 - 27),
                                     \ i.e. 0 to 32
 
  MOV     R8, #10                    \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 10),
                                     \ i.e. -&400000 to +&400000
 
- MOV     R6, #170                   \ Set the particle's existence counter to
+ MOV     R6, #170                   \ Set the particle's lifespan counter to
                                     \ 170 iterations of the main loop, so it
                                     \ won't disappear before it hits the ground
 
  B       AddStaticParticleToBuffer  \ Add a rock to the particle data buffer
                                     \ that starts off static, and with a random
                                     \ element being added to its velocity and
-                                    \ existence counter, returning from the
+                                    \ lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -4162,20 +4162,20 @@
                                     \   * Bit 20 set = apply gravity to particle
 
  MOV     R9, #29                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 29),
+                                    \ lifespan to the range 0 to 2^(32 - 29),
                                     \ i.e. 0 to 8
 
  MOV     R8, #8                     \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 8),
                                     \ i.e. -&1000000 to +&1000000
 
- MOV     R6, #8                     \ Set the particle's existence counter to 8
+ MOV     R6, #8                     \ Set the particle's lifespan counter to 8
                                     \ iterations of the main loop
 
  B       AddStaticParticleToBuffer  \ Add a particle to the particle data buffer
                                     \ that starts off static, and with a random
                                     \ element being added to its velocity and
-                                    \ existence counter, returning from the
+                                    \ lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -4270,20 +4270,20 @@
                                     \ stored above into (R0, R1, R2)
 
  MOV     R9, #26                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 26),
+                                    \ lifespan to the range 0 to 2^(32 - 26),
                                     \ i.e. 0 to 64
 
  MOV     R8, #10                    \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 10),
                                     \ i.e. -&400000 to +&400000
 
- MOV     R6, #20                    \ Set the particle's existence counter to 20
+ MOV     R6, #20                    \ Set the particle's lifespan counter to 20
                                     \ iterations of the main loop
 
  B       AddStaticParticleToBuffer  \ Add a particle to the particle data buffer
                                     \ that starts off static, and with a random
                                     \ element being added to its velocity and
-                                    \ existence counter, returning from the
+                                    \ lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
