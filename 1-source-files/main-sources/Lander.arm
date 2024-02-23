@@ -2351,7 +2351,7 @@
                                     \   = xPlayer - xVelocity + xGun / 256
                                     \
                                     \ So this sets (R0, R1, R2) to a coordinate
-                                    \ that's back by the player's velocity
+                                    \ that's moved back by the player's velocity
                                     \ (which takes us to the point where the
                                     \ ship was before we moved it in this
                                     \ iteration, which is where we would expect
@@ -2536,11 +2536,11 @@
                                     \ calls to drop rocks from the sky, draw the
                                     \ player's ship or update the fuel level)
 
-                                    \ We start by setting up the rotation matrix
-                                    \ for the particle clouds, using the main
-                                    \ loop counter to generate rotation angles
-                                    \ that change along with the main loop (so
-                                    \ the clouds rotate at a nice steady speed)
+                                    \ We now set up the rotation matrix for the
+                                    \ rocks, using the main loop counter to
+                                    \ generate rotation angles that change along
+                                    \ with the main loop (so the rocks spin at a
+                                    \ nice steady speed)
 
  LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24
  MOV     R0, R0, LSL #24
@@ -2549,7 +2549,11 @@
 
  BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
                                     \ "angles" given in R0 and R1, which we can
-                                    \ apply to the particle clouds
+                                    \ apply to any rocks we draw in the
+                                    \ MoveAndDrawParticles routine (as rocks are
+                                    \ only rotating 3D objects apart from the
+                                    \ player, and the player calculates its own
+                                    \ rotation matrix)
 
  BL      MoveAndDrawParticles       \ Move and draw all the particles, such as
                                     \ smoke clouds and bullets, into the
@@ -3683,21 +3687,13 @@
 \
 \   (R0, R1, R2)                    Particle coordinate
 \
+\   (R3, R4, R5)                    Particle velocity
+\
 \   R6                              Particle existence counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
 \   R7                              Particle flags
-\
-\   R8                              Magnitude of the random element that's added
-\                                   to the velocity, with a larger figure giving
-\                                   a smaller random element; the actual range
-\                                   is +/- 2^(32 - R8)
-\
-\   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
-\                                   figure giving a smaller random element; the
-\                                   actual range is 0 to 2^(32 - R9)
 \
 \   Stack                           Contains a value to restore into R8 at the
 \                                   end, and the return address
@@ -12306,10 +12302,10 @@
                                     \ the graphics buffers
 
                                     \ We now set up the rotation matrix for the
-                                    \ particle clouds, using the main loop
-                                    \ counter to generate rotation angles that
-                                    \ change along with the main loop (so the
-                                    \ clouds rotate at a nice steady speed)
+                                    \ rocks, using the main loop counter to
+                                    \ generate rotation angles that change along
+                                    \ with the main loop (so the rocks spin at a
+                                    \ nice steady speed)
 
  LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24
  MOV     R0, R0, LSL #24
@@ -12318,7 +12314,11 @@
 
  BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
                                     \ "angles" given in R0 and R1, which we can
-                                    \ apply to the particle clouds
+                                    \ apply to any rocks we draw in the
+                                    \ MoveAndDrawParticles routine (as rocks are
+                                    \ only rotating 3D objects apart from the
+                                    \ player, and the player calculates its own
+                                    \ rotation matrix)
 
  BL      DropRocksFromTheSky        \ If the score is 800 or more, then randomly
                                     \ drop rocks from the sky
