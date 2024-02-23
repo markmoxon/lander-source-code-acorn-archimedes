@@ -2502,6 +2502,7 @@
 \   Category: Main loop
 \    Summary: Display a crash animation when we lose a life and end the game if
 \             this is our last life
+\  Deep dive: The main game loop
 \
 \ ******************************************************************************
 
@@ -2676,6 +2677,7 @@
 \   Category: Particles
 \    Summary: Process particle movement and draw the particles into the graphics
 \             buffers, starting with the movement of particles
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2791,6 +2793,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Draw particles (including rocks) into the graphics buffers
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -2855,6 +2858,7 @@
 \    Summary: Process rocks by checking for collisions and drawing them as 3D
 \             objects
 \  Deep dive: Drawing 3D objects
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -2938,6 +2942,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Draw particles into the graphics buffers
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -3008,6 +3013,7 @@
 \   Category: Particles
 \    Summary: Set the flags for a particle whose colour fades from white to red
 \             over time, to give a white-hot explosion particle that cools down
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3124,6 +3130,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Bounce a particle off the ground
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3173,6 +3180,7 @@
 \   Category: Particles
 \    Summary: If this particle has hit an object, destroy the object and the
 \             particle in an explosion, scoring points if it's a bullet
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3269,6 +3277,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a small explosion to the particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3297,6 +3306,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Splash a particle into the sea, creating a spray particle
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3345,6 +3355,7 @@
 \   Category: Particles
 \    Summary: Delete a particle from the particle data buffer and move the last
 \             particle's data down to take its place
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3384,6 +3395,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a bullet particle to the particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3429,6 +3441,7 @@
 \   Category: Particles
 \    Summary: Add one of the moving particles in the exhaust plume to the
 \             particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3477,6 +3490,7 @@
 \   Category: Particles
 \    Summary: Add a particle to the particle data buffer that starts off static,
 \             adding a random element to its velocity and existence counter
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3530,6 +3544,7 @@
 \   Category: Particles
 \    Summary: Add a particle to the particle data buffer that initially drifts
 \             up, with a random element to its velocity and existence counter
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3586,6 +3601,7 @@
 \   Category: Particles
 \    Summary: Add a moving particle to the particle data buffer, adding a random
 \             element to its velocity and existence counter
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3680,6 +3696,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Store the data for a new particle in the particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3736,6 +3753,7 @@
 \       Type: Subroutine
 \   Category: Start and end
 \    Summary: Initialise the particle data buffer and associated variables
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -3759,6 +3777,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a smoke particle to the particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3869,6 +3888,7 @@
 \   Category: Particles
 \    Summary: Add a debris particle to the particle data buffer, which is a
 \             purple-brownish-green particle that bounces out of an explosion
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3989,6 +4009,7 @@
 \   Category: Particles
 \    Summary: Drop a rock from the specified coordinates by spawning it as a
 \             particle, albeit a very big particle with an associated 3D object
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4122,6 +4143,7 @@
 \ Arguments:
 \
 \   (R0, R1, R2)                    Particle coordinates
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -4168,6 +4190,7 @@
 \ Arguments:
 \
 \   (R0, R1, R2)                    Particle coordinates
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -4270,6 +4293,7 @@
 \   Category: Particles
 \    Summary: Create a big explosion of particles and add it to the particle
 \             data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4322,6 +4346,7 @@
 \   Category: Particles
 \    Summary: An unused routine that adds a 50-cluster explosion cloud to the
 \             particle data buffer, just front of the player's ship
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -12282,6 +12307,7 @@
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: The main game loop
+\  Deep dive: The main game loop
 \
 \ ******************************************************************************
 
