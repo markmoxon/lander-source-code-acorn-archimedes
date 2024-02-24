@@ -34,7 +34,7 @@ def convert(input_file, output_file):
         line = re.sub(r"^ *SKIP ", ".skip ", line)
 
         # FOR loop -> .rept
-        line = re.sub(r"^ *FOR I%, 0, ", ".rept ", line)
+        line = re.sub(r"^ *FOR I%, 1, ", ".rept ", line)
 
         # NEXT -> .endr
         line = re.sub(r"^ *NEXT", ".endr", line)

@@ -571,7 +571,7 @@
 
  EQUB    &3A, TILES_X               \ Tile row #0
 
- FOR I%, 0, (TILES_Z - 1) / 2
+ FOR I%, 1, (TILES_Z - 1) / 2
 
   EQUB   &E3, TILES_X               \ Tile row data (even)
   EQUB   &E4, TILES_X               \ Tile row data (odd)
@@ -608,13 +608,14 @@
 .graphicsBuffers
 
                                     \ We need a graphics buffer for each tile
-                                    \ corner row (and the game also adds an
-                                    \ unused spare buffer)
+                                    \ corner row, numbered 0 to 10 (and the game
+                                    \ also includes an extra buffer that is
+                                    \ unused)
 
  buffer = workspace + buffers       \ The graphics buffers live at the address
                                     \ given in the buffersAddr variable
 
- FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
+ FOR I%, 1, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
 
   EQUD   buffer                     \ Insert the address of the buffer
 
@@ -636,13 +637,14 @@
 .graphicsBuffersEnd
 
                                     \ We need a graphics buffer for each tile
-                                    \ corner row (and the game also adds an
-                                    \ unused spare buffer)
+                                    \ corner row, numbered 0 to 10 (and the game
+                                    \ also includes an extra buffer that is
+                                    \ unused)
 
  buffer = workspace + buffers       \ The graphics buffers live at the address
                                     \ given in the buffersAddr variable
 
- FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
+ FOR I%, 1, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
 
   EQUD   buffer                     \ Insert the address of the buffer
 
@@ -699,8 +701,8 @@
 \ So we draw the objects in graphics buffer 0 just after we process tile corner
 \ row 2, so that's just after we draw the tiles between corner rows 1 and 2.
 \
-\ Note that graphics buffer 11 is defined but is not used, as the landscape is
-\ only ten tile rows deep.
+\ Note that the game allocates memory to an extra graphics buffer, but only
+\ buffers numbers 0 to TILE_Z are used.
 \
 \ ******************************************************************************
 
@@ -2754,8 +2756,8 @@
  BLNE    SetParticleColourToFade    \ call SetParticleColourToFade to fade the
                                     \ particle colour from white to red,
                                     \ according to the particle's age, and store
-                                    \ the colour in the low byte of the particle
-                                    \ flags
+                                    \ the colour in the bottom byte of the
+                                    \ particle flags (bits 0 to 7)
 
  MOV     R8, R0                     \ Set (R8, R9) = (R0, R2) so we can fetch
  MOV     R9, R2                     \ the landscape altitude directly below the
@@ -8310,7 +8312,7 @@
                                     \ buffers, so higher z-coordinates map to
                                     \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
-                                    \ and buffer 11 is for the closest objects
+                                    \ and buffer 10 is for the closest objects
                                     \ to the viewer)
 
  ADD     R14, R14, #TILE_SIZE       \ Add the size of one tile to R14 so we draw
@@ -8429,7 +8431,7 @@
                                     \ buffers, so higher z-coordinates map to
                                     \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
-                                    \ and buffer 11 is for the closest objects
+                                    \ and buffer 10 is for the closest objects
                                     \ to the viewer)
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
@@ -8555,7 +8557,7 @@
                                     \ buffers, so higher z-coordinates map to
                                     \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
-                                    \ and buffer 11 is for the closest objects
+                                    \ and buffer 10 is for the closest objects
                                     \ to the viewer)
 
  CMP     R14, #LANDSCAPE_Z_BEYOND   \ If R14 is a z-distance beyond the back of
@@ -8675,7 +8677,7 @@
                                     \ buffers, so higher z-coordinates map to
                                     \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
-                                    \ and buffer 11 is for the closest objects
+                                    \ and buffer 10 is for the closest objects
                                     \ to the viewer)
 
  ADD     R14, R14, #TILE_SIZE       \ Add the size of one tile to R14 so we draw
@@ -8769,26 +8771,17 @@
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine draws the contents of a specified graphics buffer. There are 12
+\ This routine draws the contents of a specified graphics buffer. There are 11
 \ buffers that are used to layer the game's graphics correctly according to an
-\ object's distance. This system was described by David Braben in November 1987
-\ issue of the Micro User:
-\
-\ "Since objects only need to be approximately in order, and it is known that
-\ the values are in a certain range, a technique known as bin sorting is used.
-\ This involves having a buffer for each of a range of depth values, and when
-\ an object's position is calculated it is put into the relevant buffer. Finally
-\ the buffers are flushed in depth order, farthest first. This requires a great
-\ deal of memory, but is virtually free as far as time considerations go."
-\
-\ This routine implements a buffer being "flushed". i.e. drawn onto the screen.
+\ object's distance. This routine draws the contents of a specific buffer onto
+\ the screen.
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
 \   R0                              The number of the graphics buffer to draw
-\                                   (0 to 11)
+\                                   (0 to 10)
 \
 \ ------------------------------------------------------------------------------
 \
