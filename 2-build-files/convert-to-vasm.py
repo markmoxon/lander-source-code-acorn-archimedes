@@ -78,6 +78,9 @@ def convert(input_file, output_file):
         # INCBIN -> .incbin
         line = re.sub(r"^ *INCBIN", ".incbin", line)
 
+        # INCLUDE -> .include
+        line = re.sub(r"^ *INCLUDE", ".include", line)
+
         # Write updated line
         if line.strip():
             output_file.write(line)
