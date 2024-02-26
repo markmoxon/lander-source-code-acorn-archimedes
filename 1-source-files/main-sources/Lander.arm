@@ -8356,9 +8356,9 @@
  MOV     R8, R8, LSR #25            \ Scale R8 from a 3D z-coordinate into a
  CMP     R8, #8                     \ number between 0 and 8, which we can use
  MOVHS   R8, #8                     \ as the drawing command number, as drawing
-                                    \ commands 0 to 9 draw large particles with
-                                    \ higher numbers giving smaller particles
-                                    \ (see bufferJump for a full list of drawing
+                                    \ commands 0 to 8 draw particles with higher
+                                    \ numbers giving smaller particles (see
+                                    \ bufferJump for a full list of drawing
                                     \ commands)
 
  AND     R7, R7, #&FF               \ Encode the two pixel coordinates in R0 and
@@ -8472,10 +8472,10 @@
  MOV     R8, R8, LSR #25            \ Scale R8 from a 3D z-coordinate into a
  CMP     R8, #8                     \ number between 9 and 17, which we can use
  MOVHS   R8, #8                     \ as the drawing command number, as drawing
- ADD     R8, R8, #9                 \ commands 9 to 17 draw small particles with
-                                    \ higher numbers giving smaller particles
-                                    \ (see bufferJump for a full list of drawing
-                                    \ commands)
+ ADD     R8, R8, #9                 \ commands 9 to 17 draw shadow particles
+                                    \ with higher numbers giving smaller
+                                    \ particles (see bufferJump for a full list
+                                    \ of drawing commands)
 
  ADD     R1, R1, R0, LSL #20        \ Encode the two pixel coordinates in R0 and
                                     \ R1 into one parameter word in R1, by
