@@ -602,6 +602,7 @@
 \   Category: Graphics buffers
 \    Summary: The addresses of each of the graphics buffers (these values do not
 \             change)
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -631,6 +632,7 @@
 \   Category: Graphics buffers
 \    Summary: The end addresses of each of the graphics buffers (these values
 \             get updated as objects are drawn into the buffers)
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -661,6 +663,7 @@
 \    Summary: Draw the landscape and the contents of the graphics buffers, from
 \             the back of the screen to the front
 \  Deep dive: Drawing the landscape
+\             Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -861,6 +864,7 @@
 \   Category: Landscape
 \    Summary: Draw a row of landscape tiles
 \  Deep dive: Drawing the landscape
+\             Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -1067,6 +1071,7 @@
 \    Summary: Draw the objects in the graphics buffers for two rows behind the
 \             current corner row
 \  Deep dive: Drawing the landscape
+\             Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -1140,6 +1145,7 @@
 \   Category: Landscape
 \    Summary: Draw the remaining graphics buffers
 \  Deep dive: Drawing the landscape
+\             Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -2663,6 +2669,7 @@
 \   Category: Graphics buffers
 \    Summary: The addresses of the tables containing the graphics buffer
 \             addresses (same as graphicsBufferEndAddr and graphicsBufferAddr)
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -5849,6 +5856,7 @@
 \   Category: Graphics buffers
 \    Summary: The address of the table containing the end addresses of the
 \             graphics buffers
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -5863,6 +5871,7 @@
 \   Category: Graphics buffers
 \    Summary: The address of the table containing the addresses of the graphics
 \             buffers
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -7799,6 +7808,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 1x1-pixel specified" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7877,6 +7887,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 2x1-pixel particle" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7956,6 +7967,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 2x2-pixel particle" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8037,6 +8049,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 3x2-pixel particle" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8120,6 +8133,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 3x1-pixel particle" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8199,6 +8213,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Process the "draw triangle" command from the graphics buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8257,6 +8272,7 @@
 \   Category: Particles
 \    Summary: Draw a large coloured particle into a slightly nearer graphics,
 \             buffer according to its distance
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8375,6 +8391,7 @@
 \   Category: Particles
 \    Summary: Draw a small black particle into the correct graphics buffer,
 \             according to its distance
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8493,6 +8510,7 @@
 \    Summary: Draw a triangle shadow into the correct graphics buffer, according
 \             to its distance
 \  Deep dive: Drawing 3D objects
+\             Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8611,6 +8629,7 @@
 \    Summary: Draw a coloured triangle into a slightly nearer graphics buffer,
 \             according to its distance
 \  Deep dive: Drawing 3D objects
+\             Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8734,6 +8753,7 @@
 \   Category: Graphics buffers
 \    Summary: The jump table for drawing commands that we store in the graphics
 \             buffers
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -8769,6 +8789,7 @@
 \       Type: Subroutine
 \   Category: Graphics buffers
 \    Summary: Draw the contents of the specified graphics buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8841,6 +8862,7 @@
 \   Category: Graphics buffers
 \    Summary: Add terminators to the ends of the graphics buffers so we know
 \             when to stop drawing
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
