@@ -20,6 +20,8 @@ all:
 	cp 1-source-files/other-sources/arthur/Lander,ffb 5-compiled-game-discs/arthur/Lander,ffb
 	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/GameCode
 
+	@$(PYTHON) 2-build-files/export-symbols.py
+
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.unprot.bin 3-assembled-output/RunImage.arm
 	cp 1-source-files/other-sources/riscos/!Run,feb 5-compiled-game-discs/riscos/!Lander/!Run,feb
 	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/riscos/!Lander/!Sprites,ff9

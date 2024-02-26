@@ -1,5 +1,5 @@
 .set CODE, 0x00008000
-.set Entry, 0x0000A824
+.include "3-assembled-output/exports.arm"
 .org CODE
  B       DecryptGameBinary
 gameCode:

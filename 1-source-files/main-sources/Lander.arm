@@ -583,14 +583,14 @@
 
  EQUB    &3A, TILES_X               \ Tile row #0
 
- FOR I%, 0, (TILES_Z - 1) / 2
+ FOR I%, 1, (TILES_Z - 1) / 2
 
   EQUB   &E3, TILES_X               \ Tile row data (even)
   EQUB   &E4, TILES_X               \ Tile row data (odd)
 
  NEXT
 
- EQUB    &E3, TILES_X               \ Tile row #TILES_X
+ EQUB    &E3, TILES_X               \ Tile row #TILES_Z
 
  ALIGN
 
@@ -614,19 +614,21 @@
 \   Category: Graphics buffers
 \    Summary: The addresses of each of the graphics buffers (these values do not
 \             change)
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
 .graphicsBuffers
 
                                     \ We need a graphics buffer for each tile
-                                    \ corner row (and the game also adds an
-                                    \ unused spare buffer)
+                                    \ corner row, numbered 0 to 10 (and the game
+                                    \ also includes an extra buffer that is
+                                    \ unused)
 
  buffer = workspace + buffers       \ The graphics buffers live at the address
                                     \ given in the buffersAddr variable
 
- FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
+ FOR I%, 1, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
 
   EQUD   buffer                     \ Insert the address of the buffer
 
@@ -642,19 +644,21 @@
 \   Category: Graphics buffers
 \    Summary: The end addresses of each of the graphics buffers (these values
 \             get updated as objects are drawn into the buffers)
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
 .graphicsBuffersEnd
 
                                     \ We need a graphics buffer for each tile
-                                    \ corner row (and the game also adds an
-                                    \ unused spare buffer)
+                                    \ corner row, numbered 0 to 10 (and the game
+                                    \ also includes an extra buffer that is
+                                    \ unused)
 
  buffer = workspace + buffers       \ The graphics buffers live at the address
                                     \ given in the buffersAddr variable
 
- FOR I%, 0, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
+ FOR I%, 1, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
 
   EQUD   buffer                     \ Insert the address of the buffer
 
@@ -670,6 +674,8 @@
 \   Category: Landscape
 \    Summary: Draw the landscape and the contents of the graphics buffers, from
 \             the back of the screen to the front
+\  Deep dive: Drawing the landscape
+\             Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -710,8 +716,8 @@
 \ So we draw the objects in graphics buffer 0 just after we process tile corner
 \ row 2, so that's just after we draw the tiles between corner rows 1 and 2.
 \
-\ Note that graphics buffer 11 is defined but is not used, as the landscape is
-\ only ten tile rows deep.
+\ Note that the game allocates memory to an extra graphics buffer, but only
+\ buffers numbers 0 to TILE_Z are used.
 \
 \ ******************************************************************************
 
@@ -869,6 +875,8 @@
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: Draw a row of landscape tiles
+\  Deep dive: Drawing the landscape
+\             Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -961,7 +969,10 @@
  STMIA   R7!, {R0-R1}               \ Store the corner coordinates in (R0, R1)
                                     \ in R7, updating R7 as we go, as R7 is
                                     \ where we store the tile corner pixel
-                                    \ coordinates as we go
+                                    \ coordinates as we go (so this stores the
+                                    \ corner coordinates in either cornerStore1
+                                    \ or cornerStore2, so we can fetch them when
+                                    \ we process the next tile corner row)
 
  CMP     R6, #0                     \ If R6 = 0 then this is either the very
  BEQ     land4                      \ first tile corner row, or we have already
@@ -978,7 +989,9 @@
                                     \ into (R2, R3), updating R6 as we go, so
                                     \ this fetches the corresponding corner
                                     \ pixel coordinates from the previous tile
-                                    \ corner row
+                                    \ corner row (i.e. from the opposite corner
+                                    \ store to the one where we just stored this
+                                    \ row's coordinate)
 
  CMP     R2, #&80000000             \ If R2 = &80000000 then we have reached the
  MOVEQ   R6, #0                     \ end of the storage in R6, so set R6 = 0
@@ -1069,6 +1082,8 @@
 \   Category: Landscape
 \    Summary: Draw the objects in the graphics buffers for two rows behind the
 \             current corner row
+\  Deep dive: Drawing the landscape
+\             Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -1141,6 +1156,8 @@
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: Draw the remaining graphics buffers
+\  Deep dive: Drawing the landscape
+\             Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -1162,6 +1179,7 @@
 \   Category: Landscape
 \    Summary: Calculate the altitude of the landscape for a given coordinate
 \  Deep dive: Generating the landscape
+\             Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1461,6 +1479,7 @@
 \       Type: Subroutine
 \   Category: Landscape
 \    Summary: Calculate the colour of the landscape tile currently being drawn
+\  Deep dive: Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1488,17 +1507,18 @@
                                     \
                                     \   R14 = min(0, prevAltitude - altitude)
                                     \
-                                    \ So if the slope is going down from the
-                                    \ previous point to the current one, then
-                                    \ the slope will be non-zero, but if it is
-                                    \ going up from the previous point to the
-                                    \ current one, it will be zero
+                                    \ The y-axis that measures altitude goes
+                                    \ down the screen (counterintuitively), so
+                                    \ if prevAltitude has a bigger value than
+                                    \ altitude, this means the previous point
+                                    \ is lower down than the current point
                                     \
                                     \ As we draw the landscape from left to
-                                    \ right, this means the slope will be large
-                                    \ for tiles that face left, with a greater
-                                    \ value for steeper slopes, while tiles that
-                                    \ face right will have a slope value of zero
+                                    \ right, this means the slope value will be
+                                    \ non-zero for tiles that face left, with a
+                                    \ greater value for steeper slopes, while
+                                    \ tiles that face right will have a slope
+                                    \ value of zero
 
                                     \ We now calculate the colour, with the red,
                                     \ green and blue channels in R0, R1 and R2
@@ -1547,9 +1567,12 @@
  MOVEQ   R0, #0
 
  LDRB    R8, [R11, #tileCornerRow]  \ Set R8 to the number of the tile corner
-                                    \ row that we're processing (so it goes from
-                                    \ 0 at the back to TILES_Z - 1 at the front,
-                                    \ or 0 to 10)
+                                    \ row that we're processing, so it goes from
+                                    \ 1 at the back to TILES_Z - 1 at the front,
+                                    \ or 1 to 10 (it doesn't start at zero as we
+                                    \ don't draw any tiles for the very first
+                                    \ row of tile corners, so we don't call this
+                                    \ routine)
 
                                     \ --- Mod: Code added for more tiles: ----->
 
@@ -1562,7 +1585,7 @@
                                     \
                                     \   tileCornerRow + slope >> 22
                                     \
-                                    \ where tileCornerRow is 0 at the back and
+                                    \ where tileCornerRow is 1 at the back and
                                     \ TILES_Z - 1 at the front
                                     \
                                     \ As we draw the landscape from back to
@@ -1645,7 +1668,8 @@
 
  ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
  ORR     R8, R8, R8, LSL #16        \ other three bytes in the word to produce
- ORR     R8, R8, R8, LSL #24        \ a VIDC palette word
+ ORR     R8, R8, R8, LSL #24        \ a four-pixel colour word containing four
+                                    \ pixels of this colour
 
  LDMFD   R13!, {R0-R4, PC}          \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -2220,7 +2244,7 @@
                                     \   * Bit 19 set = bounce on ground
                                     \   * Bit 20 set = apply gravity to particle
 
- MOV     R6, #8                     \ Set the particle's existence counter to 8
+ MOV     R6, #8                     \ Set the particle's lifespan counter to 8
                                     \ iterations of the main loop
 
  MOV     R8, #10                    \ Set the random element of the particle's
@@ -2228,7 +2252,7 @@
                                     \ i.e. -&400000 to +&400000
 
  MOV     R9, #29                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 29),
+                                    \ lifespan to the range 0 to 2^(32 - 29),
                                     \ i.e. 0 to 8
 
  STMFD   R13!, {R0-R9}              \ Store R0 to R9 on the stack so we can
@@ -2354,7 +2378,7 @@
                                     \   = xPlayer - xVelocity + xGun / 256
                                     \
                                     \ So this sets (R0, R1, R2) to a coordinate
-                                    \ that's back by the player's velocity
+                                    \ that's moved back by the player's velocity
                                     \ (which takes us to the point where the
                                     \ ship was before we moved it in this
                                     \ iteration, which is where we would expect
@@ -2362,7 +2386,7 @@
                                     \ vector, so the bullet fires out of the end
                                     \ of the gun
 
- MOV     R6, #20                    \ Set the bullet particle's existence
+ MOV     R6, #20                    \ Set the bullet particle's lifespan
                                     \ counter to 20 iterations of the main loop
 
  MOV     R7, #&01BC0000             \ Set bits 18, 19, 20, 21, 23 and 24 of the
@@ -2505,6 +2529,7 @@
 \   Category: Main loop
 \    Summary: Display a crash animation when we lose a life and end the game if
 \             this is our last life
+\  Deep dive: The main game loop
 \
 \ ******************************************************************************
 
@@ -2539,11 +2564,11 @@
                                     \ calls to drop rocks from the sky, draw the
                                     \ player's ship or update the fuel level)
 
-                                    \ We start by setting up the rotation matrix
-                                    \ for the particle clouds, using the main
-                                    \ loop counter to generate rotation angles
-                                    \ that change along with the main loop (so
-                                    \ the clouds rotate at a nice steady speed)
+                                    \ We now set up the rotation matrix for the
+                                    \ rocks, using the main loop counter to
+                                    \ generate rotation angles that change along
+                                    \ with the main loop (so the rocks spin at a
+                                    \ nice steady speed)
 
  LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24
  MOV     R0, R0, LSL #24
@@ -2552,7 +2577,11 @@
 
  BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
                                     \ "angles" given in R0 and R1, which we can
-                                    \ apply to the particle clouds
+                                    \ apply to any rocks we draw in the
+                                    \ MoveAndDrawParticles routine (as rocks are
+                                    \ only rotating 3D objects apart from the
+                                    \ player, and the player calculates its own
+                                    \ rotation matrix)
 
  BL      MoveAndDrawParticles       \ Move and draw all the particles, such as
                                     \ smoke clouds and bullets, into the
@@ -2659,6 +2688,7 @@
 \   Category: Graphics buffers
 \    Summary: The addresses of the tables containing the graphics buffer
 \             addresses (same as graphicsBufferEndAddr and graphicsBufferAddr)
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -2670,11 +2700,12 @@
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawParticles (Part 1 of 2)
+\       Name: MoveAndDrawParticles (Part 1 of 4)
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Process particle movement and draw the particles into the graphics
 \             buffers, starting with the movement of particles
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2714,7 +2745,7 @@
                                     \
                                     \   (R3, R4, R5) = particle velocity
                                     \
-                                    \   R6 = particle existence counter
+                                    \   R6 = particle lifespan counter
                                     \
                                     \   R7 = particle flags
 
@@ -2726,7 +2757,7 @@
 
 .dpar2
 
- SUBS    R6, R6, #1                 \ Decrement the particle's existence counter
+ SUBS    R6, R6, #1                 \ Decrement the particle's lifespan counter
                                     \ in R6
 
  BEQ     DeleteParticleData         \ If R6 is now zero then the particle just
@@ -2751,8 +2782,8 @@
  BLNE    SetParticleColourToFade    \ call SetParticleColourToFade to fade the
                                     \ particle colour from white to red,
                                     \ according to the particle's age, and store
-                                    \ the colour in the low byte of the particle
-                                    \ flags
+                                    \ the colour in the bottom byte of the
+                                    \ particle flags (bits 0 to 7)
 
  MOV     R8, R0                     \ Set (R8, R9) = (R0, R2) so we can fetch
  MOV     R9, R2                     \ the landscape altitude directly below the
@@ -2786,10 +2817,11 @@
 
 \ ******************************************************************************
 \
-\       Name: MoveAndDrawParticles (Part 2 of 2)
+\       Name: MoveAndDrawParticles (Part 2 of 4)
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Draw particles (including rocks) into the graphics buffers
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -2824,7 +2856,7 @@
 
  CMP     R2, #LANDSCAPE_Z_FRONT     \ If the z-coordinate of the particle in R2
  BLO     dpar1                      \ is closer to us than LANDSCAPE_Z_FRONT,
-                                    \ then it is closed than the front of the
+                                    \ then it is closer than the front of the
                                     \ visible landscape, so jump to dpar1 to
                                     \ move on to the next particle in the buffer
 
@@ -2854,6 +2886,7 @@
 \    Summary: Process rocks by checking for collisions and drawing them as 3D
 \             objects
 \  Deep dive: Drawing 3D objects
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -2937,6 +2970,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Draw particles into the graphics buffers
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -3007,12 +3041,13 @@
 \   Category: Particles
 \    Summary: Set the flags for a particle whose colour fades from white to red
 \             over time, to give a white-hot explosion particle that cools down
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3123,6 +3158,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Bounce a particle off the ground
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3172,6 +3208,7 @@
 \   Category: Particles
 \    Summary: If this particle has hit an object, destroy the object and the
 \             particle in an explosion, scoring points if it's a bullet
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3268,6 +3305,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a small explosion to the particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3296,6 +3334,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Splash a particle into the sea, creating a spray particle
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3344,6 +3383,7 @@
 \   Category: Particles
 \    Summary: Delete a particle from the particle data buffer and move the last
 \             particle's data down to take its place
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3383,6 +3423,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a bullet particle to the particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3392,7 +3433,7 @@
 \
 \   (R3, R4, R5)                    Particle velocity
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3404,7 +3445,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3428,6 +3469,7 @@
 \   Category: Particles
 \    Summary: Add one of the moving particles in the exhaust plume to the
 \             particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3437,7 +3479,7 @@
 \
 \   (R3, R4, R5)                    Particle velocity
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3449,7 +3491,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3465,7 +3507,7 @@
  B       AddMovingParticleToBuffer  \ Add a moving particle to the particle data
                                     \ buffer that starts off moving along the
                                     \ exhaust vector, and with a random element
-                                    \ being added to its velocity and existence
+                                    \ being added to its velocity and lifespan
                                     \ counter, returning from the subroutine
                                     \ using a tail call
 
@@ -3475,7 +3517,8 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a particle to the particle data buffer that starts off static,
-\             adding a random element to its velocity and existence counter
+\             adding a random element to its velocity and lifespan counter
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3483,7 +3526,7 @@
 \
 \   (R0, R1, R2)                    Particle coordinate
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3505,7 +3548,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3528,7 +3571,8 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a particle to the particle data buffer that initially drifts
-\             up, with a random element to its velocity and existence counter
+\             up, with a random element to its velocity and lifespan counter
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3538,7 +3582,7 @@
 \
 \   R4                              Particle velocity in the y-axis (up-down)
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3560,7 +3604,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3584,7 +3628,8 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a moving particle to the particle data buffer, adding a random
-\             element to its velocity and existence counter
+\             element to its velocity and lifespan counter
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3594,7 +3639,7 @@
 \
 \   (R3, R4, R5)                    Particle velocity
 \
-\   R6                              Particle existence counter (i.e. how many
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
@@ -3616,7 +3661,7 @@
 \                                   is +/- 2^(32 - R8)
 \
 \   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
+\                                   to the particle lifespan, with a larger
 \                                   figure giving a smaller random element; the
 \                                   actual range is 0 to 2^(32 - R9)
 \
@@ -3658,7 +3703,7 @@
                                     \ increase or decrease R5
 
                                     \ We now add a random positive element to
-                                    \ the particle's existence counter in R6,
+                                    \ the particle's lifespan counter in R6,
                                     \ with the scale determined by R9 (so a
                                     \ larger R9 adds a smaller random element
                                     \ to the particle's lifespan)
@@ -3679,6 +3724,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Store the data for a new particle in the particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3686,21 +3732,13 @@
 \
 \   (R0, R1, R2)                    Particle coordinate
 \
-\   R6                              Particle existence counter (i.e. how many
+\   (R3, R4, R5)                    Particle velocity
+\
+\   R6                              Particle lifespan counter (i.e. how many
 \                                   iterations around the main loop before the
 \                                   particle expires)
 \
 \   R7                              Particle flags
-\
-\   R8                              Magnitude of the random element that's added
-\                                   to the velocity, with a larger figure giving
-\                                   a smaller random element; the actual range
-\                                   is +/- 2^(32 - R8)
-\
-\   R9                              Magnitude of the random element that's added
-\                                   to the particle existence, with a larger
-\                                   figure giving a smaller random element; the
-\                                   actual range is 0 to 2^(32 - R9)
 \
 \   Stack                           Contains a value to restore into R8 at the
 \                                   end, and the return address
@@ -3743,6 +3781,7 @@
 \       Type: Subroutine
 \   Category: Start and end
 \    Summary: Initialise the particle data buffer and associated variables
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -3766,6 +3805,7 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a smoke particle to the particle data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3853,20 +3893,20 @@
                                     \ stored above into (R0, R1, R2)
 
  MOV     R9, #25                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 25),
+                                    \ lifespan to the range 0 to 2^(32 - 25),
                                     \ i.e. 0 to 128
 
  MOV     R8, #13                    \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 13),
                                     \ i.e. -&80000 to +&80000
 
- MOV     R6, #15                    \ Set the particle's existence counter to 15
+ MOV     R6, #15                    \ Set the particle's lifespan counter to 15
                                     \ iterations of the main loop
 
  B       AddRisingParticleToBuffer  \ Add a particle to the particle data buffer
                                     \ that initially drifts upwards, and with a
                                     \ random element being added to its velocity
-                                    \ and existence counter, returning from the
+                                    \ and lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -3876,6 +3916,7 @@
 \   Category: Particles
 \    Summary: Add a debris particle to the particle data buffer, which is a
 \             purple-brownish-green particle that bounces out of an explosion
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3973,20 +4014,20 @@
                                     \ stored above into (R0, R1, R2)
 
  MOV     R9, #26                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 26),
+                                    \ lifespan to the range 0 to 2^(32 - 26),
                                     \ i.e. 0 to 64
 
  MOV     R8, #10                    \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 10),
                                     \ i.e. -&400000 to +&400000
 
- MOV     R6, #15                    \ Set the particle's existence counter to 15
+ MOV     R6, #15                    \ Set the particle's lifespan counter to 15
                                     \ iterations of the main loop
 
  B       AddStaticParticleToBuffer  \ Add a particle to the particle data buffer
                                     \ that starts off static, and with a random
                                     \ element being added to its velocity and
-                                    \ existence counter, returning from the
+                                    \ lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -3996,6 +4037,7 @@
 \   Category: Particles
 \    Summary: Drop a rock from the specified coordinates by spawning it as a
 \             particle, albeit a very big particle with an associated 3D object
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4099,21 +4141,21 @@
                                     \ stored above into (R0, R1, R2)
 
  MOV     R9, #27                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 27),
+                                    \ lifespan to the range 0 to 2^(32 - 27),
                                     \ i.e. 0 to 32
 
  MOV     R8, #10                    \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 10),
                                     \ i.e. -&400000 to +&400000
 
- MOV     R6, #170                   \ Set the particle's existence counter to
+ MOV     R6, #170                   \ Set the particle's lifespan counter to
                                     \ 170 iterations of the main loop, so it
                                     \ won't disappear before it hits the ground
 
  B       AddStaticParticleToBuffer  \ Add a rock to the particle data buffer
                                     \ that starts off static, and with a random
                                     \ element being added to its velocity and
-                                    \ existence counter, returning from the
+                                    \ lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -4129,6 +4171,7 @@
 \ Arguments:
 \
 \   (R0, R1, R2)                    Particle coordinates
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -4147,20 +4190,20 @@
                                     \   * Bit 20 set = apply gravity to particle
 
  MOV     R9, #29                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 29),
+                                    \ lifespan to the range 0 to 2^(32 - 29),
                                     \ i.e. 0 to 8
 
  MOV     R8, #8                     \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 8),
                                     \ i.e. -&1000000 to +&1000000
 
- MOV     R6, #8                     \ Set the particle's existence counter to 8
+ MOV     R6, #8                     \ Set the particle's lifespan counter to 8
                                     \ iterations of the main loop
 
  B       AddStaticParticleToBuffer  \ Add a particle to the particle data buffer
                                     \ that starts off static, and with a random
                                     \ element being added to its velocity and
-                                    \ existence counter, returning from the
+                                    \ lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -4175,6 +4218,7 @@
 \ Arguments:
 \
 \   (R0, R1, R2)                    Particle coordinates
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -4254,20 +4298,20 @@
                                     \ stored above into (R0, R1, R2)
 
  MOV     R9, #26                    \ Set the random element of the particle's
-                                    \ existence to the range 0 to 2^(32 - 26),
+                                    \ lifespan to the range 0 to 2^(32 - 26),
                                     \ i.e. 0 to 64
 
  MOV     R8, #10                    \ Set the random element of the particle's
                                     \ velocity to the range +/- 2^(32 - 10),
                                     \ i.e. -&400000 to +&400000
 
- MOV     R6, #20                    \ Set the particle's existence counter to 20
+ MOV     R6, #20                    \ Set the particle's lifespan counter to 20
                                     \ iterations of the main loop
 
  B       AddStaticParticleToBuffer  \ Add a particle to the particle data buffer
                                     \ that starts off static, and with a random
                                     \ element being added to its velocity and
-                                    \ existence counter, returning from the
+                                    \ lifespan counter, returning from the
                                     \ subroutine using a tail call
 
 \ ******************************************************************************
@@ -4277,6 +4321,7 @@
 \   Category: Particles
 \    Summary: Create a big explosion of particles and add it to the particle
 \             data buffer
+\  Deep dive: Particles and particle clouds
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4329,6 +4374,7 @@
 \   Category: Particles
 \    Summary: An unused routine that adds a 50-cluster explosion cloud to the
 \             particle data buffer, just front of the player's ship
+\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -4718,11 +4764,21 @@
 
  CMP     R0, #SEA_LEVEL             \ If the object is on the sea, jump back to
  BEQ     dobs3                      \ dobs3 to move on to the next object, as
-                                    \ there are no objects on the sea (though
-                                    \ there shouldn't be any objects in the sea
-                                    \ in the object map anyway, as this check is
-                                    \ also performed when populating the object
-                                    \ map)
+                                    \ there are no objects on the sea
+                                    \
+                                    \ This check sounds unnecessary as there
+                                    \ shouldn't be any objects in the sea in the
+                                    \ object map anyway, as this check is also
+                                    \ performed when populating the object map
+                                    \
+                                    \ However, because the landscape in Lander
+                                    \ is infinite but the object map is finite,
+                                    \ the object map gets repeated every 256
+                                    \ tiles in each direction, and objects that
+                                    \ appear on land in one instance of the
+                                    \ object may well appear in the sea in
+                                    \ another instance, so this check prevents
+                                    \ that from happening
 
  LDR     R14, [R11, #xCamera]       \ Set R0 = R8 - xCamera
  SUB     R0, R8, R14                \        = x - xCamera
@@ -5460,7 +5516,8 @@
 
  ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
  ORR     R8, R8, R8, LSL #16        \ other three bytes in the word to produce
- ORR     R8, R8, R8, LSL #24        \ a VIDC palette word
+ ORR     R8, R8, R8, LSL #24        \ a four-pixel colour word containing four
+                                    \ pixels of this colour
 
                                     \ Finally we can draw the face, using the
                                     \ colour in R8
@@ -5682,7 +5739,7 @@
 \       Name: fuelBarColour
 \       Type: Variable
 \   Category: Score bar
-\    Summary: A pixel word for the colour of the fuel bar
+\    Summary: A four-pixel colour word for the colour of the fuel bar
 \
 \ ******************************************************************************
 
@@ -5763,12 +5820,13 @@
  ADD     R11, R7, #320              \ Set R11 to the address in R7, plus 320 to
                                     \ move it down by one pixel line
 
- LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
-                                    \ poke into screen memory to draw a pixel in
-                                    \ the correct colour for the fuel bar
+ LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+                                    \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
 
- MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
-                                    \         = fuel level * 16
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+                                    \         = fuel level / 16
 
  BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
                                     \ starting at screen address R11 and drawing
@@ -5778,12 +5836,13 @@
  ADD     R11, R7, #2*320            \ Set R11 to the address in R7, plus 640 to
                                     \ move it down by two pixel lines
 
- LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
-                                    \ poke into screen memory to draw a pixel in
-                                    \ the correct colour for the fuel bar
+ LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+                                    \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
 
- MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
-                                    \         = fuel level * 16
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+                                    \         = fuel level / 16
 
  BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
                                     \ starting at screen address R11 and drawing
@@ -5793,12 +5852,13 @@
  ADD     R11, R7, #3*320            \ Set R11 to the address in R7, plus 960 to
                                     \ move it down by two pixel lines
 
- LDR     R8, fuelBarColour          \ Set R8 to the pixel word that we need to
-                                    \ poke into screen memory to draw a pixel in
-                                    \ the correct colour for the fuel bar
+ LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+                                    \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
 
- MOV     R10, R1, LSR #4            \ Set R10 = R1 << 4
-                                    \         = fuel level * 16
+ MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+                                    \         = fuel level / 16
 
  BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
                                     \ starting at screen address R11 and drawing
@@ -5815,6 +5875,7 @@
 \   Category: Graphics buffers
 \    Summary: The address of the table containing the end addresses of the
 \             graphics buffers
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -5829,6 +5890,7 @@
 \   Category: Graphics buffers
 \    Summary: The address of the table containing the addresses of the graphics
 \             buffers
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -6962,6 +7024,8 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Project a vertex coordinate from a 3D object onto the screen
+\  Deep dive: Drawing 3D objects
+\             Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7639,6 +7703,7 @@
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Generate pseudo-random numbers from the random number seeds
+\  Deep dive: Random numbers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7714,7 +7779,7 @@
 \       Name: greyColourWords
 \       Type: Variable
 \   Category: Drawing the screen
-\    Summary: An unused table of grey colour words
+\    Summary: An unused table of grey four-pixel colour words
 \
 \ ******************************************************************************
 
@@ -7746,7 +7811,8 @@
 \       Name: greyColourWordsAddr
 \       Type: Variable
 \   Category: Drawing the screen
-\    Summary: The unused address of the unused table of grey colour words
+\    Summary: The unused address of the unused table of grey four-pixel colour
+\             words
 \
 \ ******************************************************************************
 
@@ -7761,6 +7827,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 1x1-pixel specified" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7839,6 +7906,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 2x1-pixel particle" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7918,6 +7986,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 2x2-pixel particle" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7999,6 +8068,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 3x2-pixel particle" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8082,6 +8152,7 @@
 \   Category: Particles
 \    Summary: Process the "draw 3x1-pixel particle" command from the graphics
 \             buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8161,6 +8232,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Process the "draw triangle" command from the graphics buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8219,6 +8291,7 @@
 \   Category: Particles
 \    Summary: Draw a large coloured particle into a slightly nearer graphics,
 \             buffer according to its distance
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8275,7 +8348,7 @@
                                     \ buffers, so higher z-coordinates map to
                                     \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
-                                    \ and buffer 11 is for the closest objects
+                                    \ and buffer 10 is for the closest objects
                                     \ to the viewer)
 
  ADD     R14, R14, #TILE_SIZE       \ Add the size of one tile to R14 so we draw
@@ -8337,6 +8410,7 @@
 \   Category: Particles
 \    Summary: Draw a small black particle into the correct graphics buffer,
 \             according to its distance
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8394,7 +8468,7 @@
                                     \ buffers, so higher z-coordinates map to
                                     \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
-                                    \ and buffer 11 is for the closest objects
+                                    \ and buffer 10 is for the closest objects
                                     \ to the viewer)
 
  BIC     R14, R14, #&00C00000       \ We are going to use the top byte of R14 as
@@ -8455,6 +8529,7 @@
 \    Summary: Draw a triangle shadow into the correct graphics buffer, according
 \             to its distance
 \  Deep dive: Drawing 3D objects
+\             Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8520,7 +8595,7 @@
                                     \ buffers, so higher z-coordinates map to
                                     \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
-                                    \ and buffer 11 is for the closest objects
+                                    \ and buffer 10 is for the closest objects
                                     \ to the viewer)
 
  CMP     R14, #LANDSCAPE_Z_BEYOND   \ If R14 is a z-distance beyond the back of
@@ -8573,6 +8648,7 @@
 \    Summary: Draw a coloured triangle into a slightly nearer graphics buffer,
 \             according to its distance
 \  Deep dive: Drawing 3D objects
+\             Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8640,7 +8716,7 @@
                                     \ buffers, so higher z-coordinates map to
                                     \ lower buffer numbers and vice versa (so
                                     \ buffer 0 is for objects that are far away
-                                    \ and buffer 11 is for the closest objects
+                                    \ and buffer 10 is for the closest objects
                                     \ to the viewer)
 
  ADD     R14, R14, #TILE_SIZE       \ Add the size of one tile to R14 so we draw
@@ -8696,13 +8772,14 @@
 \   Category: Graphics buffers
 \    Summary: The jump table for drawing commands that we store in the graphics
 \             buffers
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
 .bufferJump
 
  EQUD    Draw3x2ParticleFromBuffer  \ Drawing commands 0 to 8 draw large
- EQUD    Draw3x2ParticleFromBuffer  \ particles
+ EQUD    Draw3x2ParticleFromBuffer  \ particles (for particles)
  EQUD    Draw3x2ParticleFromBuffer
  EQUD    Draw3x2ParticleFromBuffer
  EQUD    Draw3x2ParticleFromBuffer
@@ -8712,7 +8789,7 @@
  EQUD    Draw1x1ParticleFromBuffer
 
  EQUD    Draw3x1ParticleFromBuffer  \ Drawing commands 9 to 17 draw small
- EQUD    Draw3x1ParticleFromBuffer  \ particles
+ EQUD    Draw3x1ParticleFromBuffer  \ particles (for shadows)
  EQUD    Draw3x1ParticleFromBuffer
  EQUD    Draw3x1ParticleFromBuffer
  EQUD    Draw3x1ParticleFromBuffer
@@ -8731,29 +8808,21 @@
 \       Type: Subroutine
 \   Category: Graphics buffers
 \    Summary: Draw the contents of the specified graphics buffer
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ------------------------------------------------------------------------------
 \
-\ This routine draws the contents of a specified graphics buffer. There are 12
+\ This routine draws the contents of a specified graphics buffer. There are 11
 \ buffers that are used to layer the game's graphics correctly according to an
-\ object's distance. This system was described by David Braben in November 1987
-\ issue of the Micro User:
-\
-\ "Since objects only need to be approximately in order, and it is known that
-\ the values are in a certain range, a technique known as bin sorting is used.
-\ This involves having a buffer for each of a range of depth values, and when
-\ an object's position is calculated it is put into the relevant buffer. Finally
-\ the buffers are flushed in depth order, farthest first. This requires a great
-\ deal of memory, but is virtually free as far as time considerations go."
-\
-\ This routine implements a buffer being "flushed". i.e. drawn onto the screen.
+\ object's distance. This routine draws the contents of a specific buffer onto
+\ the screen.
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
 \   R0                              The number of the graphics buffer to draw
-\                                   (0 to 11)
+\                                   (0 to 10)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8812,6 +8881,7 @@
 \   Category: Graphics buffers
 \    Summary: Add terminators to the ends of the graphics buffers so we know
 \             when to stop drawing
+\  Deep dive: Depth-sorting with the graphics buffers
 \
 \ ******************************************************************************
 
@@ -9039,6 +9109,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a quadrilateral (i.e. two triangles)
+\  Deep dive: Drawing the landscape
 \
 \ ------------------------------------------------------------------------------
 \
@@ -9592,8 +9663,8 @@
 
  BLPL    DrawHorizontalLine         \ If R10 is positive then we draw a line
                                     \ from the left edge to the right edge,
-                                    \ using the colour word that was passed to
-                                    \ the DrawTriangle routine in R8
+                                    \ using the four-pixel colour word that was
+                                    \ passed to the DrawTriangle routine in R8
 
  SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
                                     \ points to the start of the pixel row above
@@ -9867,8 +9938,8 @@
 
  BLPL    DrawHorizontalLine         \ If R10 is positive then we draw a line
                                     \ from the left edge to the right edge,
-                                    \ using the colour word that was passed to
-                                    \ the DrawTriangle routine in R8
+                                    \ using the four-pixel colour word that was
+                                    \ passed to the DrawTriangle routine in R8
 
  SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
                                     \ points to the start of the pixel row above
@@ -11328,7 +11399,7 @@
                                     \
                                     \   R7 = right edge slope
                                     \
-                                    \   R8 = colour word
+                                    \   R8 = four-pixel colour word
                                     \
                                     \   R9 = the delta y-coordinate between
                                     \        (x1, y1) and (x2, y2), which
@@ -11452,8 +11523,8 @@
 
  CMP     R10, #0                    \ If R10 is positive then we draw a line
  BLPL    DrawHorizontalLine         \ from the left edge to the right edge,
-                                    \ using the colour word that was passed to
-                                    \ the DrawTriangle routine in R8
+                                    \ using the four-pixel colour word that was
+                                    \ passed to the DrawTriangle routine in R8
 
 .trin47
 
@@ -11518,7 +11589,8 @@
 \
 \ Arguments:
 \
-\   R8                              Line colour (in the form of a pixel word)
+\   R8                              Line colour (in the form of a four-pixel
+\                                   colour word)
 \
 \   R10                             Line length
 \
@@ -11659,7 +11731,8 @@
 \
 \ Arguments:
 \
-\   R8                              Line colour (in the form of a pixel word)
+\   R8                              Line colour (in the form of a four-pixel
+\                                   colour word)
 \
 \   R11                             Screen address of left end of line
 \
@@ -12269,6 +12342,7 @@
 \       Type: Subroutine
 \   Category: Main loop
 \    Summary: The main game loop
+\  Deep dive: The main game loop
 \
 \ ******************************************************************************
 
@@ -12289,10 +12363,10 @@
                                     \ the graphics buffers
 
                                     \ We now set up the rotation matrix for the
-                                    \ particle clouds, using the main loop
-                                    \ counter to generate rotation angles that
-                                    \ change along with the main loop (so the
-                                    \ clouds rotate at a nice steady speed)
+                                    \ rocks, using the main loop counter to
+                                    \ generate rotation angles that change along
+                                    \ with the main loop (so the rocks spin at a
+                                    \ nice steady speed)
 
  LDR     R0, [R11, #mainLoopCount]  \ Set R0 = mainLoopCount << 24
  MOV     R0, R0, LSL #24
@@ -12301,7 +12375,11 @@
 
  BL      CalculateRotationMatrix    \ Calculate the rotation matrix from the
                                     \ "angles" given in R0 and R1, which we can
-                                    \ apply to the particle clouds
+                                    \ apply to any rocks we draw in the
+                                    \ MoveAndDrawParticles routine (as rocks are
+                                    \ only rotating 3D objects apart from the
+                                    \ player, and the player calculates its own
+                                    \ rotation matrix)
 
  BL      DropRocksFromTheSky        \ If the score is 800 or more, then randomly
                                     \ drop rocks from the sky

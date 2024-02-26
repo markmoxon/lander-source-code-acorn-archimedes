@@ -26,21 +26,7 @@
 
  CODE = &00008000
 
-\ ******************************************************************************
-\
-\ Configuration variables
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code removed for more tiles: --->
-
-\Entry = &0000A614                  \ The execution address of GameCode
-
-                                    \ --- And replaced by: -------------------->
-
- Entry = &0000A824                  \ The execution address of GameCode
-
-                                    \ --- End of replacement ------------------>
+ INCLUDE "3-assembled-output/exports.arm"
 
 \ ******************************************************************************
 \
