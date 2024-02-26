@@ -7675,6 +7675,7 @@
 \       Type: Subroutine
 \   Category: Maths (Arithmetic)
 \    Summary: Generate pseudo-random numbers from the random number seeds
+\  Deep dive: Random numbers
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8739,7 +8740,7 @@
 .bufferJump
 
  EQUD    Draw3x2ParticleFromBuffer  \ Drawing commands 0 to 8 draw large
- EQUD    Draw3x2ParticleFromBuffer  \ particles
+ EQUD    Draw3x2ParticleFromBuffer  \ particles (for particles)
  EQUD    Draw3x2ParticleFromBuffer
  EQUD    Draw3x2ParticleFromBuffer
  EQUD    Draw3x2ParticleFromBuffer
@@ -8749,7 +8750,7 @@
  EQUD    Draw1x1ParticleFromBuffer
 
  EQUD    Draw3x1ParticleFromBuffer  \ Drawing commands 9 to 17 draw small
- EQUD    Draw3x1ParticleFromBuffer  \ particles
+ EQUD    Draw3x1ParticleFromBuffer  \ particles (for shadows)
  EQUD    Draw3x1ParticleFromBuffer
  EQUD    Draw3x1ParticleFromBuffer
  EQUD    Draw3x1ParticleFromBuffer
