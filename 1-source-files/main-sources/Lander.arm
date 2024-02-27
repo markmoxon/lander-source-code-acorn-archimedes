@@ -2834,7 +2834,7 @@
  LDR     R8, [R11, #zCamera]        \ Set R2 = R2 - zCamera
  SUB     R2, R2, R8                 \
                                     \ So R2 contains the z-coordinate of the
-                                    \ particle relative to camera
+                                    \ particle relative to the camera
 
  ADD     R2, R2, #LANDSCAPE_Z       \ Move the coordinate back by the landscape
                                     \ offset, so (R0, R2) contains the
@@ -2992,7 +2992,7 @@
                                     \ shadow relative to the camera
 
  MOV     R8, R2                     \ Set R8 to the z-coordinate of the particle
-                                    \ relative to camera
+                                    \ relative to the camera
 
  BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle's
                                     \ shadow in (R0, R1, R2) onto the screen,
@@ -3009,7 +3009,7 @@
                                     \ that we stored above
 
  MOV     R8, R2                     \ Set R8 to the z-coordinate of the particle
-                                    \ relative to camera
+                                    \ relative to the camera
 
  BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle in
                                     \ (R0, R1, R2) onto the screen, returning
@@ -4789,7 +4789,7 @@
  LDR     R14, [R11, #zCamera]       \ Set R2 = R9 - zCamera
  SUB     R2, R9, R14                \
                                     \ So R2 contains the z-coordinate of the
-                                    \ object relative to camera
+                                    \ object relative to the camera
 
  ADD     R2, R2, #LANDSCAPE_Z       \ Move the coordinate back by the landscape
                                     \ offset, so (R0, R2) contains the
@@ -8375,9 +8375,9 @@
  MOV     R8, R8, LSR #25            \ Scale R8 from a 3D z-coordinate into a
  CMP     R8, #8                     \ number between 0 and 8, which we can use
  MOVHS   R8, #8                     \ as the drawing command number, as drawing
-                                    \ commands 0 to 9 draw large particles with
-                                    \ higher numbers giving smaller particles
-                                    \ (see bufferJump for a full list of drawing
+                                    \ commands 0 to 8 draw particles with higher
+                                    \ numbers giving smaller particles (see
+                                    \ bufferJump for a full list of drawing
                                     \ commands)
 
  AND     R7, R7, #&FF               \ Encode the two pixel coordinates in R0 and
@@ -8491,10 +8491,10 @@
  MOV     R8, R8, LSR #25            \ Scale R8 from a 3D z-coordinate into a
  CMP     R8, #8                     \ number between 9 and 17, which we can use
  MOVHS   R8, #8                     \ as the drawing command number, as drawing
- ADD     R8, R8, #9                 \ commands 9 to 17 draw small particles with
-                                    \ higher numbers giving smaller particles
-                                    \ (see bufferJump for a full list of drawing
-                                    \ commands)
+ ADD     R8, R8, #9                 \ commands 9 to 17 draw shadow particles
+                                    \ with higher numbers giving smaller
+                                    \ particles (see bufferJump for a full list
+                                    \ of drawing commands)
 
  ADD     R1, R1, R0, LSL #20        \ Encode the two pixel coordinates in R0 and
                                     \ R1 into one parameter word in R1, by
@@ -14853,3 +14853,5 @@
  EQUD     &00013627, &0001304D, &00012AAA, &0001253C
  EQUD     &00012000, &00011AF2, &00011611, &0001115B
  EQUD     &00010CCC, &00010864, &00010421, &00010000
+
+.endCode

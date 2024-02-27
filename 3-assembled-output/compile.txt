@@ -10621,7 +10621,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00011C14 64080100
 00:00011C18 21040100
 00:00011C1C 00000100
-                            	  4813: 
+                            	  4813: endCode:
+                            	  4814: 
 
 
 Symbols by name:
@@ -10778,6 +10779,7 @@ dpar1                            A:00008A10
 dpar2                            A:00008A1C
 dpar3                            A:00008AF8
 dpar4                            A:00008B14
+endCode                          A:00011C20
 entr1                            A:0000A8F4
 expl1                            A:00008ED0
 fuelBarColour                    A:000093FC
@@ -11016,9 +11018,9 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 OS_WriteC
-00000000 LANDSCAPE_Y
 00000000 xObject
+00000000 LANDSCAPE_Y
+00000000 OS_WriteC
 00000001 OS_WriteS
 00000004 OS_ReadC
 00000006 OS_Byte
@@ -11028,8 +11030,8 @@ Symbols by value:
 0000001C OS_Mouse
 0000001F HALF_TILES_X
 00000028 OS_BinaryToDecimal
-00000030 xNoseV
 00000030 rotationMatrix
+00000030 xNoseV
 00000034 xRoofV
 00000038 xSideV
 0000003C yNoseV
@@ -11040,8 +11042,8 @@ Symbols by value:
 00000048 zNoseV
 0000004C zRoofV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -11095,8 +11097,8 @@ Symbols by value:
 00000900 particleData
 000010D4 BUFFER_SIZE
 00004600 objectMap
-00008000 CODE
 00008000 landscapeOffset
+00008000 CODE
 0000800C landscapeOffsetAddr
 00008010 landscapeConfig
 00008090 landscapeConfigAddr
@@ -11376,6 +11378,7 @@ Symbols by value:
 0000CA20 arctanTable
 0000CC20 squareRootTable
 0000DC20 divisionTable
+00011C20 endCode
 000121FC stack
 00012200 workspace
 00014600 buffers

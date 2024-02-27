@@ -7,9 +7,9 @@ Source: "3-assembled-output/RunImage.arm"
                             	     2: .include "3-assembled-output/exports.arm"
 
 Source: "3-assembled-output/exports.arm"
-                            	     1: .set OS_WriteC, 0x00000000
+                            	     1: .set xObject, 0x00000000
                             	     2: .set LANDSCAPE_Y, 0x00000000
-                            	     3: .set xObject, 0x00000000
+                            	     3: .set OS_WriteC, 0x00000000
                             	     4: .set OS_WriteS, 0x00000001
                             	     5: .set OS_ReadC, 0x00000004
                             	     6: .set OS_Byte, 0x00000006
@@ -19,8 +19,8 @@ Source: "3-assembled-output/exports.arm"
                             	    10: .set OS_Mouse, 0x0000001C
                             	    11: .set HALF_TILES_X, 0x0000001F
                             	    12: .set OS_BinaryToDecimal, 0x00000028
-                            	    13: .set xNoseV, 0x00000030
-                            	    14: .set rotationMatrix, 0x00000030
+                            	    13: .set rotationMatrix, 0x00000030
+                            	    14: .set xNoseV, 0x00000030
                             	    15: .set xRoofV, 0x00000034
                             	    16: .set xSideV, 0x00000038
                             	    17: .set yNoseV, 0x0000003C
@@ -31,8 +31,8 @@ Source: "3-assembled-output/exports.arm"
                             	    22: .set zNoseV, 0x00000048
                             	    23: .set zRoofV, 0x0000004C
                             	    24: .set zSideV, 0x00000050
-                            	    25: .set xVertex, 0x00000054
-                            	    26: .set varOffset, 0x00000054
+                            	    25: .set varOffset, 0x00000054
+                            	    26: .set xVertex, 0x00000054
                             	    27: .set yVertex, 0x00000058
                             	    28: .set xVertexRotated, 0x00000064
                             	    29: .set labOffset, 0x0000006C
@@ -86,8 +86,8 @@ Source: "3-assembled-output/exports.arm"
                             	    77: .set particleData, 0x00000900
                             	    78: .set BUFFER_SIZE, 0x000010D4
                             	    79: .set objectMap, 0x00004600
-                            	    80: .set CODE, 0x00008000
-                            	    81: .set landscapeOffset, 0x00008000
+                            	    80: .set landscapeOffset, 0x00008000
+                            	    81: .set CODE, 0x00008000
                             	    82: .set landscapeOffsetAddr, 0x0000800C
                             	    83: .set landscapeConfig, 0x00008010
                             	    84: .set landscapeConfigAddr, 0x00008090
@@ -367,36 +367,37 @@ Source: "3-assembled-output/exports.arm"
                             	   358: .set arctanTable, 0x0000CA20
                             	   359: .set squareRootTable, 0x0000CC20
                             	   360: .set divisionTable, 0x0000DC20
-                            	   361: .set stack, 0x000121FC
-                            	   362: .set workspace, 0x00012200
-                            	   363: .set buffers, 0x00014600
-                            	   364: .set buffer, 0x00069D00
-                            	   365: .set SMOKE_RISING_SPEED, 0x00080000
-                            	   366: .set SPLASH_HEIGHT, 0x00100000
-                            	   367: .set LANDING_SPEED, 0x00200000
-                            	   368: .set EXPLODE_Y, 0x00500000
-                            	   369: .set UNDERCARRIAGE_Y, 0x00640000
-                            	   370: .set SMOKE_HEIGHT, 0x00C00000
-                            	   371: .set TILE_SIZE, 0x01000000
-                            	   372: .set SAFE_HEIGHT, 0x01800000
-                            	   373: .set LAUNCHPAD_Y, 0x02EC0000
-                            	   374: .set LAUNCHPAD_ALTITUDE, 0x03500000
-                            	   375: .set LAND_MID_HEIGHT, 0x05000000
-                            	   376: .set SEA_LEVEL, 0x05500000
-                            	   377: .set LAUNCHPAD_SIZE, 0x08000000
-                            	   378: .set LANDSCAPE_Z_FRONT, 0x0A000000
-                            	   379: .set LANDSCAPE_Z_MID, 0x0F000000
-                            	   380: .set LANDSCAPE_X, 0x1E800000
-                            	   381: .set LANDSCAPE_X_HALF, 0x1F000000
-                            	   382: .set ROCK_HEIGHT, 0x20000000
-                            	   383: .set HIGHEST_ALTITUDE, 0x34000000
-                            	   384: .set CAMERA_PLAYER_Z, 0x39000000
-                            	   385: .set PLAYER_FRONT_Z, 0x3A000000
-                            	   386: .set LANDSCAPE_X_WIDTH, 0x3D000000
-                            	   387: .set LANDSCAPE_Z_DEPTH, 0x3E000000
-                            	   388: .set LANDSCAPE_Z_BEYOND, 0x3F000000
-                            	   389: .set LANDSCAPE_Z, 0x48000000
-                            	   390: 
+                            	   361: .set endCode, 0x00011C20
+                            	   362: .set stack, 0x000121FC
+                            	   363: .set workspace, 0x00012200
+                            	   364: .set buffers, 0x00014600
+                            	   365: .set buffer, 0x00069D00
+                            	   366: .set SMOKE_RISING_SPEED, 0x00080000
+                            	   367: .set SPLASH_HEIGHT, 0x00100000
+                            	   368: .set LANDING_SPEED, 0x00200000
+                            	   369: .set EXPLODE_Y, 0x00500000
+                            	   370: .set UNDERCARRIAGE_Y, 0x00640000
+                            	   371: .set SMOKE_HEIGHT, 0x00C00000
+                            	   372: .set TILE_SIZE, 0x01000000
+                            	   373: .set SAFE_HEIGHT, 0x01800000
+                            	   374: .set LAUNCHPAD_Y, 0x02EC0000
+                            	   375: .set LAUNCHPAD_ALTITUDE, 0x03500000
+                            	   376: .set LAND_MID_HEIGHT, 0x05000000
+                            	   377: .set SEA_LEVEL, 0x05500000
+                            	   378: .set LAUNCHPAD_SIZE, 0x08000000
+                            	   379: .set LANDSCAPE_Z_FRONT, 0x0A000000
+                            	   380: .set LANDSCAPE_Z_MID, 0x0F000000
+                            	   381: .set LANDSCAPE_X, 0x1E800000
+                            	   382: .set LANDSCAPE_X_HALF, 0x1F000000
+                            	   383: .set ROCK_HEIGHT, 0x20000000
+                            	   384: .set HIGHEST_ALTITUDE, 0x34000000
+                            	   385: .set CAMERA_PLAYER_Z, 0x39000000
+                            	   386: .set PLAYER_FRONT_Z, 0x3A000000
+                            	   387: .set LANDSCAPE_X_WIDTH, 0x3D000000
+                            	   388: .set LANDSCAPE_Z_DEPTH, 0x3E000000
+                            	   389: .set LANDSCAPE_Z_BEYOND, 0x3F000000
+                            	   390: .set LANDSCAPE_Z, 0x48000000
+                            	   391: 
 
 Source: "3-assembled-output/RunImage.arm"
                             	     3: .org CODE
