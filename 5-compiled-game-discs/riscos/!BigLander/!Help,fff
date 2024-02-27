@@ -1,0 +1,6 @@
+This is an extended version of !Lander that has a
+larger landscape.
+
+It should work on all versions of RISC OS.
+
+See lander.bbcelite.com for details.

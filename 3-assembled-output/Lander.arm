@@ -39,6 +39,7 @@
 .set OS_Word, 0x07
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
+.set XOS_ReadVduVariables, 0x20031
 .set stack, 0x000121FC
 .set workspace, stack + 4
 .set xObject, 0x00
@@ -2121,8 +2122,37 @@ screenBank2Addr:
 .long    0x01FD8000 + 320 * 16
 screenBank1Addr:
 .long    0x01FEC000 + 320 * 16
+screenWidth:
+.long   0
+readVduInputBlock:
+.long    148
+.long    149
+.long    6
+.long    -1
 screenBankNumber:
 .long    0
+GetScreenAddress:
+ STMFD   R13!, {R0-R3, R14}
+ MOV     R0, #112
+ MOV     R1, #1
+ SWI     OS_Byte
+ MOV     R0, #113
+ MOV     R1, #2
+ SWI     OS_Byte
+ ADR     R0, readVduInputBlock
+ ADR     R1, screenBank2Addr
+ SWI     XOS_ReadVduVariables
+ LDRVC   R1, screenBank2Addr
+ LDRVC   R2, screenWidth
+ LDRVC   R3, screenBank1Addr
+ MOVVS   R1, #0x01FD8000
+ MOVVS   R2, #320
+ MOVVS   R3, #0x01FEC000
+ ADD R1, R1, R2, LSL #4
+ STR R1, screenBank2Addr
+ ADD R3, R3, R2, LSL #4
+ STR R3, screenBank1Addr
+ LDMFD   R13!, {R0-R3, PC}
 divisionTableAddr:
 .long    divisionTable
 SwitchScreenBank:
@@ -2754,19 +2784,6 @@ Entry:
  LDR     R13, stackAddr
  LDR     R11, workspaceAddr
  STMFD   R13!, {R14}
- LDR     R0, memoryTestAddr
- LDRB    R1, [R0]
- MOV     R2, #0xAA
- STRB    R2, [R0]
- LDRB    R3, [R0]
- CMP     R2, R3
- BNE     AbortWithMemoryError
- MOV     R2, #0x55
- STRB    R2, [R0]
- LDRB    R3, [R0]
- CMP     R2, R3
- BNE     AbortWithMemoryError
- STRB    R1, [R0]
  MOV     R0, #4
  MOV     R1, #1
  MOV     R2, #0
@@ -2781,6 +2798,7 @@ Entry:
 .byte    "(C) D.J.Braben 1987"
 .byte    0
 .balign 4
+ BL      GetScreenAddress
  BL      SwitchScreenBank
  MOV     R0, #22
  SWI     OS_WriteC

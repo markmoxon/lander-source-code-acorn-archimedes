@@ -1,5 +1,6 @@
 .set CODE, 0x00008000
 .include "3-assembled-output/exports.arm"
+.set XOS_SynchroniseCodeAreas, 0x2006E
 .org CODE
  B       DecryptGameBinary
 gameCode:
@@ -14,6 +15,7 @@ decr1:
  STR     R12, [R1], #4
  CMP     R0, R2
  BNE     decr1
+ SWI XOS_SynchroniseCodeAreas
  B       Entry
 absoluteAddr:
 .long    CODE

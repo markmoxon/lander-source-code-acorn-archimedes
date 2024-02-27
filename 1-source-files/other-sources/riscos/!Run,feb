@@ -1,4 +1,4 @@
-| !Run file for !Lander, version 0.41 (16-Dec-88)
+| !Run file for !BigLander (see lander.bbcelite.com)
 WimpSlot 0 0
 RMEnsure MemAlloc 0 RMLoad <Obey$Dir>.MemAlloc
 Echo <22><141>

@@ -28,6 +28,21 @@
 
  INCLUDE "3-assembled-output/exports.arm"
 
+                                    \ --- Mod: Code added for more tiles: ----->
+
+ XOS_SynchroniseCodeAreas = &2006E  \ The operating system call to synchronise
+                                    \ code areas, which we need to call on
+                                    \ StrongARM machines after the copying is
+                                    \ done, so the proessor can flush its cache
+                                    \ to ensure it reads the moved game code
+                                    \
+                                    \ We set the 'X' silent error bit so we can
+                                    \ call this SWI on earlier operating systems
+                                    \ without getting an error (as this SWI is
+                                    \ only supported on RISC OS 3.7 and above)
+
+                                    \ --- End of added code ------------------->
+
 \ ******************************************************************************
 \
 \ LANDER !RunImage CODE
@@ -97,6 +112,14 @@
 
  CMP     R0, R2                     \ Loop back until we have copied the whole
  BNE     decr1                      \ game
+
+                                    \ --- Mod: Code added for more tiles: ----->
+
+ SWI XOS_SynchroniseCodeAreas       \ Synchronise code areas, so the proessor can
+                                    \ flush its cache to ensure it reads the
+                                    \ moved game code correctly
+
+                                    \ --- End of added code ------------------->
 
  B       Entry                      \ Start the game, which has execution
                                     \ address (the Entry routine)

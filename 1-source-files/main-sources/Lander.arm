@@ -204,6 +204,18 @@
  OS_BinaryToDecimal = &28           \ The operating system call to convert a
                                     \ number into a string
 
+                                    \ --- Mod: Code added for more tiles: ----->
+
+ XOS_ReadVduVariables = &20031      \ The operating system call to read the
+                                    \ display details
+                                    \
+                                    \ We set the 'X' silent error bit so we can
+                                    \ call this SWI on earlier operating systems
+                                    \ without getting an error (as this SWI is
+                                    \ only supported on RISC OS 2 and above)
+
+                                    \ --- End of added code ------------------->
+
 \ ******************************************************************************
 \
 \ Workspace variables
@@ -8962,6 +8974,47 @@
 
 \ ******************************************************************************
 \
+\       Name: screenWidth
+\       Type: Variable
+\   Category: Drawing the screen
+\    Summary: The number of bytes per pixel row in the current screen mode
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for more tiles: ----->
+
+.screenWidth
+
+ EQUD   0
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: readVduInputBlock
+\       Type: Variable
+\   Category: Drawing the screen
+\    Summary: The input block to pass to OS_ReadVduVariables so we can fetch
+\             the screen addresses
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for more tiles: ----->
+
+.readVduInputBlock
+
+ EQUD    148                        \ ScreenStart, as used by VDU drivers
+
+ EQUD    149                        \ DisplayStart, as used by display hardware
+
+ EQUD    6                          \ LineLength, number of bytes per pixel row
+
+ EQUD    -1                         \ Terminate block
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
 \       Name: screenBankNumber
 \       Type: Variable
 \   Category: Drawing the screen
@@ -8977,6 +9030,78 @@
                                     \   * 0 = draw bank 1, show bank 2
                                     \
                                     \   * 1 = draw bank 2, show bank 1
+
+\ ******************************************************************************
+\
+\       Name: GetScreenAddress
+\       Type: Variable
+\   Category: Drawing the screen
+\    Summary: Fetch the addresses of both screen banks in a way that works on
+\             all versions of Arthur and RISC OS
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for more tiles: ----->
+
+.GetScreenAddress
+
+ STMFD   R13!, {R0-R3, R14}         \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R0, #112                   \ Set the VDU driver screen bank to bank 1
+ MOV     R1, #1
+ SWI     OS_Byte
+
+ MOV     R0, #113                   \ Set the display hardware to bank 2
+ MOV     R1, #2
+ SWI     OS_Byte
+
+ ADR     R0, readVduInputBlock      \ Read the display parameters defined in the
+ ADR     R1, screenBank2Addr        \ readVduInputBlock block into the variables
+ SWI     XOS_ReadVduVariables       \ screenBank2Addr, screenBank1Addr and
+                                    \ screenWidth, so we can use the correct
+                                    \ addresses on RISC OS 3+, rather than the
+                                    \ hardcoded addresses in the original game
+                                    \
+                                    \ We call the XOS_ReadVduVariables version
+                                    \ of the SWI so it will fail gracefully on
+                                    \ Arthur and RISC OS 2, as they do not
+                                    \ support this SWI
+
+ LDRVC   R1, screenBank2Addr        \ If the SWI succeeded then the V flag will
+ LDRVC   R2, screenWidth            \ be clear, so set R1 to R3 to the results
+ LDRVC   R3, screenBank1Addr
+
+ MOVVS   R1, #&01FD8000             \ If the SWI failed then the V flag will be
+ MOVVS   R2, #320                   \ set, so set R1 to R3 to the hardcoded
+ MOVVS   R3, #&01FEC000             \ memory addresses from the original game
+
+                                    \ By this point we have the following:
+                                    \
+                                    \   R1 = address of screen bank 2
+                                    \
+                                    \   R2 = the screen width
+                                    \
+                                    \   R3 = address of screen bank 1
+
+ ADD R1, R1, R2, LSL #4             \ Set screenBank2Addr = R1 + R2 * 16
+ STR R1, screenBank2Addr            \
+                                    \ So this sets screenBank2Addr to the screen
+                                    \ address of the pixel row in bank 2 that's
+                                    \ just below the score bar in (which takes
+                                    \ up the first 16 pixel rows of the screen)
+
+ ADD R3, R3, R2, LSL #4             \ Set screenBank1Addr = R3 + R2 * 16
+ STR R3, screenBank1Addr            \
+                                    \ So this sets screenBank1Addr to the screen
+                                    \ address of the pixel row in bank 1 that's
+                                    \ just below the score bar in (which takes
+                                    \ up the first 16 pixel rows of the screen)
+
+ LDMFD   R13!, {R0-R3, PC}          \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
@@ -11981,29 +12106,33 @@
                                     \ to when quitting the game, so store it on
                                     \ the stack so we can retrieve it later
 
- LDR     R0, memoryTestAddr         \ Set R0 to the address in memoryTestAddr,
-                                    \ which points to a byte that will be
-                                    \ writable if there is enough free memory
-                                    \ for running the game
+                                    \ --- Mod: Code removed for more tiles: --->
 
- LDRB    R1, [R0]                   \ Set R1 to the current contents of memory
-                                    \ at R0, so we can restore it after running
-                                    \ our memory tests
+\LDR     R0, memoryTestAddr         \ Set R0 to the address in memoryTestAddr,
+\                                   \ which points to a byte that will be
+\                                   \ writable if there is enough free memory
+\                                   \ for running the game
+\
+\LDRB    R1, [R0]                   \ Set R1 to the current contents of memory
+\                                   \ at R0, so we can restore it after running
+\                                   \ our memory tests
+\
+\MOV     R2, #&AA                   \ Store the value &AA in our test memory
+\STRB    R2, [R0]                   \ location in R0, read it back, and if the
+\LDRB    R3, [R0]                   \ returned value is different to &AA, jump
+\CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
+\BNE     AbortWithMemoryError       \ as there isn't enough free memory
+\
+\MOV     R2, #&55                   \ Store the value &55 in our test memory
+\STRB    R2, [R0]                   \ location in R0, read it back, and if the
+\LDRB    R3, [R0]                   \ returned value is different to &55, jump
+\CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
+\BNE     AbortWithMemoryError       \ as there isn't enough free memory
+\
+\STRB    R1, [R0]                   \ Restore the original contents of address
+\                                   \ R0 so it's unchanged by our memory tests
 
- MOV     R2, #&AA                   \ Store the value &AA in our test memory
- STRB    R2, [R0]                   \ location in R0, read it back, and if the
- LDRB    R3, [R0]                   \ returned value is different to &AA, jump
- CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
- BNE     AbortWithMemoryError       \ as there isn't enough free memory
-
- MOV     R2, #&55                   \ Store the value &55 in our test memory
- STRB    R2, [R0]                   \ location in R0, read it back, and if the
- LDRB    R3, [R0]                   \ returned value is different to &55, jump
- CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
- BNE     AbortWithMemoryError       \ as there isn't enough free memory
-
- STRB    R1, [R0]                   \ Restore the original contents of address
-                                    \ R0 so it's unchanged by our memory tests
+                                    \ --- End of removed code ----------------->
 
  MOV     R0, #4                     \ Call OS_Byte 4 to set the cursor keys to
  MOV     R1, #1                     \ return ASCII values, so they don't move
@@ -12023,6 +12152,14 @@
  EQUS    "(C) D.J.Braben 1987"      \ whole game
  EQUB    0
  ALIGN
+
+                                    \ --- Mod: Code added for more tiles: ----->
+
+ BL      GetScreenAddress           \ Fetch the screen addresses for both screen
+                                    \ banks in a way that works on all versions
+                                    \ of Arthur and RISC OS
+
+                                    \ --- End of added code ------------------->
 
  BL      SwitchScreenBank           \ Switch screen bank, so VDU commands go to
                                     \ screen bank 2
