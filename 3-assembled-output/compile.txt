@@ -10307,7 +10307,8 @@ Source: "3-assembled-output/Lander.arm"
 00:00011A04 64080100
 00:00011A08 21040100
 00:00011A0C 00000100
-                            	  4811: 
+                            	  4811: endCode:
+                            	  4812: 
 
 
 Symbols by name:
@@ -10464,6 +10465,7 @@ dpar1                            A:00008800
 dpar2                            A:0000880C
 dpar3                            A:000088E8
 dpar4                            A:00008904
+endCode                          A:00011A10
 entr1                            A:0000A6E4
 expl1                            A:00008CC0
 fuelBarColour                    A:000091EC
@@ -10702,14 +10704,14 @@ zSideV                           S:00000050
 zVelocity                        S:000000A8
 
 Symbols by value:
-00000000 OS_WriteC
 00000000 LANDSCAPE_Y
 00000000 xObject
+00000000 OS_WriteC
 00000000 STORE
 00000001 OS_WriteS
 00000004 OS_ReadC
-00000006 OS_Byte
 00000006 HALF_TILES_X
+00000006 OS_Byte
 00000007 OS_Word
 00000008 zObject
 00000009 LAUNCHPAD_OBJECT
@@ -10717,8 +10719,8 @@ Symbols by value:
 0000000D TILES_X
 0000001C OS_Mouse
 00000028 OS_BinaryToDecimal
-00000030 rotationMatrix
 00000030 xNoseV
+00000030 rotationMatrix
 00000034 xRoofV
 00000038 xSideV
 0000003C yNoseV
@@ -10727,8 +10729,8 @@ Symbols by value:
 00000048 zNoseV
 0000004C zRoofV
 00000050 zSideV
-00000054 xVertex
 00000054 varOffset
+00000054 xVertex
 00000058 yVertex
 00000064 xVertexRotated
 0000006C labOffset
@@ -10781,8 +10783,8 @@ Symbols by value:
 00000700 particleData
 000010D4 BUFFER_SIZE
 00004400 objectMap
-00008000 landscapeOffset
 00008000 CODE
+00008000 landscapeOffset
 0000800C landscapeOffsetAddr
 00008010 landscapeConfig
 00008028 landscapeConfigAddr
@@ -11062,6 +11064,7 @@ Symbols by value:
 0000C810 arctanTable
 0000CA10 squareRootTable
 0000DA10 divisionTable
+00011A10 endCode
 000121FC stack
 00012200 workspace
 00014400 buffers
@@ -11076,15 +11079,15 @@ Symbols by value:
 01800000 SAFE_HEIGHT
 02EC0000 LAUNCHPAD_Y
 03500000 LAUNCHPAD_ALTITUDE
-05000000 CAMERA_PLAYER_Z
 05000000 LAND_MID_HEIGHT
+05000000 CAMERA_PLAYER_Z
 05500000 SEA_LEVEL
 05800000 LANDSCAPE_X
 06000000 LANDSCAPE_X_HALF
 06000000 PLAYER_FRONT_Z
 08000000 LAUNCHPAD_SIZE
-0A000000 LANDSCAPE_Z_FRONT
 0A000000 LANDSCAPE_Z_DEPTH
+0A000000 LANDSCAPE_Z_FRONT
 0B000000 LANDSCAPE_Z_BEYOND
 0B000000 LANDSCAPE_X_WIDTH
 0F000000 LANDSCAPE_Z_MID
