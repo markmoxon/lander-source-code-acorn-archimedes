@@ -2815,7 +2815,7 @@
  LDR     R8, [R11, #zCamera]        \ Set R2 = R2 - zCamera
  SUB     R2, R2, R8                 \
                                     \ So R2 contains the z-coordinate of the
-                                    \ particle relative to camera
+                                    \ particle relative to the camera
 
  ADD     R2, R2, #LANDSCAPE_Z       \ Move the coordinate back by the landscape
                                     \ offset, so (R0, R2) contains the
@@ -2973,7 +2973,7 @@
                                     \ shadow relative to the camera
 
  MOV     R8, R2                     \ Set R8 to the z-coordinate of the particle
-                                    \ relative to camera
+                                    \ relative to the camera
 
  BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle's
                                     \ shadow in (R0, R1, R2) onto the screen,
@@ -2990,7 +2990,7 @@
                                     \ that we stored above
 
  MOV     R8, R2                     \ Set R8 to the z-coordinate of the particle
-                                    \ relative to camera
+                                    \ relative to the camera
 
  BL      ProjectParticleOntoScreen  \ Project the coordinates of the particle in
                                     \ (R0, R1, R2) onto the screen, returning
@@ -4770,7 +4770,7 @@
  LDR     R14, [R11, #zCamera]       \ Set R2 = R9 - zCamera
  SUB     R2, R9, R14                \
                                     \ So R2 contains the z-coordinate of the
-                                    \ object relative to camera
+                                    \ object relative to the camera
 
  ADD     R2, R2, #LANDSCAPE_Z       \ Move the coordinate back by the landscape
                                     \ offset, so (R0, R2) contains the
