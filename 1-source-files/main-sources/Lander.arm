@@ -571,7 +571,7 @@
 
  EQUB    &3A, TILES_X               \ Tile row #0
 
- FOR I%, 1, (TILES_Z - 1) / 2
+ FOR I% = 1 TO (TILES_Z - 1) / 2
 
   EQUB   &E3, TILES_X               \ Tile row data (even)
   EQUB   &E4, TILES_X               \ Tile row data (odd)
@@ -616,7 +616,7 @@
  buffer = workspace + buffers       \ The graphics buffers live at the address
                                     \ given in the buffersAddr variable
 
- FOR I%, 1, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
+ FOR I% = 1 TO TILES_Z + 1          \ Add a buffer for each corner row (plus 1)
 
   EQUD   buffer                     \ Insert the address of the buffer
 
@@ -646,7 +646,7 @@
  buffer = workspace + buffers       \ The graphics buffers live at the address
                                     \ given in the buffersAddr variable
 
- FOR I%, 1, TILES_Z + 1             \ Add a buffer for each corner row (plus 1)
+ FOR I% = 1 TO TILES_Z + 1          \ Add a buffer for each corner row (plus 1)
 
   EQUD   buffer                     \ Insert the address of the buffer
 
