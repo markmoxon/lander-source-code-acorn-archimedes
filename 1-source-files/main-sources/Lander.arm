@@ -1468,6 +1468,7 @@
 \   Category: Landscape
 \    Summary: Calculate the colour of the landscape tile currently being drawn
 \  Deep dive: Drawing the landscape
+\             Screen memory in the Archimedes
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1616,7 +1617,7 @@
                                     \   * Bit 7 = blue bit 3
                                     \   * Bit 6 = green bit 3
                                     \   * Bit 5 = green bit 2
-                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 4 = red bit 3
                                     \   * Bit 3 = blue bit 2
                                     \   * Bit 2 = red bit 2
                                     \   * Bit 1 = sum of red/green/blue bit 1
@@ -3029,6 +3030,7 @@
 \    Summary: Set the flags for a particle whose colour fades from white to red
 \             over time, to give a white-hot explosion particle that cools down
 \  Deep dive: Particles and particle clouds
+\             Screen memory in the Archimedes
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3072,7 +3074,7 @@
  MOVLO   R2, #0                     \ otherwise set:
                                     \
                                     \   Green channel in R1 = R6 * 2
-                                    \   Blue = 0
+                                    \   Blue channel in R2 = 0
                                     \
                                     \ So particles start out white (R6 > 8)
                                     \ with a fading level of blue, until the
@@ -3095,7 +3097,7 @@
                                     \   * Bit 7 = blue bit 3
                                     \   * Bit 6 = green bit 3
                                     \   * Bit 5 = green bit 2
-                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 4 = red bit 3
                                     \   * Bit 3 = blue bit 2
                                     \   * Bit 2 = red bit 2
                                     \   * Bit 1 = sum of red/green/blue bit 1
@@ -3795,6 +3797,7 @@
 \   Category: Particles
 \    Summary: Add a smoke particle to the particle data buffer
 \  Deep dive: Particles and particle clouds
+\             Screen memory in the Archimedes
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3837,7 +3840,7 @@
                                     \   * Bit 7 = blue bit 3
                                     \   * Bit 6 = green bit 3
                                     \   * Bit 5 = green bit 2
-                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 4 = red bit 3
                                     \   * Bit 3 = blue bit 2
                                     \   * Bit 2 = red bit 2
                                     \   * Bit 1 = sum of red/green/blue bit 1
@@ -3906,6 +3909,7 @@
 \    Summary: Add a debris particle to the particle data buffer, which is a
 \             purple-brownish-green particle that bounces out of an explosion
 \  Deep dive: Particles and particle clouds
+\             Screen memory in the Archimedes
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3961,7 +3965,7 @@
                                     \   * Bit 7 = blue bit 3
                                     \   * Bit 6 = green bit 3
                                     \   * Bit 5 = green bit 2
-                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 4 = red bit 3
                                     \   * Bit 3 = blue bit 2
                                     \   * Bit 2 = red bit 2
                                     \   * Bit 1 = sum of red/green/blue bit 1
@@ -4027,6 +4031,7 @@
 \    Summary: Drop a rock from the specified coordinates by spawning it as a
 \             particle, albeit a very big particle with an associated 3D object
 \  Deep dive: Particles and particle clouds
+\             Screen memory in the Archimedes
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4083,7 +4088,7 @@
                                     \   * Bit 7 = blue bit 3
                                     \   * Bit 6 = green bit 3
                                     \   * Bit 5 = green bit 2
-                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 4 = red bit 3
                                     \   * Bit 3 = blue bit 2
                                     \   * Bit 2 = red bit 2
                                     \   * Bit 1 = sum of red/green/blue bit 1
@@ -4201,13 +4206,14 @@
 \       Type: Subroutine
 \   Category: Particles
 \    Summary: Add a spray particle to the particle data buffer
+\  Deep dive: Particles and particle clouds
+\             Screen memory in the Archimedes
 \
 \ ------------------------------------------------------------------------------
 \
 \ Arguments:
 \
 \   (R0, R1, R2)                    Particle coordinates
-\  Deep dive: Particles and particle clouds
 \
 \ ******************************************************************************
 
@@ -4248,7 +4254,7 @@
                                     \   * Bit 7 = blue bit 3
                                     \   * Bit 6 = green bit 3
                                     \   * Bit 5 = green bit 2
-                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 4 = red bit 3
                                     \   * Bit 3 = blue bit 2
                                     \   * Bit 2 = red bit 2
                                     \   * Bit 1 = sum of red/green/blue bit 1
@@ -5379,6 +5385,7 @@
 \    Summary: Draw each of the object's faces
 \  Deep dive: Drawing 3D objects
 \             Object blueprints
+\             Screen memory in the Archimedes
 \
 \ ******************************************************************************
 
@@ -5475,7 +5482,7 @@
                                     \   * Bit 7 = blue bit 3
                                     \   * Bit 6 = green bit 3
                                     \   * Bit 5 = green bit 2
-                                    \   * Bit 4 = red bit 2
+                                    \   * Bit 4 = red bit 3
                                     \   * Bit 3 = blue bit 2
                                     \   * Bit 2 = red bit 2
                                     \   * Bit 1 = sum of red/green/blue bit 1
@@ -7755,6 +7762,7 @@
 \   Category: Drawing the screen
 \    Summary: The screen address for the start of the 17th pixel line in the
 \             current bank (i.e. the line just below the two rows of text)
+\  Deep dive: Screen memory in the Archimedes
 \
 \ ******************************************************************************
 
@@ -8929,6 +8937,7 @@
 \   Category: Drawing the screen
 \    Summary: The screen address for the start of the 17th pixel line in screen
 \             bank 0 (i.e. the line just below the two rows of text)
+\  Deep dive: Screen memory in the Archimedes
 \
 \ ******************************************************************************
 
@@ -8943,6 +8952,7 @@
 \   Category: Drawing the screen
 \    Summary: The screen address for the start of the 17th pixel line in screen
 \             bank 1 (i.e. the line just below the two rows of text)
+\  Deep dive: Screen memory in the Archimedes
 \
 \ ******************************************************************************
 
@@ -8956,6 +8966,7 @@
 \       Type: Variable
 \   Category: Drawing the screen
 \    Summary: The number of the current screen bank (0 or 1)
+\  Deep dive: Screen memory in the Archimedes
 \
 \ ******************************************************************************
 
@@ -8988,6 +8999,7 @@
 \   Category: Drawing the screen
 \    Summary: Switch screen banks and clear the newly hidden screen bank to
 \             black
+\  Deep dive: Screen memory in the Archimedes
 \
 \ ******************************************************************************
 
