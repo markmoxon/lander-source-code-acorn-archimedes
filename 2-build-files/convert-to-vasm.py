@@ -24,6 +24,12 @@ def convert(input_file, output_file):
         # .label -> label:
         line = re.sub(r"^\.([^ \n]+)", r"\1:", line)
 
+        # FOR loop -> .rept
+        line = re.sub(r"^ *FOR I% = 1 TO ", ".rept ", line)
+
+        # NEXT -> .endr
+        line = re.sub(r"^ *NEXT", ".endr", line)
+
         # x = y -> .set x, y
         line = re.sub(r"^ *(.+) = (.+)$", r".set \1, \2", line)
 
@@ -32,12 +38,6 @@ def convert(input_file, output_file):
 
         # SKIP -> .skip
         line = re.sub(r"^ *SKIP ", ".skip ", line)
-
-        # FOR loop -> .rept
-        line = re.sub(r"^ *FOR I%, 1, ", ".rept ", line)
-
-        # NEXT -> .endr
-        line = re.sub(r"^ *NEXT", ".endr", line)
 
         # P% -> $
         line = re.sub(r"P%", "$", line)
