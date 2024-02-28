@@ -1986,6 +1986,7 @@
 \   Category: Player
 \    Summary: Check for collisions and draw the ship
 \  Deep dive: Drawing 3D objects
+\             Collisions and bullets
 \
 \ ******************************************************************************
 
@@ -2290,6 +2291,7 @@
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Spawn a bullet particle if the fire button is being pressed
+\  Deep dive: Collisions and bullets
 \
 \ ******************************************************************************
 
@@ -2396,6 +2398,7 @@
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Check to see if the player has landed on the launchpad
+\  Deep dive: Collisions and bullets
 \
 \ ------------------------------------------------------------------------------
 \
@@ -2492,6 +2495,7 @@
 \   Category: Main loop
 \    Summary: Lose a life when a crash is detected in the particle processing
 \             loop
+\  Deep dive: Collisions and bullets
 \
 \ ******************************************************************************
 
@@ -2511,6 +2515,7 @@
 \    Summary: Display a crash animation when we lose a life and end the game if
 \             this is our last life
 \  Deep dive: The main game loop
+\             Collisions and bullets
 \
 \ ******************************************************************************
 
@@ -2867,7 +2872,8 @@
 \    Summary: Process rocks by checking for collisions and drawing them as 3D
 \             objects
 \  Deep dive: Drawing 3D objects
-\  Deep dive: Particles and particle clouds
+\             Particles and particle clouds
+\             Collisions and bullets
 \
 \ ******************************************************************************
 
@@ -3190,6 +3196,7 @@
 \    Summary: If this particle has hit an object, destroy the object and the
 \             particle in an explosion, scoring points if it's a bullet
 \  Deep dive: Particles and particle clouds
+\             Collisions and bullets
 \
 \ ------------------------------------------------------------------------------
 \
@@ -3405,6 +3412,7 @@
 \   Category: Particles
 \    Summary: Add a bullet particle to the particle data buffer
 \  Deep dive: Particles and particle clouds
+\             Collisions and bullets
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4355,7 +4363,7 @@
 \   Category: Particles
 \    Summary: An unused routine that adds a 50-cluster explosion cloud to the
 \             particle data buffer, just front of the player's ship
-\  Deep dive: Particles and particle clouds
+\  Deep dive: Unused code in Lander
 \
 \ ******************************************************************************
 
@@ -4396,6 +4404,7 @@
 \   Category: Particles
 \    Summary: An unused routine that adds a cloud of 150 spark particles to the
 \             particle data buffer, just in front of the player's ship
+\  Deep dive: Unused code in Lander
 \
 \ ******************************************************************************
 
@@ -4443,6 +4452,7 @@
 \   Category: Particles
 \    Summary: An unused routine that spawns a rock in the sky, at half the
 \             altitude of the rocks in the DropRocksFromTheSky routine
+\  Deep dive: Unused code in Lander
 \
 \ ******************************************************************************
 
@@ -5029,6 +5039,7 @@
 \    Summary: Process the object's vertices
 \  Deep dive: Drawing 3D objects
 \             Object blueprints
+\             Collisions and bullets
 \
 \ ******************************************************************************
 
@@ -6121,6 +6132,7 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: An unused routine that transposes the rotation matrix
+\  Deep dive: Unused code in Lander
 \
 \ ******************************************************************************
 
@@ -6132,13 +6144,13 @@
  LDR     R0, [R2, #4]               \ Transpose it by swapping coordinates on
  LDR     R1, [R2, #12]              \ either side of the diagonal from the
  STR     R0, [R2, #12]              \ top-left to bottom-right
- STR     R1, [R2, #4]
- LDR     R0, [R2, #8]
- LDR     R1, [R2, #24]
- STR     R0, [R2, #24]
- STR     R1, [R2, #8]
- LDR     R0, [R2, #20]
- LDR     R1, [R2, #28]
+ STR     R1, [R2, #4]               \
+ LDR     R0, [R2, #8]               \   [ x1 x2 x3 ]      [ x1 y1 z1 ]
+ LDR     R1, [R2, #24]              \   [ y1 y2 y3 ]  ->  [ x2 y2 z2 ]
+ STR     R0, [R2, #24]              \   [ z1 z2 z3 ]      [ x3 y3 z3 ]
+ STR     R1, [R2, #8]               \
+ LDR     R0, [R2, #20]              \ This converts the rotation matrix into the
+ LDR     R1, [R2, #28]              \ inverse rotation
  STR     R0, [R2, #28]
  STR     R1, [R2, #20]
 
@@ -6151,6 +6163,7 @@
 \   Category: Maths (Geometry)
 \    Summary: An unused routine that adds a delta vector to a coordinate and
 \             updates the delta with feedback from the coordinate value
+\  Deep dive: Unused code in Lander
 \
 \ ******************************************************************************
 
@@ -7017,18 +7030,10 @@
 \
 \   screen y-coordinate = 64 + y / z
 \
-\ The screen coordinate is deemed on-screen when it is within the following
-\ valid ranges:
-\
-\   screen x is in the range 0 to 319
-\
-\   screen y is in the range 0 to 238
+\ The particle is deemed on-screen if its z-coordinate is less than &80000000.
 \
 \ This routine differs from the particle projection routine in that it projects
 \ vertices irrespective of their viewing angle.
-\
-\ The y-coordinate is the screen height (256 pixels) minus the two text lines
-\ that are reserved for the score bar at the top of the screen (16 pixels).
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7388,6 +7393,7 @@
 \   Category: Maths (Geometry)
 \    Summary: An unused routine that adds two vectors and uses self-modifying
 \             code to store the results in a specified location
+\  Deep dive: Unused code in Lander
 \
 \ ******************************************************************************
 
@@ -7533,6 +7539,7 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: An unused routine that multiplies a vector by a constant value
+\  Deep dive: Unused code in Lander
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7761,6 +7768,7 @@
 \       Type: Variable
 \   Category: Drawing the screen
 \    Summary: An unused table of grey four-pixel colour words
+\  Deep dive: Unused code in Lander
 \
 \ ******************************************************************************
 
@@ -7794,6 +7802,7 @@
 \   Category: Drawing the screen
 \    Summary: The unused address of the unused table of grey four-pixel colour
 \             words
+\  Deep dive: Unused code in Lander
 \
 \ ******************************************************************************
 
@@ -12457,6 +12466,7 @@
 \   Category: Score bar
 \    Summary: An unused routine that prints an 8-digit hexadecimal number on the
 \             second character row of the screen
+\  Deep dive: Unused code in Lander
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12519,6 +12529,7 @@
 \   Category: Score bar
 \    Summary: An unused routine that prints a single digit hexadecimal number in
 \             the score bar
+\  Deep dive: Unused code in Lander
 \
 \ ------------------------------------------------------------------------------
 \
