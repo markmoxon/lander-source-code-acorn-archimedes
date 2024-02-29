@@ -44,6 +44,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    39: .set OS_Word, 0x07
                             	    40: .set OS_Mouse, 0x1C
                             	    41: .set OS_BinaryToDecimal, 0x28
+<<<<<<< HEAD
                             	    42: .set XOS_ReadVduVariables, 0x20031
                             	    43: .set stack, 0x000121FC
                             	    44: .set workspace, stack + 4
@@ -137,6 +138,100 @@ Source: "3-assembled-output/Lander.arm"
                             	   131: .byte   0xE3, TILES_X
                             	   132: .byte   0xE4, TILES_X
                             	   133: .endr
+=======
+                            	    42: .set stack, 0x000121FC
+                            	    43: .set workspace, stack + 4
+                            	    44: .set xObject, 0x00
+                            	    45: .set yObject, 0x04
+                            	    46: .set zObject, 0x08
+                            	    47: .set rotationMatrix, 0x30
+                            	    48: .set xNoseV, 0x30
+                            	    49: .set xRoofV, 0x34
+                            	    50: .set xSideV, 0x38
+                            	    51: .set yNoseV, 0x3C
+                            	    52: .set yRoofV, 0x40
+                            	    53: .set ySideV, 0x44
+                            	    54: .set zNoseV, 0x48
+                            	    55: .set zRoofV, 0x4C
+                            	    56: .set zSideV, 0x50
+                            	    57: .set xVertex, 0x54
+                            	    58: .set yVertex, 0x58
+                            	    59: .set zVertex, 0x5C
+                            	    60: .set xVertexRotated, 0x64
+                            	    61: .set yVertexRotated, 0x68
+                            	    62: .set zVertexRotated, 0x6C
+                            	    63: .set xCoord, 0x74
+                            	    64: .set yCoord, 0x78
+                            	    65: .set zCoord, 0x7C
+                            	    66: .set xObjectScaled, 0x84
+                            	    67: .set yObjectScaled, 0x88
+                            	    68: .set zObjectScaled, 0x8C
+                            	    69: .set xPlayer, 0x94
+                            	    70: .set yPlayer, 0x98
+                            	    71: .set zPlayer, 0x9C
+                            	    72: .set xVelocity, 0xA0
+                            	    73: .set yVelocity, 0xA4
+                            	    74: .set zVelocity, 0xA8
+                            	    75: .set xExhaust, 0xAC
+                            	    76: .set yExhaust, 0xB0
+                            	    77: .set zExhaust, 0xB4
+                            	    78: .set previousColumn, 0xC4
+                            	    79: .set tileCornerRow, 0xE4
+                            	    80: .set unusedConfig, 0xF0
+                            	    81: .set objectType, 0xF4
+                            	    82: .set tileRowOddEven, 0xF8
+                            	    83: .set altitude, 0x100
+                            	    84: .set prevAltitude, 0x104
+                            	    85: .set particleEnd, 0x108
+                            	    86: .set particleCount, 0x10C
+                            	    87: .set objectData, 0x110
+                            	    88: .set objectFlags, 0x114
+                            	    89: .set mainLoopCount, 0x118
+                            	    90: .set crashLoopCount, 0x11C
+                            	    91: .set crashedFlag, 0x120
+                            	    92: .set currentScore, 0x124
+                            	    93: .set fuelLevel, 0x128
+                            	    94: .set gravity, 0x12C
+                            	    95: .set playingGame, 0x130
+                            	    96: .set remainingLives, 0x134
+                            	    97: .set highScore, 0x138
+                            	    98: .set xCamera, 0x13C
+                            	    99: .set yCamera, 0x140
+                            	   100: .set zCamera, 0x144
+                            	   101: .set xCameraTile, 0x148
+                            	   102: .set yCameraTile, 0x14C
+                            	   103: .set zCameraTile, 0x150
+                            	   104: .set shipDirection, 0x154
+                            	   105: .set shipPitch, 0x158
+                            	   106: .set fuelBurnRate, 0x15C
+                            	   107: .set xLandscapeRow, 0x160
+                            	   108: .set yLandscapeRow, 0x164
+                            	   109: .set zLandscapeRow, 0x168
+                            	   110: .set xLandscapeCol, 0x170
+                            	   111: .set yLandscapeCol, 0x174
+                            	   112: .set zLandscapeCol, 0x178
+                            	   113: .set stringBuffer, 0x200
+                            	   114: .set cornerStore1, 0x400
+                            	   115: .set cornerStore2, 0x500 + STORE
+                            	   116: .set vertexProjected, 0x600 + STORE * 2
+                            	   117: .set particleData, 0x700 + STORE * 2
+                            	   118: .set objectMap, 0x4400 + STORE * 2
+                            	   119: .set buffers, 0x14400 + STORE * 2
+                            	   120: .org     CODE
+                            	   121: landscapeOffset:
+00:00008000 000080FA        	   122: .long    -LANDSCAPE_X
+00:00008004 00000000        	   123: .long    LANDSCAPE_Y
+00:00008008 00000014        	   124: .long    LANDSCAPE_Z
+                            	   125: landscapeOffsetAddr:
+00:0000800C 00800000        	   126: .long    landscapeOffset
+                            	   127: landscapeConfig:
+00:00008010 3A              	   128: .byte    0x3A, TILES_X
+00:00008011 0D
+                            	   129: .rept (TILES_Z - 1) / 2
+                            	   130: .byte   0xE3, TILES_X
+                            	   131: .byte   0xE4, TILES_X
+                            	   132: .endr
+>>>>>>> main
 00:00008012 E3              	     1R .byte   0xE3, TILES_X
 00:00008013 3F
 00:00008014 E4              	     2R .byte   0xE4, TILES_X
