@@ -309,14 +309,17 @@
 
  zVelocity = &A8                    \ The player's velocity in the z-axis
 
- xThrust = &AC                      \ The x-coordinate of the ship's thrust
-                                    \ vector
+ xExhaust = &AC                     \ The x-coordinate of the ship's exhaust
+                                    \ vector, which points along the exhaust
+                                    \ plume
 
- yThrust = &B0                      \ The y-coordinate of the ship's thrust
-                                    \ vector
+ yExhaust = &B0                     \ The y-coordinate of the ship's exhaust
+                                    \ vector, which points along the exhaust
+                                    \ plume
 
- zThrust = &B4                      \ The z-coordinate of the ship's thrust
-                                    \ vector
+ zExhaust = &B4                     \ The z-coordinate of the ship's exhaust
+                                    \ vector, which points along the exhaust
+                                    \ plume
 
                                     \ Offsets &B8 to &C0 appear to be unused
 
@@ -1664,6 +1667,7 @@
 \   Category: Player
 \    Summary: Process player movement and draw the player's ship into the
 \             graphics buffers, starting with reading the mouse position
+\  Deep dive: Flying by mouse
 \
 \ ******************************************************************************
 
@@ -1815,6 +1819,7 @@
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Update the player's velocity and coordinates
+\  Deep dive: Flying by mouse
 \
 \ ******************************************************************************
 
@@ -1852,9 +1857,9 @@
                                     \ Let's refer to this thrust vector as
                                     \ follows:
                                     \
-                                    \   R6 = xThrust
-                                    \   R7 = yThrust
-                                    \   R8 = zThrust
+                                    \   R6 = xExhaust
+                                    \   R7 = yExhaust
+                                    \   R8 = zExhaust
 
  LDRB    R9, [R11, #fuelBurnRate]   \ Set R9 to the fuel burn rate
 
@@ -1871,15 +1876,16 @@
                                     \ by 1/64, so this applies a deceleration in
                                     \ this direction (due to friction)
 
- SUBNE   R3, R3, R6, ASR #11        \ Increase R3 by a further xThrust / 2048 if
-                                    \ full thrust is being pressed, so this
+ SUBNE   R3, R3, R6, ASR #11        \ Increase R3 by a further xExhaust / 2048
+                                    \ if full thrust is being pressed, so this
                                     \ applies the engine thrust
                                     \
-                                    \ We subtract the thrust rather than adding
-                                    \ it because the direction of the y-axis is
-                                    \ reversed (positive is down rather than up)
-                                    \ so we add downward forces and subtract
-                                    \ upward forces
+                                    \ We subtract the exhaust vector to apply
+                                    \ thrust because the direction of the thrust
+                                    \ applied by the plume is in the opposite
+                                    \ direction to the plume (in other words, a
+                                    \ rocket's plume pushes downwards so the
+                                    \ rocket can rise up)
 
  ADD     R0, R0, R3                 \ Set R0 = R0 + R3
                                     \        = xPlayer + R3
@@ -1897,15 +1903,16 @@
                                     \ by 1/64, so this applies a deceleration in
                                     \ this direction (due to friction)
 
- SUBNE   R4, R4, R7, ASR #11        \ Increase R3 by a further yThrust / 2048 if
-                                    \ full thrust is being pressed, so this
+ SUBNE   R4, R4, R7, ASR #11        \ Increase R3 by a further yExhaust / 2048
+                                    \ if full thrust is being pressed, so this
                                     \ applies the engine thrust
                                     \
-                                    \ We subtract the thrust rather than adding
-                                    \ it because the direction of the y-axis is
-                                    \ reversed (positive is down rather than up)
-                                    \ so we add downward forces and subtract
-                                    \ upward forces
+                                    \ We subtract the exhaust vector to apply
+                                    \ thrust because the direction of the thrust
+                                    \ applied by the plume is in the opposite
+                                    \ direction to the plume (in other words, a
+                                    \ rocket's plume pushes downwards so the
+                                    \ rocket can rise up)
 
  ADD     R1, R1, R4                 \ Set R1 = R1 + R4
                                     \        = yPlayer + R4
@@ -1923,15 +1930,16 @@
                                     \ by 1/64, so this applies a deceleration in
                                     \ this direction (due to friction)
 
- SUBNE   R5, R5, R8, ASR #11        \ Increase R3 by a further zThrust / 2048 if
-                                    \ full thrust is being pressed, so this
+ SUBNE   R5, R5, R8, ASR #11        \ Increase R3 by a further zExhaust / 2048
+                                    \ if full thrust is being pressed, so this
                                     \ applies the engine thrust
                                     \
-                                    \ We subtract the thrust rather than adding
-                                    \ it because the direction of the y-axis is
-                                    \ reversed (positive is down rather than up)
-                                    \ so we add downward forces and subtract
-                                    \ upward forces
+                                    \ We subtract the exhaust vector to apply
+                                    \ thrust because the direction of the thrust
+                                    \ applied by the plume is in the opposite
+                                    \ direction to the plume (in other words, a
+                                    \ rocket's plume pushes downwards so the
+                                    \ rocket can rise up)
 
  ADD     R2, R2, R5                 \ Set R2 = R2 + R5
                                     \        = zPlayer + R5
@@ -1975,9 +1983,9 @@
                                     \   yVelocity = R4
                                     \   zVelocity = R5
                                     \
-                                    \   xThrust = R6
-                                    \   yThrust = R7
-                                    \   zThrust = R8
+                                    \   xExhaust = R6
+                                    \   yExhaust = R7
+                                    \   zExhaust = R8
                                     \
                                     \ We use these values in part 4
 
@@ -1989,6 +1997,7 @@
 \    Summary: Check for collisions and draw the ship
 \  Deep dive: Drawing 3D objects
 \             Collisions and bullets
+\             Flying by mouse
 \
 \ ******************************************************************************
 
@@ -2153,6 +2162,7 @@
 \       Type: Subroutine
 \   Category: Player
 \    Summary: Spawn the particles in the exhaust plume if the engine is engaged
+\  Deep dive: Flying by mouse
 \
 \ ******************************************************************************
 
@@ -2168,9 +2178,9 @@
                                     \   R1 = yVelocity
                                     \   R2 = zVelocity
                                     \
-                                    \   R6 = xThrust
-                                    \   R7 = yThrust
-                                    \   R8 = zThrust
+                                    \   R6 = xExhaust
+                                    \   R7 = yExhaust
+                                    \   R8 = zExhaust
                                     \
                                     \ So (R0, R1, R2) is the player's velocity
                                     \ and (R6, R7, R8) is the player's thrust
@@ -2178,17 +2188,19 @@
 
  ADD     R3, R0, R6, ASR #7         \ Set (R3, R4, R5) as follows:
  ADD     R4, R1, R7, ASR #7         \
- ADD     R5, R2, R8, ASR #7         \   [ (xVelocity + xThrust / 128) / 2 ]
- MOV     R3, R3, ASR #1             \   [ (yVelocity + yThrust / 128) / 2 ]
- MOV     R4, R4, ASR #1             \   [ (zVelocity + zThrust / 128) / 2 ]
+ ADD     R5, R2, R8, ASR #7         \   [ (xVelocity + xExhaust / 128) / 2 ]
+ MOV     R3, R3, ASR #1             \   [ (yVelocity + yExhaust / 128) / 2 ]
+ MOV     R4, R4, ASR #1             \   [ (zVelocity + zExhaust / 128) / 2 ]
  MOV     R5, R5, ASR #1             \
                                     \ So this sets (R3, R4, R5) to a vector in
                                     \ the direction of the player's velocity
                                     \ (so the particles move along with the
-                                    \ ship) and slightly against the direction
-                                    \ of thrust (so that's heading away from
-                                    \ the engine in the direction that it's
-                                    \ pointing)
+                                    \ ship) and in the direction of the exhaust
+                                    \ plume (so that's heading away from the
+                                    \ engine, in the direction that it's
+                                    \ pointing), and we halve the result so they
+                                    \ shoot out of the engine but soon get left
+                                    \ behind as we blast away
 
  ADD     R0, R11, #xPlayer          \ Set R0 to R2 as follows:
  LDMIA   R0, {R0-R2}                \ 
@@ -2200,16 +2212,21 @@
 
  SUB     R0, R0, R3                 \ Set (R0, R1, R2) as follows:
  SUB     R1, R1, R4                 \
- SUB     R2, R2, R5                 \   [ xPlayer - R3 + (xThrust / 128) ]
- ADD     R0, R0, R6, ASR #7         \   [ yPlayer - R4 + (yThrust / 128) ]
- ADD     R1, R1, R7, ASR #7         \   [ zPlayer - R5 + (zThrust / 128) ]
+ SUB     R2, R2, R5                 \   [ xPlayer - R3 + (xExhaust / 128) ]
+ ADD     R0, R0, R6, ASR #7         \   [ yPlayer - R4 + (yExhaust / 128) ]
+ ADD     R1, R1, R7, ASR #7         \   [ zPlayer - R5 + (zExhaust / 128) ]
  ADD     R2, R2, R8, ASR #7         \
-                                    \ So this sets (R0, R1, R2) to a coordinate
-                                    \ just behind the player's ship (as we have
-                                    \ subtracted the velocity vector) and
-                                    \ slightly against the direction of thrust
-                                    \ (so that's below the engine in the
-                                    \ direction that it's pointing)
+                                    \ So this sets (R0, R1, R2) to the position
+                                    \ of the player's ship, but a little way in
+                                    \ the direction of the exhaust plume (so
+                                    \ that's below the engine in the direction
+                                    \ that it's pointing), and we also subtract
+                                    \ the velocity in (R3, R4, R5) because the
+                                    \ first thing that happens when we process
+                                    \ the particle in MoveAndDrawParticles is
+                                    \ to add the velocity, so this cancels that
+                                    \ out to ensure the particle starts out
+                                    \ along the line of the exhaust plume
 
                                     \ By this stage we have:
                                     \
@@ -2352,24 +2369,20 @@
  ADD     R0, R0, R6, ASR #7         \   [ yPlayer - R4 + (yGun / 128) ]
  ADD     R1, R1, R7, ASR #7         \   [ zPlayer - R5 + (zGun / 128) ]
  ADD     R2, R2, R8, ASR #7         \
-                                    \ The calculation for each vertex works out
-                                    \ like this:
-                                    \
-                                    \     xPlayer - R3 + (xGun / 128)
-                                    \
-                                    \   = xPlayer - (xVelocity + xGun / 256)
-                                    \             + (xGun / 128)
-                                    \
-                                    \   = xPlayer - xVelocity + xGun / 256
-                                    \
-                                    \ So this sets (R0, R1, R2) to a coordinate
-                                    \ that's moved back by the player's velocity
-                                    \ (which takes us to the point where the
-                                    \ ship was before we moved it in this
-                                    \ iteration, which is where we would expect
-                                    \ the gun to have fired), plus the gun
-                                    \ vector, so the bullet fires out of the end
+                                    \ So this sets (R0, R1, R2) to the position
+                                    \ of the player's ship, but a little way in
+                                    \ the direction of the gun (so the bullet
+                                    \ fires out of the end of the gun), and we
+                                    \ also subtract the velocity in (R3, R4, R5)
+                                    \ because the first thing that happens when
+                                    \ we process the particle in
+                                    \ MoveAndDrawParticles is to add the
+                                    \ velocity, so this cancels that out to
+                                    \ ensure the particle starts out at the end
                                     \ of the gun
+
+
+
 
  MOV     R6, #20                    \ Set the bullet particle's lifespan
                                     \ counter to 20 iterations of the main loop
@@ -3462,6 +3475,7 @@
 \    Summary: Add one of the moving particles in the exhaust plume to the
 \             particle data buffer
 \  Deep dive: Particles and particle clouds
+\             Flying by mouse
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4898,6 +4912,7 @@
 \    Summary: Draw a 3D object and its shadow
 \  Deep dive: Drawing 3D objects
 \             Object blueprints
+\             Flying by mouse
 \
 \ ------------------------------------------------------------------------------
 \
@@ -5766,6 +5781,7 @@
 \       Type: Variable
 \   Category: Maths (Geometry)
 \    Summary: The address of the arctan lookup table
+\  Deep dive: Flying by mouse
 \
 \ ******************************************************************************
 
@@ -5779,6 +5795,7 @@
 \       Type: Variable
 \   Category: Maths (Arithmetic)
 \    Summary: The address of the square root lookup table
+\  Deep dive: Flying by mouse
 \
 \ ******************************************************************************
 
@@ -6227,6 +6244,7 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Calculate the rotation matrix
+\  Deep dive: Flying by mouse
 \
 \ ------------------------------------------------------------------------------
 \
@@ -6482,6 +6500,7 @@
 \   Category: Maths (Geometry)
 \    Summary: Convert the mouse x- and y-coordinates into polar coordinates,
 \             starting by calculating the polar angle
+\  Deep dive: Flying by mouse
 \
 \ ------------------------------------------------------------------------------
 \
@@ -6683,6 +6702,7 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Calculate the polar distance
+\  Deep dive: Flying by mouse
 \
 \ ******************************************************************************
 
@@ -13424,6 +13444,7 @@
 \       Type: Variable
 \   Category: Maths (Geometry)
 \    Summary: Arctan lookup table
+\  Deep dive: Flying by mouse
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13476,6 +13497,7 @@
 \       Type: Variable
 \   Category: Maths (Arithmetic)
 \    Summary: Square root lookup table
+\  Deep dive: Flying by mouse
 \
 \ ------------------------------------------------------------------------------
 \

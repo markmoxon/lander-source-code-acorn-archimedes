@@ -77,9 +77,9 @@ Source: "3-assembled-output/Lander.arm"
                             	    72: .set xVelocity, 0xA0
                             	    73: .set yVelocity, 0xA4
                             	    74: .set zVelocity, 0xA8
-                            	    75: .set xThrust, 0xAC
-                            	    76: .set yThrust, 0xB0
-                            	    77: .set zThrust, 0xB4
+                            	    75: .set xExhaust, 0xAC
+                            	    76: .set yExhaust, 0xB0
+                            	    77: .set zExhaust, 0xB4
                             	    78: .set previousColumn, 0xC4
                             	    79: .set tileCornerRow, 0xE4
                             	    80: .set unusedConfig, 0xF0

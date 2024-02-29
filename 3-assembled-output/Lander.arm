@@ -72,9 +72,9 @@
 .set xVelocity, 0xA0
 .set yVelocity, 0xA4
 .set zVelocity, 0xA8
-.set xThrust, 0xAC
-.set yThrust, 0xB0
-.set zThrust, 0xB4
+.set xExhaust, 0xAC
+.set yExhaust, 0xB0
+.set zExhaust, 0xB4
 .set previousColumn, 0xC4
 .set tileCornerRow, 0xE4
 .set unusedConfig, 0xF0
