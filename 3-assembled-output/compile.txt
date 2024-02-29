@@ -28,13 +28,13 @@ Source: "3-assembled-output/Lander.arm"
                             	    23: .set PLAYER_FRONT_Z, (TILES_Z - 5) * TILE_SIZE
                             	    24: .set ROCK_HEIGHT, TILE_SIZE * 32
                             	    25: .set LANDSCAPE_X_WIDTH, TILE_SIZE * (TILES_X - 2)
-                            	    26: .set LANDSCAPE_X, LANDSCAPE_X_WIDTH / 2
-                            	    27: .set LANDSCAPE_Y, 0
-                            	    28: .set LANDSCAPE_Z, (TILES_Z + 9) * TILE_SIZE
-                            	    29: .set HALF_TILES_X, TILES_X / 2
-                            	    30: .set LANDSCAPE_X_HALF, TILE_SIZE * HALF_TILES_X
-                            	    31: .set LANDSCAPE_Z_DEPTH, TILE_SIZE * (TILES_Z - 1)
-                            	    32: .set LANDSCAPE_Z_BEYOND, TILE_SIZE * TILES_Z
+                            	    26: .set LANDSCAPE_Z_DEPTH, TILE_SIZE * (TILES_Z - 1)
+                            	    27: .set LANDSCAPE_X, LANDSCAPE_X_WIDTH / 2
+                            	    28: .set LANDSCAPE_Y, 0
+                            	    29: .set LANDSCAPE_Z, LANDSCAPE_Z_DEPTH + (10 * TILE_SIZE)
+                            	    30: .set HALF_TILES_X, TILES_X / 2
+                            	    31: .set LANDSCAPE_X_HALF, TILE_SIZE * HALF_TILES_X
+                            	    32: .set LANDSCAPE_Z_BEYOND, LANDSCAPE_Z_DEPTH + TILE_SIZE
                             	    33: .set LANDSCAPE_Z_FRONT, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH
                             	    34: .set LANDSCAPE_Z_MID, LANDSCAPE_Z - CAMERA_PLAYER_Z
                             	    35: .set OS_WriteC, 0x00
