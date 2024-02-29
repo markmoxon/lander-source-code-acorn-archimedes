@@ -128,6 +128,10 @@
                                                 \ counting whole tiles only,
                                                 \ and ignoring the centre tile
 
+ LANDSCAPE_Z_DEPTH = TILE_SIZE * (TILES_Z - 1)  \ The depth of the visible
+                                                \ landscape in z-coordinates,
+                                                \ counting whole tiles only
+
  LANDSCAPE_X = LANDSCAPE_X_WIDTH / 2    \ The x-coordinate of the landscape
                                         \ offset, which is set to the whole
                                         \ number of tiles that fit into the half
@@ -139,10 +143,11 @@
                                     \ which is zero so the landscape remains at
                                     \ the same height
 
- LANDSCAPE_Z = (TILES_Z + 9) * TILE_SIZE    \ The z-coordinate of the landscape
-                                            \ offset, which is set to the size
-                                            \ of 20 tiles and moves the
-                                            \ landscape away from the viewer
+ LANDSCAPE_Z = LANDSCAPE_Z_DEPTH + (10 * TILE_SIZE) \ The z-coordinate of the
+                                                    \ landscape offset, which is
+                                                    \ set to push the landscape
+                                                    \ away from the viewer by
+                                                    \ ten tile sizes
 
  HALF_TILES_X = TILES_X / 2         \ Half the number of tiles from left to
                                     \ right in the landscape
@@ -151,13 +156,9 @@
                                                 \ of tiles from left to right in
                                                 \ the landscape in x-coordinates
 
- LANDSCAPE_Z_DEPTH = TILE_SIZE * (TILES_Z - 1)  \ The depth of the visible
-                                                \ landscape in z-coordinates,
-                                                \ counting whole tiles only
-
- LANDSCAPE_Z_BEYOND = TILE_SIZE * TILES_Z   \ The depth of the visible landscape
-                                            \ in z-coordinates, plus one more
-                                            \ tile
+ LANDSCAPE_Z_BEYOND = LANDSCAPE_Z_DEPTH + TILE_SIZE \ The depth of the visible
+                                                    \ landscape in z-coordinates
+                                                    \ plus one more tile
 
  LANDSCAPE_Z_FRONT = LANDSCAPE_Z - LANDSCAPE_Z_DEPTH    \ The z-coordinate of
                                                         \ the front of the
@@ -245,7 +246,7 @@
 
  zNoseV = &48                       \ The z-coordinate of the nose vector
 
- zRoofV = &4C                       \ The z-coordinate of the side vector
+ zRoofV = &4C                       \ The z-coordinate of the roof vector
 
  zSideV = &50                       \ The z-coordinate of the side vector
 
