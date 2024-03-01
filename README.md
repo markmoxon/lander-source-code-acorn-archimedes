@@ -22,6 +22,8 @@ See the [introduction](#introduction) for more information.
 
 * [Folder structure](#folder-structure)
 
+* [Extending the landscape with BigLander](#extending-the-landscape-with-biglander)
+
 * [Building Lander from the source](#building-lander-from-the-source)
 
   * [Requirements](#requirements)
@@ -98,6 +100,18 @@ There are five main folders in this repository, which reflect the order of the b
 * [4-reference-binaries](4-reference-binaries) contains the correct binaries for each release, so we can verify that our assembled output matches the reference.
 
 * [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process: a folder that contains the compiled game and which can be run on real hardware or in an emulator.
+
+## Extending the landscape with BigLander
+
+This repository also includes a version of Lander with a much bigger landscape: 62 by 62 tiles, to be precise (as compared to the original 12 by 10 tiles). This version also runs on all versions of RISC OS (the original only works on Arthur and RISC OS 2). The big-landscape code is in a separate branch called `big-landscape`, and apart from the code differences for the landscape size and later versions of RISC OS, this branch is identical to the main branch and the same build process applies.
+
+The annotated source files in the `big-landscape` branch contain both the original Lander code and all of the modifications for the bigger landscape, so you can look through the source to see exactly what's changed. Any code that I've removed from the original version is commented out in the source files, so when they are assembled they produce the big-landscape binaries, while still containing details of all the modifications. You can find all the diffs by searching the sources for `Mod:`.
+
+BigLander should work on all versions of RISC OS, but to get it working on a Raspberry Pi, you may need to create a text file in the !Boot.Loader folder called CMDLINE/TXT, containing the word `disable_mode_changes` (reboot after you create this). Make sure you have !ADFFS loaded, and then BigLander should run. You can see a video guide to this process [on YouTube](https://www.youtube.com/watch?v=HpQk1l7Rvu0).
+
+If BigLander on your Pi is blurry, you can change the GPU upscaler method. Edit the CONFIG/TXT in !Boot.Loader and add `scaling_kernel=8` on a new line before rebooting. This will probably make your desktop a bit messy, but BigLander should now look pretty great (and you can remove the line to go back to blurry BigLander and a crisp desktop).
+
+For more information on BigLander, see the [accompanying website](https://lander.bbcelite.com/deep_dives/hacking_the_landscape.html).
 
 ## Building Lander from the source
 
