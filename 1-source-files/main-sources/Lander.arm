@@ -6819,6 +6819,8 @@
 \       Type: Subroutine
 \   Category: Maths (Geometry)
 \    Summary: Project a 3D particle coordinate onto the screen
+\  Deep dive: Particles and particle clouds
+\             Projecting onto the screen
 \
 \ ------------------------------------------------------------------------------
 \
@@ -6838,6 +6840,9 @@
 \
 \ and is at less than a 45-degree viewing angle (i.e. within a viewing cone of
 \ 45 degrees).
+\
+\ The particle is deemed visible if its z-coordinate is less than &80000000, and
+\ is not projected if it is further away than this.
 \
 \ The y-coordinate is the screen height (256 pixels) minus the two text lines
 \ that are reserved for the score bar at the top of the screen (16 pixels).
@@ -6861,9 +6866,10 @@
 
 .ProjectParticleOntoScreen
 
- CMN     R2, #&80000000             \ If R2 >= -&80000000 then the particle is
- MOVHS   PC, R14                    \ too far away to be visible, so return from
-                                    \ the subroutine with the C flag set
+ CMN     R2, #&80000000             \ If R2 + &80000000 produces a carry, then
+ MOVCS   PC, R14                    \ the particle is too far away to be
+                                    \ visible, so return from the subroutine
+                                    \ with the C flag set
 
  MOVS    R3, R0                     \ Set R3 = |R0|
  RSBMI   R3, R3, #0                 \        = |x|
@@ -7048,6 +7054,7 @@
 \    Summary: Project a vertex coordinate from a 3D object onto the screen
 \  Deep dive: Drawing 3D objects
 \             Drawing the landscape
+\             Projecting onto the screen
 \
 \ ------------------------------------------------------------------------------
 \
@@ -7058,7 +7065,8 @@
 \
 \   screen y-coordinate = 64 + y / z
 \
-\ The particle is deemed on-screen if its z-coordinate is less than &80000000.
+\ The vertex is deemed visible if its z-coordinate is less than &80000000, and
+\ is not projected if it is further away than this.
 \
 \ This routine differs from the particle projection routine in that it projects
 \ vertices irrespective of their viewing angle.
@@ -7086,9 +7094,10 @@
                                     \ from (R0, R1, R2), which we'll call
                                     \ (x, y, z) in the following
 
- CMN     R2, #&80000000             \ If R2 >= -&80000000 then the particle is
- MOVHS   PC, R14                    \ too far away to be visible, so return from
-                                    \ the subroutine with the C flag set
+ CMN     R2, #&80000000             \ If R2 + &80000000 produces a carry, then
+ MOVCS   PC, R14                    \ the vertex is too far away to be visible,
+                                    \ so return from the subroutine with the
+                                    \ C flag set
 
  STMFD   R13!, {R5-R7, R14}         \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
@@ -8252,6 +8261,7 @@
 \   Category: Drawing triangles
 \    Summary: Process the "draw triangle" command from the graphics buffer
 \  Deep dive: Depth-sorting with the graphics buffers
+\             Drawing triangles
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8549,6 +8559,7 @@
 \             to its distance
 \  Deep dive: Drawing 3D objects
 \             Depth-sorting with the graphics buffers
+\             Drawing triangles
 \
 \ ------------------------------------------------------------------------------
 \
@@ -8668,6 +8679,7 @@
 \             according to its distance
 \  Deep dive: Drawing 3D objects
 \             Depth-sorting with the graphics buffers
+\             Drawing triangles
 \
 \ ------------------------------------------------------------------------------
 \
@@ -9133,6 +9145,7 @@
 \   Category: Drawing triangles
 \    Summary: Draw a quadrilateral (i.e. two triangles)
 \  Deep dive: Drawing the landscape
+\             Drawing triangles
 \
 \ ------------------------------------------------------------------------------
 \
@@ -9193,6 +9206,7 @@
 \   Category: Drawing triangles
 \    Summary: Draw a triangle, starting by ordering the coordinates and jumping
 \             to the relevant part of the routine
+\  Deep dive: Drawing triangles
 \
 \ ------------------------------------------------------------------------------
 \
@@ -9220,7 +9234,7 @@
                                     \ score bar)
 
  BHS     trin23                     \ If any of the corners are off-screen, jump
-                                    \ to trin23 to draw a clipped triangle
+                                    \ to part 6 to draw a clipped triangle
 
  STMFD   R13!, {R14}                \ Store the return address on the stack
 
@@ -9296,6 +9310,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Calculate the slope of (x1, y1) to (x2, y2)
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -9444,6 +9459,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Calculate the slope of (x1, y1) to (x3, y3)
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -9568,6 +9584,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a triangle that isn't clipped and has a sloping first side
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -9730,7 +9747,7 @@
                                     \ side of the triangle, from (x2, y2) to
                                     \ (x3, y3), as follows:
                                     \
-                                    \   R14 = (y2 - y3) / (x2 - x1)
+                                    \   R14 = (y2 - y3) / (x3 - x2)
 
  SUBS    R14, R0, R2                \ Set R14 = R0 - R2
                                     \         = x3 - x2
@@ -10037,6 +10054,7 @@
 \   Category: Drawing triangles
 \    Summary: Draw a triangle with a horizontal edge between (x1, y1) and
 \             (x2, y2)
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -10345,6 +10363,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a clipped triangle that's partly off-screen
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -10430,6 +10449,7 @@
 \   Category: Drawing triangles
 \    Summary: Calculate the slopes of (x1, y1) to (x2, y2) and (x1, y1) to
 \             (x3, y3) for a clipped triangle
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -10694,6 +10714,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw the bottom part of a clipped triangle
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -10924,6 +10945,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw the top part of a clipped triangle
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -11092,6 +11114,7 @@
 \   Category: Drawing triangles
 \    Summary: Draw a clipped triangle with a horizontal edge between (x1, y1)
 \             and (x2, y2)
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -11400,6 +11423,7 @@
 \       Type: Subroutine
 \   Category: Drawing triangles
 \    Summary: Draw a triangle, clipping it to the screen as we go
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -11577,6 +11601,7 @@
 \   Category: Drawing lines
 \    Summary: Jump table for drawing a horizontal line of between 0 and 17
 \             pixels using the relevant entry point in DrawLineSegment
+\  Deep dive: Drawing triangles
 \
 \ ******************************************************************************
 
@@ -11607,6 +11632,7 @@
 \       Type: Subroutine
 \   Category: Drawing lines
 \    Summary: Draw a horizontal line
+\  Deep dive: Drawing triangles
 \
 \ ------------------------------------------------------------------------------
 \
@@ -11687,7 +11713,7 @@
                                     \ line, and it increments R11 so R11 now
                                     \ points to the next pixel along
 
- TSTNE   R11, #3                    \ If R11 is still not a multiple of 4 then
+ TSTNE   R11, #%00000011            \ If R11 is still not a multiple of 4 then
  STRNEB  R8, [R11], #1              \ bits 0 and 1 will still be non-zero, so
                                     \ set the pixel at R11 to the colour in R8
                                     \ and increment R11
@@ -11697,7 +11723,7 @@
                                     \ a word boundary, and it increments R11 so
                                     \ R11 now points to the next pixel along
 
- TSTNE   R11, #3                    \ If R11 is still not a multiple of 4 then
+ TSTNE   R11, #%00000011            \ If R11 is still not a multiple of 4 then
  STRNEB  R8, [R11], #1              \ bits 0 and 1 will still be non-zero, so
                                     \ set the pixel at R11 to the colour in R8
                                     \ and increment R11
@@ -11749,6 +11775,7 @@
 \   Category: Drawing lines
 \    Summary: Draw a horizontal line of between 0 and 17 pixels by jumping to
 \             the relevant entry point
+\  Deep dive: Drawing triangles
 \
 \ ------------------------------------------------------------------------------
 \
