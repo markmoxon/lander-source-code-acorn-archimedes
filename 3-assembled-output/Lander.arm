@@ -1643,7 +1643,7 @@ pole6:
  LDMIA   R0, {R0-R2}
 ProjectParticleOntoScreen:
  CMN     R2, #0x80000000
- MOVHS   PC, R14
+ MOVCS   PC, R14
  MOVS    R3, R0
  RSBMI   R3, R3, #0
  MVNMI   R5, R3
@@ -1702,7 +1702,7 @@ ppar3:
 ProjectVertexOntoScreen:
  LDMIA   R0, {R0-R2}
  CMN     R2, #0x80000000
- MOVHS   PC, R14
+ MOVCS   PC, R14
  STMFD   R13!, {R5-R7, R14}
  MOVS    R3, R0
  RSBMI   R3, R3, #0
@@ -2700,9 +2700,9 @@ DrawHorizontalLine:
  BIC     R0, R10, #0x3
  TST     R11, #0x3
  STRNEB  R8, [R11], #1
- TSTNE   R11, #3
+ TSTNE   R11, #0x3
  STRNEB  R8, [R11], #1
- TSTNE   R11, #3
+ TSTNE   R11, #0x3
  STRNEB  R8, [R11], #1
 hlin1:
  STR     R8, [R11], #4

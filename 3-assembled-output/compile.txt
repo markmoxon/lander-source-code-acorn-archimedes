@@ -2038,7 +2038,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000987C 070090E8        	  1643:  LDMIA   R0, {R0-R2}
                             	  1644: ProjectParticleOntoScreen:
 00:00009880 020172E3        	  1645:  CMN     R2, #0x80000000
-00:00009884 0EF0A021        	  1646:  MOVHS   PC, R14
+00:00009884 0EF0A021        	  1646:  MOVCS   PC, R14
 00:00009888 0030B0E1        	  1647:  MOVS    R3, R0
 00:0000988C 00306342        	  1648:  RSBMI   R3, R3, #0
 00:00009890 0350E041        	  1649:  MVNMI   R5, R3
@@ -2097,7 +2097,7 @@ Source: "3-assembled-output/Lander.arm"
                             	  1702: ProjectVertexOntoScreen:
 00:00009958 070090E8        	  1703:  LDMIA   R0, {R0-R2}
 00:0000995C 020172E3        	  1704:  CMN     R2, #0x80000000
-00:00009960 0EF0A021        	  1705:  MOVHS   PC, R14
+00:00009960 0EF0A021        	  1705:  MOVCS   PC, R14
 00:00009964 E0402DE9        	  1706:  STMFD   R13!, {R5-R7, R14}
 00:00009968 0030B0E1        	  1707:  MOVS    R3, R0
 00:0000996C 00306342        	  1708:  RSBMI   R3, R3, #0
@@ -3095,9 +3095,9 @@ Source: "3-assembled-output/Lander.arm"
 00:0000A758 0300CAE3        	  2700:  BIC     R0, R10, #0x3
 00:0000A75C 03001BE3        	  2701:  TST     R11, #0x3
 00:0000A760 0180CB14        	  2702:  STRNEB  R8, [R11], #1
-00:0000A764 03001B13        	  2703:  TSTNE   R11, #3
+00:0000A764 03001B13        	  2703:  TSTNE   R11, #0x3
 00:0000A768 0180CB14        	  2704:  STRNEB  R8, [R11], #1
-00:0000A76C 03001B13        	  2705:  TSTNE   R11, #3
+00:0000A76C 03001B13        	  2705:  TSTNE   R11, #0x3
 00:0000A770 0180CB14        	  2706:  STRNEB  R8, [R11], #1
                             	  2707: hlin1:
 00:0000A774 04808BE4        	  2708:  STR     R8, [R11], #4
