@@ -16,9 +16,9 @@ all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
-	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/GameCode.inf
-	cp 1-source-files/other-sources/arthur/Lander,ffb 5-compiled-game-discs/arthur/Lander,ffb
-	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/GameCode
+	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Game/GameCode.inf
+	cp 1-source-files/other-sources/arthur/Lander,ffb 5-compiled-game-discs/arthur/Game/Lander,ffb
+	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/Game/GameCode
 
 	@$(PYTHON) 2-build-files/export-symbols.py
 
@@ -27,6 +27,17 @@ all:
 	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/riscos/!Lander/!Sprites,ff9
 	cp 1-source-files/other-sources/riscos/MemAlloc,ffa 5-compiled-game-discs/riscos/!Lander/MemAlloc,ffa
 	cp 3-assembled-output/!RunImage.unprot.bin 5-compiled-game-discs/riscos/!Lander/!RunImage,ff8
+
+	cp -r 5-compiled-game-discs/riscos/!Lander .
+	zip -r \!Lander.zip !Lander
+	mv \!Lander.zip 5-compiled-game-discs/zip
+	rm -fr \!Lander
+
+	mkdir Game
+	cp -r 5-compiled-game-discs/arthur/* Game/
+	zip -r Game.zip Game
+	mv Game.zip 5-compiled-game-discs/zip
+	rm -fr Game
 
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
 
