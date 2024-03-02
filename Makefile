@@ -33,8 +33,7 @@ all:
 	mv \!Lander.zip 5-compiled-game-discs/zip
 	rm -fr \!Lander
 
-	mkdir Game
-	cp -r 5-compiled-game-discs/arthur/* Game/
+	cp -r 5-compiled-game-discs/arthur/Game .
 	zip -r Game.zip Game
 	mv Game.zip 5-compiled-game-discs/zip
 	rm -fr Game
