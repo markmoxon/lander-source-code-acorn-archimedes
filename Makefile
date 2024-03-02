@@ -16,9 +16,9 @@ all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
-	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/GameCode.inf
-	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/arthur/BigLander,ffb
-	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/GameCode
+	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Game/GameCode.inf
+	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/arthur/Game/BigLander,ffb
+	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/Game/GameCode
 
 	@$(PYTHON) 2-build-files/export-symbols.py
 
@@ -32,11 +32,17 @@ all:
 	cp 3-assembled-output/!Help,fff 5-compiled-game-discs/riscos/!BigLander/!Help,fff
 	cp 3-assembled-output/!RunImage.unprot.bin 5-compiled-game-discs/riscos/!BigLander/!RunImage,ff8
 
+	cp -r 5-compiled-game-discs/arthur/Game .
+	zip -r Game.zip Game
+	mv Game.zip 5-compiled-game-discs/zip
+	rm -fr Game
+
+	cp -r 5-compiled-game-discs/riscos/!BigLander .
+	zip -r \!BigLander.zip !BigLander
+	mv \!BigLander.zip 5-compiled-game-discs/zip
+	rm -fr \!BigLander
+
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
 
 deploy:
-	cp -r 5-compiled-game-discs/riscos/!BigLander .
-	zip -r \!BigLander.zip !BigLander
-	scp \!BigLander.zip ${LANDER_PATH}
-	rm -fr \!BigLander
-	rm \!BigLander.zip
+	scp 5-compiled-game-discs/zip/!BigLander.zip ${LANDER_PATH}

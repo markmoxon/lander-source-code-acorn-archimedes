@@ -139,7 +139,7 @@ All being well, entering the following into a command window:
 make.bat
 ```
 
-will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs` folder, which contain the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek.
+will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs` folder, which contain the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a zip file for each variant, which can be found in the `zip` folder (note that these zips and do not contain RISC OS filetype metadata; filetypes are included as filename suffixes, so they will work with HostFS).
 
 ### Mac and Linux
 
@@ -151,7 +151,7 @@ All being well, entering the following into a terminal window:
 make
 ```
 
-will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs` folder, which contain the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek.
+will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs` folder, which contain the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a zip file for each variant, which can be found in the `zip` folder (note that these zips and do not contain RISC OS filetype metadata; filetypes are included as filename suffixes, so they will work with HostFS).
 
 ### Verifying the output
 
