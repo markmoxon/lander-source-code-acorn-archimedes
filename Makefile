@@ -41,10 +41,4 @@ all:
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
 
 deploy:
-	cp -r 5-compiled-game-discs/riscos/!Lander .
-	echo " " > T-$$(date +%H-%M-%S),fff
-	zip -r \!Lander.zip !Lander T*
-	scp \!Lander.zip ${LANDER_PATH}
-	rm -fr \!Lander
-	rm T*
-	rm \!Lander.zip
+	scp 5-compiled-game-discs/zip/!Lander.zip ${LANDER_PATH}
