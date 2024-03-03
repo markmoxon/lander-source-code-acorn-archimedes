@@ -105,6 +105,20 @@ There are five main folders in this repository, which reflect the order of the b
 
 This repository also includes a version of Lander with a much bigger landscape: 62 by 62 tiles, to be precise (as compared to the original 12 by 10 tiles). This version also runs on all versions of RISC OS (the original only works on Arthur and RISC OS 2). The big-landscape code is in a separate branch called `big-landscape`, and apart from the code differences for the landscape size and later versions of RISC OS, this branch is identical to the main branch and the same build process applies.
 
+The landscape size is configurable. The default is 62 by 62 tiles (which equates to TILES_X = 63 and TILES_Z = 63), but you can set your own values by passing x and z parameters to the build. For example, building BigLander like this on Mac or Linux:
+
+```
+make x=122 z=122
+```
+
+or this on Windows:
+
+```
+make.bat x=122 z=122
+```
+
+would build BigLander with a landscape size of 121 x 121 tiles (i.e. TILES_X = 122 and TILES_Z = 122). The number of tiles is given in the !Help file of the generated application, along with the build date.
+
 The annotated source files in the `big-landscape` branch contain both the original Lander code and all of the modifications for the bigger landscape, so you can look through the source to see exactly what's changed. Any code that I've removed from the original version is commented out in the source files, so when they are assembled they produce the big-landscape binaries, while still containing details of all the modifications. You can find all the diffs by searching the sources for `Mod:`.
 
 BigLander should work on all versions of RISC OS, but to get it working on a Raspberry Pi, you may need to create a text file in the !Boot.Loader folder called CMDLINE/TXT, containing the word `disable_mode_changes` (reboot after you create this). Make sure you have !ADFFS loaded, and then BigLander should run. You can see a video guide to this process [on YouTube](https://www.youtube.com/watch?v=HpQk1l7Rvu0).
