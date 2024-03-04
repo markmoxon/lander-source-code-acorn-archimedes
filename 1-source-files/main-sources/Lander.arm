@@ -9232,6 +9232,12 @@
  CMPLO   R5, #239                   \ rather than 255 as the top 16 pixel lines
                                     \ of the 320x256 screen are taken up by the
                                     \ score bar)
+                                    \
+                                    \ This also catches any negative pixel
+                                    \ coordinates, as they will be treated as
+                                    \ extremely large positive values in the
+                                    \ comparisons (as the LO condition is used
+                                    \ for unsigned comparisons)
 
  BHS     trin23                     \ If any of the corners are off-screen, jump
                                     \ to part 6 to draw a clipped triangle
