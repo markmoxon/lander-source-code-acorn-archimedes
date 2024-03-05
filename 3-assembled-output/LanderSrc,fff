@@ -517,7 +517,7 @@ REM Produces the binary file GameCode.
 REM
 REM ******************************************************************************
 
- DIM CODE% &A000                    : REM Reserve a block in memory for the
+ DIM CODE% &A000 + STORE * 2        : REM Reserve a block in memory for the
                                     : REM assembled code
 
  FOR pass% = 4 TO 6 STEP 2          : REM Perform a two-pass assembly, using both
