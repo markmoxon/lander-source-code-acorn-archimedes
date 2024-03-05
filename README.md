@@ -46,7 +46,7 @@ It is a companion to the [lander.bbcelite.com website](https://lander.bbcelite.c
 
 * If you would rather explore the source code in your favourite IDE, then the [annotated source](1-source-files/main-sources/Lander.arm) is what you're looking for. It contains the exact same content as the website, so you won't be missing out (the website is generated from the source files, so they are guaranteed to be identical). You might also like to read the section on [Browsing the source in an IDE](#browsing-the-source-in-an-ide) for some tips.
 
-* If you want to build Lander from the source on a modern computer, to produce a working game disc that can be loaded into a Acorn Archimedes or an emulator, then you want the section on [Building Lander from the source](#building-lander-from-the-source).
+* If you want to build Lander from the source on a modern computer, to produce a working game disc that can be loaded into a Acorn Archimedes or an emulator, then you want the section on [Building Lander from the source](#building-lander-from-the-source). You can also build the source on an Archimedes, as described in the the [Archimedes](#archimedes) section.
 
 My hope is that this repository will be useful for those who want to learn more about Lander and what makes it tick. It is provided on an educational and non-profit basis, with the aim of helping people appreciate the magic of David Braben's 32-bit masterpiece, and the first ever game for the ARM platform.
 
@@ -174,9 +174,11 @@ will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs`
 
 The build process outlined above also produces a file called `LanderSrc,fff` in the `5-compiled-game-discs` folder. This contains a version of the game source that can be built on an Archimedes, and it can be found ready-built in the repository at [5-compiled-game-discs/LanderSrc,fff](5-compiled-game-discs/LanderSrc,fff).
 
-To build this source on an Archimedes, you need to do the following:
+To build this source on an Archimedes, you first need to convert the BBC BASIC text file into tokenised BBC BASIC. You can do this on RISC OS 3 or later, like this:
 
-* Copy the file to an Archimedes machine (these instructions apply to RISC OS 3 and later, as Edit doesn't convert Text to BASIC in earlier versions). If you are using HostFS then the filetype should be set automatically, but if you need to set it manually, it should be a Text file.
+* Copy the file to an Archimedes machine.
+
+* If you are using HostFS then the filetype should be set automatically, but if you need to set it manually, it should be a Text file.
 
 * Load the text file into !Edit. You should see the fully documented source code.
 
@@ -186,13 +188,15 @@ To build this source on an Archimedes, you need to do the following:
 
 * Save the file, which is now a BASIC program.
 
-* Run the file by double-clicking it, and it will assemble and save the GameCode file into the current directory. You may want to set the current directory via the command line before doing this.
+You now have the Lander source in BBC BASIC, which is how David Braben originally wrote it.
+
+To build Lander from this source, run the file by double-clicking it. It will assemble the game and save the GameCode file into the current directory. You may therefore want to set the current directory before doing this.
 
 The GameCode file contains the Arthur version of Lander. You can run it on Arthur or RISC OS 2 by double-clicking it. You may need to allocate more memory to the next application for it to work.
 
-Note that the source code in this repository is very close to BBC BASIC format, but it isn't exactly the same (which is why the BBC BASIC version is created by the build process rather than being the main source). This is because BBC BASIC has some limitations that make it a tricky bedfellow for large disassemblies like this. For example, the colon character separates multiple statements, but this also applies within comments, so any comments containing colons will cause runtime errors when converted into BASIC. The same applies with unmatched brackets and double-quotes, though these break the Text to BASIC conversion process rather than the program itself. BBC BASIC also doesn't support comma-separated EQU arguments, which makes laying out tables like the object blueprints rather difficult.
+Note that the source code in this repository is very close to being in BBC BASIC format, but it isn't exactly the same (which is why the BBC BASIC version is created by the build process rather than being the main source). This is because BBC BASIC has some limitations that make it a tricky companion for large commentaries like this. For example, the colon character separates multiple statements in BBC BASIC, but this also applies within comments, so any comments that contain colons will cause runtime errors when converted into BASIC. The same applies with unmatched brackets and double-quotes, though these break the Text to BASIC conversion process rather than the program itself. BBC BASIC also doesn't support comma-separated EQU arguments, which makes laying out tables like the object blueprints rather difficult.
 
-As a result the main source code in this repository is an homage to BBC BASIC's assembly language format, but I've had to build a conversion script to convert that into a working BBC BASIC source (see the [convert-to-basic.py](2-build-files/convert-to-basic.py) script for details).
+As a result the main source code in this repository is an homage to BBC BASIC's assembly language format, but it is not 100% accurate. That's why the build includes a conversion script to convert the Lander.arm source file into a working BBC BASIC source. See the [convert-to-basic.py](2-build-files/convert-to-basic.py) script for details.
 
 ### Verifying the output
 
