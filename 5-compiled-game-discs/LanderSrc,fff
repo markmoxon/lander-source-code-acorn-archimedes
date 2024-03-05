@@ -37,25 +37,13 @@ REM ****************************************************************************
 
                                     : REM --- Mod; Code removed for more tiles; --->
 
-REMTILES_X = 13                       : REM The number of tile corners in a landscape
+ TILES_X = 63                       : REM The number of tile corners in a landscape
 REM                                   : REM row from left to right [i.e. 12 tiles]
 REM
-REMTILES_Z = 11                       : REM The number of tile corners in a landscape
+ TILES_Z = 63                       : REM The number of tile corners in a landscape
 REM                                   : REM row from front to back [i.e. 10 tiles]
 
-                                    : REM --- And replaced by; -------------------->
-
-REMTILES_X = 13                       : REM The number of tile corners in a landscape
-                                    : REM row from left to right [i.e. 12 tiles]
-                                    : REM
-                                    : REM This symbol is defined in the Makefile
-
-REMTILES_Z = 11                       : REM The number of tile corners in a landscape
-                                    : REM row from front to back [i.e. 10 tiles]
-                                    : REM
-                                    : REM This symbol is defined in the Makefile
-
-                                    : REM --- End of replacement ------------------>
+                                    : REM --- End of removed code ----------------->
 
  MAX_PARTICLES = 484                : REM The maximum number of particles at any one
                                     : REM time

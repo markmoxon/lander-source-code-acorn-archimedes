@@ -26,6 +26,10 @@ def convert(input_file, output_file):
         else:
             in_code = re.match(r"^ *\[", line)
 
+        # Put tile sizes back
+        line = re.sub(r"^\\TILES_X = 13", r" TILES_X = 63", line)
+        line = re.sub(r"^\\TILES_Z = 11", r" TILES_Z = 63", line)
+
         # Change (...) in comments to [...]
         while re.search(r"(\\.*)\(", line):
             line = re.sub(r"(\\.*)\(", r"\1[", line)
