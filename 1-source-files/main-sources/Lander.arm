@@ -533,7 +533,7 @@
 \
 \ ******************************************************************************
 
- DIM CODE% &A000                    \ Reserve a block in memory for the
+ DIM CODE% &A000 + STORE * 2        \ Reserve a block in memory for the
                                     \ assembled code
 
  FOR pass% = 4 TO 6 STEP 2          \ Perform a two-pass assembly, using both
