@@ -36,7 +36,21 @@
 \
 \ ******************************************************************************
 
- ORG CODE
+ DIM CODE% &A000                    \ Reserve a block in memory for the
+                                    \ assembled code
+
+ FOR pass% = 4 TO 6 STEP 2          \ Perform a two-pass assembly, using both
+                                    \ P% and O%, with errors enabled on the
+                                    \ second pass only
+
+ O% = CODE%                         \ Assemble the code for deployment to
+                                    \ address O%
+
+ P% = CODE                          \ Assemble the code into the block at P%
+
+ [                                  \ Switch from BASIC into assembly language
+
+ OPT pass%                          \ Set the assembly option for this pass
 
 \ ******************************************************************************
 \
@@ -98,8 +112,8 @@
  CMP     R0, R2                     \ Loop back until we have copied the whole
  BNE     decr1                      \ game
 
- B       Entry                      \ Start the game, which has execution
-                                    \ address (the Entry routine)
+ B       Entry                      \ Start the game by jumping to the Entry
+                                    \ routine
 
 \ ******************************************************************************
 \
@@ -139,3 +153,21 @@
 .gameCodeEndAddr
 
  EQUD    gameCodeEnd
+
+\ ******************************************************************************
+\
+\ Two-pass assembly loop
+\
+\ ******************************************************************************
+
+ ]
+
+ NEXT pass%                         \ Loop back for the second pass
+
+\ ******************************************************************************
+\
+\ Save !RunImage.unprot.bin
+\
+\ ******************************************************************************
+
+ OSCLI "SAVE !RunImage "+STR$~CODE%+" "+STR$~O%+" "+STR$~CODE+" "+STR$~CODE

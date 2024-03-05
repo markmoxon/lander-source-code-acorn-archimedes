@@ -30,6 +30,7 @@ See the [introduction](#introduction) for more information.
   * [Build targets](#build-targets)
   * [Windows](#windows)
   * [Mac and Linux](#mac-and-linux)
+  * [Archimedes](#archimedes)
   * [Verifying the output](#verifying-the-output)
   * [Log files](#log-files)
 
@@ -99,7 +100,7 @@ There are five main folders in this repository, which reflect the order of the b
 
 * [4-reference-binaries](4-reference-binaries) contains the correct binaries for each release, so we can verify that our assembled output matches the reference.
 
-* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process: a folder that contains the compiled game and which can be run on real hardware or in an emulator.
+* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process: a folder that contains the compiled game and which can be run on real hardware or in an emulator, plus zips of those folders. It also contains version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
 
 ## Extending the landscape with BigLander
 
@@ -129,7 +130,9 @@ For more information on BigLander, see the [accompanying website](https://lander
 
 ## Building Lander from the source
 
-Builds are supported for both Windows and Mac/Linux systems. In all cases the build process is defined in the `Makefile` provided.
+Builds are supported for Windows and Mac/Linux systems. In all cases the build process is defined in the `Makefile` provided.
+
+The build process also creates a version of the source that can be built on [Archimedes][#archimedes] machines.
 
 ### Requirements
 
@@ -166,6 +169,30 @@ make
 ```
 
 will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs` folder, which contain the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a zip file for each variant, which can be found in the `zip` folder (note that these zips and do not contain RISC OS filetype metadata; filetypes are included as filename suffixes, so they will work with HostFS).
+
+### Archimedes
+
+The build process outlined above also produces a file called `LanderSrc,fff` in the `5-compiled-game-discs` folder. This contains a version of the game source that can be built on an Archimedes, and it can be found ready-built in the repository at [5-compiled-game-discs/LanderSrc,fff](5-compiled-game-discs/LanderSrc,fff).
+
+To build this source on an Archimedes, you need to do the following:
+
+* Copy the file to an Archimedes machine (these instructions apply to RISC OS 3 and later, as Edit doesn't convert Text to BASIC in earlier versions). If you are using HostFS then the filetype should be set automatically, but if you need to set it manually, it should be a Text file.
+
+* Load the text file into !Edit. You should see the fully documented source code.
+
+* Click Menu on Edit's icon bar icon, choose "BASIC options > Line number increment" and set the value to 1.
+
+* Click Menu over Edit's window, choose "Misc > Set type" and set the value to BASIC.
+
+* Save the file, which is now a BASIC program.
+
+* Run the file by double-clicking it, and it will assemble and save the GameCode file into the current directory. You may want to set the current directory via the command line before doing this.
+
+The GameCode file contains the Arthur version of Lander. You can run it on Arthur or RISC OS 2 by double-clicking it. You may need to allocate more memory to the next application for it to work.
+
+Note that the source code in this repository is very close to BBC BASIC format, but it isn't exactly the same (which is why the BBC BASIC version is created by the build process rather than being the main source). This is because BBC BASIC has some limitations that make it a tricky bedfellow for large disassemblies like this. For example, the colon character separates multiple statements, but this also applies within comments, so any comments containing colons will cause runtime errors when converted into BASIC. The same applies with unmatched brackets and double-quotes, though these break the Text to BASIC conversion process rather than the program itself. BBC BASIC also doesn't support comma-separated EQU arguments, which makes laying out tables like the object blueprints rather difficult.
+
+As a result the main source code in this repository is an homage to BBC BASIC's assembly language format, but I've had to build a conversion script to convert that into a working BBC BASIC source (see the [convert-to-basic.py](2-build-files/convert-to-basic.py) script for details).
 
 ### Verifying the output
 

@@ -28,6 +28,9 @@ all:
 	cp 1-source-files/other-sources/riscos/MemAlloc,ffa 5-compiled-game-discs/riscos/!Lander/MemAlloc,ffa
 	cp 3-assembled-output/!RunImage.unprot.bin 5-compiled-game-discs/riscos/!Lander/!RunImage,ff8
 
+	@$(PYTHON) 2-build-files/convert-to-basic.py
+	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/LanderSrc,fff
+
 	cp -r 5-compiled-game-discs/riscos/!Lander .
 	zip -r \!Lander.zip !Lander
 	mv \!Lander.zip 5-compiled-game-discs/zip

@@ -15,7 +15,7 @@
 .set LAUNCHPAD_SIZE, TILE_SIZE * 8
 .set HIGHEST_ALTITUDE, TILE_SIZE * 52
 .set SPLASH_HEIGHT, TILE_SIZE / 16
-.set EXPLODE_Y, TILE_SIZE * 5 / 16
+.set CRASH_CLOUD_Y, TILE_SIZE * 5 / 16
 .set SMOKE_HEIGHT, TILE_SIZE * 3 / 4
 .set SAFE_HEIGHT, TILE_SIZE * 3 / 2
 .set CAMERA_PLAYER_Z, (TILES_Z - 6) * TILE_SIZE
@@ -27,7 +27,7 @@
 .set LANDSCAPE_X, LANDSCAPE_X_WIDTH / 2
 .set LANDSCAPE_Y, 0
 .set LANDSCAPE_Z, LANDSCAPE_Z_DEPTH + (10 * TILE_SIZE)
-.set HALF_TILES_X, TILES_X / 2
+.set HALF_TILES_X, (TILES_X / 2)
 .set LANDSCAPE_X_HALF, TILE_SIZE * HALF_TILES_X
 .set LANDSCAPE_Z_BEYOND, LANDSCAPE_Z_DEPTH + TILE_SIZE
 .set LANDSCAPE_Z_FRONT, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH
@@ -117,7 +117,7 @@
 .set particleData, 0x700 + STORE * 2
 .set objectMap, 0x4400 + STORE * 2
 .set buffers, 0x14400 + STORE * 2
-.org     CODE
+.org CODE
 landscapeOffset:
 .long    -LANDSCAPE_X
 .long    LANDSCAPE_Y
@@ -573,7 +573,7 @@ LoseLife:
  MOV     R8, #81
  ADD     R0, R11, #xPlayer
  LDMIA   R0, {R0-R2}
- SUB     R1, R1, #EXPLODE_Y
+ SUB     R1, R1, #CRASH_CLOUD_Y
  BL      AddExplosionToBuffer
 lose1:
  LDR     R0, [R11, #mainLoopCount]

@@ -1,0 +1,187 @@
+REM ******************************************************************************
+REM
+REM LANDER !RunImage SOURCE
+REM
+REM Lander was written by David Braben and is copyright D.J.Braben 1987
+REM
+REM The code on this site has been reconstructed from a disassembly of the game on
+REM the Arthur and RISC OS 2 application discs
+REM
+REM The commentary is copyright Mark Moxon, and any misunderstandings or mistakes
+REM in the documentation are entirely my fault
+REM
+REM The terminology and notations used in this commentary are explained at
+REM https;//lander.bbcelite.com/terminology
+REM
+REM The deep dive articles referred to in this commentary can be found at
+REM https;//lander.bbcelite.com/deep_dives
+REM
+REM ------------------------------------------------------------------------------
+REM
+REM This source file produces the following binary file;
+REM
+REM   * !RunImage.unprot.bin
+REM
+REM ******************************************************************************
+
+ CODE = &00008000
+
+ INCLUDE "3-assembled-output/exports.arm"
+
+REM ******************************************************************************
+REM
+REM LANDER !RunImage CODE
+REM
+REM Produces the binary file !RunImage.unprot.bin.
+REM
+REM ******************************************************************************
+
+ DIM CODE% &A000                    : REM Reserve a block in memory for the
+                                    : REM assembled code
+
+ FOR pass% = 4 TO 6 STEP 2          : REM Perform a two-pass assembly, using both
+                                    : REM P% and O%, with errors enabled on the
+                                    : REM second pass only
+
+ O% = CODE%                         : REM Assemble the code for deployment to
+                                    : REM address O%
+
+ P% = CODE                          : REM Assemble the code into the block at P%
+
+ [                                  \ Switch from BASIC into assembly language
+
+ OPT pass%                          \ Set the assembly option for this pass
+
+\ ******************************************************************************
+\
+\       Name; RunImageEntry
+\       Type; Subroutine
+\   Category; Copy protection
+\    Summary; Entry point for the !RunImage Absolute file
+\
+\ ******************************************************************************
+
+ B       DecryptGameBinary          \ RISC OS runs !RunImage as an Absolute file
+                                    \ which executes from the first instruction
+                                    \ rather than having an execute address, so
+                                    \ this jumps to the decryption routine to
+                                    \ decrypt the game binary before jumping to
+                                    \ Entry to start the game
+
+\ ******************************************************************************
+\
+\       Name; gameCode
+\       Type; Variable
+\   Category; Copy protection
+\    Summary; The unencrypted game code
+\
+\ ******************************************************************************
+
+.gameCode
+
+ INCBIN "3-assembled-output/GameCode.bin"
+
+.gameCodeEnd
+
+\ ******************************************************************************
+\
+\       Name; DecryptGameBinary
+\       Type; Subroutine
+\   Category; Copy protection
+\    Summary; Placeholder routine to decrypt game code to &8000 so it can be run
+\
+\ ******************************************************************************
+
+.DecryptGameBinary
+
+ LDR     R0, gameCodeAddr           \ Set R0 to the address of the game code
+
+ LDR     R1, absoluteAddr           \ Set R1 to the address of the start of the
+                                    \ Absolute file
+
+ LDR     R2, gameCodeEndAddr        \ Set R2 to the address of the end of the
+                                    \ game code
+
+.decr1
+ 
+ LDR     R12, [R0], #4              \ Copy a word from R0 to R1, updating the
+ STR     R12, [R1], #4              \ addresses as we go [this is where the
+                                    \ decryption process would work, but
+                                    \ currently it is just a copy]
+
+ CMP     R0, R2                     \ Loop back until we have copied the whole
+ BNE     decr1                      \ game
+
+ B       Entry                      \ Start the game by jumping to the Entry
+                                    \ routine
+
+\ ******************************************************************************
+\
+\       Name; absoluteAddr
+\       Type; Variable
+\   Category; Copy protection
+\    Summary; The address of the start of the Absolute file
+\
+\ ******************************************************************************
+
+.absoluteAddr
+
+ EQUD    CODE
+
+\ ******************************************************************************
+\
+\       Name; gameCodeAddr
+\       Type; Variable
+\   Category; Copy protection
+\    Summary; The address of the game code
+\
+\ ******************************************************************************
+
+.gameCodeAddr
+
+ EQUD    gameCode
+
+\ ******************************************************************************
+\
+\       Name; gameCodeEndAddr
+\       Type; Variable
+\   Category; Copy protection
+\    Summary; The address of the end of the game code
+\
+\ ******************************************************************************
+
+.gameCodeEndAddr
+
+ EQUD    gameCodeEnd
+
+\ ******************************************************************************
+\
+\ Two-pass assembly loop
+\
+\ ******************************************************************************
+
+ ]
+
+ NEXT pass%                         : REM Loop back for the second pass
+
+REM ******************************************************************************
+REM
+REM Save !RunImage.unprot.bin
+REM
+REM ******************************************************************************
+
+ OSCLI "SAVE !RunImage "+STR$~CODE%+" "+STR$~O%+" "+STR$~CODE+" "+STR$~CODE
+
+ END
+
+ DEF FN_AlignWithZeroes
+  a = P% AND 3
+  IF a > 0 THEN
+   FOR I% = 1 TO 4 - a
+    [
+     OPT pass%
+     EQUB 0
+    ]
+   NEXT I%
+  ENDIF
+ =pass%
