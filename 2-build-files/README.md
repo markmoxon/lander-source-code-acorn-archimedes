@@ -2,7 +2,9 @@
 
 This folder contains support scripts for building Lander on the Acorn Archimedes.
 
-* [convert-to-vasm.py](convert-to-vasm.py) converts the BBC BASIC Asssembler format of the main source files into vasm-compatible syntax so vasm can assemble the game
+* [convert-to-vasm.py](convert-to-vasm.py) converts the main source files into vasm-compatible syntax so vasm can assemble the game
+
+* [convert-to-basic.py](convert-to-basic.py) converts the main source files into a BBC BASIC-compatible syntax that will build on an Archimedes
 
 * [crc32.py](crc32.py) calculates checksums during the verify stage and compares the results with the relevant binaries in the [4-reference-binaries](../4-reference-binaries) folder
 

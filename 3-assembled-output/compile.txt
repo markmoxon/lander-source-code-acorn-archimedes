@@ -18,7 +18,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    13: .set LAUNCHPAD_SIZE, TILE_SIZE * 8
                             	    14: .set HIGHEST_ALTITUDE, TILE_SIZE * 52
                             	    15: .set SPLASH_HEIGHT, TILE_SIZE / 16
-                            	    16: .set EXPLODE_Y, TILE_SIZE * 5 / 16
+                            	    16: .set CRASH_CLOUD_Y, TILE_SIZE * 5 / 16
                             	    17: .set SMOKE_HEIGHT, TILE_SIZE * 3 / 4
                             	    18: .set SAFE_HEIGHT, TILE_SIZE * 3 / 2
                             	    19: .set CAMERA_PLAYER_Z, (TILES_Z - 6) * TILE_SIZE
@@ -30,7 +30,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    25: .set LANDSCAPE_X, LANDSCAPE_X_WIDTH / 2
                             	    26: .set LANDSCAPE_Y, 0
                             	    27: .set LANDSCAPE_Z, LANDSCAPE_Z_DEPTH + (10 * TILE_SIZE)
-                            	    28: .set HALF_TILES_X, TILES_X / 2
+                            	    28: .set HALF_TILES_X, (TILES_X / 2)
                             	    29: .set LANDSCAPE_X_HALF, TILE_SIZE * HALF_TILES_X
                             	    30: .set LANDSCAPE_Z_BEYOND, LANDSCAPE_Z_DEPTH + TILE_SIZE
                             	    31: .set LANDSCAPE_Z_FRONT, LANDSCAPE_Z - LANDSCAPE_Z_DEPTH
@@ -121,7 +121,7 @@ Source: "3-assembled-output/Lander.arm"
                             	   116: .set particleData, 0x700 + STORE * 2
                             	   117: .set objectMap, 0x4400 + STORE * 2
                             	   118: .set buffers, 0x14400 + STORE * 2
-                            	   119: .org     CODE
+                            	   119: .org CODE
                             	   120: landscapeOffset:
 00:00008000 000080E1        	   121: .long    -LANDSCAPE_X
 00:00008004 00000000        	   122: .long    LANDSCAPE_Y
@@ -961,7 +961,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000088E8 5180A0E3        	   574:  MOV     R8, #81
 00:000088EC 94008BE2        	   575:  ADD     R0, R11, #xPlayer
 00:000088F0 070090E8        	   576:  LDMIA   R0, {R0-R2}
-00:000088F4 051641E2        	   577:  SUB     R1, R1, #EXPLODE_Y
+00:000088F4 051641E2        	   577:  SUB     R1, R1, #CRASH_CLOUD_Y
 00:000088F8 730100EB        	   578:  BL      AddExplosionToBuffer
                             	   579: lose1:
 00:000088FC 18019BE5        	   580:  LDR     R0, [R11, #mainLoopCount]
@@ -10664,6 +10664,7 @@ BUFFER_SIZE                      S:000010D4
 BounceParticle                   A:00008BA8
 CAMERA_PLAYER_Z                  S:39000000
 CODE                             S:00008000
+CRASH_CLOUD_Y                    S:00500000
 CalculateRotationMatrix          A:000095F4
 DeleteParticleData               A:00008C68
 Draw1x1ParticleFromBuffer        A:00009CD4
@@ -10688,7 +10689,6 @@ DrawTriangleShadowToBuffer       A:00009E38
 DrawTriangleToBuffer             A:00009E68
 DropARockFromTheSky              A:00008DE8
 DropRocksFromTheSky              A:00008F50
-EXPLODE_Y                        S:00500000
 EndGame                          A:0000AAFC
 Entry                            A:0000A894
 GameOver                         A:00008954
@@ -11410,7 +11410,7 @@ Symbols by value:
 00080000 SMOKE_RISING_SPEED
 00100000 SPLASH_HEIGHT
 00200000 LANDING_SPEED
-00500000 EXPLODE_Y
+00500000 CRASH_CLOUD_Y
 00640000 UNDERCARRIAGE_Y
 00C00000 SMOKE_HEIGHT
 01000000 TILE_SIZE

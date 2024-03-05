@@ -2,11 +2,11 @@
 #
 # ******************************************************************************
 #
-# CONVERT BBC BASIC ASSEMBLER TO VASM
+# CONVERT REPOSITORY ASSEMBLER FORMAT TO VASM
 #
 # Written by Mark Moxon
 #
-# This script converts source code from BBC BASIC ARM Assembler style into
+# This script converts source code from the repository style into
 # vasm-compatible ARM assembler.
 #
 # ******************************************************************************
@@ -24,6 +24,27 @@ def convert(input_file, output_file):
         # .label -> label:
         line = re.sub(r"^\.([^ \n]+)", r"\1:", line)
 
+        # Remove INT(...)
+        line = re.sub(r" INT\(", " (", line)
+
+        # Remove lines that mention pass%
+        line = re.sub(r"^.*pass%.*$", "", line)
+
+        # Remove lines that start with "DIM "
+        line = re.sub(r"^ *DIM .*$", "", line)
+
+        # Remove lines that start with "O% = "
+        line = re.sub(r"^ *O% = .*$", "", line)
+
+        # Remove lines that start with "OSCLI "
+        line = re.sub(r"^ *OSCLI .*$", "", line)
+
+        # Remove lines that start with [ or ]
+        line = re.sub(r"^ *(\[|\]).*$", "", line)
+
+        # "P% = " -> .org
+        line = re.sub(r"^ *P% = ", ".org ", line)
+
         # FOR loop -> .rept
         line = re.sub(r"^ *FOR I% = 1 TO ", ".rept ", line)
 
@@ -32,9 +53,6 @@ def convert(input_file, output_file):
 
         # x = y -> .set x, y
         line = re.sub(r"^ *(.+) = (.+)$", r".set \1, \2", line)
-
-        # ORG -> .org
-        line = re.sub(r"^ *ORG ", ".org ", line)
 
         # SKIP -> .skip
         line = re.sub(r"^ *SKIP ", ".skip ", line)
@@ -88,16 +106,16 @@ def convert(input_file, output_file):
 
 print("Converting 1-source-files/Lander.arm")
 
-bbc_basic_file = open("1-source-files/main-sources/Lander.arm", "r")
+source_file = open("1-source-files/main-sources/Lander.arm", "r")
 vasm_file = open("3-assembled-output/Lander.arm", "w")
-convert(bbc_basic_file, vasm_file)
-bbc_basic_file.close()
+convert(source_file, vasm_file)
+source_file.close()
 vasm_file.close()
 
-bbc_basic_file = open("1-source-files/main-sources/RunImage.arm", "r")
+source_file = open("1-source-files/main-sources/RunImage.arm", "r")
 vasm_file = open("3-assembled-output/RunImage.arm", "w")
-convert(bbc_basic_file, vasm_file)
-bbc_basic_file.close()
+convert(source_file, vasm_file)
+source_file.close()
 vasm_file.close()
 
 print("3-assembled-output/Lander.arm file saved")

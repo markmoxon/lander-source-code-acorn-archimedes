@@ -379,7 +379,7 @@ Source: "3-assembled-output/exports.arm"
                             	   370: .set SMOKE_RISING_SPEED, 0x00080000
                             	   371: .set SPLASH_HEIGHT, 0x00100000
                             	   372: .set LANDING_SPEED, 0x00200000
-                            	   373: .set EXPLODE_Y, 0x00500000
+                            	   373: .set CRASH_CLOUD_Y, 0x00500000
                             	   374: .set UNDERCARRIAGE_Y, 0x00640000
                             	   375: .set SMOKE_HEIGHT, 0x00C00000
                             	   376: .set TILE_SIZE, 0x01000000

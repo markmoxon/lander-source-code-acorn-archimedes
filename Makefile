@@ -58,15 +58,18 @@ all:
 	cp 3-assembled-output/!Help,fff 5-compiled-game-discs/riscos/!BigLander/!Help,fff
 	cp 3-assembled-output/!RunImage.unprot.bin 5-compiled-game-discs/riscos/!BigLander/!RunImage,ff8
 
-	cp -r 5-compiled-game-discs/arthur/Game .
-	zip -r Game.zip Game
-	mv Game.zip 5-compiled-game-discs/zip
-	rm -fr Game
+	@$(PYTHON) 2-build-files/convert-to-basic.py
+	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/LanderSrc,fff
 
 	cp -r 5-compiled-game-discs/riscos/!BigLander .
 	zip -r \!BigLander.zip !BigLander
 	mv \!BigLander.zip 5-compiled-game-discs/zip
 	rm -fr \!BigLander
+
+	cp -r 5-compiled-game-discs/arthur/Game .
+	zip -r Game.zip Game
+	mv Game.zip 5-compiled-game-discs/zip
+	rm -fr Game
 
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
 
