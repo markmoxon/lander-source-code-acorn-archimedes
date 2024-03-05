@@ -176,7 +176,7 @@ The build process outlined above produces a file called `LanderSrc,fff` in the `
 
 To build this source on an Archimedes, you first need to convert the BBC BASIC text file into tokenised BBC BASIC. If you have RISC OS 3, then you can use Edit to do this, as follows:
 
-* Download the source as a [https://raw.githubusercontent.com/markmoxon/archimedes-lander/main/5-compiled-game-discs/LanderSrc%2Cfff](BBC BASIC text file).
+* Download the source as a (BBC BASIC text file)[https://raw.githubusercontent.com/markmoxon/archimedes-lander/main/5-compiled-game-discs/LanderSrc%2Cfff].
 
 * Copy the file to an Archimedes machine.
 
