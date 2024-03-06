@@ -24,7 +24,7 @@
 \
 \ ******************************************************************************
 
- CODE = &00008000
+ CODE = &00008000                   \ The build address for the game code
 
 \ ******************************************************************************
 \
@@ -547,7 +547,7 @@
 
  [                                  \ Switch from BASIC into assembly language
 
- OPT pass%                          \ Set the assembly option for this pass
+ OPT    pass%                       \ Set the assembly option for this pass
 
 \ ******************************************************************************
 \
@@ -612,7 +612,7 @@
 
 [
 
- OPT pass%
+  OPT    pass%
 
   EQUB   &E3, TILES_X               \ Tile row data (even)
   EQUB   &E4, TILES_X               \ Tile row data (odd)
@@ -623,7 +623,7 @@
 
 [
 
- OPT pass%
+ OPT    pass%
 
  EQUB    &E3, TILES_X               \ Tile row #TILES_Z
 
@@ -669,7 +669,7 @@
 
 [
 
-  OPT pass%
+  OPT    pass%
 
   EQUD   buffer                     \ Insert the address of the buffer
 
@@ -682,7 +682,7 @@
 
 [
 
- OPT pass%
+ OPT    pass%
 
 \ ******************************************************************************
 \
@@ -711,7 +711,7 @@
 
 [
 
-  OPT pass%
+  OPT    pass%
 
   EQUD   buffer                     \ Insert the address of the buffer
 
@@ -724,7 +724,7 @@
 
 [
 
- OPT pass%
+ OPT    pass%
 
 \ ******************************************************************************
 \
@@ -4837,7 +4837,7 @@
 
 [
 
- OPT pass%
+ OPT    pass%
 
  ADD     R0, PC, R0, LSL #2         \ Set R14 to the address in entry R0 in the
  LDR     R14, [R0, #-typeOffset]    \ objectTypes table, which is the address of
@@ -8981,7 +8981,7 @@
 
 [
 
- OPT pass%
+ OPT    pass%
 
  ADD     R0, PC, R0, LSL #2         \ Jump to the address in entry R0 in the
  LDR     PC, [R0, #-labOffset]      \ bufferJump table
@@ -11867,7 +11867,7 @@
 
 [
 
- OPT pass%
+ OPT    pass%
 
  ADDLO   R0, PC, R10, LSL #2        \ If R10 < 18, jump to the address in entry
  LDRLO   PC, [R0, #-varOffset]      \ R10 in the lineJump table, which will draw

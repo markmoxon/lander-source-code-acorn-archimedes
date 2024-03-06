@@ -100,7 +100,7 @@ There are five main folders in this repository, which reflect the order of the b
 
 * [4-reference-binaries](4-reference-binaries) contains the correct binaries for each release, so we can verify that our assembled output matches the reference.
 
-* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process: folders that contains the compiled game for each variant and which can be run on real hardware or in an emulator, plus zips of those folders for easier deployment. It also contains version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
+* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process: folders that contains the compiled game for each variant and which can be run on real hardware or in an emulator, plus zips of those folders for easier deployment. It also contains version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter. The Arthur variant contains the GameCode binary in two formats: as a pair of files (GameCode and GameCode.inf) that is suitable for programs that support inf files, or as a single file (GameCode,8000-A614) that will work with HostFS. Both options contain the load and execution address of the file, and you should choose the one that works for you when copying the game to your emulator or Archimedes.
 
 ## Extending the landscape with BigLander
 

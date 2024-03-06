@@ -14,6 +14,7 @@
 
 import re
 import math
+import shutil
 
 
 def convert(input_file, output_file, inf_file, run_file):
@@ -45,6 +46,8 @@ def convert(input_file, output_file, inf_file, run_file):
 
     inf = "$.Gamecode        008000 " + exec_address[-6:].upper() + " " + file_size[-6:].upper()
     inf_file.write(inf)
+
+    shutil.copy("5-compiled-game-discs/arthur/Game/GameCode", "5-compiled-game-discs/arthur/Game/GameCode,8000-" + exec_address[-4:].upper())
 
     wimp_slot = math.ceil((buffer - 0x8000 - buffer_size) / 1024)
     if (wimp_slot // 8) != (wimp_slot / 8):
