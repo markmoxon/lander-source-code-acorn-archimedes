@@ -172,17 +172,17 @@ will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs`
 
 ### Archimedes
 
-The build process outlined above produces a file called `LanderSrc,fff` in the `5-compiled-game-discs` folder. This contains a version of the game source that can be built on an Archimedes.
+The build process outlined above produces a file called `LanderSrc,fff` in the `5-compiled-game-discs` folder, or `BLanderSrc,fff` if you are building BigLander. These files contain versions of the game source that can be built on an Archimedes.
 
-To build this source on an Archimedes, you first need to convert the BBC BASIC text file into tokenised BBC BASIC. If you have RISC OS 3, then you can use Edit to do this, as follows:
+To build the source on an Archimedes, you first need to convert the BBC BASIC text file into tokenised BBC BASIC. If you have RISC OS 3, then you can use Edit to do this, as follows:
 
-* Download the source as a [BBC BASIC text file](https://raw.githubusercontent.com/markmoxon/archimedes-lander/main/5-compiled-game-discs/LanderSrc%2Cfff).
+* Download the source as a BBC BASIC text file for [Lander](https://raw.githubusercontent.com/markmoxon/archimedes-lander/main/5-compiled-game-discs/LanderSrc%2Cfff) or [BigLander](https://raw.githubusercontent.com/markmoxon/archimedes-lander/big-landscape/5-compiled-game-discs/BLanderSrc%2Cfff).
 
-* Copy the file to an Archimedes machine.
+* Copy the file to an Archimedes machine (if you aren't already downloading it in RISC OS).
 
 * If you are using HostFS then the filetype should be set automatically, but if you need to set it manually, it should be a Text file.
 
-* Load the text file into !Edit. You should see the fully documented source code appear.
+* Load the text file into Edit. You should see the fully documented source code appear.
 
 * Click Menu on Edit's icon bar icon, choose "BASIC options > Line number increment" and set the value to 1.
 
@@ -192,9 +192,9 @@ To build this source on an Archimedes, you first need to convert the BBC BASIC t
 
 You now have the Lander source in BBC BASIC, which is how David Braben originally wrote it (though without quite so many comments).
 
-To build Lander from this source, run the file by double-clicking it. It will assemble the game and save the GameCode file into the current directory, so you may want to set the current directory before doing this.
+To build the game from this source, simply run the file by double-clicking it. It will assemble the game and save the GameCode file into the current directory, so you may want to set the current directory before doing this. You may need to allocate more memory to the Next slot for the assembly to work: you need at least 832K to build Lander, and at least 904K to build BigLander.
 
-The GameCode file contains the Arthur version of Lander. You can run it on Arthur, RISC OS 2 or up to RISC OS 3.11 by double-clicking it (it does not work on RISC OS 3.5 and up - you need [BigLander](#extending-the-landscape-with-biglander) for that). You may need to allocate more memory to the Next slot for it to work: you need at least 832K to build Lander, and at least 904K to build Big Lander.
+You can play the game by simply double-clicking on the GameCode file. You can run Lander on Arthur, RISC OS 2 or up to RISC OS 3.11, and you can run BigLander on any version of RISC OS. You may need to allocate more memory to the Next slot for the game to run: you need at least 168K to run Lander, and at least 400K to run BigLander.
 
 Note that the main source code in this repository is very close to being in BBC BASIC format, but it isn't exactly the same (which is why the BBC BASIC version is created by the build process rather than actually being the main source). This is because BBC BASIC has some limitations that make it a tricky companion for large commentaries like this. For example, the colon character separates multiple statements in BBC BASIC, but this also applies within comments, so any comments that contain colons will cause runtime errors when used in BASIC. The same applies with unmatched brackets and double-quotes, though these only generate warnings (though they do break the Text to BASIC conversion process). BBC BASIC also doesn't support comma-separated EQU arguments, which makes laying out tables like the object blueprints rather difficult.
 
