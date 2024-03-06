@@ -63,7 +63,7 @@ all:
 	cp 3-assembled-output/!RunImage.unprot.bin 5-compiled-game-discs/riscos/!BigLander/!RunImage,ff8
 
 	@$(PYTHON) 2-build-files/convert-to-basic.py ${x} ${z}
-	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/LanderSrc,fff
+	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/BLanderSrc,fff
 
 	cp -r 5-compiled-game-discs/riscos/!BigLander .
 	zip -r \!BigLander.zip !BigLander -x "*/.*"
