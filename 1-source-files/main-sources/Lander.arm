@@ -536,7 +536,7 @@
  DIM CODE% &A000 + STORE * 2        \ Reserve a block in memory for the
                                     \ assembled code
 
- FOR pass% = 4 TO 6 STEP 2          \ Perform a two-pass assembly, using both
+ FOR pass% = 4 TO 7 STEP 3          \ Perform a two-pass assembly, using both
                                     \ P% and O%, with errors enabled on the
                                     \ second pass only
 
