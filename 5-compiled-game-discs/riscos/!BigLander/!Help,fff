@@ -5,7 +5,7 @@ It should work on all versions of RISC OS.
 
 See lander.bbcelite.com for details.
 
-Build: 2024-03-06 11-28-27
+Build: 2024-03-06 11-35-07
 
-Tiles: TILES_X = 63
-       TILES_Z = 63
+Tiles: TILES_X = 65
+       TILES_Z = 65

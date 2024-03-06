@@ -1,8 +1,8 @@
 VASM?=vasmarm_std
 PYTHON?=python
 
-# A make command with no arguments will build BigLander with 62 x 62 tiles
-# (i.e. TILES_X = 63 and TILES_Z = 63)
+# A make command with no arguments will build BigLander with 64 x 64 tiles
+# (i.e. TILES_X = 65 and TILES_Z = 65)
 #
 # Optional arguments for the make command are:
 #
@@ -29,11 +29,11 @@ PYTHON?=python
 # https://archi.medes.live/#ff=14400&disc=https://server.com/path/to/!BigLander.zip&autoboot=desktop%20filer_opendir%20HostFS::HostFS.$
 
 ifndef x
-  x=63
+  x=65
 endif
 
 ifndef z
-  z=63
+  z=65
 endif
 
 .PHONY:all

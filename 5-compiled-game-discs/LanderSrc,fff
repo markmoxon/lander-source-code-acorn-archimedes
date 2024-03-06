@@ -35,11 +35,11 @@ REM ****************************************************************************
  TILE_SIZE = &01000000              : REM The length of one side of a square
                                     : REM landscape tile in 3D coordinates
 
- TILES_X = 63                       : REM The number of tile corners in a landscape
-                                    : REM row from left to right [i.e. 62 tiles]
+ TILES_X = 65                       : REM The number of tile corners in a landscape
+                                    : REM row from left to right [i.e. 64 tiles]
  
- TILES_Z = 63                       : REM The number of tile corners in a landscape
-                                    : REM row from front to back [i.e. 62 tiles]
+ TILES_Z = 65                       : REM The number of tile corners in a landscape
+                                    : REM row from front to back [i.e. 64 tiles]
 
  MAX_PARTICLES = 484                : REM The maximum number of particles at any one
                                     : REM time
