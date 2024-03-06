@@ -104,9 +104,9 @@ There are five main folders in this repository, which reflect the order of the b
 
 ## Extending the landscape with BigLander
 
-This repository also includes a version of Lander with a much bigger landscape: 62 by 62 tiles, to be precise (as compared to the original 12 by 10 tiles). This version also runs on all versions of RISC OS (the original only works on Arthur and RISC OS 2). The big-landscape code is in a separate branch called `big-landscape`, and apart from the code differences for the landscape size and later versions of RISC OS, this branch is identical to the main branch and the same build process applies.
+This repository also includes a version of Lander with a much bigger landscape: 64 by 64 tiles, to be precise (as compared to the original 12 by 10 tiles). This version also runs on all versions of RISC OS (the original only works on Arthur and RISC OS 2). The big-landscape code is in a separate branch called `big-landscape`, and apart from the code differences for the landscape size and later versions of RISC OS, this branch is identical to the main branch and the same build process applies.
 
-The landscape size is configurable. The default is 62 by 62 tiles (which equates to TILES_X = 63 and TILES_Z = 63), but you can set your own values by passing x and z parameters to the build. For example, building BigLander like this on Mac or Linux:
+The landscape size is configurable. The default is 64 by 64 tiles (which equates to TILES_X = 65 and TILES_Z = 65), but you can set your own values by passing x and z parameters to the build. For example, building BigLander like this on Mac or Linux:
 
 ```
 make x=122 z=122
@@ -192,9 +192,9 @@ To build this source on an Archimedes, you first need to convert the BBC BASIC t
 
 You now have the Lander source in BBC BASIC, which is how David Braben originally wrote it (though without quite so many comments).
 
-To build Lander from this source, run the file by double-clicking it. It will assemble the game and save the GameCode file into the current directory. You may therefore want to set the current directory before doing this.
+To build Lander from this source, run the file by double-clicking it. It will assemble the game and save the GameCode file into the current directory, so you may want to set the current directory before doing this.
 
-The GameCode file contains the Arthur version of Lander. You can run it on Arthur, RISC OS 2 or up to RISC OS 3.11 by double-clicking it (it does not work on RISC OS 3.5 and up - you need [BigLander](#extending-the-landscape-with-biglander) for that). You may need to allocate more memory to the Next slot for it to work.
+The GameCode file contains the Arthur version of Lander. You can run it on Arthur, RISC OS 2 or up to RISC OS 3.11 by double-clicking it (it does not work on RISC OS 3.5 and up - you need [BigLander](#extending-the-landscape-with-biglander) for that). You may need to allocate more memory to the Next slot for it to work: you need at least 832K to build Lander, and at least 904K to build Big Lander.
 
 Note that the main source code in this repository is very close to being in BBC BASIC format, but it isn't exactly the same (which is why the BBC BASIC version is created by the build process rather than actually being the main source). This is because BBC BASIC has some limitations that make it a tricky companion for large commentaries like this. For example, the colon character separates multiple statements in BBC BASIC, but this also applies within comments, so any comments that contain colons will cause runtime errors when used in BASIC. The same applies with unmatched brackets and double-quotes, though these only generate warnings (though they do break the Text to BASIC conversion process). BBC BASIC also doesn't support comma-separated EQU arguments, which makes laying out tables like the object blueprints rather difficult.
 
