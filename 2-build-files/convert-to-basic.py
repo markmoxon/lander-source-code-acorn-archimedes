@@ -54,7 +54,7 @@ def convert(input_file, output_file):
 
         if in_code:
             # Change ALIGN to FN_AlignWithZeroes
-            line = re.sub(r"ALIGN", r"OPT FN_AlignWithZeroes", line)
+            line = re.sub(r"ALIGN", r"OPT     FN_AlignWithZeroes", line)
 
         # Write updated line
         output_file.write(line)

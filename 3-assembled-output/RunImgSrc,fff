@@ -24,7 +24,7 @@ REM   * !RunImage.unprot.bin
 REM
 REM ******************************************************************************
 
- CODE = &00008000
+ CODE = &00008000                   : REM The build address for the Absolute file
 
  INCLUDE "3-assembled-output/exports.arm"
 
