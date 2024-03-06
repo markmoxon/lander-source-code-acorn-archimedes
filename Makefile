@@ -15,6 +15,10 @@ PYTHON?=python
 all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
+	rm -fr 5-compiled-game-discs/arthur/Game/*
+	rm -fr 5-compiled-game-discs/riscos/!Lander/*
+	rm -fr 5-compiled-game-discs/zip/*
+
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
 	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Game/GameCode.inf
 	cp 1-source-files/other-sources/arthur/Lander,ffb 5-compiled-game-discs/arthur/Game/Lander,ffb
@@ -32,12 +36,12 @@ all:
 	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/LanderSrc,fff
 
 	cp -r 5-compiled-game-discs/riscos/!Lander .
-	zip -r \!Lander.zip !Lander
+	zip -r \!Lander.zip !Lander -x "*/.*"
 	mv \!Lander.zip 5-compiled-game-discs/zip
 	rm -fr \!Lander
 
 	cp -r 5-compiled-game-discs/arthur/Game .
-	zip -r Game.zip Game
+	zip -r Game.zip Game -x "*/.*"
 	mv Game.zip 5-compiled-game-discs/zip
 	rm -fr Game
 
