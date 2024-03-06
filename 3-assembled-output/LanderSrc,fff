@@ -520,7 +520,7 @@ REM ****************************************************************************
  DIM CODE% &A000 + STORE * 2        : REM Reserve a block in memory for the
                                     : REM assembled code
 
- FOR pass% = 4 TO 6 STEP 2          : REM Perform a two-pass assembly, using both
+ FOR pass% = 4 TO 7 STEP 3          : REM Perform a two-pass assembly, using both
                                     : REM P% and O%, with errors enabled on the
                                     : REM second pass only
 
