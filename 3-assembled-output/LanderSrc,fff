@@ -532,7 +532,7 @@ REM ****************************************************************************
  DIM CODE% &A000 + STORE * 2        : REM Reserve a block in memory for the
                                     : REM assembled code
 
- FOR pass% = 4 TO 7 STEP 3          : REM Perform a two-pass assembly, using both
+ FOR pass% = 4 TO 6 STEP 2          : REM Perform a two-pass assembly, using both
                                     : REM P% and O%, with errors enabled on the
                                     : REM second pass only
 
@@ -13420,6 +13420,22 @@ REM ****************************************************************************
 \
 \ For n = 0 to 1023
 \
+\ In the original BBC BASIC source, this table would have been populated using
+\ something along these lines;
+\
+\   FOR I% = 0 TO 1023
+\    [
+\     OPT pass%
+\     EQUD [2^31 - 1] * SIN[2 * PI * [I% / 1024]]
+\    ]
+\   NEXT
+\
+\ I have used EQUDs here because different computers have different algorithms
+\ and accuracies in their maths routines, so the only way to ensure a complete
+\ match with the original binaries is to hard-code the values.
+\
+\ The above loop produces the correct values when run on an Archimedes.
+\
 \ ******************************************************************************
 
 .sinTable
@@ -13693,9 +13709,25 @@ REM ****************************************************************************
 \
 \ At byte n, the table contains;
 \
-\   [[2^31 - 1] / PI] * ATAN[n / 128]
+\   [[2^31 - 1] / PI] * arctan[n / 128]
 \
 \ For n = 0 to 127
+\
+\ In the original BBC BASIC source, this table would have been populated using
+\ something along these lines;
+\
+\   FOR I% = 0 TO 127
+\    [
+\     OPT pass%
+\     EQUD [[2^31 - 1] / PI] * ATN[I% / 128]
+\    ]
+\   NEXT
+\
+\ I have used EQUDs here because different computers have different algorithms
+\ and accuracies in their maths routines, so the only way to ensure a complete
+\ match with the original binaries is to hard-code the values.
+\
+\ The above loop produces the correct values when run on an Archimedes.
 \
 \ ******************************************************************************
 
@@ -13748,7 +13780,23 @@ REM ****************************************************************************
 \
 \   [2^31 - 1] * SQRT[n / 1024]
 \
-\ For n = 0 to 127
+\ For n = 0 to 1023
+\
+\ In the original BBC BASIC source, this table would have been populated using
+\ something along these lines;
+\
+\   FOR I% = 0 TO 1023
+\    [
+\     OPT pass%
+\     EQUD [2^31 - 1] * SQR[I% / 1024]
+\    ]
+\   NEXT
+\
+\ I have used EQUDs here because different computers have different algorithms
+\ and accuracies in their maths routines, so the only way to ensure a complete
+\ match with the original binaries is to hard-code the values.
+\
+\ The above loop produces the correct values when run on an Archimedes.
 \
 \ ******************************************************************************
 
@@ -14031,6 +14079,28 @@ REM ****************************************************************************
 \ The address of the table containing the values of n / d is;
 \
 \   divisionTable + d * 256
+\
+\ In the original BBC BASIC source, this table would have been populated using
+\ something along these lines;
+\
+\   FOR I% = 0 TO 63
+\    [
+\     OPT pass%
+\     EQUD &FFFFFFFF
+\    ]
+\    FOR J% = 1 TO 63
+\     [
+\      OPT pass%
+\      EQUD 65536 * I% / J%
+\     ]
+\    NEXT
+\   NEXT
+\
+\ I have used EQUDs here because different computers have different algorithms
+\ and accuracies in their maths routines, so the only way to ensure a complete
+\ match with the original binaries is to hard-code the values.
+\
+\ The above loop produces the correct values when run on an Archimedes.
 \
 \ ******************************************************************************
 
