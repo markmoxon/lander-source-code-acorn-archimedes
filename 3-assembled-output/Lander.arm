@@ -2121,7 +2121,7 @@ screenBank2Addr:
 screenBank1Addr:
 .long    0x01FEC000 + 320 * 16
 screenWidth:
-.long   0
+.long   320
 readVduInputBlock:
 .long    148
 .long    149
@@ -2140,12 +2140,9 @@ GetScreenAddress:
  ADR     R0, readVduInputBlock
  ADR     R1, screenBank2Addr
  SWI     XOS_ReadVduVariables
- LDRVC   R1, screenBank2Addr
- LDRVC   R2, screenWidth
- LDRVC   R3, screenBank1Addr
- MOVVS   R1, #0x01FD8000
- MOVVS   R2, #320
- MOVVS   R3, #0x01FEC000
+ LDR     R1, screenBank2Addr
+ LDR     R2, screenWidth
+ LDR     R3, screenBank1Addr
  ADD R1, R1, R2, LSL #4
  STR R1, screenBank2Addr
  ADD R3, R3, R2, LSL #4

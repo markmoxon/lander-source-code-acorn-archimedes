@@ -40,6 +40,10 @@ endif
 all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
+	rm -fr 5-compiled-game-discs/arthur/Game/*
+	rm -fr 5-compiled-game-discs/riscos/!BigLander/*
+	rm -fr 5-compiled-game-discs/zip/*
+
 	$(VASM) -a2 -m2 -quiet -Fbin -DTILES_X=${x} -DTILES_Z=${z} -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
 	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Game/GameCode.inf
 	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/arthur/Game/BigLander,ffb
@@ -58,16 +62,16 @@ all:
 	cp 3-assembled-output/!Help,fff 5-compiled-game-discs/riscos/!BigLander/!Help,fff
 	cp 3-assembled-output/!RunImage.unprot.bin 5-compiled-game-discs/riscos/!BigLander/!RunImage,ff8
 
-	@$(PYTHON) 2-build-files/convert-to-basic.py
+	@$(PYTHON) 2-build-files/convert-to-basic.py ${x} ${z}
 	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/LanderSrc,fff
 
 	cp -r 5-compiled-game-discs/riscos/!BigLander .
-	zip -r \!BigLander.zip !BigLander
+	zip -r \!BigLander.zip !BigLander -x "*/.*"
 	mv \!BigLander.zip 5-compiled-game-discs/zip
 	rm -fr \!BigLander
 
 	cp -r 5-compiled-game-discs/arthur/Game .
-	zip -r Game.zip Game
+	zip -r Game.zip Game -x "*/.*"
 	mv Game.zip 5-compiled-game-discs/zip
 	rm -fr Game
 

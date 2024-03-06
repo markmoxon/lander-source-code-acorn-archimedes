@@ -35,15 +35,11 @@ REM ****************************************************************************
  TILE_SIZE = &01000000              : REM The length of one side of a square
                                     : REM landscape tile in 3D coordinates
 
-                                    : REM --- Mod; Code removed for more tiles; --->
-
  TILES_X = 63                       : REM The number of tile corners in a landscape
-REM                                   : REM row from left to right [i.e. 12 tiles]
-REM
+                                    : REM row from left to right [i.e. 62 tiles]
+ 
  TILES_Z = 63                       : REM The number of tile corners in a landscape
-REM                                   : REM row from front to back [i.e. 10 tiles]
-
-                                    : REM --- End of removed code ----------------->
+                                    : REM row from front to back [i.e. 62 tiles]
 
  MAX_PARTICLES = 484                : REM The maximum number of particles at any one
                                     : REM time
@@ -9092,7 +9088,7 @@ REM ****************************************************************************
 
 .screenWidth
 
- EQUD   0
+ EQUD   320
 
                                     \ --- End of added code ------------------->
 
@@ -9176,15 +9172,12 @@ REM ****************************************************************************
                                     \ Arthur and RISC OS 2, as they do not
                                     \ support this SWI
 
- LDRVC   R1, screenBank2Addr        \ If the SWI succeeded then the V flag will
- LDRVC   R2, screenWidth            \ be clear, so set R1 to R3 to the results
- LDRVC   R3, screenBank1Addr
-
- MOVVS   R1, #&01FD8000             \ If the SWI failed then the V flag will be
- MOVVS   R2, #320                   \ set, so set R1 to R3 to the hardcoded
- MOVVS   R3, #&01FEC000             \ memory addresses from the original game
-
-                                    \ By this point we have the following;
+ LDR     R1, screenBank2Addr        \ If the SWI succeeded then set R1 to R3 to
+ LDR     R2, screenWidth            \ the results, otherwise the contents of the
+ LDR     R3, screenBank1Addr        \ block will be unchanged, so we load the
+                                    \ original values into R1 to R3
+                                    \
+                                    \ So by this point we have the following;
                                     \
                                     \   R1 = address of screen bank 2
                                     \
