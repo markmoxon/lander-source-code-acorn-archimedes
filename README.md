@@ -223,7 +223,9 @@ All the compiled binaries match the originals, so we know we are producing the s
 
 The !RunImage file in the RISC OS variant of Lander is encrypted. The [2-build-files/decrypt](2-build-files/decrypt) folder contains a script that decrypts the binary.
 
-It turns out that the decrypted !RunImage is identical to the Arthur variant's GameCode binary, so the RISC OS variant is the exact same game, just encrypted.
+It turns out that the decrypted !RunImage is identical to the Arthur variant's GameCode binary, so the RISC OS variant is the exact same game, just encrypted. To prove this, I've written a Python script called [lander-decrypt.py](2-build-files/decrypt/lander-decrypt.py) that decrypts the original !RunImage binary. This Python script is based on the original decryption routine, whose source is in [lander-decrypt.arm](2-build-files/decrypt/lander-decrypt.arm).</p>
+
+The !RunImage produced by the build process doesn't include this encryption, and in its place there's a small routine that simply copies the game code to address &8000, without making any changes (you can see this in the main [RunImage.arm](1-source-files/main-sources/RunImage.arm) source).
 
 ### Log files
 
