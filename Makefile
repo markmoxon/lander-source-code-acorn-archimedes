@@ -26,11 +26,11 @@ all:
 
 	@$(PYTHON) 2-build-files/export-symbols.py
 
-	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.unprot.bin 3-assembled-output/RunImage.arm
+	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
 	cp 1-source-files/other-sources/riscos/!Run,feb 5-compiled-game-discs/riscos/!Lander/!Run,feb
 	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/riscos/!Lander/!Sprites,ff9
 	cp 1-source-files/other-sources/riscos/MemAlloc,ffa 5-compiled-game-discs/riscos/!Lander/MemAlloc,ffa
-	cp 3-assembled-output/!RunImage.unprot.bin 5-compiled-game-discs/riscos/!Lander/!RunImage,ff8
+	cp 3-assembled-output/!RunImage.bin 5-compiled-game-discs/riscos/!Lander/!RunImage,ff8
 
 	@$(PYTHON) 2-build-files/convert-to-basic.py
 	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/LanderSrc,fff
