@@ -11755,7 +11755,7 @@
                                     \ So R0 is set to the x-coordinate of the
                                     \ left end of the line we want to draw
 
- CMP     R5, #&01400000             \ If R5 > &01400000, then the right end of
+ CMP     R5, #&01400000             \ If R5 < &01400000, then the right end of
  RSBLO   R10, R0, R5, LSR #16       \ the line is less than &140 (as the
                                     \ fractional number &01400000 represents the
                                     \ integer &0140), so it is less than 320
