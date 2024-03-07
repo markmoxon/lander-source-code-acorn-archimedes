@@ -195,7 +195,7 @@ lander_code = bytearray()
 
 # Load assembled code file
 
-lander_file = open("../4-reference-binaries/!RunImage.bin", "rb")
+lander_file = open("!RunImage.bin", "rb")
 lander_code.extend(lander_file.read())
 lander_file.close()
 
@@ -204,7 +204,7 @@ lander_file.close()
 lander_code.extend(bytearray(0x20000 - 0x8000 - len(lander_code)))
 
 print()
-print("[ Read    ] 4-reference-binaries/!RunImage.bin")
+print("[ Read    ] !RunImage.bin")
 
 # Do decryption
 
@@ -343,13 +343,13 @@ while True:
         r4 = 1                              # 0000EEC4 MOV     R4, #1
         continue                            # 0000EEC8 B       0x0000EDFC
 
-print("[ Decrypt ] 4-reference-binaries/!RunImage.bin")
+print("[ Decrypt ] !RunImage.bin")
 
 # Write output file for !RunImage.decrypt
 
-output_file = open("../3-assembled-output/!RunImage.decrypt.bin", "wb")
+output_file = open("!RunImage.decrypt.bin", "wb")
 output_file.write(lander_code[0: 0x9A10])
 output_file.close()
 
-print("[ Save    ] 3-assembled-output/!RunImage.decrypt.bin")
+print("[ Save    ] !RunImage.decrypt.bin")
 print()

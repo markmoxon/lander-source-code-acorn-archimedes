@@ -56,11 +56,11 @@ all:
 	echo "\nTiles: TILES_X = ${x}" >> 3-assembled-output/!Help,fff
 	echo "       TILES_Z = ${z}" >> 3-assembled-output/!Help,fff
 
-	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.unprot.bin 3-assembled-output/RunImage.arm
+	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
 	cp 3-assembled-output/!Run,feb 5-compiled-game-discs/riscos/!BigLander/!Run,feb
 	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/riscos/!BigLander/!Sprites,ff9
 	cp 3-assembled-output/!Help,fff 5-compiled-game-discs/riscos/!BigLander/!Help,fff
-	cp 3-assembled-output/!RunImage.unprot.bin 5-compiled-game-discs/riscos/!BigLander/!RunImage,ff8
+	cp 3-assembled-output/!RunImage.bin 5-compiled-game-discs/riscos/!BigLander/!RunImage,ff8
 
 	@$(PYTHON) 2-build-files/convert-to-basic.py ${x} ${z}
 	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/BLanderSrc,fff
