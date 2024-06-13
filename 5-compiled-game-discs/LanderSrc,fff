@@ -5,7 +5,7 @@ REM
 REM Lander was written by David Braben and is copyright D.J.Braben 1987
 REM
 REM The code on this site has been reconstructed from a disassembly of the game on
-REM the Arthur and RISC OS 2 application discs
+REM the Arthur, RISC OS 2 and RISC OS 3.00 application discs
 REM
 REM The commentary is copyright Mark Moxon, and any misunderstandings or mistakes
 REM in the documentation are entirely my fault
@@ -608,7 +608,7 @@ REM ****************************************************************************
 
 [
 
- OPT    pass%
+ OPT     pass%
 
  EQUB &E3 : EQUB TILES_X               \ Tile row #TILES_Z
 
@@ -11622,7 +11622,7 @@ REM ****************************************************************************
                                     \ So R0 is set to the x-coordinate of the
                                     \ left end of the line we want to draw
 
- CMP     R5, #&01400000             \ If R5 > &01400000, then the right end of
+ CMP     R5, #&01400000             \ If R5 < &01400000, then the right end of
  RSBLO   R10, R0, R5, LSR #16       \ the line is less than &140 [as the
                                     \ fractional number &01400000 represents the
                                     \ integer &0140], so it is less than 320

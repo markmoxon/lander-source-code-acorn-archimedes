@@ -608,7 +608,7 @@
 
 [
 
- OPT    pass%
+ OPT     pass%
 
  EQUB    &E3, TILES_X               \ Tile row #TILES_Z
 
