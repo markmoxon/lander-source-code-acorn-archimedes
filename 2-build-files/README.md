@@ -10,9 +10,7 @@ This folder contains support scripts for building Lander on the Acorn Archimedes
 
 * [export-symbols.py](convert-to-vasm.py) extracts symbol values from the vasm output so they can be included in the !RunImage source (so changing the souce code won't break the !RunImage loader)
 
-* [lander-decrypt.arm](lander-decrypt.arm) contains the decryption code from the RISC OS variant of the game, taken from the end of the !RunImage file
-
-* [lander-decrypt.py](lander-decrypt.py) contains the decryption code from the RISC OS variant of the game, translated into Python
+* The [decrypt](decrypt) folder contains decryption-related files from the RISC OS variant of the game
 
 It also contains the `make.exe` executable for Windows, plus the required DLL files.
 
