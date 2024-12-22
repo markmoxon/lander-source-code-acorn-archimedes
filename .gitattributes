@@ -15,3 +15,6 @@
 *.PDF    diff=astextplain
 *.rtf    diff=astextplain
 *.RTF    diff=astextplain
+
+# Set syntax for ARM assembler files
+*.arm linguist-language=Assembly
