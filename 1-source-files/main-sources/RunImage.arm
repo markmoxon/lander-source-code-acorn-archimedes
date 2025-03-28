@@ -63,9 +63,9 @@
 
  P% = CODE                          \ Assemble the code into the block at P%
 
- [                                  \ Switch from BASIC into assembly language
+[                                   \ Switch from BASIC into assembly language
 
- OPT pass%                          \ Set the assembly option for this pass
+ OPT     pass%                      \ Set the assembly option for this pass
 
 \ ******************************************************************************
 \
