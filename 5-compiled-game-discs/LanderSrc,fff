@@ -532,7 +532,7 @@ REM ****************************************************************************
 
 [                                   \ Switch from BASIC into assembly language
 
- OPT    pass%                       \ Set the assembly option for this pass
+ OPT     pass%                      \ Set the assembly option for this pass
 
 \ ******************************************************************************
 \
