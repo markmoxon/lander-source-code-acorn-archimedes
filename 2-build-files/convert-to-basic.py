@@ -49,7 +49,7 @@ def convert(input_file, output_file):
             line = re.sub(r"^\\", r"REM", line)
             line = re.sub(r"\\", r": REM", line)
 
-            # Change GameCode.bin to GameCode.bin
+            # Change GameCode.bin to GameCode
             line = re.sub(r"GameCode\.bin", r"GameCode", line)
 
         if in_code:
