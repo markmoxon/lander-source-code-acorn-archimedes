@@ -15207,7 +15207,7 @@ REM ****************************************************************************
 
 .endCode
 
- ]
+]
 
  NEXT pass%                         : REM Loop back for the second pass
 
