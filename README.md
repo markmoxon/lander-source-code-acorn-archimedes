@@ -133,7 +133,7 @@ For more information on BigLander, see the [accompanying website](https://lander
 
 Builds are supported for Windows and Mac/Linux systems. In all cases the build process is defined in the `Makefile` provided.
 
-The build process also creates a version of the source that can be built on [Archimedes][#archimedes] machines.
+The build process also creates a version of the source that can be built on [Archimedes](#archimedes) machines.
 
 ### Requirements
 
