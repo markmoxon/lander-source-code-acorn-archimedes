@@ -43,10 +43,11 @@ REM ****************************************************************************
                                     : REM P% and O%, with errors enabled on the
                                     : REM second pass only
 
- O% = CODE%                         : REM Assemble the code for deployment to
-                                    : REM address O%
+ O% = CODE%                         : REM Assemble the code into the reserved block
+                                    : REM of memory at CODE%
 
- P% = CODE                          : REM Assemble the code into the block at P%
+ P% = CODE                          : REM Assemble the code so it runs at the
+                                    : REM address in CODE
 
 [                                   \ Switch from BASIC into assembly language
 

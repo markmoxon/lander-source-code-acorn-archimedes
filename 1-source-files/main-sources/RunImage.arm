@@ -43,10 +43,11 @@
                                     \ P% and O%, with errors enabled on the
                                     \ second pass only
 
- O% = CODE%                         \ Assemble the code for deployment to
-                                    \ address O%
+ O% = CODE%                         \ Assemble the code into the reserved block
+                                    \ of memory at CODE%
 
- P% = CODE                          \ Assemble the code into the block at P%
+ P% = CODE                          \ Assemble the code so it runs at the
+                                    \ address in CODE
 
 [                                   \ Switch from BASIC into assembly language
 
