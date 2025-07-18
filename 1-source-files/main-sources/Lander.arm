@@ -18,6 +18,13 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains the main game code for Lander. On Arthur this forms
+\ the GameCode binary, which is an Absolute file. On RISC OS the game code is
+\ encrypted and combined with a decryption routine in the !RunImage binary,
+\ which is also an Absolute file.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * GameCode.bin

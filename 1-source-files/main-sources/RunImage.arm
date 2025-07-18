@@ -18,6 +18,11 @@
 \
 \ ------------------------------------------------------------------------------
 \
+\ This source file contains decryption code for the RISC OS version of Lander.
+\ It decrypts the main game code as part of the !RunImage binary.
+\
+\ ------------------------------------------------------------------------------
+\
 \ This source file produces the following binary file:
 \
 \   * !RunImage.unprot.bin
