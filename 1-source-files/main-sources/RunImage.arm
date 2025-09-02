@@ -27,6 +27,10 @@
 \
 \   * !RunImage.unprot.bin
 \
+\ after reading in the following file:
+\
+\   * GameCode.bin
+\
 \ ******************************************************************************
 
  CODE = &00008000                   \ The build address for the Absolute file
