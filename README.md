@@ -39,7 +39,6 @@ See the [introduction](#introduction) for more information.
 * [Building Lander from the source](#building-lander-from-the-source)
 
   * [Requirements](#requirements)
-  * [Build targets](#build-targets)
   * [Windows](#windows)
   * [Mac and Linux](#mac-and-linux)
   * [Archimedes](#archimedes)
