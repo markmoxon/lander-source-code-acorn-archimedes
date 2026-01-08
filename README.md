@@ -16,7 +16,7 @@ See [my profile](https://github.com/markmoxon) for more repositories to explore.
 
 ![Screenshot of Lander on the Acorn Archimedes](https://lander.bbcelite.com/images/github/Lander.png)
 
-This repository contains source code for Lander on the Acorn Archimedes, with every single line documented and (for the most part) explained. It has been reconstructed by hand from a disassembly of the original game binaries.
+This repository contains source code for David Braben's classic game Lander on the Acorn Archimedes, with every single line documented and (for the most part) explained. It has been reconstructed by hand from a disassembly of the original game binaries.
 
 It is a companion to the [lander.bbcelite.com website](https://lander.bbcelite.com).
 
