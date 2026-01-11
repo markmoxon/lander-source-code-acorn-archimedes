@@ -4852,14 +4852,12 @@
                                     \ object map anyway, as this check is also
                                     \ performed when populating the object map
                                     \
-                                    \ However, because the landscape in Lander
-                                    \ is infinite but the object map is finite,
-                                    \ the object map gets repeated every 256
-                                    \ tiles in each direction, and objects that
-                                    \ appear on land in one instance of the
-                                    \ object may well appear in the sea in
-                                    \ another instance, so this check prevents
-                                    \ that from happening
+                                    \ However, because the object map is finite,
+                                    \ it gets repeated every 256 tiles in each
+                                    \ direction, and objects that appear on land
+                                    \ in one instance of the object may well
+                                    \ appear in the sea in another instance, so
+                                    \ this check prevents that from happening
 
  LDR     R14, [R11, #xCamera]       \ Set R0 = R8 - xCamera
  SUB     R0, R8, R14                \        = x - xCamera

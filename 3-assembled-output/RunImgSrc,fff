@@ -18,9 +18,18 @@ REM https;//lander.bbcelite.com/deep_dives
 REM
 REM ------------------------------------------------------------------------------
 REM
+REM This source file contains decryption code for the RISC OS version of Lander.
+REM It decrypts the main game code as part of the !RunImage binary.
+REM
+REM ------------------------------------------------------------------------------
+REM
 REM This source file produces the following binary file;
 REM
 REM   * !RunImage.unprot.bin
+REM
+REM after reading in the following file;
+REM
+REM   * GameCode
 REM
 REM ******************************************************************************
 
