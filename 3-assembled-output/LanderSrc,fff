@@ -1242,7 +1242,7 @@ REM ****************************************************************************
 \ The altitude at landscape coordinate [x, z] is calculated as follows;
 \
 \   LAND_MID_HEIGHT - [   2*sin[x - 2z]  + 2*sin[4x + 3z]  + 2*sin[3z - 5x]
-\                       + 2*sin[3x + 3z] +   sin[5x + 11z] +   sin[10x + 7z]
+\                       + 2*sin[7x + 5z] +   sin[5x + 11z] +   sin[10x + 7z]
 \                     ] / 256
 \
 \ Note that the object map is flat, like a paper map, so the x- and z-axes on
@@ -1370,28 +1370,28 @@ REM ****************************************************************************
 
  ADD     R1, R9, R1, LSL #2         \ R1 = R9 + R1 << 2
                                     \    = z + [2x + z] << 2
-                                    \    = z + 4x + 2z
-                                    \    = 4x + 3z
+                                    \    = z + 8x + 4z
+                                    \    = 8x + 5z
 
  SUB     R1, R1, R8                 \ R1 = R1 - R8
-                                    \    = 4x + 3z - x
-                                    \    = 3x + 3z
+                                    \    = 8x + 5z - x
+                                    \    = 7x + 5z
 
                                     \ So the above gives us;
                                     \
                                     \   R0 = [sin[x - 2z] + sin[4x + 3z]
                                     \                     + sin[3z - 5x]] / 128
-                                    \   R1 = 3x + 3z
+                                    \   R1 = 7x + 5z
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set;
  BIC     R1, R1, #&00300000         \
  LDR     R1, [R2, R1, LSR #20]      \   R1 = sin[R1]
-                                    \      = sin[3x + 3z]
+                                    \      = sin[7x + 5z]
 
  ADD     R0, R0, R1, ASR #7         \ R0 = R0 + R1 >> 7
                                     \    = [sin[x - 2z] + sin[4x + 3z]
                                     \                   + sin[3z - 5x]
-                                    \                   + sin[3x + 3z]] / 128
+                                    \                   + sin[7x + 5z]] / 128
 
  ADD     R1, R3, R9, LSL #3         \ R1 = R3 + R9 << 3
                                     \    = 5x + 3z + 8z
@@ -1401,7 +1401,7 @@ REM ****************************************************************************
                                     \
                                     \   R0 = [sin[x - 2z] + sin[4x + 3z]
                                     \                     + sin[3z - 5x]
-                                    \                     + sin[3x + 3z]] / 128
+                                    \                     + sin[7x + 5z]] / 128
                                     \   R1 = 5x + 11z
 
  LDR     R2, sinTableAddr           \ Using the same approach as above, set;
@@ -1412,7 +1412,7 @@ REM ****************************************************************************
  ADD     R0, R0, R1, ASR #8         \ R0 = R0 + R1 >> 8
                                     \    = [sin[x - 2z] + sin[4x + 3z]
                                     \                   + sin[3z - 5x]
-                                    \                   + sin[3x + 3z]] / 128
+                                    \                   + sin[7x + 5z]] / 128
                                     \      + sin[5x + 11z] / 256
 
  ADD     R1, R9, R3, LSL #1         \ R1 = R9 + R3 << 1
@@ -1424,7 +1424,7 @@ REM ****************************************************************************
                                     \
                                     \   R0 = [sin[x - 2z] + sin[4x + 3z]
                                     \                     + sin[3z - 5x]
-                                    \                     + sin[3x + 3z]] / 128
+                                    \                     + sin[7x + 5z]] / 128
                                     \        + sin[5x + 11z] / 256
                                     \   R1 = 10x + 7z
 
@@ -1436,7 +1436,7 @@ REM ****************************************************************************
  ADD     R0, R0, R1, ASR #8         \ R0 = R0 + R1 >> 8
                                     \    = [sin[x - 2z] + sin[4x + 3z]
                                     \                   + sin[3z - 5x]
-                                    \                   + sin[3x + 3z]] / 128
+                                    \                   + sin[7x + 5z]] / 128
                                     \      +
                                     \      [sin[5x + 11z] + sin[10x + 7z]] / 256
 
@@ -1445,7 +1445,7 @@ REM ****************************************************************************
                                     \    = LAND_MID_HEIGHT -
                                     \      [2*sin[x - 2z] + 2*sin[4x + 3z]
                                     \                     + 2*sin[3z - 5x]
-                                    \                     + 2*sin[3x + 3z]
+                                    \                     + 2*sin[7x + 5z]
                                     \                     + sin[5x + 11z]
                                     \                     + sin[10x + 7z]] / 256
                                     \
