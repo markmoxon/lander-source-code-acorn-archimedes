@@ -11865,8 +11865,8 @@
  CMP     R10, #18                   \ If R10 < 18 then set the flags so the next
                                     \ set of instructions are run (so for lines
                                     \ of length 17 pixels and fewer, we jump to
-                                    \ the relevant routine in the lineJump to
-                                    \ draw the line
+                                    \ the relevant routine in the lineJump table
+                                    \ to draw the line
 
 ]
 

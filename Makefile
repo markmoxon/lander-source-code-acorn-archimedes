@@ -40,14 +40,27 @@ endif
 all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
+ifeq ($(OS), Windows_NT)
+	del /q /f 5-compiled-game-discs\arthur\Game\*
+	del /q /f 5-compiled-game-discs\riscos\!Lander\*
+	del /q /f 5-compiled-game-discs\zip\*
+else
 	rm -fr 5-compiled-game-discs/arthur/Game/*
 	rm -fr 5-compiled-game-discs/riscos/!BigLander/*
 	rm -fr 5-compiled-game-discs/zip/*
+endif
 
 	$(VASM) -a2 -m2 -quiet -Fbin -DTILES_X=${x} -DTILES_Z=${z} -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
+
+ifeq ($(OS), Windows_NT)
+	copy 3-assembled-output\GameCode.inf 5-compiled-game-discs\arthur\Game\GameCode.inf
+	copy "1-source-files\other-sources\arthur\Lander,ffb" "5-compiled-game-discs\arthur\Game\Lander,ffb"
+	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\arthur\Game\GameCode
+else
 	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Game/GameCode.inf
 	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/arthur/Game/BigLander,ffb
 	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/Game/GameCode
+endif
 
 	@$(PYTHON) 2-build-files/export-symbols.py
 
@@ -57,12 +70,34 @@ all:
 	echo "       TILES_Z = ${z}" >> 3-assembled-output/!Help,fff
 
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
+
+ifeq ($(OS), Windows_NT)
+	copy "1-source-files\other-sources\riscos\!Run,feb" "5-compiled-game-discs\riscos\!BigLander\!Run,feb"
+	copy "1-source-files\other-sources\riscos\!Sprites,ff9" "5-compiled-game-discs\riscos\!BigLander\!Sprites,ff9"
+	copy "1-source-files\other-sources\riscos\MemAlloc,ffa" "5-compiled-game-discs\riscos\!BigLander\MemAlloc,ffa"
+	copy 3-assembled-output\!RunImage.bin "5-compiled-game-discs\riscos\!BigLander\!RunImage,ff8"
+else
 	cp 3-assembled-output/!Run,feb 5-compiled-game-discs/riscos/!BigLander/!Run,feb
 	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/riscos/!BigLander/!Sprites,ff9
 	cp 3-assembled-output/!Help,fff 5-compiled-game-discs/riscos/!BigLander/!Help,fff
 	cp 3-assembled-output/!RunImage.bin 5-compiled-game-discs/riscos/!BigLander/!RunImage,ff8
+endif
 
 	@$(PYTHON) 2-build-files/convert-to-basic.py ${x} ${z}
+
+ifeq ($(OS), Windows_NT)
+	copy "3-assembled-output\LanderSrc,fff" "5-compiled-game-discs\BLanderSrc,fff"
+
+	xcopy /q /y /i 5-compiled-game-discs\riscos\!BigLander !BigLander
+	tar -ca --exclude ".*" -f !BigLander.zip !BigLander
+	move !BigLander.zip "5-compiled-game-discs\zip\"
+	rmdir /q /s !BigLander
+
+	xcopy /q /y /i 5-compiled-game-discs\arthur\Game Game
+	tar -ca --exclude ".*" -f Game.zip Game
+	move Game.zip "5-compiled-game-discs\zip\"
+	rmdir /q /s Game
+else
 	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/BLanderSrc,fff
 
 	cp -r 5-compiled-game-discs/riscos/!BigLander .
@@ -74,6 +109,7 @@ all:
 	zip -r Game.zip Game -x "*/.*"
 	mv Game.zip 5-compiled-game-discs/zip
 	rm -fr Game
+endif
 
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
 
