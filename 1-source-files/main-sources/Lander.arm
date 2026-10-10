@@ -31,7 +31,16 @@
 \
 \ ******************************************************************************
 
- CODE = &00008000                   \ The build address for the game code
+                                    \ --- Mod: Code removed for AES ----------->
+
+\CODE = &00008000                   \ The build address for the game code
+
+
+                                    \ --- And replaced by: -------------------->
+
+ CODE = &00001000                   \ The build address for the game code
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -196,11 +205,20 @@
 
  OS_Word = &07                      \ General-purpose operating system calls
 
- OS_Mouse = &1C                     \ The operating system call to read the
-                                    \ mouse status
+                                    \ --- Mod: Code removed for AES ----------->
 
- OS_BinaryToDecimal = &28           \ The operating system call to convert a
-                                    \ number into a string
+\OS_Mouse = &1C                     \ The operating system call to read the
+\                                   \ mouse status
+\
+\OS_BinaryToDecimal = &28           \ The operating system call to convert a
+\                                   \ number into a string
+
+                                    \ --- And replaced by: -------------------->
+
+ OS_Exit = &11                      \ The operating system call to exit back to
+                                    \ the supervisor
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -208,10 +226,21 @@
 \
 \ ******************************************************************************
 
- stack = &000121FC                  \ The stack is after the end of the main
+                                    \ --- Mod: Code removed for AES ----------->
+
+\stack = &000121FC                  \ The stack is after the end of the main
                                     \ game code and descends from this address
                                     \ down to &00012000 (to give a stack size of
                                     \ 512 32-bit entries)
+
+                                    \ --- And replaced by: -------------------->
+
+ stack = &0000B1FC                  \ The stack is after the end of the main
+                                    \ game code and descends from this address
+                                    \ down to &00012000 (to give a stack size of
+                                    \ 512 32-bit entries)
+
+                                    \ --- End of replacement ------------------>
 
  workspace = stack + 4              \ The variable workspace starts just after
                                     \ the top of the stack
@@ -541,6 +570,22 @@
 [                                   \ Switch from BASIC into assembly language
 
  OPT     pass%                      \ Set the assembly option for this pass
+
+
+                                    \ --- Mod: Code added for AES ------------->
+
+\ ******************************************************************************
+\
+\       Name: BinaryEntry
+\       Type: Subroutine
+\   Category: ARM Evaluation System
+\    Summary: Jump to the entry point so the execution address is always &1000
+\
+\ ******************************************************************************
+
+ B       Entry                      \ Jump to Entry to start the game
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
@@ -1740,13 +1785,17 @@
                                     \ the player's ship, based on its new
                                     \ orientation
 
- SWI     OS_Mouse                   \ Read the mouse coordinates, returning:
-                                    \
-                                    \   R0 = x-coordinate
-                                    \
-                                    \   R1 = y-coordinate
-                                    \
-                                    \   R2 = mouse buttons (%lmr)
+                                    \ --- Mod: Code removed for AES ----------->
+
+\SWI     OS_Mouse                   \ Read the mouse coordinates, returning:
+\                                   \
+\                                   \   R0 = x-coordinate
+\                                   \
+\                                   \   R1 = y-coordinate
+\                                   \
+\                                   \   R2 = mouse buttons (%lmr)
+
+                                    \ --- End of removed code ----------------->
 
  STRB    R2, [R11, #fuelBurnRate]   \ Set the fuel burn rate to the mouse button
                                     \ result, so it's set to:
@@ -5679,9 +5728,13 @@
  MOVHS   R4, #&70000                \ gravity increases again when we reach a
  STRHS   R4, [R11, #gravity]        \ score of 1488
 
- SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
-                                    \ string and store it in the buffer at R1
-                                    \ with a maximum string size of R2
+                                    \ --- Mod: Code removed for AES ----------->
+
+\SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
+\                                   \ string and store it in the buffer at R1
+\                                   \ with a maximum string size of R2
+
+                                    \ --- End of removed code ----------------->
 
  MOV     R0, #30                    \ Print a VDU 30 command to move the text
  SWI     OS_WriteC                  \ cursor to the top-left corner of the
@@ -5743,9 +5796,13 @@
  MOV     R2, #19                    \ Set R2 = 19, to use as the size of the
                                     \ string buffer in the following call
 
- SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
-                                    \ string and store it in the buffer at R1
-                                    \ with a maximum string size of R2
+                                    \ --- Mod: Code removed for AES ----------->
+
+\SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
+\                                   \ string and store it in the buffer at R1
+\                                   \ with a maximum string size of R2
+
+                                    \ --- End of removed code ----------------->
 
  MOV     R0, #31                    \ Start printing the following VDU command:
  SWI     OS_WriteC                  \
@@ -7989,8 +8046,15 @@
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3]                   \ Draw a 1x1-pixel particle in the colour
+                                    \ --- Mod: Code removed for AES ----------->
+
+\STRB    R7, [R3]                   \ Draw a 1x1-pixel particle in the colour
                                     \ specified in R7
+
+                                    \ --- And replaced by: -------------------->
+
+
+                                    \ --- End of replacement ------------------>
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
                                     \ buffer
@@ -8069,8 +8133,15 @@
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3]                   \ Draw a 2x1-pixel particle in the colour
- STRB    R7, [R3, #1]               \ specified in R7
+                                    \ --- Mod: Code removed for AES ----------->
+
+\STRB    R7, [R3]                   \ Draw a 2x1-pixel particle in the colour
+\STRB    R7, [R3, #1]               \ specified in R7
+
+                                    \ --- And replaced by: -------------------->
+
+
+                                    \ --- End of replacement ------------------>
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
                                     \ buffer
@@ -8149,10 +8220,17 @@
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3]                   \ Draw a 2x2-pixel particle in the colour
- STRB    R7, [R3, #1]               \ specified in R7
- STRB    R7, [R3, #320]
- STRB    R7, [R3, #320+1]
+                                    \ --- Mod: Code removed for AES ----------->
+
+\STRB    R7, [R3]                   \ Draw a 2x2-pixel particle in the colour
+\STRB    R7, [R3, #1]               \ specified in R7
+\STRB    R7, [R3, #320]
+\STRB    R7, [R3, #320+1]
+
+                                    \ --- And replaced by: -------------------->
+
+
+                                    \ --- End of replacement ------------------>
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
                                     \ buffer
@@ -8231,12 +8309,19 @@
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3, #-1]              \ Draw a 3x2-pixel particle in the colour
- STRB    R7, [R3]                   \ specified in R7
- STRB    R7, [R3, #1]
- STRB    R7, [R3, #320-1]
- STRB    R7, [R3, #320]
- STRB    R7, [R3, #320+1]
+                                    \ --- Mod: Code removed for AES ----------->
+
+\STRB    R7, [R3, #-1]              \ Draw a 3x2-pixel particle in the colour
+\STRB    R7, [R3]                   \ specified in R7
+\STRB    R7, [R3, #1]
+\STRB    R7, [R3, #320-1]
+\STRB    R7, [R3, #320]
+\STRB    R7, [R3, #320+1]
+
+                                    \ --- And replaced by: -------------------->
+
+
+                                    \ --- End of replacement ------------------>
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
                                     \ buffer
@@ -8315,9 +8400,16 @@
                                     \ So R3 contains the screen address of the
                                     \ coordinate in screen memory
 
- STRB    R7, [R3, #-1]              \ Draw a 3x1-pixel particle in the colour
- STRB    R7, [R3]                   \ specified in R7
- STRB    R7, [R3, #1]
+                                    \ --- Mod: Code removed for AES ----------->
+
+\STRB    R7, [R3, #-1]              \ Draw a 3x1-pixel particle in the colour
+\STRB    R7, [R3]                   \ specified in R7
+\STRB    R7, [R3, #1]
+
+                                    \ --- And replaced by: -------------------->
+
+
+                                    \ --- End of replacement ------------------>
 
  B       DrawNextFromGraphicsBuffer \ Draw the next command from the graphics
                                     \ buffer
@@ -11729,130 +11821,181 @@
 
 .DrawHorizontalLine
 
- CMP     R10, #18                   \ If R10 < 18 then set the flags so the next
-                                    \ set of instructions are run (so for lines
-                                    \ of length 17 pixels and fewer, we jump to
-                                    \ the relevant routine in the lineJump table
-                                    \ to draw the line
+                                    \ --- Mod: Code removed for AES ----------->
 
-]
+\CMP     R10, #18                   \ If R10 < 18 then set the flags so the next
+\                                   \ set of instructions are run (so for lines
+\                                   \ of length 17 pixels and fewer, we jump to
+\                                   \ the relevant routine in the lineJump table
+\                                   \ to draw the line
+\
+\]
+\
+\varOffset = P% + 8 - lineJump      \ Set labOffset to the offset back to the
+\                                   \ lineJump table from the next instruction
+\
+\[
+\
+\OPT    pass%
+\
+\ADDLO   R0, PC, R10, LSL #2        \ If R10 < 18, jump to the address in entry
+\LDRLO   PC, [R0, #-varOffset]      \ R10 in the lineJump table, which will draw
+\                                   \ a horizontal line R10 pixels long and
+\                                   \ return from the subroutine using a tail
+\                                   \ call
+\
+\                                   \ If we get here then we need to draw a line
+\                                   \ of 18 pixels or more
+\
+\ADD     R10, R11, R10              \ Set R10 to the screen address of the right
+\                                   \ end of the line (i.e. the address of the
+\                                   \ left end in R11 plus the width in R10)
+\
+\BIC     R0, R10, #%00000011        \ Set R0 to the screen address with bits 0
+\                                   \ and 1 cleared, so R0 points to the word in
+\                                   \ screen memory that contains the right end
+\                                   \ of the line (the "right cap")
+\
+\                                   \ So by this point R11 points to the word in
+\                                   \ screen memory that contains the left cap
+\                                   \ of the line (which is the word containing
+\                                   \ the left end of the line), and R0 points
+\                                   \ to the right cap
+\                                   \
+\                                   \ The caps can contain 1, 2, 3 or 4 pixels,
+\                                   \ as each 32-bit word contains four one-byte
+\                                   \ pixels
+\                                   \
+\                                   \ If a cap contains four pixels, then bits 0
+\                                   \ and 1 of the cap address will be zero, so
+\                                   \ in the following we draw the line as
+\                                   \ follows:
+\                                   \
+\                                   \   * If the left cap contains 1, 2 or 3
+\                                   \     pixels, draw those pixels
+\                                   \
+\                                   \   * Draw the portion of the line between
+\                                   \     the left and right caps, drawing it
+\                                   \     one word (four pixels) at a time
+\                                   \
+\                                   \   * If the right cap contains 1, 2 or 3
+\                                   \     pixels, draw those pixels
+\                                   \
+\                                   \ We start with the left cap at screen
+\                                   \ address R11
+\
+\TST     R11, #%00000011            \ If R11 is not a multiple of 4 then one or
+\STRNEB  R8, [R11], #1              \ both of bits 0 and 1 will be non-zero, so
+\                                   \ set the pixel at R11 to the colour in R8
+\                                   \ and increment R11
+\                                   \
+\                                   \ So this draws the pixel at the end of the
+\                                   \ line, and it increments R11 so R11 now
+\                                   \ points to the next pixel along
+\
+\TSTNE   R11, #%00000011            \ If R11 is still not a multiple of 4 then
+\STRNEB  R8, [R11], #1              \ bits 0 and 1 will still be non-zero, so
+\                                   \ set the pixel at R11 to the colour in R8
+\                                   \ and increment R11
+\                                   \
+\                                   \ So this draws the second pixel in the line
+\                                   \ if drawing the first one didn't take us to
+\                                   \ a word boundary, and it increments R11 so
+\                                   \ R11 now points to the next pixel along
+\
+\TSTNE   R11, #%00000011            \ If R11 is still not a multiple of 4 then
+\STRNEB  R8, [R11], #1              \ bits 0 and 1 will still be non-zero, so
+\                                   \ set the pixel at R11 to the colour in R8
+\                                   \ and increment R11
+\                                   \
+\                                   \ So this draws the third pixel in the line
+\                                   \ if drawing the first two didn't take us to
+\                                   \ a word boundary, and it increments R11 so
+\                                   \ R11 now points to the next pixel along
+\
+\                                   \ By this point R11 will definitely be on a
+\                                   \ word boundary and we have successfully
+\                                   \ drawn the left cap of the line, so now we
+\                                   \ draw the centre portion of the line, all
+\                                   \ the way to the right cap
+\                                   \
+\                                   \ We do this in a loop that is unrolled once
+\                                   \ to speed things up a little but
+\
+\.hlin1
+\
+\STR     R8, [R11], #4              \ Draw a full word (four pixels) in the
+\                                   \ colour in R8 at screen address R11 and
+\                                   \ increment R11 by 4 to move on to the next
+\                                   \ word
+\
+\CMP     R11, R0                    \ If R11 < R0 then we have not yet reached
+\STRLO   R8, [R11], #4              \ the right cap, so draw another word in
+\                                   \ memory and increment R11 again
+\
+\CMPLO   R11, R0                    \ If R11 < R0 then we have still not reached
+\BLO     hlin1                      \ the right cap, so loop back to hlin1 to
+\                                   \ keep drawing the centre portion of the
+\                                   \ line until we do reach the right cap
+\
+\CMP     R11, R10                   \ If R11 < R10 then we have not yet reached
+\STRLOB  R8, [R11], #1              \ the end of the line, so we draw up to
+\CMPLO   R11, R10                   \ three pixels in the final word of the line
+\STRLOB  R8, [R11], #1              \ by simply drawing each pixel, incrementing
+\CMPLO   R11, R10                   \ R11 and then re-checking whether R11 has
+\STRLOB  R8, [R11], #1              \ reached R10 (and drawing the next pixel if
+\                                   \ it hasn't)
 
- varOffset = P% + 8 - lineJump      \ Set labOffset to the offset back to the
-                                    \ lineJump table from the next instruction
+                                    \ --- And replaced by: -------------------->
 
-[
+ LDR     R0, screenAddr             \ Set R3 = R11 - screenAddr, so it contains
+ SUB     R3, R11, R0                \ the offset of the line in screen memory
 
- OPT    pass%
+ MOV     R2, #0                     \ Set R2 = 0 to use as a counter for the
+                                    \ multiples of 320 in R1
 
- ADDLO   R0, PC, R10, LSL #2        \ If R10 < 18, jump to the address in entry
- LDRLO   PC, [R0, #-varOffset]      \ R10 in the lineJump table, which will draw
-                                    \ a horizontal line R10 pixels long and
-                                    \ return from the subroutine using a tail
-                                    \ call
+.divl1
 
-                                    \ If we get here then we need to draw a line
-                                    \ of 18 pixels or more
-
- ADD     R10, R11, R10              \ Set R10 to the screen address of the right
-                                    \ end of the line (i.e. the address of the
-                                    \ left end in R11 plus the width in R10)
-
- BIC     R0, R10, #%00000011        \ Set R0 to the screen address with bits 0
-                                    \ and 1 cleared, so R0 points to the word in
-                                    \ screen memory that contains the right end
-                                    \ of the line (the "right cap")
-
-                                    \ So by this point R11 points to the word in
-                                    \ screen memory that contains the left cap
-                                    \ of the line (which is the word containing
-                                    \ the left end of the line), and R0 points
-                                    \ to the right cap
+ CMP     R3, #320                   \ Decompose R3 into (320 * R2) + 3, so we 
+ SUBCS   R3, R3, #320               \ get:
+ ADDCS   R2, R2, #1                 \
+ BCS     divl1                      \   * R3 is the pixel x-coordinate
                                     \
-                                    \ The caps can contain 1, 2, 3 or 4 pixels,
-                                    \ as each 32-bit word contains four one-byte
-                                    \ pixels
-                                    \
-                                    \ If a cap contains four pixels, then bits 0
-                                    \ and 1 of the cap address will be zero, so
-                                    \ in the following we draw the line as
-                                    \ follows:
-                                    \
-                                    \   * If the left cap contains 1, 2 or 3
-                                    \     pixels, draw those pixels
-                                    \
-                                    \   * Draw the portion of the line between
-                                    \     the left and right caps, drawing it
-                                    \     one word (four pixels) at a time
-                                    \
-                                    \   * If the right cap contains 1, 2 or 3
-                                    \     pixels, draw those pixels
-                                    \
-                                    \ We start with the left cap at screen
-                                    \ address R11
+                                    \   * R2 is the pixel y-coordinate
 
- TST     R11, #%00000011            \ If R11 is not a multiple of 4 then one or
- STRNEB  R8, [R11], #1              \ both of bits 0 and 1 will be non-zero, so
-                                    \ set the pixel at R11 to the colour in R8
-                                    \ and increment R11
-                                    \
-                                    \ So this draws the pixel at the end of the
-                                    \ line, and it increments R11 so R11 now
-                                    \ points to the next pixel along
+.divl2
 
- TSTNE   R11, #%00000011            \ If R11 is still not a multiple of 4 then
- STRNEB  R8, [R11], #1              \ bits 0 and 1 will still be non-zero, so
-                                    \ set the pixel at R11 to the colour in R8
-                                    \ and increment R11
-                                    \
-                                    \ So this draws the second pixel in the line
-                                    \ if drawing the first one didn't take us to
-                                    \ a word boundary, and it increments R11 so
-                                    \ R11 now points to the next pixel along
+ STR     R3, oswordPixel+3          \ Store the pixel coordinate in the OS_Word
+ STR     R2, oswordPixel+4          \ block
 
- TSTNE   R11, #%00000011            \ If R11 is still not a multiple of 4 then
- STRNEB  R8, [R11], #1              \ bits 0 and 1 will still be non-zero, so
-                                    \ set the pixel at R11 to the colour in R8
-                                    \ and increment R11
-                                    \
-                                    \ So this draws the third pixel in the line
-                                    \ if drawing the first two didn't take us to
-                                    \ a word boundary, and it increments R11 so
-                                    \ R11 now points to the next pixel along
+ ADR     R1, oswordPixel            \ Draw the dot at the start of the line
+ MOV     R0, #241
+ SWI     OS_Word
 
-                                    \ By this point R11 will definitely be on a
-                                    \ word boundary and we have successfully
-                                    \ drawn the left cap of the line, so now we
-                                    \ draw the centre portion of the line, all
-                                    \ the way to the right cap
-                                    \
-                                    \ We do this in a loop that is unrolled once
-                                    \ to speed things up a little but
+ ADD     R3, R3, R10                \ Set the x-coordinate in the OS_Word block
+ STR     R3, oswordPixel+3          \ to the x-coordinate of the end of the line
 
-.hlin1
+ ADR     R1, oswordPixel            \ Draw the dot at the end of the line
+ MOV     R0, #241
+ SWI     OS_Word
 
- STR     R8, [R11], #4              \ Draw a full word (four pixels) in the
-                                    \ colour in R8 at screen address R11 and
-                                    \ increment R11 by 4 to move on to the next
-                                    \ word
-
- CMP     R11, R0                    \ If R11 < R0 then we have not yet reached
- STRLO   R8, [R11], #4              \ the right cap, so draw another word in
-                                    \ memory and increment R11 again
-
- CMPLO   R11, R0                    \ If R11 < R0 then we have still not reached
- BLO     hlin1                      \ the right cap, so loop back to hlin1 to
-                                    \ keep drawing the centre portion of the
-                                    \ line until we do reach the right cap
-
- CMP     R11, R10                   \ If R11 < R10 then we have not yet reached
- STRLOB  R8, [R11], #1              \ the end of the line, so we draw up to
- CMPLO   R11, R10                   \ three pixels in the final word of the line
- STRLOB  R8, [R11], #1              \ by simply drawing each pixel, incrementing
- CMPLO   R11, R10                   \ R11 and then re-checking whether R11 has
- STRLOB  R8, [R11], #1              \ reached R10 (and drawing the next pixel if
-                                    \ it hasn't)
+                                    \ --- End of replacement ------------------>
 
  MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.oswordPixel
+
+ EQUB 5                             \ The number of bytes to transmit with this command
+ EQUB 0                             \ The number of bytes to receive with this command
+ EQUB 0x30                          \ Distance
+ EQUB 50                            \ x
+ EQUB 50                            \ y
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
@@ -12094,11 +12237,22 @@
 
 .Entry
 
- MOV     R0, #22                    \ Change to screen mode 15, which uses 160K
- SWI     OS_WriteC                  \ of screen memory, the same amount that we
- MOV     R0, #15                    \ need for the game (though in the game we
- SWI     OS_WriteC                  \ actually use two mode 13 screens, each of
-                                    \ which is 80K)
+                                    \ --- Mod: Code removed for AES ----------->
+
+\MOV     R0, #22                    \ Change to screen mode 15, which uses 160K
+\SWI     OS_WriteC                  \ of screen memory, the same amount that we
+\MOV     R0, #15                    \ need for the game (though in the game we
+\SWI     OS_WriteC                  \ actually use two mode 13 screens, each of
+\                                   \ which is 80K)
+
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R0, #22                    \ Change to screen mode 1
+ SWI     OS_WriteC
+ MOV     R0, #1
+ SWI     OS_WriteC
+
+                                    \ --- End of replacement ------------------>
 
  STR     R13, stackPointerOnEntry   \ Store the stack pointer from when the game
                                     \ started in stackPointerOnEntry, so we can
@@ -12117,29 +12271,33 @@
                                     \ to when quitting the game, so store it on
                                     \ the stack so we can retrieve it later
 
- LDR     R0, memoryTestAddr         \ Set R0 to the address in memoryTestAddr,
-                                    \ which points to a byte that will be
-                                    \ writable if there is enough free memory
-                                    \ for running the game
+                                    \ --- Mod: Code removed for AES ----------->
 
- LDRB    R1, [R0]                   \ Set R1 to the current contents of memory
-                                    \ at R0, so we can restore it after running
-                                    \ our memory tests
+\LDR     R0, memoryTestAddr         \ Set R0 to the address in memoryTestAddr,
+\                                   \ which points to a byte that will be
+\                                   \ writable if there is enough free memory
+\                                   \ for running the game
+\
+\LDRB    R1, [R0]                   \ Set R1 to the current contents of memory
+\                                   \ at R0, so we can restore it after running
+\                                   \ our memory tests
+\
+\MOV     R2, #&AA                   \ Store the value &AA in our test memory
+\STRB    R2, [R0]                   \ location in R0, read it back, and if the
+\LDRB    R3, [R0]                   \ returned value is different to &AA, jump
+\CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
+\BNE     AbortWithMemoryError       \ as there isn't enough free memory
+\
+\MOV     R2, #&55                   \ Store the value &55 in our test memory
+\STRB    R2, [R0]                   \ location in R0, read it back, and if the
+\LDRB    R3, [R0]                   \ returned value is different to &55, jump
+\CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
+\BNE     AbortWithMemoryError       \ as there isn't enough free memory
+\
+\STRB    R1, [R0]                   \ Restore the original contents of address
+\                                   \ R0 so it's unchanged by our memory tests
 
- MOV     R2, #&AA                   \ Store the value &AA in our test memory
- STRB    R2, [R0]                   \ location in R0, read it back, and if the
- LDRB    R3, [R0]                   \ returned value is different to &AA, jump
- CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
- BNE     AbortWithMemoryError       \ as there isn't enough free memory
-
- MOV     R2, #&55                   \ Store the value &55 in our test memory
- STRB    R2, [R0]                   \ location in R0, read it back, and if the
- LDRB    R3, [R0]                   \ returned value is different to &55, jump
- CMP     R2, R3                     \ to AbortWithMemoryError to abort the game,
- BNE     AbortWithMemoryError       \ as there isn't enough free memory
-
- STRB    R1, [R0]                   \ Restore the original contents of address
-                                    \ R0 so it's unchanged by our memory tests
+                                    \ --- End of removed code ----------------->
 
  MOV     R0, #4                     \ Call OS_Byte 4 to set the cursor keys to
  MOV     R1, #1                     \ return ASCII values, so they don't move
@@ -12149,10 +12307,14 @@
  BL      InitialiseParticleData     \ Initialise the particle data buffer and
                                     \ associated variables
 
- MOV     R0, #22                    \ Change to screen mode 13 (320×256 pixels
- SWI     OS_WriteC                  \ with 256 colours), which will display
- MOV     R0, #13                    \ screen bank 1
- SWI     OS_WriteC
+                                    \ --- Mod: Code removed for AES ----------->
+
+\MOV     R0, #22                    \ Change to screen mode 13 (320×256 pixels
+\SWI     OS_WriteC                  \ with 256 colours), which will display
+\MOV     R0, #13                    \ screen bank 1
+\SWI     OS_WriteC
+
+                                    \ --- End of removed code ----------------->
 
  SWI     OS_WriteS                  \ Write the game's title into the top line
  EQUS    "Lander Demo/Practice "    \ of the screen, where it remains for the
@@ -12160,13 +12322,17 @@
  EQUB    0
  ALIGN
 
- BL      SwitchScreenBank           \ Switch screen bank, so VDU commands go to
-                                    \ screen bank 2
+                                    \ --- Mod: Code removed for AES ----------->
 
- MOV     R0, #22                    \ Change to screen mode 13 with shadow
- SWI     OS_WriteC                  \ memory enabled (i.e. mode 128 + 13), which
- MOV     R0, #128+13                \ creates two mode 13 screen banks
- SWI     OS_WriteC                  \ 
+\BL      SwitchScreenBank           \ Switch screen bank, so VDU commands go to
+\                                   \ screen bank 2
+\
+\MOV     R0, #22                    \ Change to screen mode 13 with shadow
+\SWI     OS_WriteC                  \ memory enabled (i.e. mode 128 + 13), which
+\MOV     R0, #128+13                \ creates two mode 13 screen banks
+\SWI     OS_WriteC
+
+                                    \ --- End of removed code ----------------->
 
  MOV     R0, #23                    \ Start printing the following VDU command:
  SWI     OS_WriteC                  \ 
@@ -12188,11 +12354,15 @@
  BNE     entr1                      \ Loop back until we have printed all eight
                                     \ zeroes
 
- SWI     OS_WriteS                  \ Write the game's title into the top line
- EQUS    "Lander Demo/Practice "    \ of screen bank 2, so the same title
- EQUS    "(C) D.J.Braben 1987"      \ appears at the top of both screen banks
- EQUB    0
- ALIGN
+                                    \ --- Mod: Code removed for AES ----------->
+
+\SWI     OS_WriteS                  \ Write the game's title into the top line
+\EQUS    "Lander Demo/Practice "    \ of screen bank 2, so the same title
+\EQUS    "(C) D.J.Braben 1987"      \ appears at the top of both screen banks
+\EQUB    0
+\ALIGN
+
+                                    \ --- End of removed code ----------------->
 
  LDR     R0, initialScore           \ Initialise currentScore to the score that
  STR     R0, [R11, #currentScore]   \ we start each game with, which is set in
@@ -12237,8 +12407,12 @@
  MOV     R2, #1                     \ call to PrintScoreInBothBanks prints the
                                     \ high score at column 35 on row 1
 
- BL      PrintScoreInBothBanks      \ Print the high score in R0 at column 35 on
-                                    \ row 1, at the right end of the score bar
+                                    \ --- Mod: Code removed for AES ----------->
+
+\BL      PrintScoreInBothBanks      \ Print the high score in R0 at column 35 on
+\                                   \ row 1, at the right end of the score bar
+
+                                    \ --- End of removed code ----------------->
 
  LDR     R0, initialScore           \ Initialise currentScore to the score that
  STR     R0, [R11, #currentScore]   \ we start each game with, which is set in
@@ -12429,9 +12603,13 @@
  MOV     R2, #1                     \ call to PrintScoreInBothBanks prints the
                                     \ number of lives at column 30 on row 1
 
- BL      PrintScoreInBothBanks      \ Print the number of lives in R0 at column
-                                    \ 30 on row 1, just before the high score
-                                    \ towards the right end of the score bar
+                                    \ --- Mod: Code removed for AES ----------->
+
+\BL      PrintScoreInBothBanks      \ Print the number of lives in R0 at column
+\                                   \ 30 on row 1, just before the high score
+\                                   \ towards the right end of the score bar
+
+                                    \ --- End of removed code ----------------->
 
  MVN     R0, #0                     \ Set playingGame = -1 to flag that the game
  STR     R0, [R11, #playingGame]    \ is being played and that this is not the
@@ -12469,8 +12647,12 @@
                                     \  yVelocity = 0
                                     \  zVelocity = 0
 
- BL      ResetMousePosition         \ Reset the mouse position to (511, 511),
-                                    \ ready for the game
+                                    \ --- Mod: Code removed for AES ----------->
+
+\BL      ResetMousePosition         \ Reset the mouse position to (511, 511),
+\                                   \ ready for the game
+
+                                    \ --- End of removed code ----------------->
 
 \ ******************************************************************************
 \
@@ -12600,10 +12782,18 @@
                                     \ stored in stackPointerOnEntry in the Entry
                                     \ routine
 
- MOV     PC, R14                    \ Exit from the game by jumping to the
-                                    \ address in R14, which will return us to
-                                    \ the Desktop (or wherever the game was run
-                                    \ from)
+                                    \ --- Mod: Code removed for AES ----------->
+
+\MOV     PC, R14                    \ Exit from the game by jumping to the
+\                                   \ address in R14, which will return us to
+\                                   \ the Desktop (or wherever the game was run
+\                                   \ from)
+
+                                    \ --- And replaced by: -------------------->
+
+ SWI     OS_Exit                    \ Return to the supervisor
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
