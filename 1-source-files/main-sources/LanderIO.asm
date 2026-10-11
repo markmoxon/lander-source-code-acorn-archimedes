@@ -157,10 +157,10 @@
 
 .STARTUP
 
- LDA #22                \ Mode 1
- JSR OSWRCH
- LDA #1
- JSR OSWRCH
+\LDA #22                \ Mode 1
+\JSR OSWRCH
+\LDA #1
+\JSR OSWRCH
 
  LDA WORDV              \ Store the current WORDV vector in notours(2 1)
  STA notours+1
