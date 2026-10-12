@@ -11440,8 +11440,8 @@ ZP workspace (I/O processor) from &80 to &97 inclusive
      25B3   7E
      25B4   7E
 .TWOS2
-     25B5   CC
-     25B6   66
-     25B7   33
-     25B8   33
+     25B5   88
+     25B6   44
+     25B7   22
+     25B8   11
 Saving file '3-assembled-output/I.LANDER.bin'
