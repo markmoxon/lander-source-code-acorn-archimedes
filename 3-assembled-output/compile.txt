@@ -1408,7 +1408,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000091E8 0EF0A0E1        	  1325:  MOV     PC, R14
                             	  1326: fuelBarColour:
 00:000091EC 37373737        	  1327: .long    0x37373737
-                            	  1328: sinTableAddr: 
+                            	  1328: sinTableAddr:
 00:000091F0 10B80000        	  1329: .long    sinTable
                             	  1330: arctanTableAddr:
 00:000091F4 10C80000        	  1331: .long    arctanTable

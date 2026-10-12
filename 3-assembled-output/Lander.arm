@@ -1325,7 +1325,7 @@ prsb2:
  MOV     PC, R14
 fuelBarColour:
 .long    0x37373737
-sinTableAddr: 
+sinTableAddr:
 .long    sinTable
 arctanTableAddr:
 .long    arctanTable
