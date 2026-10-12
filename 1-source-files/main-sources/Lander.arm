@@ -237,7 +237,7 @@
 
  stack = &0000B1FC                  \ The stack is after the end of the main
                                     \ game code and descends from this address
-                                    \ down to &00012000 (to give a stack size of
+                                    \ down to &0000B000 (to give a stack size of
                                     \ 512 32-bit entries)
 
                                     \ --- End of replacement ------------------>
@@ -571,9 +571,6 @@
 
  OPT     pass%                      \ Set the assembly option for this pass
 
-
-                                    \ --- Mod: Code added for AES ------------->
-
 \ ******************************************************************************
 \
 \       Name: BinaryEntry
@@ -582,6 +579,8 @@
 \    Summary: Jump to the entry point so the execution address is always &1000
 \
 \ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
 
  B       Entry                      \ Jump to Entry to start the game
 
@@ -1795,7 +1794,14 @@
 \                                   \
 \                                   \   R2 = mouse buttons (%lmr)
 
-                                    \ --- End of removed code ----------------->
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R0, #0                     \ No movement
+ MOV     R1, #0
+
+ MOV     R2, #%100                  \ Thrust
+
+                                    \ --- End of replacement ------------------>
 
  STRB    R2, [R11, #fuelBurnRate]   \ Set the fuel burn rate to the mouse button
                                     \ result, so it's set to:
@@ -11956,24 +11962,28 @@
 
 .divl1
 
- CMP     R3, #320                   \ Decompose R3 into (320 * R2) + 3, so we 
+ CMP     R3, #320                   \ Decompose R3 into (320 * R2) + R3, so we 
  SUBCS   R3, R3, #320               \ get:
  ADDCS   R2, R2, #1                 \
- BCS     divl1                      \   * R3 is the pixel x-coordinate
+ BCS     divl1                      \   * R2 is the pixel y-coordinate
                                     \
-                                    \   * R2 is the pixel y-coordinate
+                                    \   * R3 is the pixel x-coordinate
 
-.divl2
+ RSB     R2, R2, #255               \ Set R2 = 255 - R2 to convert into MOS
+                                    \ y-coordinates
 
- STR     R3, oswordPixel+3          \ Store the pixel coordinate in the OS_Word
- STR     R2, oswordPixel+4          \ block
+ STR     R3, oswordPixel+2          \ Store the pixel coordinates in the OS_Word
+ STRB    R2, oswordPixel+4          \ block
 
  ADR     R1, oswordPixel            \ Draw the dot at the start of the line
  MOV     R0, #241
  SWI     OS_Word
 
- ADD     R3, R3, R10                \ Set the x-coordinate in the OS_Word block
- STR     R3, oswordPixel+3          \ to the x-coordinate of the end of the line
+ ADD     R3, R3, R10                \ Set the x-coordinate in R3 to the end of
+                                    \ the line
+
+ STR     R3, oswordPixel+2          \ Store the pixel coordinates in the OS_Word
+ STRB    R2, oswordPixel+4          \ block
 
  ADR     R1, oswordPixel            \ Draw the dot at the end of the line
  MOV     R0, #241
@@ -11987,11 +11997,13 @@
 
 .oswordPixel
 
- EQUB 5                             \ The number of bytes to transmit with this command
- EQUB 0                             \ The number of bytes to receive with this command
- EQUB 0x30                          \ Distance
- EQUB 50                            \ x
- EQUB 50                            \ y
+ EQUB 5                             \ The number of bytes to transmit
+
+ EQUB 0                             \ The number of bytes to receive
+
+ EQUW 50                            \ x (two bytes, 0 - 319)
+
+ EQUB 50                            \ y (one byte, 0 - 255)
 
  ALIGN
 

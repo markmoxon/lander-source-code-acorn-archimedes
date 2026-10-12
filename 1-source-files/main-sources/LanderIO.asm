@@ -369,93 +369,46 @@
 
 .PXLO
 
- LDA (OSSC),Y           \ Set P to byte #2 from the Y-th pixel block in OSSC,
- STA P                  \ which contains the point's distance value (ZZ)
+ LDA #25                \ VDU 25, 69, lo/hi x, lo/hi Y
+ JSR OSWRCH             \ Draw pixel at (x, y) in range 1280x1024
+ LDA #69                \ So multiply 320x256 by 4 in each axis
+ JSR OSWRCH
 
-                        \ If we get here then the pixel's distance value (ZZ) is
-                        \ a multiple of 8, as set by the parasite's PIXEL
-                        \ routine
+ LDA (OSSC),Y           \ Set SC(1 0) to bytes #2/3 from the Y-th pixel block
+ STA SC                 \ in OSSC, which contain the point's x-coordinate
+ INY
+ LDA (OSSC),Y
+ STA SC+1
 
- INY                    \ Increment Y to 3
+ ASL SC                 \ SC(1 0) = x * 4
+ ROL SC+1
+ ASL SC
+ ROL SC+1
 
- LDA (OSSC),Y           \ Set X to byte #3 from the Y-th pixel block in OSSC,
- TAX                    \ which contains the pixel's x-coordinate
+ LDA SC                 \ VDU x;
+ JSR OSWRCH
+ LDA SC+1
+ JSR OSWRCH
 
  INY                    \ Increment Y to 4
 
- LDA (OSSC),Y           \ Set Y to byte #4 from the Y-th pixel block in OSSC,
- STY T1                 \ which contains the pixel's y-coordinate, and store Y,
- TAY                    \ the index of this pixel's y-coordinate, in T1, so we
-                        \ can restore it at the end of the subroutine
+ LDA (OSSC),Y           \ Set SC(1 0) to byte #4 from the Y-th pixel block in
+ STA SC                 \ OSSC, which contains the pixel's y-coordinate
+ LDA #0
+ STA SC+1
 
- LDA ylookup,Y          \ Look up the page number of the character row that
- STA SC+1               \ contains the pixel with the y-coordinate in Y, and
-                        \ store it in the high byte of SC(1 0) at SC+1
+ STY T1                 \ Store Y in T1, so we can keep looping through the
+                        \ coordinates
 
- TXA                    \ Each character block contains 8 pixel rows, so to get
- AND #%11111100         \ the address of the first byte in the character block
- ASL A                  \ that we need to draw into, as an offset from the start
-                        \ of the row, we clear bits 0-1 and shift left to double
-                        \ it (as each character row contains two pages of bytes,
-                        \ or 512 bytes, which cover 256 pixels). This also
-                        \ shifts bit 7 of the x-coordinate into the C flag
+ ASL SC                 \ SC(1 0) = y * 4
+ ROL SC+1
+ ASL SC
+ ROL SC+1
 
- STA SC                 \ Store the address of the character block in the low
-                        \ byte of SC(1 0), so now SC(1 0) points to the
-                        \ character block we need to draw into
-
- BCC P%+4               \ If the C flag is clear then skip the next instruction
-
- INC SC+1               \ The C flag is set, which means bit 7 of X1 was set
-                        \ before the ASL above, so the x-coordinate is in the
-                        \ right half of the screen (i.e. in the range 128-255).
-                        \ Each row takes up two pages in memory, so the right
-                        \ half is in the second page but SC+1 contains the value
-                        \ we looked up from ylookup, which is the page number of
-                        \ the first memory page for the row... so we need to
-                        \ increment SC+1 to point to the correct page
-
- TYA                    \ Set Y = Y mod 8, which is the pixel row within the
- AND #7                 \ character block at which we want to draw the start of
- TAY                    \ our line (as each character block has 8 rows)
-
- TXA                    \ Copy bits 0-1 of the x-coordinate to bits 0-1 of X,
- AND #%00000011         \ which will now be in the range 0-3, and will contain
- TAX                    \ the two pixels to show in the character row
-
- LDA P                  \ Fetch the pixel's distance from P
-
- CMP #80                \ If the pixel's ZZ distance is >= 80, then the dot is
- BCS PX6                \ a medium distance away, so jump to PX6 to draw a
-                        \ single pixel
-
- LDA TWOS2,X            \ Fetch a mode 1 two-pixel byte with the pixels set as
- AND #WHITE             \ in X, and AND with #WHITE to make it white (i.e.
-                        \ cyan/red)
-
- EOR (SC),Y             \ Draw the pixel on-screen using EOR logic, so we can
- STA (SC),Y             \ remove it later without ruining the background that's
-                        \ already on-screen
-
- DEY                    \ Reduce Y by 1 to point to the pixel row above the one
- BPL P%+4               \ we just plotted, and if it is still positive, skip the
-                        \ next instruction
-
- LDY #1                 \ Reducing Y by 1 made it negative, which means Y was
-                        \ 0 before we did the DEY above, so set Y to 1 to point
-                        \ to the pixel row after the one we just plotted
-
-                        \ We now draw our second dash
-
-.PX6
-
- LDA TWOS2,X            \ Fetch a mode 1 two-pixel byte with the pixels set as
- AND #WHITE             \ in X, and AND with #WHITE to make it white (i.e.
-                        \ cyan/red)
-
- EOR (SC),Y             \ Draw the pixel on-screen using EOR logic, so we can
- STA (SC),Y             \ remove it later without ruining the background that's
-                        \ already on-screen
+ LDA SC                 \ VDU y;
+ JSR OSWRCH
+ LDA SC+1
+ JSR OSWRCH
 
  LDY T1                 \ Set Y to the index of this pixel's y-coordinate byte
                         \ in the command block, which we stored in T1 above
@@ -474,70 +427,8 @@
 
 \ ******************************************************************************
 \
-\       Name: ylookup
-\       Type: Variable
-\   Category: Drawing pixels
-\    Summary: Lookup table for converting pixel y-coordinate to page number of
-\             screen address
-\
-\ ------------------------------------------------------------------------------
-\
-\ Elite's screen mode is based on mode 1, so it allocates two pages of screen
-\ memory to each character row (where a character row is 8 pixels high). This
-\ table enables us to convert a pixel y-coordinate in the range 0-247 into the
-\ page number for the start of the character row containing that coordinate.
-\
-\ Screen memory is from &4000 to &7DFF, so the lookup works like this:
-\
-\   Y =   0 to  7,  lookup value = &40 (so row 1 is from &4000 to &41FF)
-\   Y =   8 to 15,  lookup value = &42 (so row 2 is from &4200 to &43FF)
-\   Y =  16 to 23,  lookup value = &44 (so row 3 is from &4400 to &45FF)
-\   Y =  24 to 31,  lookup value = &46 (so row 4 is from &4600 to &47FF)
-\
-\   ...
-\
-\   Y = 232 to 239, lookup value = &7A (so row 31 is from &7A00 to &7BFF)
-\   Y = 240 to 247, lookup value = &7C (so row 32 is from &7C00 to &7DFF)
-\
-\ There is also a lookup value for y-coordinates from 248 to 255, but that's off
-\ the end of the screen, as the special Elite screen mode only has 31 character
-\ rows.
+\ Save Lander.bin
 \
 \ ******************************************************************************
 
-.ylookup
-
- FOR I%, 0, 255
-
-  EQUB &40 + ((I% DIV 8) * 2)
-
- NEXT
-
-\ ******************************************************************************
-\
-\       Name: TWOS2
-\       Type: Variable
-\   Category: Drawing pixels
-\    Summary: Ready-made double-pixel character row bytes for mode 1
-\
-\ ------------------------------------------------------------------------------
-\
-\ Ready-made bytes for plotting two-pixel dashes in mode 1 (the top part of the
-\ split screen).
-\
-\ ******************************************************************************
-
-.TWOS2
-
- EQUB %10001000
- EQUB %01000100
- EQUB %00100010
- EQUB %00010001
-
-\ ******************************************************************************
-\
-\ Save I.LANDER.bin
-\
-\ ******************************************************************************
-
- SAVE "3-assembled-output/I.LANDER.bin", CODE%, P%, LOAD%
+ SAVE "3-assembled-output/Lander.bin", CODE%, P%, LOAD%

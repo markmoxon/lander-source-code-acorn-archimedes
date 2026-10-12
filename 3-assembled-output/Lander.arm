@@ -352,6 +352,9 @@ GetLandscapeTileColour:
  LDMFD   R13!, {R0-R4, PC}
 MoveAndDrawPlayer:
  STMFD   R13!, {R14}
+ MOV     R0, #0
+ MOV     R1, #0
+ MOV     R2, #0x4
  STRB    R2, [R11, #fuelBurnRate]
  LDR     R14, [R11, #fuelLevel]
  CMP     R14, #0
@@ -2649,14 +2652,15 @@ divl1:
  SUBCS   R3, R3, #320
  ADDCS   R2, R2, #1
  BCS     divl1
-divl2:
- STR     R3, oswordPixel+3
- STR     R2, oswordPixel+4
+ RSB     R2, R2, #255
+ STR     R3, oswordPixel+2
+ STRB    R2, oswordPixel+4
  ADR     R1, oswordPixel
  MOV     R0, #241
  SWI     OS_Word
  ADD     R3, R3, R10
- STR     R3, oswordPixel+3
+ STR     R3, oswordPixel+2
+ STRB    R2, oswordPixel+4
  ADR     R1, oswordPixel
  MOV     R0, #241
  SWI     OS_Word
@@ -2664,8 +2668,7 @@ divl2:
 oswordPixel:
 .byte 5
 .byte 0
-.byte 0x30
-.byte 50
+.word 50
 .byte 50
 .balign 4
 DrawLineSegment:
