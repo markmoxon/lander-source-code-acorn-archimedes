@@ -482,7 +482,7 @@
                                     \ of the landscape row that we are drawing,
                                     \ where rows run from left to right across
                                     \ the screen (this is a relative coordinate)
- 
+
  zLandscapeRow = &168               \ The z-coordinate of the far-left corner
                                     \ of the landscape row that we are drawing,
                                     \ where rows run from left to right across
@@ -2286,7 +2286,7 @@
                                     \ behind as we blast away
 
  ADD     R0, R11, #xPlayer          \ Set R0 to R2 as follows:
- LDMIA   R0, {R0-R2}                \ 
+ LDMIA   R0, {R0-R2}                \
                                     \   R0 = xPlayer
                                     \   R1 = yPlayer
                                     \   R2 = zPlayer
@@ -2409,7 +2409,7 @@
  STR     R8, [R11, #currentScore]
 
  ADD     R14, R11, #xPlayer         \ Set R0 to R5 as follows:
- LDMIA   R14, {R0-R5}               \ 
+ LDMIA   R14, {R0-R5}               \
                                     \   R0 = xPlayer
                                     \   R1 = yPlayer
                                     \   R2 = zPlayer
@@ -2547,7 +2547,7 @@
  RSBMI   R5, R5, #0                 \        = |zVelocity|
 
  ADD     R3, R3, R4                 \ If R3 + R4 + R5 >= LANDING_SPEED, then:
- ADD     R3, R3, R5                 \ 
+ ADD     R3, R3, R5                 \
  CMP     R3, #LANDING_SPEED         \   |xVelocity| + |yVelocity| + |zVelocity|
  MOVHS   PC, R14                    \
                                     \ is greater than the safe landing speed, so
@@ -2700,7 +2700,7 @@
 
  LDR     R0, [R11, #remainingLives] \ Decrement the number of remaining lives
  SUBS    R0, R0, #1                 \ and set the flags accordingly
- STR     R0, [R11, #remainingLives] \ 
+ STR     R0, [R11, #remainingLives] \
 
  ADD     R13, R13, #4               \ Increment the stack pointer by one word so
                                     \ we discard the return address from the top
@@ -2732,7 +2732,7 @@
  MOV     R0, #31                    \ Print the following VDU command:
  SWI     OS_WriteC                  \
  MOV     R0, #1                     \   VDU 31, 1, 16
- SWI     OS_WriteC                  \ 
+ SWI     OS_WriteC                  \
  MOV     R0, #16                    \ which moves the text cursor to column 1 on
  SWI     OS_WriteC                  \ row 16, halfway down the screen
 
@@ -2749,7 +2749,7 @@
  MOV     R0, #31                    \ Print the following VDU command:
  SWI     OS_WriteC                  \
  MOV     R0, #1                     \   VDU 31, 1, 16
- SWI     OS_WriteC                  \ 
+ SWI     OS_WriteC                  \
  MOV     R0, #16                    \ which moves the text cursor to column 1 on
  SWI     OS_WriteC                  \ row 16, i.e. the same text coordinates as
                                     \ the text we printed in screen bank 1 above
@@ -3167,7 +3167,7 @@
  MOVHS   R1, #15                    \
  MOVLO   R1, R6, LSL #1             \   Green channel in R1 = 15
  SUBHS   R2, R6, #8                 \   Blue channel in R2 = (R6 - 8) * 2
- MOVHS   R2, R2, LSL #1             \ 
+ MOVHS   R2, R2, LSL #1             \
  MOVLO   R2, #0                     \ otherwise set:
                                     \
                                     \   Green channel in R1 = R6 * 2
@@ -3207,7 +3207,7 @@
  ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
  AND     R7, R7, #%00000011         \
  ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
- AND     R7, R7, #7                 \ 
+ AND     R7, R7, #7                 \
                                     \ So this sets bits 0, 1 and 2 of R7 as
                                     \ required
 
@@ -3651,7 +3651,7 @@
  MOV     R4, #0                     \ Set R4 = 0
 
                                     \ Fall into AddRisingParticleToBuffer so we
-                                    \ pass a velocity of (0, 0, 0) to the 
+                                    \ pass a velocity of (0, 0, 0) to the
                                     \ AddMovingParticleToBuffer routine
 
 \ ******************************************************************************
@@ -3951,7 +3951,7 @@
  ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
  AND     R7, R7, #%00000011         \
  ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
- AND     R7, R7, #7                 \ 
+ AND     R7, R7, #7                 \
                                     \ So this sets bits 0, 1 and 2 of R7 as
                                     \ required
 
@@ -4076,7 +4076,7 @@
  ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
  AND     R7, R7, #%00000011         \
  ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
- AND     R7, R7, #7                 \ 
+ AND     R7, R7, #7                 \
                                     \ So this sets bits 0, 1 and 2 of R7 as
                                     \ required
 
@@ -4199,7 +4199,7 @@
  ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
  AND     R7, R7, #%00000011         \
  ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
- AND     R7, R7, #7                 \ 
+ AND     R7, R7, #7                 \
                                     \ So this sets bits 0, 1 and 2 of R7 as
                                     \ required
 
@@ -4365,7 +4365,7 @@
  ORR     R7, R1, R2                 \ Set R7 to the bottom three bits of:
  AND     R7, R7, #%00000011         \
  ORR     R7, R7, R0                 \   (the bottom two bits of R1 OR R2) OR R0
- AND     R7, R7, #7                 \ 
+ AND     R7, R7, #7                 \
                                     \ So this sets bits 0, 1 and 2 of R7 as
                                     \ required
 
@@ -5541,7 +5541,7 @@
                                     \ screen)
                                     \
                                     \ So a bigger, more negative R1 means
-                                    \ brighter colours 
+                                    \ brighter colours
 
  CMP     R0, #0                     \ If R0 is negative then the normal is
  ADDMI   R1, R1, #1                 \ pointing more towards the left then the
@@ -5855,14 +5855,14 @@
 
 \ ******************************************************************************
 \
-\       Name: sinTableAddr 
+\       Name: sinTableAddr
 \       Type: Variable
 \   Category: Maths (Geometry)
 \    Summary: The address of the sine/cosine lookup table
 \
 \ ******************************************************************************
 
-.sinTableAddr 
+.sinTableAddr
 
  EQUD    sinTable
 
@@ -6062,22 +6062,22 @@
                                     \   [ R1+8 ]   [ R0+8 ]
                                     \
                                     \ and return from the subroutine
- 
+
  STMFD   R13!, {R6-R7, R14}         \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
- 
+
  ADD     R2, R11, #rotationMatrix   \ Set R2 to the address of the rotation
                                     \ matrix at rotationMatrix, which contains
                                     \ the object's rotation matrix
 
  BL      GetDotProduct              \ Set R1 = R2 . R0, so:
- STR     R3, [R1]                   \ 
+ STR     R3, [R1]                   \
  BL      GetDotProduct              \   [R1  ]   [ R2    R2+4  R2+8  ]   [R0  ]
  STR     R3, [R1, #4]               \   [R1+4] = [ R2+12 R2+16 R2+20 ] . [R0+4]
  BL      GetDotProduct              \   [R1+8]   [ R2+24 R2+28 R2+32 ]   [R0+8]
  STR     R3, [R1, #8]               \
                                     \ which is the result we want
- 
+
  LDMFD   R13!, {R6-R7, PC}          \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
@@ -6409,7 +6409,7 @@
  ADD     R1, R1, #&40000000         \ Using the same approach as above, set:
  LDR     R14, sinTableAddr          \
  BIC     R1, R1, #&00300000         \   R3 = sin(b + &40000000)
- LDR     R3, [R14, R1, LSR #20]     \      = cos(b) 
+ LDR     R3, [R14, R1, LSR #20]     \      = cos(b)
 
  LDMFD   R13!, {R4-R5}              \ Set R4 and R5 to the original arguments in
                                     \ R0 and R1, so R4 = a and R5 = b
@@ -7082,7 +7082,7 @@
  SUBCS   R3, R3, R2                 \
  ORRCS   R5, R5, R14                \    R5 = R3 / R2
  MOVS    R14, R14, LSR #1           \       = |x| / z
- BCC     ppar3                      \ 
+ BCC     ppar3                      \
  MOVS    R5, R5, LSL #22            \ where |x| and z are both scaled up by the
                                     \ same factor
 
@@ -7097,7 +7097,7 @@
                                     \      = 160 + x / z
                                     \
                                     \ otherwise set:
-                                    \ 
+                                    \
                                     \   R0 = 160 - R5
                                     \      = 160 - |x| / z
                                     \      = 160 + x / z
@@ -7109,13 +7109,13 @@
 
  TEQ     R1, #0                     \ If the original R1 argument was positive,
  ADDPL   R1, R6, #64                \ set:
- RSBMI   R1, R6, #64                \ 
+ RSBMI   R1, R6, #64                \
                                     \   R1 = 64 + R6
                                     \      = 64 + |y| / z
                                     \      = 64 + y / z
                                     \
                                     \ otherwise set:
-                                    \ 
+                                    \
                                     \   R1 = 64 - R6
                                     \      = 64 - |y| / z
                                     \      = 64 + y / z
@@ -7308,7 +7308,7 @@
  SUBCS   R3, R3, R2                 \
  ORRCS   R5, R5, R14                \    R5 = R3 / R2
  MOVS    R14, R14, LSR #1           \       = |x| / z
- BCC     pver3                      \ 
+ BCC     pver3                      \
  MOVS    R5, R5, LSL #22            \ where |x| and z are both scaled up by the
                                     \ same factor
 
@@ -7323,7 +7323,7 @@
                                     \      = 160 + x / z
                                     \
                                     \ otherwise set:
-                                    \ 
+                                    \
                                     \   R0 = 160 - R5
                                     \      = 160 - |x| / z
                                     \      = 160 + x / z
@@ -7335,13 +7335,13 @@
 
  TEQ     R1, #0                     \ If the original R1 argument was positive,
  ADDPL   R1, R6, #64                \ set:
- RSBMI   R1, R6, #64                \ 
+ RSBMI   R1, R6, #64                \
                                     \   R1 = 64 + R6
                                     \      = 64 + |y| / z
                                     \      = 64 + y / z
                                     \
                                     \ otherwise set:
-                                    \ 
+                                    \
                                     \   R1 = 64 - R6
                                     \      = 64 - |y| / z
                                     \      = 64 + y / z
@@ -7456,7 +7456,7 @@
  SUBCS   R3, R3, R2                 \
  ORRCS   R5, R5, R14                \    R5 = R3 / R2
  MOVS    R14, R14, LSR #1           \       = |x| / z
- BCC     pver7                      \ 
+ BCC     pver7                      \
  MOVS    R5, R5, LSL #22            \ where |x| and z are both scaled up by the
                                     \ same factor
 
@@ -7479,7 +7479,7 @@
                                     \      = 160 + x / z
                                     \
                                     \ otherwise set:
-                                    \ 
+                                    \
                                     \   R0 = 160 - R5
                                     \      = 160 - |x| / z
                                     \      = 160 + x / z
@@ -7491,13 +7491,13 @@
 
  TEQ     R1, #0                     \ If the original R1 argument was positive,
  ADDPL   R1, R6, #64                \ set:
- RSBMI   R1, R6, #64                \ 
+ RSBMI   R1, R6, #64                \
                                     \   R1 = 64 + R6
                                     \      = 64 + |y| / z
                                     \      = 64 + y / z
                                     \
                                     \ otherwise set:
-                                    \ 
+                                    \
                                     \   R1 = 64 - R6
                                     \      = 64 - |y| / z
                                     \      = 64 + y / z
@@ -7683,7 +7683,7 @@
 \ Returns:
 \
 \   xVertexRotated                  The result of the multiplication, followed
-\                                   by the incremented counter 
+\                                   by the incremented counter
 \
 \ ******************************************************************************
 
@@ -7957,7 +7957,7 @@
 \               ^          ^        ^               ^
 \               |          |        |               |
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
-\         (0-319)    (0-255)                  (0-255)  
+\         (0-319)    (0-255)                  (0-255)
 \
 \ This command draws a 1x1-pixel particle at the given coordinates in the
 \ specified colour.
@@ -8116,7 +8116,7 @@
 \               ^          ^        ^               ^
 \               |          |        |               |
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
-\         (0-319)    (0-255)                  (0-255)  
+\         (0-319)    (0-255)                  (0-255)
 \
 \ This command draws a 2x2-pixel particle at the given coordinates in the
 \ specified colour, with the coordinates specifying the top-left corner of the
@@ -8198,7 +8198,7 @@
 \               ^          ^        ^               ^
 \               |          |        |               |
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
-\         (0-319)    (0-255)                  (0-255)  
+\         (0-319)    (0-255)                  (0-255)
 \
 \ This command draws a 3x2-pixel particle at the given coordinates in the
 \ specified colour, with the coordinates specifying the pixel in the
@@ -8282,7 +8282,7 @@
 \               ^          ^        ^               ^
 \               |          |        |               |
 \   Pixel x-coord     Colour   Unused   Pixel y-coord
-\         (0-319)    (0-255)                  (0-255)  
+\         (0-319)    (0-255)                  (0-255)
 \
 \ This command draws a 3x1-pixel particle at the given coordinates in the
 \ specified colour, with the coordinates specifying the pixel in the middle of
@@ -8980,7 +8980,7 @@
 
  LDR     R0, [R9], #4               \ Fetch the address of the next free byte in
                                     \ the graphics buffer (which is the same as
-                                    \ the end address of the buffer) from the 
+                                    \ the end address of the buffer) from the
                                     \ graphicsBuffersEnd table, put it into R0
                                     \ and increment R9 to point to the next
                                     \ buffer's end address
@@ -10142,13 +10142,13 @@
                                     \ and leaves the slope of the right edge as
                                     \ before
 
- MOVNE   R7, R11                    \ If R2 <> R4 >> 16, then x2 <> left edge, 
+ MOVNE   R7, R11                    \ If R2 <> R4 >> 16, then x2 <> left edge,
  BICNE   R5, R5, #&FF00             \ so x2 must be at the right edge, so we set
  BICNE   R5, R5, #&00FF             \ the slope of the right edge in R7 to R11,
  ORRNE   R5, R5, #&8000             \ as it's the right edge that is changing
                                     \ slope as we move into the top part of the
                                     \ triangle:
-                                    \ 
+                                    \
                                     \   R7 = R11
                                     \      = slope of (x2, y2) to (x3, y3)
                                     \
@@ -11238,13 +11238,13 @@
                                     \ and leaves the slope of the right edge as
                                     \ before
 
- MOVNE   R7, R12                    \ If R2 <> R4 >> 16, then x2 <> left edge, 
+ MOVNE   R7, R12                    \ If R2 <> R4 >> 16, then x2 <> left edge,
  BICNE   R5, R5, #&FF00             \ so x2 must be at the right edge, so we set
  BICNE   R5, R5, #&00FF             \ the slope of the right edge in R7 to R12,
  ORRNE   R5, R5, #&8000             \ as it's the right edge that is changing
                                     \ slope as we move into the top part of the
                                     \ triangle:
-                                    \ 
+                                    \
                                     \   R7 = R12
                                     \      = slope of (x2, y2) to (x3, y3)
                                     \
@@ -12311,12 +12311,12 @@
  MOV     R0, #22                    \ Change to screen mode 13 with shadow
  SWI     OS_WriteC                  \ memory enabled (i.e. mode 128 + 13), which
  MOV     R0, #128+13                \ creates two mode 13 screen banks
- SWI     OS_WriteC                  \ 
+ SWI     OS_WriteC
 
  MOV     R0, #23                    \ Start printing the following VDU command:
- SWI     OS_WriteC                  \ 
+ SWI     OS_WriteC                  \
  MOV     R0, #1                     \   VDU 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
- SWI     OS_WriteC                  \ 
+ SWI     OS_WriteC                  \
                                     \ which disables the cursor
 
  MOV     R8, #8                     \ We now want to print the eight zeroes in
