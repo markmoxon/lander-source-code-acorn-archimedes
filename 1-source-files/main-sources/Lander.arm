@@ -9382,39 +9382,67 @@
 
 .DrawQuadrilateral
 
- STMFD   R13!, {R2-R7, R9-R12, R14} \ Store R2 to R7 on the stack, as well as
-                                    \ the registers that we want to use on the
-                                    \ stack so they can be preserved
+                                    \ --- Mod: Code removed for AES ----------->
 
- BL      DrawTriangle               \ Draw a triangle in colour R8 with the
-                                    \ following corner coordinates:
-                                    \
-                                    \   (R0, R1)
-                                    \   (R2, R3)
-                                    \   (R4, R5)
+\STMFD   R13!, {R2-R7, R9-R12, R14} \ Store R2 to R7 on the stack, as well as
+\                                   \ the registers that we want to use on the
+\                                   \ stack so they can be preserved
+\
+\BL      DrawTriangle               \ Draw a triangle in colour R8 with the
+\                                   \ following corner coordinates:
+\                                   \
+\                                   \   (R0, R1)
+\                                   \   (R2, R3)
+\                                   \   (R4, R5)
+\
+\LDMFD   R13!, {R0-R5}              \ Set R0 to R5 to the original values of
+\                                   \ R2 to R7, to (R0, R2) is the pixel
+\                                   \ coordinate of corner 2, and so on
+\
+\BL      DrawTriangle               \ Draw a triangle in colour R8 with the
+\                                   \ following corner coordinates, in terms
+\                                   \ of the original arguments to the routine:
+\                                   \
+\                                   \   (R2, R3)
+\                                   \   (R4, R5)
+\                                   \   (R6, R7)
+\                                   \
+\                                   \ So overall this draws a quadrilateral in
+\                                   \ colour R8 with corners at:
+\                                   \
+\                                   \   (R0, R1)
+\                                   \   (R2, R3)
+\                                   \   (R4, R5)
+\                                   \   (R6, R7)
+\
+\LDMFD   R13!, {R9-R12, PC}         \ Retrieve the registers that we stored on
+\                                   \ the stack and return from the subroutine
 
- LDMFD   R13!, {R0-R5}              \ Set R0 to R5 to the original values of
-                                    \ R2 to R7, to (R0, R2) is the pixel
-                                    \ coordinate of corner 2, and so on
+                                    \ --- And replaced by: -------------------->
 
- BL      DrawTriangle               \ Draw a triangle in colour R8 with the
-                                    \ following corner coordinates, in terms
-                                    \ of the original arguments to the routine:
-                                    \
-                                    \   (R2, R3)
-                                    \   (R4, R5)
-                                    \   (R6, R7)
-                                    \
-                                    \ So overall this draws a quadrilateral in
-                                    \ colour R8 with corners at:
-                                    \
-                                    \   (R0, R1)
-                                    \   (R2, R3)
-                                    \   (R4, R5)
-                                    \   (R6, R7)
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
- LDMFD   R13!, {R9-R12, PC}         \ Retrieve the registers that we stored on
+ MOV     R8, #%10000000             \ Draw landscape in colour 2 (green)
+
+ BL      DrawPixel                  \ Draw corner (R0, R1)
+
+ MOV     R0, R2                     \ Draw corner (R2, R3)
+ MOV     R1, R3
+ BL      DrawPixel
+
+ MOV     R0, R4                     \ Draw corner (R4, R5)
+ MOV     R1, R5
+ BL      DrawPixel
+
+ MOV     R0, R6                     \ Draw corner (R6, R7)
+ MOV     R1, R7
+ BL      DrawPixel
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -12037,6 +12065,69 @@
                                     \   * R4 is the pixel row within the
                                     \     character row
 
+ MOV     R8, #%00001000             \ Draw ships in colour 1 (red)
+
+ BL      DrawPixelInRow             \ Draw a pixel at the start of the line
+
+ ADD     R2, R2, R10                \ Calculate the pixel x-coordinate of the
+                                    \ end of the line
+
+ BL      DrawPixelInRow             \ Draw the pixel at the end of the line
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of replacement ------------------>
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.oswordPixel
+
+ EQUB 5                             \ The number of bytes to transmit
+
+ EQUB 0                             \ The number of bytes to receive
+
+ EQUW &0000                         \ Mode 1 screen address of pixel byte
+
+ EQUB 0                             \ Pixel byte to poke into screen address
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
+
+.DrawPixel
+
+                                    \ Plot pixel (R0, R1) in mode 1 colour R8
+
+ CMP     R0, #320                   \ Check to see if the corner is off-screen,
+ CMPLO   R1, #239                   \ in which case return from the subroutine
+ MOVHS   PC, R14
+
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
+ AND     R4, R1, #%111              \ following:
+ MOV     R2, R0                     \
+                                    \   * R3 is the character row (8 pixel rows
+                                    \     per character)
+                                    \
+                                    \   * R4 is the pixel row within the
+                                    \     character row
+                                    \
+                                    \   * R2 is the pixel x-coordinate of the
+                                    \     start of the line
+
+ BL      DrawPixelInRow             \ Draw the pixel at the start of the line
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+.DrawPixelInRow
+
+ STMFD   R13!, {R2-R4, R8, R14}     \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
                                     \ By this point we have the following:
                                     \
                                     \   * R3 is the character row (8 pixel rows
@@ -12067,9 +12158,9 @@
 
  ADD     R6, R6, #&3000             \ Add &3000 for mode 1 screen memory
 
- AND     R7, R2, #%00000011         \ Set R8 to a mode 1 pixel byte with pixel  
- MOV     R8, #%10001000             \ R7 set (0 on the left, 3 on the right)
- MOV     R8, R8, LSR R7
+ AND     R7, R2, #%00000011         \ Shift the pixel byte in R8 to set the
+ MOV     R8, R8, LSR R7             \ pixel at position R7 (0 on the left, 3 on
+                                    \ the right)
 
                                     \ So we now have:
                                     \
@@ -12087,29 +12178,8 @@
  MOV     R0, #241
  SWI     OS_Word
 
- ADD     R6, R6, R10                \ Calculate the address of the start of the
-                                    \ line
-
- LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+ LDMFD   R13!, {R2-R4, R8, PC}      \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
-
-                                    \ --- End of replacement ------------------>
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.oswordPixel
-
- EQUB 5                             \ The number of bytes to transmit
-
- EQUB 0                             \ The number of bytes to receive
-
- EQUW &0000                         \ Mode 1 screen address of pixel byte
-
- EQUB 0                             \ Pixel byte to poke into screen address
-
- ALIGN
-
-                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
@@ -12349,6 +12419,19 @@
 \
 \ ******************************************************************************
 
+                                    \ --- Mod: Code added for AES ------------->
+
+.oswordMode
+
+ EQUB 0                             \ The number of bytes to transmit
+
+ EQUB 0                             \ The number of bytes to receive
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
+
+
 .Entry
 
                                     \ --- Mod: Code removed for AES ----------->
@@ -12361,10 +12444,9 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R0, #22                    \ Change to screen mode 1
- SWI     OS_WriteC
- MOV     R0, #1
- SWI     OS_WriteC
+ ADR     R1, oswordMode             \ Clear the screen
+ MOV     R0, #242
+ SWI     OS_Word
 
                                     \ --- End of replacement ------------------>
 

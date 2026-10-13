@@ -1,5 +1,7 @@
 \ Lander I/O
 
+ GUARD &3000
+
 \ ******************************************************************************
 \
 \ Configuration variables
@@ -121,7 +123,7 @@
 
  EQUW CLS               \            240 (&F0)     0 = Clear screen
  EQUW PIXEL             \            241 (&F1)     1 = Draw pixel
- EQUW SAFE              \            242 (&F2)     2 = Do nothing
+ EQUW SETMODE           \            242 (&F2)     2 = Do nothing
  EQUW SAFE              \            243 (&F3)     3 = Do nothing
  EQUW SAFE              \            244 (&F4)     4 = Do nothing
  EQUW SAFE              \            245 (&F5)     5 = Do nothing
@@ -224,30 +226,7 @@
 \       Name: PIXEL
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Implement the OSWORD 241 command (draw space view pixels)
-\  Deep dive: Drawing colour pixels on the BBC Micro
-\
-\ ------------------------------------------------------------------------------
-\
-\ This routine is run when the parasite sends an OSWORD 241 command with
-\ parameters in the block at OSSC(1 0). It draws a dot (or collection of dots)
-\ in the space view.
-\
-\ It can draw two types of dot, depending on bits 0-2 of the dot's distance:
-\
-\   * Draw the dot using the dot's distance to determine both the dot's colour
-\     and size. This draws a one-pixel dot, two-pixel dash or four-pixel square
-\     in a colour that's determined by the distance (as per the colour table in
-\     PXCL). These kinds of dot are sent by the PIXEL3 routine in the parasite,
-\     which is used to draw explosion particles.
-\
-\   * Draw the dot using the dot's distance to determine the dot's size, either
-\     a two-pixel dash or four-pixel square. The dot is always drawn in white
-\     (which is actually a cyan/red stripe). These kinds of dot are sent by the
-\     PIXEL routine in the parasite, which is used to draw stardust particles
-\     and dots on the Long-range Chart.
-\
-\ The parameters match those put into the PBUF/pixbl block in the parasite.
+\    Summary: Implement the OSWORD 241 command (draw pixel)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -316,14 +295,92 @@
 \
 \       Name: CLS
 \       Type: Subroutine
-\   Category: Drawing pixels
+\   Category: Drawing the screen
 \    Summary: Clear the screen
+\
 \ ******************************************************************************
 
 .CLS
 
  LDA #12
  JMP OSWRCH
+
+\ ******************************************************************************
+\
+\       Name: SETMODE
+\       Type: Subroutine
+\   Category: Drawing the screen
+\    Summary: Clear the screen
+\
+\ ******************************************************************************
+
+.SETMODE
+
+ LDA #LO(B%)            \ Set the low byte of P(1 0) to point to the VDU code
+ STA P                  \ table at B%
+
+ LDA #HI(B%)            \ Set the high byte of P(1 0) to point to the VDU code
+ STA P+1                \ table at B%
+
+ LDY #0                 \ We are now going to send the VDU bytes in the table
+                        \ at B% to OSWRCH to set up the screen mode
+
+.mode1
+
+ LDA (P),Y              \ Set A to the Y-th byte of the B% table
+
+ CMP #&FF               \ If we have reached the end of the table, jump to mode2
+ BEQ mode2              \ to return from the subroutine
+
+ JSR OSWRCH             \ Print the Y-th byte of the VDU command
+
+ INY                    \ Increment the loop counter
+
+ JMP mode1              \ Loop back for the next byte
+
+.mode2
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: B%
+\       Type: Variable
+\   Category: Drawing the screen
+\    Summary: VDU commands for setting up the mode 1 screen
+\
+\ ******************************************************************************
+
+.B%
+
+ EQUB 22, 1             \ Switch to screen mode 1
+
+ EQUB 23, 0, 10, 32     \ Set 6845 register R10 = %00100000 = 32
+ EQUB 0, 0, 0           \
+ EQUB 0, 0, 0           \ This is the "cursor start" register, and bits 5 and 6
+                        \ define the "cursor display mode", as follows:
+                        \
+                        \   * %00 = steady, non-blinking cursor
+                        \
+                        \   * %01 = do not display a cursor
+                        \
+                        \   * %10 = fast blinking cursor (blink at 1/16 of the
+                        \           field rate)
+                        \
+                        \   * %11 = slow blinking cursor (blink at 1/32 of the
+                        \           field rate)
+                        \
+                        \ We can therefore turn off the cursor completely by
+                        \ setting cursor display mode %01, with bit 6 of R10
+                        \ clear and bit 5 of R10 set
+
+ EQUB 19, 2, 2          \ Define logical colour 2 as green
+ EQUB 0, 0, 0
+
+ EQUB 19, 3, 4          \ Define logical colour 3 as blue
+ EQUB 0, 0, 0
+
+ EQUB 255               \ End of commands
 
 \ ******************************************************************************
 \

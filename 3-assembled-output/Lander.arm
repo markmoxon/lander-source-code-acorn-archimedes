@@ -2118,11 +2118,19 @@ oswordCls:
 .byte 0
 .balign 4
 DrawQuadrilateral:
- STMFD   R13!, {R2-R7, R9-R12, R14}
- BL      DrawTriangle
- LDMFD   R13!, {R0-R5}
- BL      DrawTriangle
- LDMFD   R13!, {R9-R12, PC}
+ STMFD   R13!, {R0-R12, R14}
+ MOV     R8, #0x80
+ BL      DrawPixel
+ MOV     R0, R2
+ MOV     R1, R3
+ BL      DrawPixel
+ MOV     R0, R4
+ MOV     R1, R5
+ BL      DrawPixel
+ MOV     R0, R6
+ MOV     R1, R7
+ BL      DrawPixel
+ LDMFD   R13!, {R0-R12, PC}
 DrawTriangle:
  CMP     R0, #320
  CMPLO   R1, #239
@@ -2631,13 +2639,35 @@ divl2:
  SUBCS   R2, R2, #320
  ADDCS   R4, R4, #1
  BCS     divl2
+ MOV     R8, #0x8
+ BL      DrawPixelInRow
+ ADD     R2, R2, R10
+ BL      DrawPixelInRow
+ LDMFD   R13!, {R0-R12, PC}
+oswordPixel:
+.byte 5
+.byte 0
+.word 0x0000
+.byte 0
+.balign 4
+DrawPixel:
+ CMP     R0, #320
+ CMPLO   R1, #239
+ MOVHS   PC, R14
+ STMFD   R13!, {R0-R12, R14}
+ MOV     R3, R1, LSR #3
+ AND     R4, R1, #0x7
+ MOV     R2, R0
+ BL      DrawPixelInRow
+ LDMFD   R13!, {R0-R12, PC}
+DrawPixelInRow:
+ STMFD   R13!, {R2-R4, R8, R14}
  MOV     R5, R2, LSR #2
  ADD     R5, R4, R5, LSL #3
  ADD     R3, R3, R3, LSL #2
  ADD     R6, R5, R3, LSL #7
  ADD     R6, R6, #0x3000
  AND     R7, R2, #0x3
- MOV     R8, #0x88
  MOV     R8, R8, LSR R7
  STRB    R6, oswordPixel+2
  MOV     R4, R6, LSR #8
@@ -2646,14 +2676,7 @@ divl2:
  ADR     R1, oswordPixel
  MOV     R0, #241
  SWI     OS_Word
- ADD     R6, R6, R10
- LDMFD   R13!, {R0-R12, PC}
-oswordPixel:
-.byte 5
-.byte 0
-.word 0x0000
-.byte 0
-.balign 4
+ LDMFD   R13!, {R2-R4, R8, PC}
 DrawLineSegment:
  STRB    R8, [R11, #16]
  STRB    R8, [R11, #15]
@@ -2712,11 +2735,14 @@ AbortWithMemoryError:
 .byte    0
 .balign 4
  B       ReturnToDesktop
+oswordMode:
+.byte 0
+.byte 0
+.balign 4
 Entry:
- MOV     R0, #22
- SWI     OS_WriteC
- MOV     R0, #1
- SWI     OS_WriteC
+ ADR     R1, oswordMode
+ MOV     R0, #242
+ SWI     OS_Word
  STR     R13, stackPointerOnEntry
  LDR     R13, stackAddr
  LDR     R11, workspaceAddr
