@@ -352,9 +352,7 @@ GetLandscapeTileColour:
  LDMFD   R13!, {R0-R4, PC}
 MoveAndDrawPlayer:
  STMFD   R13!, {R14}
- MOV     R0, #0
- MOV     R1, #0
- MOV     R2, #0x4
+ BL ScanKeyboard
  STRB    R2, [R11, #fuelBurnRate]
  LDR     R14, [R11, #fuelLevel]
  CMP     R14, #0
@@ -2111,7 +2109,14 @@ SwitchScreenBank:
  LDRB    R0, screenBankNumber
  EORS    R0, R0, #1
  STRB    R0, screenBankNumber
- LDMFD   R13!, {R9, R11-R12, PC}
+ ADR     R1, oswordCls
+ MOV     R0, #240
+ SWI     OS_Word
+ MOV     PC, R14
+oswordCls:
+.byte 0
+.byte 0
+.balign 4
 DrawQuadrilateral:
  STMFD   R13!, {R2-R7, R9-R12, R14}
  BL      DrawTriangle
@@ -2886,6 +2891,17 @@ PrintHexDigit:
  ADDHS   R0, R0, #0x37
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
+ MOV     PC, R14
+ScanKeyboard:
+ MOV     R0, #129
+ MOV     R1, #0
+ MOV     R2, #0
+ SWI     OS_Byte
+ TEQ     R1, #0x20
+ MOVEQ   R2, #0x4
+ MOVNE   R2, #0
+ MOV     R0, #511
+ MOV     R1, #511
  MOV     PC, R14
 objectRock:
 .long    6

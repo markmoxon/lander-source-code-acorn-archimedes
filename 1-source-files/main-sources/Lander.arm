@@ -1796,10 +1796,7 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R0, #0                     \ No movement
- MOV     R1, #0
-
- MOV     R2, #%100                  \ Thrust
+ BL ScanKeyboard                    \ Scan the keyboard
 
                                     \ --- End of replacement ------------------>
 
@@ -9332,11 +9329,31 @@
 \                                   \ keep zeroing screen memory until it is all
 \                                   \ cleared to black, leaving just the two
 \                                   \ lines of text at the top
+\
+\LDMFD   R13!, {R9, R11-R12, PC}    \ Retrieve the registers that we stored on
+\                                   \ the stack and return from the subroutine
 
-                                    \ --- End of removed code ----------------->
+                                    \ --- And replaced by: -------------------->
 
- LDMFD   R13!, {R9, R11-R12, PC}    \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
+ ADR     R1, oswordCls              \ Clear the screen
+ MOV     R0, #240
+ SWI     OS_Word
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of replacement ------------------>
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.oswordCls
+
+ EQUB 0                             \ The number of bytes to transmit
+
+ EQUB 0                             \ The number of bytes to receive
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
@@ -12991,6 +13008,36 @@
  SWI     OS_WriteC                  \ Print the character in R0
 
  MOV     PC, R14                    \ Return from the subroutine
+
+
+\ ******************************************************************************
+\
+\       Name: ScanKeyboard
+\       Type: Subroutine
+\   Category: ARM Evalutation System
+\    Summary: Scan the keyboard
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.ScanKeyboard
+
+ MOV     R0, #129                   \ Call OS_Byte 129 to read the keyboard with
+ MOV     R1, #0                     \ the time limit in R1 and R2 (so that's
+ MOV     R2, #0                     \ with no time limit as R1 and R2 are zero),
+ SWI     OS_Byte                    \ returning the result in R2
+
+ TEQ     R1, #&20                   \ If R1 = &20 (Space) then apply thrust
+ MOVEQ   R2, #%100
+ MOVNE   R2, #0
+
+ MOV     R0, #511                   \ No movement
+ MOV     R1, #511
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \

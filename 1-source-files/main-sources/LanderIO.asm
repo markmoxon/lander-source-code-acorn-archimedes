@@ -119,7 +119,7 @@
 
 .OSWVECS
 
- EQUW SAFE              \            240 (&F0)     0 = Do nothing
+ EQUW CLS               \            240 (&F0)     0 = Clear screen
  EQUW PIXEL             \            241 (&F1)     1 = Draw pixel
  EQUW SAFE              \            242 (&F2)     2 = Do nothing
  EQUW SAFE              \            243 (&F3)     3 = Do nothing
@@ -303,7 +303,7 @@
                         \ the next pixel in the command block
 
  CPY Q                  \ If the index has reached the value in Q (which
- BEQ P%+5               \ contains the size of the pixel buffer), skip the next
+ BEQ P%+4               \ contains the size of the pixel buffer), skip the next
                         \ instruction
 
  BNE PXLO               \ We haven't reached the end of the buffer, so loop back
@@ -311,6 +311,19 @@
                         \ is effectively a JMP as we just passed through a BEQ)
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: CLS
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Clear the screen
+\ ******************************************************************************
+
+.CLS
+
+ LDA #12
+ JMP OSWRCH
 
 \ ******************************************************************************
 \
