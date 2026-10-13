@@ -11969,11 +11969,15 @@
                                     \
                                     \   * R3 is the pixel x-coordinate
 
- RSB     R2, R2, #255               \ Set R2 = 255 - R2 to convert into MOS
+\RSB     R2, R2, #255               \ Set R2 = 255 - R2 to convert into MOS
                                     \ y-coordinates
 
- STR     R3, oswordPixel+2          \ Store the pixel coordinates in the OS_Word
- STRB    R2, oswordPixel+4          \ block
+ STRB    R3, oswordPixel+2          \ Store the pixel x-coordinate in the
+ MOV     R4, R3, LSR #8             \ OS_Word block
+ STRB    R4, oswordPixel+3
+
+ STRB    R2, oswordPixel+4          \ Store the pixel y-coordinate in the
+                                    \ OS_Word block
 
  ADR     R1, oswordPixel            \ Draw the dot at the start of the line
  MOV     R0, #241
@@ -11982,12 +11986,13 @@
  ADD     R3, R3, R10                \ Set the x-coordinate in R3 to the end of
                                     \ the line
 
- STR     R3, oswordPixel+2          \ Store the pixel coordinates in the OS_Word
- STRB    R2, oswordPixel+4          \ block
+ STRB    R3, oswordPixel+2          \ Store the pixel x-coordinate in the
+ MOV     R4, R3, LSR #8             \ OS_Word block
+ STRB    R4, oswordPixel+3
 
  ADR     R1, oswordPixel            \ Draw the dot at the end of the line
  MOV     R0, #241
- SWI     OS_Word
+\SWI     OS_Word
 
                                     \ --- End of replacement ------------------>
 

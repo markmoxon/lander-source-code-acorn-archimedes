@@ -2652,18 +2652,19 @@ divl1:
  SUBCS   R3, R3, #320
  ADDCS   R2, R2, #1
  BCS     divl1
- RSB     R2, R2, #255
- STR     R3, oswordPixel+2
+ STRB    R3, oswordPixel+2
+ MOV     R4, R3, LSR #8
+ STRB    R4, oswordPixel+3
  STRB    R2, oswordPixel+4
  ADR     R1, oswordPixel
  MOV     R0, #241
  SWI     OS_Word
  ADD     R3, R3, R10
- STR     R3, oswordPixel+2
- STRB    R2, oswordPixel+4
+ STRB    R3, oswordPixel+2
+ MOV     R4, R3, LSR #8
+ STRB    R4, oswordPixel+3
  ADR     R1, oswordPixel
  MOV     R0, #241
- SWI     OS_Word
  MOV     PC, R14
 oswordPixel:
 .byte 5

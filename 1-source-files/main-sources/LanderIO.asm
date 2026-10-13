@@ -22,8 +22,6 @@
 
  OSCLI = &FFF7          \ The address for the OSCLI routine
 
- WHITE   = %11111010    \ Four mode 1 pixels of colour 3, 2, 3, 2 (cyan/red)
-
 \ ******************************************************************************
 \
 \       Name: ZP
@@ -380,10 +378,10 @@
  LDA (OSSC),Y
  STA SC+1
 
- ASL SC                 \ SC(1 0) = x * 4
- ROL SC+1
- ASL SC
- ROL SC+1
+\ASL SC                 \ SC(1 0) = x * 4
+\ROL SC+1
+\ASL SC
+\ROL SC+1
 
  LDA SC                 \ VDU x;
  JSR OSWRCH
@@ -400,10 +398,10 @@
  STY T1                 \ Store Y in T1, so we can keep looping through the
                         \ coordinates
 
- ASL SC                 \ SC(1 0) = y * 4
- ROL SC+1
- ASL SC
- ROL SC+1
+\ASL SC                 \ SC(1 0) = y * 4
+\ROL SC+1
+\ASL SC
+\ROL SC+1
 
  LDA SC                 \ VDU y;
  JSR OSWRCH
