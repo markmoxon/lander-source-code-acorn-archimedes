@@ -2109,11 +2109,13 @@ SwitchScreenBank:
  LDRB    R0, screenBankNumber
  EORS    R0, R0, #1
  STRB    R0, screenBankNumber
+ STRB    R0, oswordCls+2
  ADR     R1, oswordCls
  MOV     R0, #240
  SWI     OS_Word
  MOV     PC, R14
 oswordCls:
+.byte 3
 .byte 0
 .byte 0
 .balign 4
@@ -2757,16 +2759,17 @@ Entry:
 .byte    "(C) D.J.Braben 1987"
 .byte    0
 .balign 4
- MOV     R0, #23
+ BL      SwitchScreenBank
+ MOV     R0, #31
  SWI     OS_WriteC
- MOV     R0, #1
- SWI     OS_WriteC
- MOV     R8, #8
-entr1:
  MOV     R0, #0
  SWI     OS_WriteC
- SUBS    R8, R8, #1
- BNE     entr1
+ SWI     OS_WriteC
+ SWI     OS_WriteS
+.byte    "Lander Demo/Practice "
+.byte    "(C) D.J.Braben 1987"
+.byte    0
+.balign 4
  LDR     R0, initialScore
  STR     R0, [R11, #currentScore]
  LDR     R0, initialHighScore

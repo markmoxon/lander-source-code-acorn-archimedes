@@ -16,6 +16,10 @@
                         \ own custom OSWORD commands for communicating over the
                         \ Tube
 
+ VIA = &FE00            \ Memory-mapped space for accessing internal hardware,
+                        \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
+                        \ known as SHEILA)
+
  OSWRCH = &FFEE         \ The address for the OSWRCH routine
 
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
@@ -302,8 +306,68 @@
 
 .CLS
 
- LDA #12
- JMP OSWRCH
+ LDY #2                 \ Fetch the argument (0 or 1)
+ LDA (OSSC),Y
+
+ BNE bank1              \ If argument is zero jump to bank1
+
+                        \ Display main memory on screen and switch drawing to
+                        \ shadow RAM
+
+ LDA #%00000110         \ Set bits 1 and 2 of the Access Control Register at
+ STA VIA+&34            \ SHEILA &34 to switch shadow RAM into &3000-&7FFF and
+                        \ switch drawing to shadow RAM
+                        \
+                        \ Clear bit 0 to display main memory on screen
+
+ JMP bank2              \ Jump to bank3 to clear the screen (this BNE is
+                        \ effectively a JMP as A is never zero)
+
+.bank1
+
+                        \ Display shadow RAM on screen and switch drawing to
+                        \ main memory
+
+ LDA #%00000001         \ Clear bits 1 and 2 of the Access Control Register at
+ STA VIA+&34            \ SHEILA &34 to switch main memory into &3000-&7FFF and
+                        \ switch drawing to main memory
+                        \
+                        \ Set bit 0 to display shadow RAM on screen
+
+.bank2
+
+\LDA #12
+\JMP OSWRCH
+
+ LDA #&35               \ Set P(1 0) = &3500
+ STA P+1
+ LDA #&00
+ STA P
+
+ LDX #&80-&35           \ The number of pages in screen memory, starting at
+                        \ &3500 (just below the two lines of scores)
+
+ LDY #0                 \ We want to zero one page of memory, so set Y as a byte
+                        \ counter
+
+.bank3
+
+ STA (P),Y              \ Zero the Y-th byte of the P(1 0) memory block
+
+ DEY                    \ Decrement the byte counter
+
+ BNE bank3              \ Loop back to copy the next byte until we have done a
+                        \ whole page of 256 bytes
+
+ INC P+1                \ Increment the high byte of the source address to point
+                        \ to the next page
+
+ DEX                    \ Decrement the page counter
+
+ BPL bank3              \ Loop back to copy the next page until we have done X
+                        \ pages
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -353,7 +417,7 @@
 
 .B%
 
- EQUB 22, 1             \ Switch to screen mode 1
+ EQUB 22, 129           \ Switch to screen mode 129 (shadow mode 1)
 
  EQUB 23, 0, 10, 32     \ Set 6845 register R10 = %00100000 = 32
  EQUB 0, 0, 0           \

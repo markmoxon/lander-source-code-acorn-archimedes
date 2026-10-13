@@ -9335,8 +9335,10 @@
 
                                     \ --- And replaced by: -------------------->
 
- ADR     R1, oswordCls              \ Clear the screen
- MOV     R0, #240
+ STRB    R0, oswordCls+2            \ Store screen number in the OS_Word block
+
+ ADR     R1, oswordCls              \ Switch to other screen bank and clear old
+ MOV     R0, #240                   \ one
  SWI     OS_Word
 
  MOV     PC, R14                    \ Return from the subroutine
@@ -9347,9 +9349,11 @@
 
 .oswordCls
 
- EQUB 0                             \ The number of bytes to transmit
+ EQUB 3                             \ The number of bytes to transmit
 
  EQUB 0                             \ The number of bytes to receive
+
+ EQUB 0                             \ The current screen bank number (0 or 1)
 
  ALIGN
 
@@ -12431,7 +12435,6 @@
 
                                     \ --- End of added code ------------------->
 
-
 .Entry
 
                                     \ --- Mod: Code removed for AES ----------->
@@ -12518,47 +12521,51 @@
  EQUB    0
  ALIGN
 
+ BL      SwitchScreenBank           \ Switch screen bank, so VDU commands go to
+                                    \ screen bank 2
+
                                     \ --- Mod: Code removed for AES ----------->
 
-\BL      SwitchScreenBank           \ Switch screen bank, so VDU commands go to
-\                                   \ screen bank 2
-\
 \MOV     R0, #22                    \ Change to screen mode 13 with shadow
 \SWI     OS_WriteC                  \ memory enabled (i.e. mode 128 + 13), which
 \MOV     R0, #128+13                \ creates two mode 13 screen banks
 \SWI     OS_WriteC
+\
+\MOV     R0, #23                    \ Start printing the following VDU command:
+\SWI     OS_WriteC                  \
+\MOV     R0, #1                     \   VDU 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
+\SWI     OS_WriteC                  \
+\                                   \ which disables the cursor
+\
+\MOV     R8, #8                     \ We now want to print the eight zeroes in
+\                                   \ the above command, so set a loop counter
+\                                   \ in R8
+\
+\.entr1
+\
+\MOV     R0, #0                     \ This loop prints the eight zeroes in the
+\SWI     OS_WriteC                  \ above VDU command
+\
+\SUBS    R8, R8, #1                 \ Decrement the loop counter
+\
+\BNE     entr1                      \ Loop back until we have printed all eight
+\                                   \ zeroes
 
-                                    \ --- End of removed code ----------------->
+                                    \ --- And replaced by: -------------------->
 
- MOV     R0, #23                    \ Start printing the following VDU command:
- SWI     OS_WriteC                  \
- MOV     R0, #1                     \   VDU 23, 1, 0, 0, 0, 0, 0, 0, 0, 0
- SWI     OS_WriteC                  \
-                                    \ which disables the cursor
+ MOV     R0, #31                    \ Move text cursor to (0, 0)
+ SWI     OS_WriteC
+ MOV     R0, #0
+ SWI     OS_WriteC
+ SWI     OS_WriteC
 
- MOV     R8, #8                     \ We now want to print the eight zeroes in
-                                    \ the above command, so set a loop counter
-                                    \ in R8
+                                    \ --- End of replacement ------------------>
 
-.entr1
-
- MOV     R0, #0                     \ This loop prints the eight zeroes in the
- SWI     OS_WriteC                  \ above VDU command
-
- SUBS    R8, R8, #1                 \ Decrement the loop counter
-
- BNE     entr1                      \ Loop back until we have printed all eight
-                                    \ zeroes
-
-                                    \ --- Mod: Code removed for AES ----------->
-
-\SWI     OS_WriteS                  \ Write the game's title into the top line
-\EQUS    "Lander Demo/Practice "    \ of screen bank 2, so the same title
-\EQUS    "(C) D.J.Braben 1987"      \ appears at the top of both screen banks
-\EQUB    0
-\ALIGN
-
-                                    \ --- End of removed code ----------------->
+ SWI     OS_WriteS                  \ Write the game's title into the top line
+ EQUS    "Lander Demo/Practice "    \ of screen bank 2, so the same title
+ EQUS    "(C) D.J.Braben 1987"      \ appears at the top of both screen banks
+ EQUB    0
+ ALIGN
 
  LDR     R0, initialScore           \ Initialise currentScore to the score that
  STR     R0, [R11, #currentScore]   \ we start each game with, which is set in
