@@ -20,8 +20,6 @@
 
  OSWORD = &FFF1         \ The address for the OSWORD routine
 
- OSCLI = &FFF7          \ The address for the OSCLI routine
-
 \ ******************************************************************************
 \
 \       Name: ZP
@@ -37,6 +35,19 @@
 .ZP
 
  SKIP 0                 \ The start of the zero page workspace
+
+.OSSC
+
+ SKIP 2                 \ When the parasite sends an OSWORD command to the I/O
+                        \ processor (i.e. an OSWORD with A = 240 to 255), then
+                        \ the relevant handler routine in the I/O processor is
+                        \ called with OSSC(1 0) pointing to the OSWORD parameter
+                        \ block (i.e. OSSC(1 0) = (Y X) from the original call
+                        \ in the I/O processor)
+
+.SC
+
+ SKIP 2                 \ Screen address
 
 .P
 
@@ -58,87 +69,6 @@
 
  SKIP 1                 \ Temporary storage, used in a number of places
 
-.SWAP
-
- SKIP 1                 \ Temporary storage, used to store a flag that records
-                        \ whether or not we had to swap a line's start and end
-                        \ coordinates around when clipping the line in routine
-                        \ LL145 (the flag is used in places like BLINE to swap
-                        \ them back)
-
-.T1
-
- SKIP 1                 \ Temporary storage, used in a number of places
-
-.COL
-
- SKIP 1                 \ Temporary storage, used to store colour information
-                        \ when drawing pixels in the dashboard
-
-.OSSC
-
- SKIP 2                 \ When the parasite sends an OSWORD command to the I/O
-                        \ processor (i.e. an OSWORD with A = 240 to 255), then
-                        \ the relevant handler routine in the I/O processor is
-                        \ called with OSSC(1 0) pointing to the OSWORD parameter
-                        \ block (i.e. OSSC(1 0) = (Y X) from the original call
-                        \ in the I/O processor)
-
- ORG &0090              \ Set the assembly address to &0090
-
-.XX15
-
- SKIP 0                 \ Temporary storage, typically used for storing screen
-                        \ coordinates in line-drawing routines
-                        \
-                        \ There are six bytes of storage, from XX15 TO XX15+5.
-                        \ The first four bytes have the following aliases:
-                        \
-                        \   X1 = XX15
-                        \   Y1 = XX15+1
-                        \   X2 = XX15+2
-                        \   Y2 = XX15+3
-                        \
-                        \ These are typically used for describing lines in terms
-                        \ of screen coordinates, i.e. (X1, Y1) to (X2, Y2)
-                        \
-                        \ The last two bytes of XX15 do not have aliases
-
-.X1
-
- SKIP 1                 \ Temporary storage, typically used for x-coordinates in
-                        \ the line-drawing routines
-
-.Y1
-
- SKIP 1                 \ Temporary storage, typically used for y-coordinates in
-                        \ line-drawing routines
-
-.X2
-
- SKIP 1                 \ Temporary storage, typically used for x-coordinates in
-                        \ the line-drawing routines
-
-.Y2
-
- SKIP 1                 \ Temporary storage, typically used for y-coordinates in
-                        \ line-drawing routines
-
- SKIP 2                 \ The last 2 bytes of the XX15 block
-
-.SC
-
- SKIP 1                 \ Screen address (low byte)
-                        \
-                        \ Elite draws on-screen by poking bytes directly into
-                        \ screen memory, and SC(1 0) is typically set to the
-                        \ address of the character block containing the pixel
-                        \ we want to draw
-
-.SCH
-
- SKIP 1                 \ Screen address (high byte)
-
  PRINT "ZP workspace (I/O processor) from ", ~ZP, "to ", ~P%-1, "inclusive"
 
 \ ******************************************************************************
@@ -154,11 +84,6 @@
  ORG CODE%
 
 .STARTUP
-
-\LDA #22                \ Mode 1
-\JSR OSWRCH
-\LDA #1
-\JSR OSWRCH
 
  LDA WORDV              \ Store the current WORDV vector in notours(2 1)
  STA notours+1
@@ -195,7 +120,7 @@
 .OSWVECS
 
  EQUW SAFE              \            240 (&F0)     0 = Do nothing
- EQUW PIXEL             \            241 (&F1)     1 = Draw space view pixels
+ EQUW PIXEL             \            241 (&F1)     1 = Draw pixel
  EQUW SAFE              \            242 (&F2)     2 = Do nothing
  EQUW SAFE              \            243 (&F3)     3 = Do nothing
  EQUW SAFE              \            244 (&F4)     4 = Do nothing
@@ -332,25 +257,12 @@
 \
 \                         * Byte #0 = The size of the pixel buffer being sent
 \
-\                         * Byte #2 = The distance of the first dot
+\                         * Bytes #2-#3 = The screen address of the byte
+\                                         containing the pixel
 \
-\                           * Bits 0-2 clear = Draw a two-pixel dash or
-\                             four-pixel square, as determined by the distance,
-\                             in white (cyan/red)
+\                         * Byte #4 = The pixel byte to ORA into the screen
 \
-\                           * Any of bits 0-2 set = Draw a one-pixel dot,
-\                             two-pixel dash or four-pixel square in the correct
-\                             colour, as determined by the distance
-\
-\                         * Byte #3 = The x-coordinate of the first dot
-\
-\                         * Byte #4 = The y-coordinate of the first dot
-\
-\                         * Byte #5 = The distance of the second dot
-\
-\                         * Byte #6 = The x-coordinate of the second dot
-\
-\                         * Byte #7 = The y-coordinate of the second dot
+\                         * Byte #5-#7 = Next pixel
 \
 \                       and so on
 \
@@ -367,49 +279,25 @@
 
 .PXLO
 
- LDA #25                \ VDU 25, 69, lo/hi x, lo/hi Y
- JSR OSWRCH             \ Draw pixel at (x, y) in range 1280x1024
- LDA #69                \ So multiply 320x256 by 4 in each axis
- JSR OSWRCH
-
- LDA (OSSC),Y           \ Set SC(1 0) to bytes #2/3 from the Y-th pixel block
- STA SC                 \ in OSSC, which contain the point's x-coordinate
- INY
+ LDA (OSSC),Y           \ Set SC(1 0) to bytes #2-#3 from the Y-th pixel block
+ STA SC                 \ in OSSC, which contains the screen offset, and add to
+ INY                    \ &3000 for mode 1 screen memory
  LDA (OSSC),Y
  STA SC+1
 
- ASL SC                 \ SC(1 0) = x * 4
- ROL SC+1
- ASL SC
- ROL SC+1
-
- LDA SC                 \ VDU x;
- JSR OSWRCH
- LDA SC+1
- JSR OSWRCH
-
  INY                    \ Increment Y to 4
 
- LDA (OSSC),Y           \ Set SC(1 0) to byte #4 from the Y-th pixel block in
- STA SC                 \ OSSC, which contains the pixel's y-coordinate
- LDA #0
- STA SC+1
+ STY P                  \ Store Y in P
 
- STY T1                 \ Store Y in T1, so we can keep looping through the
-                        \ coordinates
+ LDA (OSSC),Y           \ Set A to byte #4 from the Y-th pixel block in OSSC,
+                        \ which contains the pixel byte
 
- ASL SC                 \ SC(1 0) = y * 4
- ROL SC+1
- ASL SC
- ROL SC+1
+ LDY #0                 \ Draw the pixel on-screen using OR logic
+ ORA (SC),Y
+ STA (SC),Y
 
- LDA SC                 \ VDU y;
- JSR OSWRCH
- LDA SC+1
- JSR OSWRCH
-
- LDY T1                 \ Set Y to the index of this pixel's y-coordinate byte
-                        \ in the command block, which we stored in T1 above
+ LDY P                  \ Set Y to the index of this pixel's y-coordinate byte
+                        \ in the command block, which we stored in P above
 
  INY                    \ Increment Y, so it now points to the first byte of
                         \ the next pixel in the command block
@@ -418,8 +306,9 @@
  BEQ P%+5               \ contains the size of the pixel buffer), skip the next
                         \ instruction
 
- JMP PXLO               \ We haven't reached the end of the buffer, so loop back
-                        \ to PXLO to draw the next pixel in the buffer
+ BNE PXLO               \ We haven't reached the end of the buffer, so loop back
+                        \ to PXLO to draw the next pixel in the buffer (this BNE
+                        \ is effectively a JMP as we just passed through a BEQ)
 
  RTS                    \ Return from the subroutine
 

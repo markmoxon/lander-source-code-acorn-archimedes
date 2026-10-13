@@ -11987,45 +11987,91 @@
  STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- MOV     R3, R11                    \ Set R3 to the offset of the line in screen
-                                    \ memory
+                                    \ Decompose mode 13 screen address into mode
+                                    \ 1 address - should replace this by passing
+                                    \ coordinates to this routine rather than
+                                    \ screen address
 
- MOV     R2, #0                     \ Set R2 = 0 to use as a counter for the
-                                    \ multiples of 320 in R3
+ MOV     R2, R11                    \ Set R3 to the offset of the start of the
+                                    \ line within mode 13 screen memory
+
+ MOV     R3, #0                     \ Set R3 = 0 to use as a counter for the
+                                    \ multiples of 320 * 8 in R2
+
+ MOV     R4, #0                     \ Set R4 = 0 to use as a counter for the
+                                    \ multiples of 320 in R2
 
 .divl1
 
- CMP     R3, #320                   \ Decompose R3 into (320 * R2) + R3, so we 
- SUBCS   R3, R3, #320               \ get:
- ADDCS   R2, R2, #1                 \
- BCS     divl1                      \   * R2 is the pixel y-coordinate
+ CMP     R2, #320*8                 \ Decompose R2 into (320 * 8 * R3) + R2, so we 
+ SUBCS   R2, R2, #320*8             \ get:
+ ADDCS   R3, R3, #1                 \
+ BCS     divl1                      \   * R3 is the character row
                                     \
-                                    \   * R3 is the pixel x-coordinate
+                                    \   * R2 is the remainder
 
- RSB     R2, R2, #255               \ Set R2 = 255 - R2 to convert into MOS
-                                    \ y-coordinates
+.divl2
 
- STRB    R3, oswordPixel+2          \ Store the pixel x-coordinate in the
- MOV     R4, R3, LSR #8             \ OS_Word block
+ CMP     R2, #320                   \ Decompose R2 into (320 * R4) + R2, so we 
+ SUBCS   R2, R2, #320               \ get:
+ ADDCS   R4, R4, #1                 \
+ BCS     divl2                      \   * R2 is the pixel x-coordinate
+                                    \
+                                    \   * R4 is the pixel row within the
+                                    \     character row
+
+                                    \ By this point we have the following:
+                                    \
+                                    \   * R3 is the character row (8 pixel rows
+                                    \     per character)
+                                    \
+                                    \   * R4 is the pixel row within the
+                                    \     character row
+                                    \
+                                    \   * R2 is the pixel x-coordinate of the
+                                    \     start of the line
+                                    \
+                                    \ Address of the start of the mode 1 pixel
+                                    \ line containing the line = R3 * 640 + R4
+                                    \
+                                    \ Add (R2 / 4) * 8 to get the address of the
+                                    \ pixel byte containing the start of the
+                                    \ line
+                                    \
+                                    \ R2 AND %11 is the pixel number (0-3)
+                                    \ within the pixel byte
+
+ MOV     R5, R2, LSR #2             \ Set R5 = (R2 / 4) * 8 + R4
+ ADD     R5, R4, R5, LSL #3
+
+ ADD     R3, R3, R3, LSL #2         \ Set R6 = R5 + ((R3 + R3 << 2) << 7)
+ ADD     R6, R5, R3, LSL #7         \        = R5 + ((R3 + 4 * R3) * 128)
+                                    \        = R5 + R3 * 640
+
+ ADD     R6, R6, #&3000             \ Add &3000 for mode 1 screen memory
+
+ AND     R7, R2, #%00000011         \ Set R8 to a mode 1 pixel byte with pixel  
+ MOV     R8, #%10001000             \ R7 set (0 on the left, 3 on the right)
+ MOV     R8, R8, LSR R7
+
+                                    \ So we now have:
+                                    \
+                                    \   * R6 = screen offset of mode 1 byte
+                                    \
+                                    \   * R5 = pixel byte with pixel set
+
+ STRB    R6, oswordPixel+2          \ Store the screen address in the OS_Word
+ MOV     R4, R6, LSR #8             \ block
  STRB    R4, oswordPixel+3
 
- STRB    R2, oswordPixel+4          \ Store the pixel y-coordinate in the
-                                    \ OS_Word block
+ STRB    R8, oswordPixel+4          \ Store the pixel byte in the OS_Word block
 
  ADR     R1, oswordPixel            \ Draw the dot at the start of the line
  MOV     R0, #241
  SWI     OS_Word
 
- ADD     R3, R3, R10                \ Set the x-coordinate in R3 to the end of
-                                    \ the line
-
- STRB    R3, oswordPixel+2          \ Store the pixel x-coordinate in the
- MOV     R4, R3, LSR #8             \ OS_Word block
- STRB    R4, oswordPixel+3
-
- ADR     R1, oswordPixel            \ Draw the dot at the end of the line
- MOV     R0, #241
- SWI     OS_Word
+ ADD     R6, R6, R10                \ Calculate the address of the start of the
+                                    \ line
 
  LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -12040,9 +12086,9 @@
 
  EQUB 0                             \ The number of bytes to receive
 
- EQUW 50                            \ x (two bytes, 0 - 319)
+ EQUW &0000                         \ Mode 1 screen address of pixel byte
 
- EQUB 50                            \ y (one byte, 0 - 255)
+ EQUB 0                             \ Pixel byte to poke into screen address
 
  ALIGN
 

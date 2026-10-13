@@ -2613,34 +2613,41 @@ lineJump:
 .long    DrawLineSegment
 DrawHorizontalLine:
  STMFD   R13!, {R0-R12, R14}
- MOV     R3, R11
- MOV     R2, #0
+ MOV     R2, R11
+ MOV     R3, #0
+ MOV     R4, #0
 divl1:
- CMP     R3, #320
- SUBCS   R3, R3, #320
- ADDCS   R2, R2, #1
+ CMP     R2, #320*8
+ SUBCS   R2, R2, #320*8
+ ADDCS   R3, R3, #1
  BCS     divl1
- RSB     R2, R2, #255
- STRB    R3, oswordPixel+2
- MOV     R4, R3, LSR #8
+divl2:
+ CMP     R2, #320
+ SUBCS   R2, R2, #320
+ ADDCS   R4, R4, #1
+ BCS     divl2
+ MOV     R5, R2, LSR #2
+ ADD     R5, R4, R5, LSL #3
+ ADD     R3, R3, R3, LSL #2
+ ADD     R6, R5, R3, LSL #7
+ ADD     R6, R6, #0x3000
+ AND     R7, R2, #0x3
+ MOV     R8, #0x88
+ MOV     R8, R8, LSR R7
+ STRB    R6, oswordPixel+2
+ MOV     R4, R6, LSR #8
  STRB    R4, oswordPixel+3
- STRB    R2, oswordPixel+4
+ STRB    R8, oswordPixel+4
  ADR     R1, oswordPixel
  MOV     R0, #241
  SWI     OS_Word
- ADD     R3, R3, R10
- STRB    R3, oswordPixel+2
- MOV     R4, R3, LSR #8
- STRB    R4, oswordPixel+3
- ADR     R1, oswordPixel
- MOV     R0, #241
- SWI     OS_Word
+ ADD     R6, R6, R10
  LDMFD   R13!, {R0-R12, PC}
 oswordPixel:
 .byte 5
 .byte 0
-.word 50
-.byte 50
+.word 0x0000
+.byte 0
 .balign 4
 DrawLineSegment:
  STRB    R8, [R11, #16]
