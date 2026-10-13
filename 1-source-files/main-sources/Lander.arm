@@ -7929,7 +7929,15 @@
 
 .screenAddr
 
- EQUD    &01FD8000 + 16 * 320
+                                    \ --- Mod: Code removed for AES ----------->
+
+\EQUD    &01FD8000 + 16 * 320
+
+                                    \ --- And replaced by: -------------------->
+
+ EQUD    0
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -9148,7 +9156,15 @@
 
 .screenBank2Addr
 
- EQUD    &01FD8000 + 320 * 16
+                                    \ --- Mod: Code removed for AES ----------->
+
+\EQUD    &01FD8000 + 320 * 16
+
+                                    \ --- And replaced by: -------------------->
+
+ EQUD    0
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -9163,7 +9179,15 @@
 
 .screenBank1Addr
 
- EQUD    &01FEC000 + 320 * 16
+                                    \ --- Mod: Code removed for AES ----------->
+
+\EQUD    &01FEC000 + 320 * 16
+
+                                    \ --- And replaced by: -------------------->
+
+ EQUD    0
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -9218,94 +9242,98 @@
                                     \
                                     \   * 1 = draw bank 2, show bank 1
 
- LDRNE   R1, screenBank2Addr        \ Set screenAddr as follows:
- LDREQ   R1, screenBank1Addr        \
- STR     R1, screenAddr             \   * If screenBankNumber = 0, set it to the
-                                    \     address of bank 2 in screenBank2Addr
-                                    \
-                                    \   * If screenBankNumber = 1, set it to the
-                                    \     address of bank 1 in screenBank1Addr
-                                    \
-                                    \ So screenAddr points to the screen that is
-                                    \ no longer being shown, i.e. the bank that
-                                    \ we should now draw into
+                                    \ --- Mod: Code removed for AES ----------->
 
- TEQ     R0, #0                     \ Set R1 = screenBankNumber + 1
- MOVEQ   R1, #1                     \
- MOVNE   R1, #2                     \ So this sets R1 as follows:
-                                    \
-                                    \   * If screenBankNumber = 0, R1 = 1
-                                    \
-                                    \   * If screenBankNumber = 1, R1 = 2
-                                    \
-                                    \ So R1 is the number of the opposite bank
-                                    \ to the one in screenAddr, i.e. the bank
-                                    \ that we should now show on-screen
+\LDRNE   R1, screenBank2Addr        \ Set screenAddr as follows:
+\LDREQ   R1, screenBank1Addr        \
+\STR     R1, screenAddr             \   * If screenBankNumber = 0, set it to the
+\                                   \     address of bank 2 in screenBank2Addr
+\                                   \
+\                                   \   * If screenBankNumber = 1, set it to the
+\                                   \     address of bank 1 in screenBank1Addr
+\                                   \
+\                                   \ So screenAddr points to the screen that is
+\                                   \ no longer being shown, i.e. the bank that
+\                                   \ we should now draw into
+\
+\TEQ     R0, #0                     \ Set R1 = screenBankNumber + 1
+\MOVEQ   R1, #1                     \
+\MOVNE   R1, #2                     \ So this sets R1 as follows:
+\                                   \
+\                                   \   * If screenBankNumber = 0, R1 = 1
+\                                   \
+\                                   \   * If screenBankNumber = 1, R1 = 2
+\                                   \
+\                                   \ So R1 is the number of the opposite bank
+\                                   \ to the one in screenAddr, i.e. the bank
+\                                   \ that we should now show on-screen
+\
+\MOV     R0, #113                   \ Set the display hardware to display the
+\SWI     OS_Byte                    \ screen bank in R1, so the correct bank is
+\                                   \ shown on-screen
+\                                   \
+\                                   \ This call returns the old bank number in
+\                                   \ R1, so R1 now contains the number of the
+\                                   \ screen bank that is not being displayed
+\
+\MOV     R0, #112                   \ Set the VDU driver screen bank to the bank
+\SWI     OS_Byte                    \ number in R1, so this directs VDU calls
+\                                   \ (such as the text routines that update the
+\                                   \ score bar) so they update the hidden
+\                                   \ screen bank
+\
+\MOV     R0, #19                    \ Wait for the vertical sync
+\SWI     OS_Byte
+\
+\                                   \ We now clear the screen bank that isn't
+\                                   \ being shown, i.e. the bank at screenAddr
+\
+\STMFD   R13!, {R9, R11-R12, R14}   \ Store the registers that we want to use on
+\                                   \ the stack so they can be preserved
+\
+\MOV     R0, #0                     \ Set R0 to R9 to zero so we can use them to
+\MOV     R1, #0                     \ clear the screen bank to black (as black
+\MOV     R2, #0                     \ is represented by zero in screen memory)
+\MOV     R3, #0
+\MOV     R4, #0
+\MOV     R5, #0
+\MOV     R6, #0
+\MOV     R7, #0
+\MOV     R8, #0
+\MOV     R9, #0
+\
+\LDR     R11, screenAddr            \ Set R11 = screenAddr
+\                                   \
+\                                   \ So R11 contains the address of the screen
+\                                   \ bank we want to clear, pointing just below
+\                                   \ the two lines of text at the top of the
+\                                   \ screen
+\
+\ADD     R12, R11, #&12C00          \ Set R12 = screenAddr + 320 * 240
+\                                   \
+\                                   \ So R12 points to the end of screen memory
+\                                   \ for the bank at screenAddr, as the address
+\                                   \ in R11 skips the first 16 pixel rows of
+\                                   \ the 320 * 256 screen
+\
+\                                   \ We now zero screen memory from R12 down to
+\                                   \ R11, which clears the screen bank that we
+\                                   \ are no longer showing on-screen
+\
+\.bank1
+\
+\STMDB   R12!, {R0-R9}              \ Zero 40 x 32-bit words of screen memory,
+\STMDB   R12!, {R0-R9}              \ decreasing the address in R12 as we go
+\STMDB   R12!, {R0-R9}
+\STMDB   R12!, {R0-R9}
+\
+\CMP     R12, R11                   \ If R12 hasn't yet reached the start of the
+\BNE     bank1                      \ bank's screen memory in R11, loop back to
+\                                   \ keep zeroing screen memory until it is all
+\                                   \ cleared to black, leaving just the two
+\                                   \ lines of text at the top
 
- MOV     R0, #113                   \ Set the display hardware to display the
- SWI     OS_Byte                    \ screen bank in R1, so the correct bank is
-                                    \ shown on-screen
-                                    \
-                                    \ This call returns the old bank number in
-                                    \ R1, so R1 now contains the number of the
-                                    \ screen bank that is not being displayed
-
- MOV     R0, #112                   \ Set the VDU driver screen bank to the bank
- SWI     OS_Byte                    \ number in R1, so this directs VDU calls
-                                    \ (such as the text routines that update the
-                                    \ score bar) so they update the hidden
-                                    \ screen bank
-
- MOV     R0, #19                    \ Wait for the vertical sync
- SWI     OS_Byte
-
-                                    \ We now clear the screen bank that isn't
-                                    \ being shown, i.e. the bank at screenAddr
-
- STMFD   R13!, {R9, R11-R12, R14}   \ Store the registers that we want to use on
-                                    \ the stack so they can be preserved
-
- MOV     R0, #0                     \ Set R0 to R9 to zero so we can use them to
- MOV     R1, #0                     \ clear the screen bank to black (as black
- MOV     R2, #0                     \ is represented by zero in screen memory)
- MOV     R3, #0
- MOV     R4, #0
- MOV     R5, #0
- MOV     R6, #0
- MOV     R7, #0
- MOV     R8, #0
- MOV     R9, #0
-
- LDR     R11, screenAddr            \ Set R11 = screenAddr
-                                    \
-                                    \ So R11 contains the address of the screen
-                                    \ bank we want to clear, pointing just below
-                                    \ the two lines of text at the top of the
-                                    \ screen
-
- ADD     R12, R11, #&12C00          \ Set R12 = screenAddr + 320 * 240
-                                    \
-                                    \ So R12 points to the end of screen memory
-                                    \ for the bank at screenAddr, as the address
-                                    \ in R11 skips the first 16 pixel rows of
-                                    \ the 320 * 256 screen
-
-                                    \ We now zero screen memory from R12 down to
-                                    \ R11, which clears the screen bank that we
-                                    \ are no longer showing on-screen
-
-.bank1
-
- STMDB   R12!, {R0-R9}              \ Zero 40 x 32-bit words of screen memory,
- STMDB   R12!, {R0-R9}              \ decreasing the address in R12 as we go
- STMDB   R12!, {R0-R9}
- STMDB   R12!, {R0-R9}
-
- CMP     R12, R11                   \ If R12 hasn't yet reached the start of the
- BNE     bank1                      \ bank's screen memory in R11, loop back to
-                                    \ keep zeroing screen memory until it is all
-                                    \ cleared to black, leaving just the two
-                                    \ lines of text at the top
+                                    \ --- End of removed code ----------------->
 
  LDMFD   R13!, {R9, R11-R12, PC}    \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -11951,14 +11979,19 @@
 \CMPLO   R11, R10                   \ R11 and then re-checking whether R11 has
 \STRLOB  R8, [R11], #1              \ reached R10 (and drawing the next pixel if
 \                                   \ it hasn't)
+\
+\MOV     PC, R14                    \ Return from the subroutine
 
                                     \ --- And replaced by: -------------------->
 
- LDR     R0, screenAddr             \ Set R3 = R11 - screenAddr, so it contains
- SUB     R3, R11, R0                \ the offset of the line in screen memory
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R3, R11                    \ Set R3 to the offset of the line in screen
+                                    \ memory
 
  MOV     R2, #0                     \ Set R2 = 0 to use as a counter for the
-                                    \ multiples of 320 in R1
+                                    \ multiples of 320 in R3
 
 .divl1
 
@@ -11969,7 +12002,7 @@
                                     \
                                     \   * R3 is the pixel x-coordinate
 
-\RSB     R2, R2, #255               \ Set R2 = 255 - R2 to convert into MOS
+ RSB     R2, R2, #255               \ Set R2 = 255 - R2 to convert into MOS
                                     \ y-coordinates
 
  STRB    R3, oswordPixel+2          \ Store the pixel x-coordinate in the
@@ -11992,11 +12025,12 @@
 
  ADR     R1, oswordPixel            \ Draw the dot at the end of the line
  MOV     R0, #241
-\SWI     OS_Word
+ SWI     OS_Word
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
                                     \ --- End of replacement ------------------>
-
- MOV     PC, R14                    \ Return from the subroutine
 
                                     \ --- Mod: Code added for AES ------------->
 

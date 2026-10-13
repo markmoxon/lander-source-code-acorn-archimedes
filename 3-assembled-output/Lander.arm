@@ -1920,7 +1920,7 @@ GetRandomNumbers:
  STR     R0, randomSeed2
  LDMFD   R13!, {PC}
 screenAddr:
-.long    0x01FD8000 + 16 * 320
+.long    0
 greyColourWords:
 .long    0x00000000
 .long    0x01010101
@@ -2100,9 +2100,9 @@ term1:
  BPL     term1
  LDMFD   R13!, {R12, PC}
 screenBank2Addr:
-.long    0x01FD8000 + 320 * 16
+.long    0
 screenBank1Addr:
-.long    0x01FEC000 + 320 * 16
+.long    0
 screenBankNumber:
 .long    0
 divisionTableAddr:
@@ -2111,38 +2111,6 @@ SwitchScreenBank:
  LDRB    R0, screenBankNumber
  EORS    R0, R0, #1
  STRB    R0, screenBankNumber
- LDRNE   R1, screenBank2Addr
- LDREQ   R1, screenBank1Addr
- STR     R1, screenAddr
- TEQ     R0, #0
- MOVEQ   R1, #1
- MOVNE   R1, #2
- MOV     R0, #113
- SWI     OS_Byte
- MOV     R0, #112
- SWI     OS_Byte
- MOV     R0, #19
- SWI     OS_Byte
- STMFD   R13!, {R9, R11-R12, R14}
- MOV     R0, #0
- MOV     R1, #0
- MOV     R2, #0
- MOV     R3, #0
- MOV     R4, #0
- MOV     R5, #0
- MOV     R6, #0
- MOV     R7, #0
- MOV     R8, #0
- MOV     R9, #0
- LDR     R11, screenAddr
- ADD     R12, R11, #0x12C00
-bank1:
- STMDB   R12!, {R0-R9}
- STMDB   R12!, {R0-R9}
- STMDB   R12!, {R0-R9}
- STMDB   R12!, {R0-R9}
- CMP     R12, R11
- BNE     bank1
  LDMFD   R13!, {R9, R11-R12, PC}
 DrawQuadrilateral:
  STMFD   R13!, {R2-R7, R9-R12, R14}
@@ -2644,14 +2612,15 @@ lineJump:
 .long    DrawLineSegment + 1 * 4
 .long    DrawLineSegment
 DrawHorizontalLine:
- LDR     R0, screenAddr
- SUB     R3, R11, R0
+ STMFD   R13!, {R0-R12, R14}
+ MOV     R3, R11
  MOV     R2, #0
 divl1:
  CMP     R3, #320
  SUBCS   R3, R3, #320
  ADDCS   R2, R2, #1
  BCS     divl1
+ RSB     R2, R2, #255
  STRB    R3, oswordPixel+2
  MOV     R4, R3, LSR #8
  STRB    R4, oswordPixel+3
@@ -2665,7 +2634,8 @@ divl1:
  STRB    R4, oswordPixel+3
  ADR     R1, oswordPixel
  MOV     R0, #241
- MOV     PC, R14
+ SWI     OS_Word
+ LDMFD   R13!, {R0-R12, PC}
 oswordPixel:
 .byte 5
 .byte 0
