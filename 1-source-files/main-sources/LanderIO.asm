@@ -336,9 +336,6 @@
 
 .bank2
 
-\LDA #12
-\JMP OSWRCH
-
  LDA #&35               \ Set P(1 0) = &3500
  STA P+1
  LDA #&00

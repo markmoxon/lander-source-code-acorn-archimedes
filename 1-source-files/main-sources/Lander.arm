@@ -9345,6 +9345,15 @@
 
                                     \ --- End of replacement ------------------>
 
+\ ******************************************************************************
+\
+\       Name: oswordCls
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: OS_Word block for bank switching and clearing the screen
+\
+\ ******************************************************************************
+
                                     \ --- Mod: Code added for AES ------------->
 
 .oswordCls
@@ -12069,7 +12078,7 @@
                                     \   * R4 is the pixel row within the
                                     \     character row
 
- MOV     R8, #%00001000             \ Draw ships in colour 1 (red)
+ MOV     R8, #%00001000             \ Draw ships/fuel in colour 1 (red)
 
  BL      DrawPixelInRow             \ Draw a pixel at the start of the line
 
@@ -12082,6 +12091,15 @@
                                     \ the stack and return from the subroutine
 
                                     \ --- End of replacement ------------------>
+
+\ ******************************************************************************
+\
+\       Name: oswordPixel
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: OS_Word block for drawing pixels
+\
+\ ******************************************************************************
 
                                     \ --- Mod: Code added for AES ------------->
 
@@ -12099,11 +12117,31 @@
 
                                     \ --- End of added code ------------------->
 
+\ ******************************************************************************
+\
+\       Name: DrawPixel
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a mode 1 pixel given the mode 13 coordinates, skipping the
+\             top two character rows of the screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The pixel x-coordinate (0-319)
+\
+\   R1                              The pixel y-coordinate (0-239)
+\
+\   R8                              Colour as a mode 1 pixel byte
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
 .DrawPixel
 
-                                    \ Plot pixel (R0, R1) in mode 1 colour R8
-
- CMP     R0, #320                   \ Check to see if the corner is off-screen,
+ CMP     R0, #320                   \ Check to see if the pixel is off-screen,
  CMPLO   R1, #239                   \ in which case return from the subroutine
  MOVHS   PC, R14
 
@@ -12113,45 +12151,67 @@
  MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
  AND     R4, R1, #%111              \ following:
  MOV     R2, R0                     \
+                                    \   * R2 is the pixel x-coordinate of the
+                                    \     start of the line
+                                    \
                                     \   * R3 is the character row (8 pixel rows
                                     \     per character)
                                     \
                                     \   * R4 is the pixel row within the
                                     \     character row
-                                    \
-                                    \   * R2 is the pixel x-coordinate of the
-                                    \     start of the line
 
  BL      DrawPixelInRow             \ Draw the pixel at the start of the line
 
  LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: DrawPixelInRow
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a mode 1 pixel given the character row
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R2                              Pixel x-coordinate of the pixel
+\
+\   R3                              Character row (8 pixel rows per character)
+\
+\   R4                              Pixel row within the character row (0-7)
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
 .DrawPixelInRow
 
  STMFD   R13!, {R2-R4, R8, R14}     \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
-                                    \ By this point we have the following:
+                                    \ Calculate the address of the start of the
+                                    \ mode 1 pixel line containing the pixel:
                                     \
-                                    \   * R3 is the character row (8 pixel rows
-                                    \     per character)
-                                    \
-                                    \   * R4 is the pixel row within the
-                                    \     character row
-                                    \
-                                    \   * R2 is the pixel x-coordinate of the
-                                    \     start of the line
-                                    \
-                                    \ Address of the start of the mode 1 pixel
-                                    \ line containing the line = R3 * 640 + R4
+                                    \   R3 * 640 + R4
                                     \
                                     \ Add (R2 / 4) * 8 to get the address of the
-                                    \ pixel byte containing the start of the
-                                    \ line
+                                    \ pixel byte containing the pixel
                                     \
-                                    \ R2 AND %11 is the pixel number (0-3)
-                                    \ within the pixel byte
+                                    \   (R2 / 4) * 8 + R3 * 640 + R4
+                                    \
+                                    \ Add &3000 to get a mode 1 screen address
+                                    \
+                                    \ Calculate the pixel number (0-3) within
+                                    \ the pixel byte:
+                                    \
+                                    \   R2 AND %00000011
+                                    \
+                                    \ and use this to create the pixel byte to
+                                    \ poke into screen memory
 
  MOV     R5, R2, LSR #2             \ Set R5 = (R2 / 4) * 8 + R4
  ADD     R5, R4, R5, LSL #3
@@ -12160,7 +12220,9 @@
  ADD     R6, R5, R3, LSL #7         \        = R5 + ((R3 + 4 * R3) * 128)
                                     \        = R5 + R3 * 640
 
- ADD     R6, R6, #&3000             \ Add &3000 for mode 1 screen memory
+ ADD     R6, R6, #&3500             \ Add &3500 to get a mode 1 screen memory
+                                    \ address, skipping the top two character
+                                    \ rows
 
  AND     R7, R2, #%00000011         \ Shift the pixel byte in R8 to set the
  MOV     R8, R8, LSR R7             \ pixel at position R7 (0 on the left, 3 on
@@ -12184,6 +12246,8 @@
 
  LDMFD   R13!, {R2-R4, R8, PC}      \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
@@ -12416,10 +12480,10 @@
 
 \ ******************************************************************************
 \
-\       Name: Entry
-\       Type: Subroutine
-\   Category: Start and end
-\    Summary: The main entry point for the game
+\       Name: oswordMode
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: OS_Word block for changing screen mode
 \
 \ ******************************************************************************
 
@@ -12434,6 +12498,15 @@
  ALIGN
 
                                     \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: Entry
+\       Type: Subroutine
+\   Category: Start and end
+\    Summary: The main entry point for the game
+\
+\ ******************************************************************************
 
 .Entry
 

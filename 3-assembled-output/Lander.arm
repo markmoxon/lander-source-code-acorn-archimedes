@@ -2668,7 +2668,7 @@ DrawPixelInRow:
  ADD     R5, R4, R5, LSL #3
  ADD     R3, R3, R3, LSL #2
  ADD     R6, R5, R3, LSL #7
- ADD     R6, R6, #0x3000
+ ADD     R6, R6, #0x3500
  AND     R7, R2, #0x3
  MOV     R8, R8, LSR R7
  STRB    R6, oswordPixel+2

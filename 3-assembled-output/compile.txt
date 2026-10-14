@@ -2751,7 +2751,7 @@ Source: "3-assembled-output/Lander.arm"
 00:000034B4 855184E0        	  2668:  ADD     R5, R4, R5, LSL #3
 00:000034B8 033183E0        	  2669:  ADD     R3, R3, R3, LSL #2
 00:000034BC 836385E0        	  2670:  ADD     R6, R5, R3, LSL #7
-00:000034C0 036A86E2        	  2671:  ADD     R6, R6, #0x3000
+00:000034C0 356C86E2        	  2671:  ADD     R6, R6, #0x3500
 00:000034C4 037002E2        	  2672:  AND     R7, R2, #0x3
 00:000034C8 3887A0E1        	  2673:  MOV     R8, R8, LSR R7
 00:000034CC 52604FE5        	  2674:  STRB    R6, oswordPixel+2
