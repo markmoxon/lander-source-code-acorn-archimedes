@@ -2441,9 +2441,6 @@
                                     \ ensure the particle starts out at the end
                                     \ of the gun
 
-
-
-
  MOV     R6, #20                    \ Set the bullet particle's lifespan
                                     \ counter to 20 iterations of the main loop
 
@@ -4194,7 +4191,6 @@
  TST     R2, #%00001000             \ If bit 3 of the blue channel in R2 is set,
  ORRNE   R7, R7, #%10000000         \ set bit 7 of R7
 
-
  ORR     R7, R7, #&00FE0000         \ Set bits 17 to 23 of the particle flags,
                                     \ so that's:
                                     \
@@ -4359,7 +4355,6 @@
 
  TST     R2, #%00001000             \ If bit 3 of the blue channel in R2 is set,
  ORRNE   R7, R7, #%10000000         \ set bit 7 of R7
-
 
  ORR     R7, R7, #&00100000         \ Set bit 20 of the particle flags, so that
                                     \ gravity is applied to the particle
@@ -9837,7 +9832,6 @@
                                     \
                                     \   R14 = |x3 - x2|
 
-
  CMP     R14, #64                   \ If either R14 >= 64 or R9 >= 64, then at
  CMPLO   R9, #64                    \ least one of these is true:
  BHS     trin11                     \
@@ -10330,7 +10324,6 @@
  B       trin22                     \ Jump to trin22 to skip the following and
                                     \ keep going
 
-
 .trin20
 
                                     \ If we get here then at least one of these
@@ -10721,7 +10714,6 @@
 
  B       trin32                     \ Jump to trin32 to skip the following and
                                     \ keep going
-
 
 .trin30
 
@@ -11389,7 +11381,6 @@
 
  B       trin44                     \ Jump to trin44 to skip the following and
                                     \ keep going
-
 
 .trin42
 
