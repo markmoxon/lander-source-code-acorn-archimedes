@@ -1336,18 +1336,13 @@ DrawFuelLevel:
  SUBS    R1, R1, R2
  MOVMI   R1, #0
  STR     R1, [R11, #fuelLevel]
- LDR     R7, screenAddr
- ADD     R11, R7, #320
- LDR     R8, fuelBarColour
+ MOV     R11, #0
+ MOV     R12, #0
  MOV     R10, R1, LSR #4
  BL      DrawHorizontalLine
- ADD     R11, R7, #2*320
- LDR     R8, fuelBarColour
- MOV     R10, R1, LSR #4
+ ADD     R12, R12, #1
  BL      DrawHorizontalLine
- ADD     R11, R7, #3*320
- LDR     R8, fuelBarColour
- MOV     R10, R1, LSR #4
+ ADD     R12, R12, #1
  BL      DrawHorizontalLine
  LDMFD   R13!, {R10-R12, PC}
 graphicsBufferEndAddr:
@@ -2165,8 +2160,7 @@ trin2:
  MOV     R3, R5
  MOV     R5, R6
 trin3:
- ADD     R11, R1, R1, LSL #2
- ADD     R12, R12, R11, LSL #6
+ MOV     R12, R1
  SUBS    R9, R1, R3
  BEQ     trin16
  STMFD   R13!, {R4-R5}
@@ -2228,11 +2222,11 @@ trin9:
 trin10:
  ADD     R4, R4, R6
  ADD     R5, R5, R7
- ADD     R11, R12, R4, LSR #16
+ MOV     R11, R4, LSR #16
  MOV     R10, R5, LSR #16
  SUBS    R10, R10, R4, LSR #16
  BLPL    DrawHorizontalLine
- SUB     R12, R12, #320
+ SUB     R12, R12, #1
  SUBS    R9, R9, #1
  BNE     trin10
  LDMFD   R13!, {R0-R1}
@@ -2277,11 +2271,11 @@ trin13:
 trin14:
  ADD     R4, R4, R6
  ADD     R5, R5, R7
- ADD     R11, R12, R4, LSR #16
+ MOV     R11, R4, LSR #16
  MOV     R10, R5, LSR #16
  SUBS    R10, R10, R4, LSR #16
  BLPL    DrawHorizontalLine
- SUB     R12, R12, #320
+ SUB     R12, R12, #1
  SUBS    R9, R9, #1
  BNE     trin14
  LDMFD   R13!, {PC}
@@ -2588,7 +2582,7 @@ trin46:
  BMI     trin47
  CMP     R4, #0
  MOVPL   R0, R4, LSR #16
- ADDPL   R11, R11, R4, LSR #16
+ MOVPL   R11, R4, LSR #16
  MOVMI   R0, #0
  CMP     R5, #0x01400000
  RSBLO   R10, R0, R5, LSR #16
@@ -2624,19 +2618,11 @@ lineJump:
 DrawHorizontalLine:
  STMFD   R13!, {R0-R12, R14}
  MOV     R2, R11
- MOV     R3, #0
- MOV     R4, #0
-divl1:
- CMP     R2, #320*8
- SUBCS   R2, R2, #320*8
- ADDCS   R3, R3, #1
- BCS     divl1
-divl2:
- CMP     R2, #320
- SUBCS   R2, R2, #320
- ADDCS   R4, R4, #1
- BCS     divl2
+ MOV     R3, R12, LSR #3
+ AND     R4, R12, #0x7
  MOV     R8, #0x8
+ BL      DrawPixelInRow
+ ADD     R2, R2, R10
  BL      DrawPixelInRow
  LDMFD   R13!, {R0-R12, PC}
 oswordPixel:

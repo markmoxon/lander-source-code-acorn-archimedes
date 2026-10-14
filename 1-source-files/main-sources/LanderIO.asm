@@ -463,6 +463,9 @@
                         \ setting cursor display mode %01, with bit 6 of R10
                         \ clear and bit 5 of R10 set
 
+ EQUB 19, 1, 1          \ Define logical colour 1 as red
+ EQUB 0, 0, 0
+
  EQUB 19, 2, 2          \ Define logical colour 2 as green
  EQUB 0, 0, 0
 

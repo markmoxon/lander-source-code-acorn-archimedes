@@ -5951,18 +5951,27 @@
  STR     R1, [R11, #fuelLevel]      \ zero, and store the updated fuel level in
                                     \ fuelLevel (and leaving the value in R1)
 
- LDR     R7, screenAddr             \ Set R7 to the address of the screen bank
-                                    \ we are drawing in, pointing just below
-                                    \ the two lines of text at the top of the
-                                    \ screen
+                                    \ --- Mod: Code removed for AES ----------->
 
- ADD     R11, R7, #320              \ Set R11 to the address in R7, plus 320 to
-                                    \ move it down by one pixel line
+\LDR     R7, screenAddr             \ Set R7 to the address of the screen bank
+\                                   \ we are drawing in, pointing just below
+\                                   \ the two lines of text at the top of the
+\                                   \ screen
+\
+\ADD     R11, R7, #320              \ Set R11 to the address in R7, plus 320 to
+\                                   \ move it down by one pixel line
+\
+\LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+\                                   \ we need to poke into screen memory to draw
+\                                   \ four pixels in the correct colour for the
+\                                   \ fuel bar
 
- LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
-                                    \ we need to poke into screen memory to draw
-                                    \ four pixels in the correct colour for the
-                                    \ fuel bar
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R11, #0                    \ Set (R11, R12) = (0, 0)
+ MOV     R12, #0
+
+                                    \ --- End of replacement ------------------>
 
  MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
                                     \         = fuel level / 16
@@ -5972,32 +5981,48 @@
                                     \ to the right in the colour in R8, so
                                     \ that's the top pixel row of the bar
 
- ADD     R11, R7, #2*320            \ Set R11 to the address in R7, plus 640 to
-                                    \ move it down by two pixel lines
+                                    \ --- Mod: Code removed for AES ----------->
 
- LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
-                                    \ we need to poke into screen memory to draw
-                                    \ four pixels in the correct colour for the
-                                    \ fuel bar
+\ADD     R11, R7, #2*320            \ Set R11 to the address in R7, plus 640 to
+\                                   \ move it down by two pixel lines
+\
+\LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+\                                   \ we need to poke into screen memory to draw
+\                                   \ four pixels in the correct colour for the
+\                                   \ fuel bar
+\
+\MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+\                                   \         = fuel level / 16
 
- MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
-                                    \         = fuel level / 16
+                                    \ --- And replaced by: -------------------->
+
+ ADD     R12, R12, #1               \ Move to next pixel line down
+
+                                    \ --- End of replacement ------------------>
 
  BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
                                     \ starting at screen address R11 and drawing
                                     \ to the right in the colour in R8, so
                                     \ that's the middle pixel row of the bar
 
- ADD     R11, R7, #3*320            \ Set R11 to the address in R7, plus 960 to
-                                    \ move it down by two pixel lines
+                                    \ --- Mod: Code removed for AES ----------->
 
- LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
-                                    \ we need to poke into screen memory to draw
-                                    \ four pixels in the correct colour for the
-                                    \ fuel bar
+\ADD     R11, R7, #3*320            \ Set R11 to the address in R7, plus 960 to
+\                                   \ move it down by two pixel lines
+\
+\LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+\                                   \ we need to poke into screen memory to draw
+\                                   \ four pixels in the correct colour for the
+\                                   \ fuel bar
+\
+\MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+\                                   \         = fuel level / 16
 
- MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
-                                    \         = fuel level / 16
+                                    \ --- And replaced by: -------------------->
+
+ ADD     R12, R12, #1               \ Move to next pixel line down
+
+                                    \ --- End of replacement ------------------>
 
  BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
                                     \ starting at screen address R11 and drawing
@@ -9566,16 +9591,25 @@
 
 .trin3
 
- ADD     R11, R1, R1, LSL #2        \ Set R11 = R1 + R1 * 4
-                                    \         = 5 * y1
+                                    \ --- Mod: Code removed for AES ----------->
 
- ADD     R12, R12, R11, LSL #6      \ Set R12 = R12 + R11 * 64
-                                    \         = screenAddr + 5 * y1 * 64
-                                    \         = screenAddr + 320 * y1
-                                    \
-                                    \ So R12 is the screen address of the start
-                                    \ of the pixel row containing (x1, y1), at
+\ADD     R11, R1, R1, LSL #2        \ Set R11 = R1 + R1 * 4
+\                                   \         = 5 * y1
+\
+\ADD     R12, R12, R11, LSL #6      \ Set R12 = R12 + R11 * 64
+\                                   \         = screenAddr + 5 * y1 * 64
+\                                   \         = screenAddr + 320 * y1
+\                                   \
+\                                   \ So R12 is the screen address of the start
+\                                   \ of the pixel row containing (x1, y1), at
+\                                   \ the bottom of the triangle on-screen
+
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R12, R1                    \ Set R12 to y1, the y-coordinate of the
                                     \ the bottom of the triangle on-screen
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -9961,11 +9995,23 @@
                                     \ right edge by the correct slope as we move
                                     \ up by one pixel row
 
- ADD     R11, R12, R4, LSR #16      \ Set R11 = R12 + R4 >> 16
-                                    \         = screen address of row + x1
+                                    \ --- Mod: Code removed for AES ----------->
+
+\ADD     R11, R12, R4, LSR #16      \ Set R11 = R12 + R4 >> 16
+\                                   \         = screen address of row + x1
+\                                   \
+\                                   \ So R11 contains the screen address of the
+\                                   \ left end of the line to draw
+
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R11, R4, LSR #16           \ Set R11 = R4 >> 16
+                                    \         = x1
                                     \
-                                    \ So R11 contains the screen address of the
+                                    \ So R11 contains the x-coordinate of the
                                     \ left end of the line to draw
+
+                                    \ --- End of replacement ------------------>
 
  MOV     R10, R5, LSR #16           \ Set R10 = R5 >> 16 - R4 >> 16
  SUBS    R10, R10, R4, LSR #16      \         =   x-coordinate of right edge
@@ -9979,9 +10025,19 @@
                                     \ using the four-pixel colour word that was
                                     \ passed to the DrawTriangle routine in R8
 
- SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
+                                    \ --- Mod: Code removed for AES ----------->
+
+\SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
                                     \ points to the start of the pixel row above
                                     \ the one we just drew
+
+                                    \ --- And replaced by: -------------------->
+
+ SUB     R12, R12, #1               \ Subtract 1 from R12 so that R12 is now the
+                                    \ y-coordinate of the pixel row above the
+                                    \ one we just drew
+
+                                    \ --- End of replacement ------------------>
 
  SUBS    R9, R9, #1                 \ Decrement the pixel row counter in R9,
                                     \ which contains the number of pixel rows
@@ -10235,11 +10291,23 @@
                                     \ right edge by the correct slope as we move
                                     \ up by one pixel row
 
- ADD     R11, R12, R4, LSR #16      \ Set R11 = R12 + R4 >> 16
-                                    \         = screen address of row + x1
+                                    \ --- Mod: Code removed for AES ----------->
+
+\ADD     R11, R12, R4, LSR #16      \ Set R11 = R12 + R4 >> 16
+\                                   \         = screen address of row + x1
+\                                   \
+\                                   \ So R11 contains the screen address of the
+\                                   \ left end of the line to draw
+
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R11, R4, LSR #16           \ Set R11 = R4 >> 16
+                                    \         = x1
                                     \
-                                    \ So R11 contains the screen address of the
+                                    \ So R11 contains the x-coordinate of the
                                     \ left end of the line to draw
+
+                                    \ --- End of replacement ------------------>
 
  MOV     R10, R5, LSR #16           \ Set R10 = R5 >> 16 - R4 >> 16
  SUBS    R10, R10, R4, LSR #16      \         =   x-coordinate of right edge
@@ -10253,9 +10321,19 @@
                                     \ using the four-pixel colour word that was
                                     \ passed to the DrawTriangle routine in R8
 
- SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
+                                    \ --- Mod: Code removed for AES ----------->
+
+\SUB     R12, R12, #320             \ Subtract 320 from R12 so that R12 now
                                     \ points to the start of the pixel row above
                                     \ the one we just drew
+
+                                    \ --- And replaced by: -------------------->
+
+ SUB     R12, R12, #1               \ Subtract 1 from R12 so that R12 is now the
+                                    \ y-coordinate of the pixel row above the
+                                    \ one we just drew
+
+                                    \ --- End of replacement ------------------>
 
  SUBS    R9, R9, #1                 \ Decrement the pixel row counter in R9,
                                     \ which contains the number of pixel rows
@@ -11803,12 +11881,24 @@
                                     \ The shift removes the fractional part from
                                     \ R4
 
- ADDPL   R11, R11, R4, LSR #16      \ If the left end of the line is positive,
-                                    \ set R11 = R11 + R4 >> 16
-                                    \         = screen address of row + x1
+                                    \ --- Mod: Code removed for AES ----------->
+
+\ADDPL   R11, R11, R4, LSR #16      \ If the left end of the line is positive,
+\                                   \ set R11 = R11 + R4 >> 16
+\                                   \         = screen address of row + x1
+\                                   \
+\                                   \ So R11 contains the screen address of the
+\                                   \ left end of the line to draw
+
+                                    \ --- And replaced by: -------------------->
+
+ MOVPL   R11, R4, LSR #16           \ Set R11 = R4 >> 16
+                                    \         = x1
                                     \
-                                    \ So R11 contains the screen address of the
+                                    \ So R11 contains the x-coordinate of the
                                     \ left end of the line to draw
+
+                                    \ --- End of replacement ------------------>
 
  MOVMI   R0, #0                     \ If the left end of the line is negative,
                                     \ i.e. off the left edge of the screen, then
@@ -12047,6 +12137,12 @@
 
                                     \ --- And replaced by: -------------------->
 
+                                    \ Called with:
+                                    \
+                                    \   * (R11, R12) = start point of line
+                                    \
+                                    \   * R10 = Line length
+
  STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
@@ -12055,33 +12151,11 @@
                                     \ coordinates to this routine rather than
                                     \ screen address
 
- MOV     R2, R11                    \ Set R3 to the offset of the start of the
-                                    \ line within mode 13 screen memory
+ MOV     R2, R11                    \ Set R2 = x-coordinate
 
- MOV     R3, #0                     \ Set R3 = 0 to use as a counter for the
-                                    \ multiples of 320 * 8 in R2
+ MOV     R3, R12, LSR #3            \ Set R3 = character row
 
- MOV     R4, #0                     \ Set R4 = 0 to use as a counter for the
-                                    \ multiples of 320 in R2
-
-.divl1
-
- CMP     R2, #320*8                 \ Decompose R2 into (320 * 8 * R3) + R2, so we 
- SUBCS   R2, R2, #320*8             \ get:
- ADDCS   R3, R3, #1                 \
- BCS     divl1                      \   * R3 is the character row
-                                    \
-                                    \   * R2 is the remainder
-
-.divl2
-
- CMP     R2, #320                   \ Decompose R2 into (320 * R4) + R2, so we 
- SUBCS   R2, R2, #320               \ get:
- ADDCS   R4, R4, #1                 \
- BCS     divl2                      \   * R2 is the pixel x-coordinate
-                                    \
-                                    \   * R4 is the pixel row within the
-                                    \     character row
+ AND     R4, R12, #%00000111        \ Set R4 = pixel row within character
 
  MOV     R8, #%00001000             \ Draw ships/fuel in colour 1 (red)
 
@@ -12090,10 +12164,10 @@
                                     \ Uncomment next section to draw a dot at
                                     \ the end of the line
 
-\ADD     R2, R2, R10                \ Calculate the pixel x-coordinate of the
-\                                   \ end of the line
-\
-\BL      DrawPixelInRow             \ Draw the pixel at the end of the line
+ ADD     R2, R2, R10                \ Calculate the pixel x-coordinate of the
+                                    \ end of the line
+
+ BL      DrawPixelInRow             \ Draw the pixel at the end of the line
 
  LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
