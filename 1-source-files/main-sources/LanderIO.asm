@@ -1,6 +1,34 @@
-\ Lander I/O
+\ ******************************************************************************
+\
+\ LANDER I/O PROCESSOR GAME SOURCE
+\
+\ Lander was written by David Braben and is copyright D.J.Braben 1987
+\
+\ The code on this site has been reconstructed from a disassembly of the game on
+\ the Arthur, RISC OS 2 and RISC OS 3.00 application discs
+\
+\ The commentary is copyright Mark Moxon, and any misunderstandings or mistakes
+\ in the documentation are entirely my fault
+\
+\ The terminology and notations used in this commentary are explained at
+\ https://lander.bbcelite.com/terminology
+\
+\ The deep dive articles referred to in this commentary can be found at
+\ https://lander.bbcelite.com/deep_dives
+\
+\ ------------------------------------------------------------------------------
+\
+\ This source file contains the I/O Processor code for Lander.
+\
+\ ------------------------------------------------------------------------------
+\
+\ This source file produces the following binary file:
+\
+\   * Lander.bin
+\
+\ ******************************************************************************
 
- GUARD &3000
+ GUARD &3000            \ Guard against assembling over screen memory
 
 \ ******************************************************************************
 \
