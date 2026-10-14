@@ -8039,25 +8039,28 @@
  AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
                                     \ to extract the pixel y-coordinate
 
- ADD     R3, R12, R0                \ Set R3 = R12 + R0
-                                    \        = screenAddr + x-coordinate
-
- ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
- ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
-                                    \        = R3 + 320 * R1
-                                    \        = screenAddr + x-coordinate
-                                    \          + 320 * y-coordinate
-                                    \
-                                    \ So R3 contains the screen address of the
-                                    \ coordinate in screen memory
-
                                     \ --- Mod: Code removed for AES ----------->
 
+\ADD     R3, R12, R0                \ Set R3 = R12 + R0
+\                                   \        = screenAddr + x-coordinate
+\
+\ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+\ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+\                                   \        = R3 + 320 * R1
+\                                   \        = screenAddr + x-coordinate
+\                                   \          + 320 * y-coordinate
+\                                   \
+\                                   \ So R3 contains the screen address of the
+\                                   \ coordinate in screen memory
+\
 \STRB    R7, [R3]                   \ Draw a 1x1-pixel particle in the colour
                                     \ specified in R7
 
                                     \ --- And replaced by: -------------------->
 
+ MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+
+ BL      DrawPixel                  \ Draw the particle
 
                                     \ --- End of replacement ------------------>
 
@@ -8126,25 +8129,28 @@
  AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
                                     \ to extract the pixel y-coordinate
 
- ADD     R3, R12, R0                \ Set R3 = R12 + R0
-                                    \        = screenAddr + x-coordinate
-
- ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
- ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
-                                    \        = R3 + 320 * R1
-                                    \        = screenAddr + x-coordinate
-                                    \          + 320 * y-coordinate
-                                    \
-                                    \ So R3 contains the screen address of the
-                                    \ coordinate in screen memory
-
                                     \ --- Mod: Code removed for AES ----------->
 
+\ADD     R3, R12, R0                \ Set R3 = R12 + R0
+\                                   \        = screenAddr + x-coordinate
+\
+\ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+\ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+\                                   \        = R3 + 320 * R1
+\                                   \        = screenAddr + x-coordinate
+\                                   \          + 320 * y-coordinate
+\                                   \
+\                                   \ So R3 contains the screen address of the
+\                                   \ coordinate in screen memory
+\
 \STRB    R7, [R3]                   \ Draw a 2x1-pixel particle in the colour
 \STRB    R7, [R3, #1]               \ specified in R7
 
                                     \ --- And replaced by: -------------------->
 
+ MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+
+ BL      DrawPixel                  \ Draw the particle
 
                                     \ --- End of replacement ------------------>
 
@@ -8213,20 +8219,20 @@
  AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
                                     \ to extract the pixel y-coordinate
 
- ADD     R3, R12, R0                \ Set R3 = R12 + R0
-                                    \        = screenAddr + x-coordinate
-
- ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
- ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
-                                    \        = R3 + 320 * R1
-                                    \        = screenAddr + x-coordinate
-                                    \          + 320 * y-coordinate
-                                    \
-                                    \ So R3 contains the screen address of the
-                                    \ coordinate in screen memory
-
                                     \ --- Mod: Code removed for AES ----------->
 
+\ADD     R3, R12, R0                \ Set R3 = R12 + R0
+\                                   \        = screenAddr + x-coordinate
+\
+\ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+\ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+\                                   \        = R3 + 320 * R1
+\                                   \        = screenAddr + x-coordinate
+\                                   \          + 320 * y-coordinate
+\                                   \
+\                                   \ So R3 contains the screen address of the
+\                                   \ coordinate in screen memory
+\
 \STRB    R7, [R3]                   \ Draw a 2x2-pixel particle in the colour
 \STRB    R7, [R3, #1]               \ specified in R7
 \STRB    R7, [R3, #320]
@@ -8234,6 +8240,9 @@
 
                                     \ --- And replaced by: -------------------->
 
+ MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+
+ BL      DrawPixel                  \ Draw the particle
 
                                     \ --- End of replacement ------------------>
 
@@ -8302,20 +8311,20 @@
  AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
                                     \ to extract the pixel y-coordinate
 
- ADD     R3, R12, R0                \ Set R3 = R12 + R0
-                                    \        = screenAddr + x-coordinate
-
- ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
- ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
-                                    \        = R3 + 320 * R1
-                                    \        = screenAddr + x-coordinate
-                                    \          + 320 * y-coordinate
-                                    \
-                                    \ So R3 contains the screen address of the
-                                    \ coordinate in screen memory
-
                                     \ --- Mod: Code removed for AES ----------->
 
+\ADD     R3, R12, R0                \ Set R3 = R12 + R0
+\                                   \        = screenAddr + x-coordinate
+\
+\ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+\ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+\                                   \        = R3 + 320 * R1
+\                                   \        = screenAddr + x-coordinate
+\                                   \          + 320 * y-coordinate
+\                                   \
+\                                   \ So R3 contains the screen address of the
+\                                   \ coordinate in screen memory
+\
 \STRB    R7, [R3, #-1]              \ Draw a 3x2-pixel particle in the colour
 \STRB    R7, [R3]                   \ specified in R7
 \STRB    R7, [R3, #1]
@@ -8325,6 +8334,9 @@
 
                                     \ --- And replaced by: -------------------->
 
+ MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+
+ BL      DrawPixel                  \ Draw the particle
 
                                     \ --- End of replacement ------------------>
 
@@ -8393,26 +8405,29 @@
  AND     R1, R1, #&FF               \ Set R1 to bits #0-7 of the parameter word,
                                     \ to extract the pixel y-coordinate
 
- ADD     R3, R12, R0                \ Set R3 = R12 + R0
-                                    \        = screenAddr + x-coordinate
-
- ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
- ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
-                                    \        = R3 + 320 * R1
-                                    \        = screenAddr + x-coordinate
-                                    \          + 320 * y-coordinate
-                                    \
-                                    \ So R3 contains the screen address of the
-                                    \ coordinate in screen memory
-
                                     \ --- Mod: Code removed for AES ----------->
 
+\ADD     R3, R12, R0                \ Set R3 = R12 + R0
+\                                   \        = screenAddr + x-coordinate
+\
+\ADD     R1, R1, R1, LSL #2         \ Set R3 = R3 + ((R1 + R1 << 2) << 6)
+\ADD     R3, R3, R1, LSL #6         \        = R3 + ((R1 + 4 * R1) * 64)
+\                                   \        = R3 + 320 * R1
+\                                   \        = screenAddr + x-coordinate
+\                                   \          + 320 * y-coordinate
+\                                   \
+\                                   \ So R3 contains the screen address of the
+\                                   \ coordinate in screen memory
+\
 \STRB    R7, [R3, #-1]              \ Draw a 3x1-pixel particle in the colour
 \STRB    R7, [R3]                   \ specified in R7
 \STRB    R7, [R3, #1]
 
                                     \ --- And replaced by: -------------------->
 
+ MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+
+ BL      DrawPixel                  \ Draw the particle
 
                                     \ --- End of replacement ------------------>
 
@@ -12072,10 +12087,13 @@
 
  BL      DrawPixelInRow             \ Draw a pixel at the start of the line
 
- ADD     R2, R2, R10                \ Calculate the pixel x-coordinate of the
-                                    \ end of the line
+                                    \ Uncomment next section to draw a dot at
+                                    \ the end of the line
 
- BL      DrawPixelInRow             \ Draw the pixel at the end of the line
+\ADD     R2, R2, R10                \ Calculate the pixel x-coordinate of the
+\                                   \ end of the line
+\
+\BL      DrawPixelInRow             \ Draw the pixel at the end of the line
 
  LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
