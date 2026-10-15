@@ -5730,7 +5730,7 @@ REM ****************************************************************************
 .PrintScoreInBothBanks
 
  STMFD   R13!, {R1-R2}              \ Store the arguments in R1 and R2 on the
-                                    \ stack so can retrieve them below
+                                    \ stack so we can retrieve them below
 
  ADD     R1, R11, #stringBuffer     \ Set R1 = stringBuffer to use as a string
                                     \ buffer for the following call
