@@ -591,9 +591,6 @@ lose1:
  ADD     R13, R13, #4
  BNE     PlacePlayerOnLaunchpad
 GameOver:
- MOV     R0, #112
- MOV     R1, #1
- SWI     OS_Byte
  MOV     R0, #31
  SWI     OS_WriteC
  MOV     R0, #1
@@ -601,25 +598,12 @@ GameOver:
  MOV     R0, #16
  SWI     OS_WriteC
  SWI     OS_WriteS
-.byte    "GAME OVER - press a "
-.byte    "key to start again"
+.byte    "GAME OVER - press "
+.byte    "Space to start again"
 .byte    0
 .balign 4
- MOV     R0, #112
- MOV     R1, #2
- SWI     OS_Byte
- MOV     R0, #31
- SWI     OS_WriteC
- MOV     R0, #1
- SWI     OS_WriteC
- MOV     R0, #16
- SWI     OS_WriteC
- SWI     OS_WriteS
-.byte    "GAME OVER - press a "
-.byte    "key to start again"
-.byte    0
-.balign 4
- SWI     OS_ReadC
+ BL      SwitchScreenBank
+ BL      WaitForSpace
  B       StartNewGame
 graphicsBuffEndAddr2:
 .long    graphicsBuffersEnd
@@ -2691,9 +2675,9 @@ mouseParameters:
 mouseParametersAddr:
 .long    mouseParameters
 ResetMousePosition:
- LDR     R1, mouseParametersAddr
- MOV     R0, #21
- SWI     OS_Word
+ MOV     R0, #0
+ STR     R0, polarAngle
+ STR     R0, polarDistance
  MOV     PC, R14
 AbortWithMemoryError:
  STRB    R1, [R0]
@@ -2819,6 +2803,7 @@ PlacePlayerOnLaunchpad:
  MOV     R1, #0
  MOV     R2, #0
  STMIA   R3!, {R0-R2}
+ BL      ResetMousePosition
 keyBuffer:
 .byte 2
 .byte 10
@@ -2908,6 +2893,14 @@ PrintHexDigit:
  ADDHS   R0, R0, #0x37
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
+ MOV     PC, R14
+WaitForSpace:
+ ADR     R1, keyBuffer
+ MOV     R0, #243
+ SWI     OS_Word
+ LDRB    R2, keyBuffer+4
+ TEQ     R2, #0xFF
+ BNE     WaitForSpace
  MOV     PC, R14
 ReadKeyboardMouseButtons:
  MOV     R2, #0

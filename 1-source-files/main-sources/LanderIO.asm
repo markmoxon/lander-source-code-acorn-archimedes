@@ -119,6 +119,11 @@
 
 .STARTUP
 
+ LDA #200               \ Call OSBYTE with A = 200, X = 3 and Y = 0 to disable
+ LDX #3                 \ the ESCAPE key and clear memory if the BREAK key is
+ LDY #0                 \ pressed
+ JSR OSBYTE
+
  LDA #13                \ Call OSBYTE with A = 13, X = 2 and Y = 0 to disable
  LDX #2                 \ the "character entering buffer" event
  LDY #0

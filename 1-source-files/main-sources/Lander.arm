@@ -2761,9 +2761,13 @@
 
 .GameOver
 
- MOV     R0, #112                   \ Set the VDU driver screen bank to bank 1
- MOV     R1, #1
- SWI     OS_Byte
+                                    \ --- Mod: Code removed for AES ----------->
+
+\MOV     R0, #112                   \ Set the VDU driver screen bank to bank 1
+\MOV     R1, #1
+\SWI     OS_Byte
+
+                                    \ --- End of removed code ----------------->
 
  MOV     R0, #31                    \ Print the following VDU command:
  SWI     OS_WriteC                  \
@@ -2772,31 +2776,54 @@
  MOV     R0, #16                    \ which moves the text cursor to column 1 on
  SWI     OS_WriteC                  \ row 16, halfway down the screen
 
+                                    \ --- Mod: Code removed for AES ----------->
+
+\SWI     OS_WriteS                  \ Print the Game Over message
+\EQUS    "GAME OVER - press a "
+\EQUS    "key to start again"
+\EQUB    0
+\ALIGN
+
+                                    \ --- And replaced by: -------------------->
+
  SWI     OS_WriteS                  \ Print the Game Over message
- EQUS    "GAME OVER - press a "
- EQUS    "key to start again"
+ EQUS    "GAME OVER - press "
+ EQUS    "Space to start again"
  EQUB    0
  ALIGN
 
- MOV     R0, #112                   \ Set the VDU driver screen bank to bank 2
- MOV     R1, #2
- SWI     OS_Byte
+                                    \ --- End of replacement ------------------>
 
- MOV     R0, #31                    \ Print the following VDU command:
- SWI     OS_WriteC                  \
- MOV     R0, #1                     \   VDU 31, 1, 16
- SWI     OS_WriteC                  \
- MOV     R0, #16                    \ which moves the text cursor to column 1 on
- SWI     OS_WriteC                  \ row 16, i.e. the same text coordinates as
-                                    \ the text we printed in screen bank 1 above
+                                    \ --- Mod: Code removed for AES ----------->
 
- SWI     OS_WriteS                  \ Print the Game Over message
- EQUS    "GAME OVER - press a "
- EQUS    "key to start again"
- EQUB    0
- ALIGN
+\MOV     R0, #112                   \ Set the VDU driver screen bank to bank 2
+\MOV     R1, #2
+\SWI     OS_Byte
+\
+\MOV     R0, #31                    \ Print the following VDU command:
+\SWI     OS_WriteC                  \
+\MOV     R0, #1                     \   VDU 31, 1, 16
+\SWI     OS_WriteC                  \
+\MOV     R0, #16                    \ which moves the text cursor to column 1 on
+\SWI     OS_WriteC                  \ row 16, i.e. the same text coordinates as
+\                                   \ the text we printed in screen bank 1 above
+\
+\SWI     OS_WriteS                  \ Print the Game Over message
+\EQUS    "GAME OVER - press a "
+\EQUS    "key to start again"
+\EQUB    0
+\ALIGN
+\
+\SWI     OS_ReadC                   \ Wait for a key press
 
- SWI     OS_ReadC                   \ Wait for a key press
+                                    \ --- And replaced by: -------------------->
+
+ BL      SwitchScreenBank           \ Switch screen banks and clear the newly
+                                    \ hidden screen bank to black
+
+ BL      WaitForSpace               \ Wait for Space to be pressed
+
+                                    \ --- End of replacement ------------------>
 
  B       StartNewGame               \ Jump to StartNewGame to start a brand new
                                     \ game
@@ -12538,9 +12565,19 @@
 
 .ResetMousePosition
 
- LDR     R1, mouseParametersAddr    \ Call OS_Word 21,3 to reset the mouse
- MOV     R0, #21                    \ position to (511, 511)
- SWI     OS_Word
+                                    \ --- Mod: Code removed for AES ----------->
+
+\LDR     R1, mouseParametersAddr    \ Call OS_Word 21,3 to reset the mouse
+\MOV     R0, #21                    \ position to (511, 511)
+\SWI     OS_Word
+
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R0, #0                     \ Reset the ship's orientation
+ STR     R0, polarAngle
+ STR     R0, polarDistance
+
+                                    \ --- End of replacement ------------------>
 
  MOV     PC, R14                    \ Return from the subroutine
 
@@ -13018,12 +13055,8 @@
                                     \  yVelocity = 0
                                     \  zVelocity = 0
 
-                                    \ --- Mod: Code removed for AES ----------->
-
-\BL      ResetMousePosition         \ Reset the mouse position to (511, 511),
-\                                   \ ready for the game
-
-                                    \ --- End of removed code ----------------->
+ BL      ResetMousePosition         \ Reset the mouse position to (511, 511),
+                                    \ ready for the game
 
 \ ******************************************************************************
 \
@@ -13315,6 +13348,31 @@
  SWI     OS_WriteC                  \ Print the character in R0
 
  MOV     PC, R14                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: WaitForSpace
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Wait for Space to be pressed
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.WaitForSpace
+
+ ADR     R1, keyBuffer              \ Scan the keyboard
+ MOV     R0, #243
+ SWI     OS_Word
+
+ LDRB    R2, keyBuffer+4            \ If Space was not pressed then loop back to
+ TEQ     R2, #&FF                   \ keep checking the keyboard
+ BNE     WaitForSpace
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
