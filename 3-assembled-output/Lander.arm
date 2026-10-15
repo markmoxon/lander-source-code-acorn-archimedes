@@ -352,20 +352,12 @@ GetLandscapeTileColour:
  LDMFD   R13!, {R0-R4, PC}
 MoveAndDrawPlayer:
  STMFD   R13!, {R14}
- BL ScanKeyboard
+ BL      ReadKeyboardMouseButtons
  STRB    R2, [R11, #fuelBurnRate]
  LDR     R14, [R11, #fuelLevel]
  CMP     R14, #0
  STREQB  R14, [R11, #fuelBurnRate]
- CMP     R0, #1024
- MOVHS   R0, #1024
- SUBHS   R0, R0, #1
- SUB     R0, R0, #512
- RSB     R1, R1, #1024
- SUB     R1, R1, #512
- MOV     R0, R0, LSL #22
- MOV     R1, R1, LSL #22
- BL      GetMouseInPolarCoordinates
+ BL      GetPolarAnglesFromKeyboard
  CMP     R0, #0x40000000
  MOVHS   R0, #0x40000000
  SUBHS   R0, R0, #1
@@ -2717,7 +2709,7 @@ AbortWithMemoryError:
 .balign 4
  B       ReturnToDesktop
 oswordMode:
-.byte 0
+.byte 2
 .byte 0
 .balign 4
 Entry:
@@ -2827,12 +2819,29 @@ PlacePlayerOnLaunchpad:
  MOV     R1, #0
  MOV     R2, #0
  STMIA   R3!, {R0-R2}
+keyBuffer:
+.byte 2
+.byte 10
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.balign 4
 MainLoop:
- MOV     R0, #129
- MOV     R1, #0
- MOV     R2, #0
- SWI     OS_Byte
- TEQ     R2, #0x1B
+ MOV     R0, #0
+ STRB    R0, keyBuffer+2
+ STRB    R0, keyBuffer+3
+ STR     R0, keyBuffer+4
+ STR     R0, keyBuffer+8
+ ADR     R1, keyBuffer
+ MOV     R0, #243
+ SWI     OS_Word
+ LDRB    R2, keyBuffer+2
+ TEQ     R2, #0xFF
  BEQ     EndGame
  BL      MoveAndDrawPlayer
  LDR     R0, [R11, #mainLoopCount]
@@ -2900,17 +2909,40 @@ PrintHexDigit:
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
  MOV     PC, R14
-ScanKeyboard:
- MOV     R0, #129
- MOV     R1, #0
+ReadKeyboardMouseButtons:
  MOV     R2, #0
- SWI     OS_Byte
- TEQ     R1, #0x20
- MOVEQ   R2, #0x4
- MOVNE   R2, #0
- MOV     R0, #511
- MOV     R1, #511
+ LDRB    R1, keyBuffer+4
+ TEQ     R1, #0xFF
+ ORREQ   R2, R2, #0x4
+ LDRB    R1, keyBuffer+3
+ TEQ     R1, #0xFF
+ ORREQ   R2, R2, #0x2
+ LDRB    R1, keyBuffer+9
+ TEQ     R1, #0xFF
+ ORREQ   R2, R2, #0x1
  MOV     PC, R14
+GetPolarAnglesFromKeyboard:
+ LDR     R1, polarAngle
+ LDRB    R2, keyBuffer+5
+ TEQ     R2, #0xFF
+ SUBEQ   R1, R1, #64 << 22
+ LDRB    R2, keyBuffer+6
+ TEQ     R2, #0xFF
+ ADDEQ   R1, R1, #64 << 22
+ STR     R1, polarAngle
+ LDR     R0, polarDistance
+ LDRB    R2, keyBuffer+7
+ TEQ     R2, #0xFF
+ SUBEQ   R0, R0, #16 << 22
+ LDRB    R2, keyBuffer+8
+ TEQ     R2, #0xFF
+ ADDEQ   R0, R0, #16 << 22
+ STR     R0, polarDistance
+ MOV     PC, R14
+polarAngle:
+.long 0
+polarDistance:
+.long 0
 objectRock:
 .long    6
 .long    8

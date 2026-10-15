@@ -119,6 +119,30 @@
 
 .STARTUP
 
+ LDA #13                \ Call OSBYTE with A = 13, X = 2 and Y = 0 to disable
+ LDX #2                 \ the "character entering buffer" event
+ LDY #0
+ JSR OSBYTE
+
+ LDA #%00111001         \ Set 6522 System VIA interrupt enable register IER
+ STA VIA+&4E            \ (SHEILA &4E) bits 0 and 3-5 (i.e. disable the Timer1,
+                        \ CB1, CB2 and CA2 interrupts from the System VIA)
+
+ LDA #%01111111         \ Set 6522 User VIA interrupt enable register IER
+ STA &FE6E              \ (SHEILA &6E) bits 0-7 (i.e. disable all hardware
+                        \ interrupts from the User VIA)
+
+ LDA #20                \ Call OSBYTE with A = 20, X = 0 and Y = 0 to implode
+ LDX #0                 \ the soft character definitions, so they don't take up
+ LDY #0                 \ extra memory (by default, having a Second Processor
+ JSR OSBYTE             \ present explodes the soft character definitions, so
+                        \ this reclaims 6 pages of memory)
+
+ LDA #4                 \ Call OSBYTE with A = 4, X = 1 and Y = 0 to disable
+ LDX #1                 \ cursor editing, so the cursor keys return ASCII values
+ LDY #0                 \ and can therefore be used in-game
+ JSR OSBYTE
+
  LDA WORDV              \ Store the current WORDV vector in notours(2 1)
  STA notours+1
  LDA WORDV+1
@@ -153,10 +177,10 @@
 
 .OSWVECS
 
- EQUW CLS               \            240 (&F0)     0 = Clear screen
+ EQUW CLS               \            240 (&F0)     0 = Switch bank, clear screen
  EQUW PIXEL             \            241 (&F1)     1 = Draw pixel
- EQUW SETMODE           \            242 (&F2)     2 = Do nothing
- EQUW SAFE              \            243 (&F3)     3 = Do nothing
+ EQUW SETMODE           \            242 (&F2)     2 = Change screen mode
+ EQUW KEYBOARD          \            243 (&F3)     3 = Scan keyboard
  EQUW SAFE              \            244 (&F4)     4 = Do nothing
  EQUW SAFE              \            245 (&F5)     5 = Do nothing
  EQUW SAFE              \            246 (&F6)     6 = Do nothing
@@ -473,6 +497,166 @@
  EQUB 0, 0, 0
 
  EQUB 255               \ End of commands
+
+\ ******************************************************************************
+\
+\       Name: DKS4
+\       Type: Macro
+\   Category: Keyboard
+\    Summary: Scan the keyboard to see if a specific key is being pressed
+\  Deep dive: The key logger
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The internal number of the key to check (see page 142 of
+\                       the "Advanced User Guide for the BBC Micro" by Bray,
+\                       Dickens and Holmes for a list of internal key numbers)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   A                   If the key in A is being pressed, A contains the
+\                       original argument A, but with bit 7 set (i.e. A + 128).
+\                       If the key in A is not being pressed, the value in A is
+\                       unchanged
+\
+\ ******************************************************************************
+
+MACRO DKS4
+
+ LDX #3                 \ Set X to 3, so it's ready to send to SHEILA once
+                        \ interrupts have been disabled
+
+ SEI                    \ Disable interrupts so we can scan the keyboard
+                        \ without being hijacked
+
+ STX VIA+&40            \ Set 6522 System VIA output register ORB (SHEILA &40)
+                        \ to %00000011 to stop auto scan of keyboard
+
+ LDX #%01111111         \ Set 6522 System VIA data direction register DDRA
+ STX VIA+&43            \ (SHEILA &43) to %01111111. This sets the A registers
+                        \ (IRA and ORA) so that:
+                        \
+                        \   * Bits 0-6 of ORA will be sent to the keyboard
+                        \
+                        \   * Bit 7 of IRA will be read from the keyboard
+
+ STA VIA+&4F            \ Set 6522 System VIA output register ORA (SHEILA &4F)
+                        \ to A, the key we want to scan for; bits 0-6 will be
+                        \ sent to the keyboard, of which bits 0-3 determine the
+                        \ keyboard column, and bits 4-6 the keyboard row
+
+ LDA VIA+&4F            \ Read 6522 System VIA output register IRA (SHEILA &4F)
+                        \ into A; bit 7 is the only bit that will have changed.
+                        \ If the key is pressed, then bit 7 will be set,
+                        \ otherwise it will be clear
+
+ LDX #%00001011         \ Set 6522 System VIA output register ORB (SHEILA &40)
+ STX VIA+&40            \ to %00001011 to restart auto scan of keyboard
+
+ CLI                    \ Allow interrupts again
+
+ENDMACRO
+
+\ ******************************************************************************
+\
+\       Name: KYTB
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: Lookup table for keyboard controls
+\
+\ ******************************************************************************
+
+.KYTB
+
+ EQUB &70               \ ESCAPE    KYTB+0      Quit
+ EQUB &68               \ ?         KYTB+1      Hover
+ EQUB &62               \ Space     KYTB+2      Thrust
+ EQUB &66               \ <         KYTB+3      Yaw left
+ EQUB &67               \ >         KYTB+4      Yaw right
+ EQUB &42               \ X         KYTB+5      Pull up
+ EQUB &51               \ S         KYTB+6      Pitch down
+ EQUB &41               \ A         KYTB+7      Fire
+
+\ ******************************************************************************
+\
+\       Name: KEYBOARD
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Implement the OSWORD 243 command (scan the keyboard)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   OSSC                The address of the table in which to log the key presses
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   OSSC                The table is updated as follows:
+\
+\                         * Byte #2: ESCAPE is being pressed (0 = no, &FF = yes)
+\
+\                         * Byte #3: "?" is being pressed (0 = no, &FF = yes)
+\
+\                         * Byte #4: Space is being pressed (0 = no, &FF = yes)
+\
+\                         * Byte #5: "<" is being pressed (0 = no, &FF = yes)
+\
+\                         * Byte #6: ">" is being pressed (0 = no, &FF = yes)
+\
+\                         * Byte #7: "X" is being pressed (0 = no, &FF = yes)
+\
+\                         * Byte #8: "S" is being pressed (0 = no, &FF = yes)
+\
+\                         * Byte #9: "A" is being pressed (0 = no, &FF = yes)
+\
+\ ******************************************************************************
+
+.KEYBOARD
+
+ LDY #9                 \ We're going to loop through the eight keys in KYTB and
+                        \ update the block pointed to by OSSC with their details
+                        \
+                        \ We want to store the results in bytes #2 to #9 in the
+                        \ block, so we set a loop counter in Y to count down
+                        \ from 9 to 2, so we can use this as an index into both
+                        \ the OSSC block and the KYTB table
+
+.DKL2
+
+ LDA KYTB-2,Y           \ Set A to the relevant internal key number from the
+                        \ KYTB table (we add Y to KYTB-2 rather than KYTB as Y
+                        \ is looping from 9 down to 2, so this grabs the key
+                        \ numbers from 7 to 1, i.e. from "A" to "?"
+
+ DKS4                   \ Include macro DKS4 to check whether the key in A is
+                        \ being pressed, and if it is, set bit 7 of A
+
+ ASL A                  \ Shift bit 7 of A into the C flag
+
+ LDA #0                 \ Set A = 0 + &FF + C
+ ADC #&FF               \
+                        \ If the C flag is set (i.e. the key is being pressed)
+                        \ then this sets A = 0, otherwise it sets A = &FF
+
+ EOR #%11111111         \ Flip all the bits in A, so now A = &FF if the key is
+                        \ being pressed, or A = 0 if it isn't
+
+ STA (OSSC),Y           \ Store A in the Y-th byte of the block pointed to by
+                        \ OSSC
+
+ DEY                    \ Decrement the loop counter
+
+ CPY #1                 \ Loop back until we have processed all the keys
+ BNE DKL2
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \

@@ -1795,7 +1795,8 @@
 
                                     \ --- And replaced by: -------------------->
 
- BL ScanKeyboard                    \ Scan the keyboard
+ BL      ReadKeyboardMouseButtons   \ Convert the keyboard buffer into mouse
+                                    \ buttons in R2
 
                                     \ --- End of replacement ------------------>
 
@@ -1823,29 +1824,39 @@
  CMP     R14, #0                    \ fuel burn rate, as we can't burn fuel that
  STREQB  R14, [R11, #fuelBurnRate]  \ we don't have
 
-                                    \ At the start of each new life, the mouse
-                                    \ is initialised to coordinates (511, 511)
+                                    \ --- Mod: Code removed for AES ----------->
 
- CMP     R0, #1024                  \ Cap the mouse x-coordinate in R0 so it's
- MOVHS   R0, #1024                  \ in the range 0 to 1023
- SUBHS   R0, R0, #1
+\                                   \ At the start of each new life, the mouse
+\                                   \ is initialised to coordinates (511, 511)
+\
+\CMP     R0, #1024                  \ Cap the mouse x-coordinate in R0 so it's
+\MOVHS   R0, #1024                  \ in the range 0 to 1023
+\SUBHS   R0, R0, #1
+\
+\SUB     R0, R0, #512               \ Convert R0 into the range -512 to +511
+\
+\RSB     R1, R1, #1024              \ Set R1 = 1024 - R1 - 512
+\SUB     R1, R1, #512               \        = 512 - R1
+\                                   \
+\                                   \ So the mouse y-coordinate in R1 is now in
+\                                   \ the range -512 to +512
+\
+\MOV     R0, R0, LSL #22            \ Scale both mouse coordinates up as far as
+\MOV     R1, R1, LSL #22            \ possible without losing data (512 << 22 is
+\                                   \ &80000000, so this is as high as we can
+\                                   \ go)
+\
+\BL      GetMouseInPolarCoordinates \ Convert the mouse coordinates into polar
+\                                   \ coordinates, returning the polar angle in
+\                                   \ R1 and the polar distance in R0
 
- SUB     R0, R0, #512               \ Convert R0 into the range -512 to +511
+                                    \ --- And replaced by: -------------------->
 
- RSB     R1, R1, #1024              \ Set R1 = 1024 - R1 - 512
- SUB     R1, R1, #512               \        = 512 - R1
-                                    \
-                                    \ So the mouse y-coordinate in R1 is now in
-                                    \ the range -512 to +512
-
- MOV     R0, R0, LSL #22            \ Scale both mouse coordinates up as far as
- MOV     R1, R1, LSL #22            \ possible without losing data (512 << 22 is
-                                    \ &80000000, so this is as high as we can
-                                    \ go)
-
- BL      GetMouseInPolarCoordinates \ Convert the mouse coordinates into polar
+ BL      GetPolarAnglesFromKeyboard \ Convert the key presses into polar
                                     \ coordinates, returning the polar angle in
                                     \ R1 and the polar distance in R0
+
+                                    \ --- End of replacement ------------------>
 
  CMP     R0, #&40000000             \ Cap the polar distance in R0 so it's in
  MOVHS   R0, #&40000000             \ the range 0 to &3FFFFFFF
@@ -6682,6 +6693,8 @@
 \ ******************************************************************************
 
 .GetMouseInPolarCoordinates
+
+                                    \ --- Mod: Code removed for AES ----------->
 
                                     \ In the following, let's call the mouse
                                     \ x- and y-coordinates xMouse and yMouse
@@ -12573,7 +12586,7 @@
 
 .oswordMode
 
- EQUB 0                             \ The number of bytes to transmit
+ EQUB 2                             \ The number of bytes to transmit
 
  EQUB 0                             \ The number of bytes to receive
 
@@ -13014,6 +13027,36 @@
 
 \ ******************************************************************************
 \
+\       Name: keyBuffer
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: The keyboard buffer OS_Word block
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.keyBuffer
+
+ EQUB 2                             \ The number of bytes to transmit
+
+ EQUB 10                            \ The number of bytes to receive
+
+ EQUB 0                             \ ESCAPE    keyBuffer+2      Quit
+ EQUB 0                             \ ?         keyBuffer+3      Hover
+ EQUB 0                             \ Space     keyBuffer+4      Thrust
+ EQUB 0                             \ <         keyBuffer+5      Yaw left
+ EQUB 0                             \ >         keyBuffer+6      Yaw right
+ EQUB 0                             \ X         keyBuffer+7      Pull up
+ EQUB 0                             \ S         keyBuffer+8      Pitch down
+ EQUB 0                             \ A         keyBuffer+9      Fire
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
 \       Name: MainLoop
 \       Type: Subroutine
 \   Category: Main loop
@@ -13024,16 +13067,36 @@
 
 .MainLoop
 
- MOV     R0, #129                   \ Call OS_Byte 129 to read the keyboard with
- MOV     R1, #0                     \ the time limit in R1 and R2 (so that's
- MOV     R2, #0                     \ with no time limit as R1 and R2 are zero),
- SWI     OS_Byte                    \ returning the result in R2
+                                    \ --- Mod: Code removed for AES ----------->
 
- TEQ     R2, #&1B                   \ If R2 = &1B then an escape condition
- BEQ     EndGame                    \ occurred during the keyboard scan (in
-                                    \ other words, Escape was pressed), so jump
-                                    \ to EndGame to acknowledge the escape
-                                    \ condition and quit the game
+\MOV     R0, #129                   \ Call OS_Byte 129 to read the keyboard with
+\MOV     R1, #0                     \ the time limit in R1 and R2 (so that's
+\MOV     R2, #0                     \ with no time limit as R1 and R2 are zero),
+\SWI     OS_Byte                    \ returning the result in R2
+\
+\TEQ     R2, #&1B                   \ If R2 = &1B then an escape condition
+\BEQ     EndGame                    \ occurred during the keyboard scan (in
+\                                   \ other words, Escape was pressed), so jump
+\                                   \ to EndGame to acknowledge the escape
+\                                   \ condition and quit the game
+
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R0, #0                     \ Clear the keyboard buffer
+ STRB    R0, keyBuffer+2
+ STRB    R0, keyBuffer+3
+ STR     R0, keyBuffer+4
+ STR     R0, keyBuffer+8
+
+ ADR     R1, keyBuffer              \ Scan the keyboard
+ MOV     R0, #243
+ SWI     OS_Word
+
+ LDRB    R2, keyBuffer+2            \ If ESCAPE was pressed then jump to EndGame
+ TEQ     R2, #&FF                   \ to quit the game
+ BEQ     EndGame
+
+                                    \ --- End of replacement ------------------>
 
  BL      MoveAndDrawPlayer          \ Move the player's ship and draw it into
                                     \ the graphics buffers
@@ -13255,30 +13318,107 @@
 
 \ ******************************************************************************
 \
-\       Name: ScanKeyboard
+\       Name: ReadKeyboardMouseButtons
 \       Type: Subroutine
-\   Category: ARM Evalutation System
-\    Summary: Scan the keyboard
+\   Category: Keyboard
+\    Summary: Convert key pressses into mouse button presses
 \
 \ ******************************************************************************
 
                                     \ --- Mod: Code added for AES ------------->
 
-.ScanKeyboard
+.ReadKeyboardMouseButtons
 
- MOV     R0, #129                   \ Call OS_Byte 129 to read the keyboard with
- MOV     R1, #0                     \ the time limit in R1 and R2 (so that's
- MOV     R2, #0                     \ with no time limit as R1 and R2 are zero),
- SWI     OS_Byte                    \ returning the result in R2
+ MOV     R2, #0                     \ Set R2 to 0 to return as the result
 
- TEQ     R1, #&20                   \ If R1 = &20 (Space) then apply thrust
- MOVEQ   R2, #%100
- MOVNE   R2, #0
+ LDRB    R1, keyBuffer+4            \ If Space was pressed then set the bit for
+ TEQ     R1, #&FF                   \ thrust
+ ORREQ   R2, R2, #%100
 
- MOV     R0, #511                   \ No movement
- MOV     R1, #511
+ LDRB    R1, keyBuffer+3            \ If "?" was pressed then set the bit for
+ TEQ     R1, #&FF                   \ hover
+ ORREQ   R2, R2, #%010
+
+ LDRB    R1, keyBuffer+9            \ If "A" was pressed then set the bit for
+ TEQ     R1, #&FF                   \ fire
+ ORREQ   R2, R2, #%001
 
  MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: GetPolarAnglesFromKeyboard
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Convert key pressses into polar coordinates
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.GetPolarAnglesFromKeyboard
+
+ LDR     R1, polarAngle             \ Set R1 to the current polar angle
+
+ LDRB    R2, keyBuffer+5            \ If yaw left was pressed then decrease
+ TEQ     R2, #&FF                   \ the angle
+ SUBEQ   R1, R1, #64 << 22
+
+ LDRB    R2, keyBuffer+6            \ If yaw right was pressed then increase
+ TEQ     R2, #&FF                   \ the angle
+ ADDEQ   R1, R1, #64 << 22
+
+ STR     R1, polarAngle             \ Store the new polar angle
+
+ LDR     R0, polarDistance          \ Set R1 to the current polar angle
+
+ LDRB    R2, keyBuffer+7            \ If pull up was pressed then decrease
+ TEQ     R2, #&FF                   \ the distance
+ SUBEQ   R0, R0, #16 << 22
+
+ LDRB    R2, keyBuffer+8            \ If pitch down was pressed then increase
+ TEQ     R2, #&FF                   \ the distance
+ ADDEQ   R0, R0, #16 << 22
+
+ STR     R0, polarDistance          \ Store the new polar distance
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: polarAngle
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: The current polar angle of the mouse
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.polarAngle
+
+ EQUD 0
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: polarDistance
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: The current polar distance of the mouse
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.polarDistance
+
+ EQUD 0
 
                                     \ --- End of added code ------------------->
 
