@@ -182,11 +182,11 @@
 
 .OSWVECS
 
- EQUW CLS               \            240 (&F0)     0 = Switch bank, clear screen
- EQUW PIXEL             \            241 (&F1)     1 = Draw pixel
- EQUW SETMODE           \            242 (&F2)     2 = Change screen mode
- EQUW KEYBOARD          \            243 (&F3)     3 = Scan keyboard
- EQUW SAFE              \            244 (&F4)     4 = Do nothing
+ EQUW ClearScreen       \            240 (&F0)     0 = Switch bank, clear screen
+ EQUW DrawPixel         \            241 (&F1)     1 = Draw pixel
+ EQUW SetScreenMode     \            242 (&F2)     2 = Set the screen mode
+ EQUW ReadKeyboard      \            243 (&F3)     3 = Scan keyboard
+ EQUW SwitchBank        \            244 (&F4)     4 = Switch screen bank
  EQUW SAFE              \            245 (&F5)     5 = Do nothing
  EQUW SAFE              \            246 (&F6)     6 = Do nothing
  EQUW SAFE              \            247 (&F7)     7 = Do nothing
@@ -284,10 +284,10 @@
 
 \ ******************************************************************************
 \
-\       Name: PIXEL
+\       Name: DrawPixel
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Implement the OSWORD 241 command (draw pixel)
+\    Summary: Draw a pixel
 \
 \ ------------------------------------------------------------------------------
 \
@@ -308,7 +308,7 @@
 \
 \ ******************************************************************************
 
-.PIXEL
+.DrawPixel
 
  LDY #0                 \ Set Q to byte #0 from the block pointed to by OSSC,
  LDA (OSSC),Y           \ which contains the size of the pixel buffer
@@ -354,14 +354,14 @@
 
 \ ******************************************************************************
 \
-\       Name: CLS
+\       Name: SwitchBank
 \       Type: Subroutine
 \   Category: Drawing the screen
-\    Summary: Clear the screen
+\    Summary: Switch screen bank to the argument passed in the block
 \
 \ ******************************************************************************
 
-.CLS
+.SwitchBank
 
  LDY #2                 \ Fetch the argument (0 or 1)
  LDA (OSSC),Y
@@ -377,8 +377,7 @@
                         \
                         \ Clear bit 0 to display main memory on screen
 
- JMP bank2              \ Jump to bank3 to clear the screen (this BNE is
-                        \ effectively a JMP as A is never zero)
+ RTS                    \ Return from the subroutine
 
 .bank1
 
@@ -391,7 +390,20 @@
                         \
                         \ Set bit 0 to display shadow RAM on screen
 
-.bank2
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ClearScreen
+\       Type: Subroutine
+\   Category: Drawing the screen
+\    Summary: Clear the screen
+\
+\ ******************************************************************************
+
+.ClearScreen
+
+ JSR SwitchBank         \ Switch screen bank to the argument passed in the block
 
  LDA #&35               \ Set P(1 0) = &3500
  STA P+1
@@ -404,13 +416,13 @@
  LDY #0                 \ We want to zero one page of memory, so set Y as a byte
                         \ counter
 
-.bank3
+.clsc1
 
  STA (P),Y              \ Zero the Y-th byte of the P(1 0) memory block
 
  DEY                    \ Decrement the byte counter
 
- BNE bank3              \ Loop back to copy the next byte until we have done a
+ BNE clsc1              \ Loop back to copy the next byte until we have done a
                         \ whole page of 256 bytes
 
  INC P+1                \ Increment the high byte of the source address to point
@@ -418,21 +430,21 @@
 
  DEX                    \ Decrement the page counter
 
- BPL bank3              \ Loop back to copy the next page until we have done X
+ BPL clsc1              \ Loop back to copy the next page until we have done X
                         \ pages
 
  RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: SETMODE
+\       Name: SetScreenMode
 \       Type: Subroutine
 \   Category: Drawing the screen
 \    Summary: Clear the screen
 \
 \ ******************************************************************************
 
-.SETMODE
+.SetScreenMode
 
  LDA #LO(B%)            \ Set the low byte of P(1 0) to point to the VDU code
  STA P                  \ table at B%
@@ -588,7 +600,7 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: KEYBOARD
+\       Name: ReadKeyboard
 \       Type: Subroutine
 \   Category: Keyboard
 \    Summary: Implement the OSWORD 243 command (scan the keyboard)
@@ -623,7 +635,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-.KEYBOARD
+.ReadKeyboard
 
  LDY #9                 \ We're going to loop through the eight keys in KYTB and
                         \ update the block pointed to by OSSC with their details

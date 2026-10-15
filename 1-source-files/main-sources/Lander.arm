@@ -5747,6 +5747,13 @@
 
 .PrintCurrentScore
 
+                                    \ --- Mod: Code added for AES ------------->
+
+ STMFD   R13!, {R14}                \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+                                    \ --- End of added code ------------------->
+
  LDR     R0, [R11, #currentScore]   \ Set R0 to the current score
 
  ADD     R1, R11, #stringBuffer     \ Set R1 = stringBuffer to use as a string
@@ -5769,7 +5776,13 @@
 \                                   \ string and store it in the buffer at R1
 \                                   \ with a maximum string size of R2
 
-                                    \ --- End of removed code ----------------->
+                                    \ --- And replaced by: -------------------->
+
+ BL      ConvertBinaryToDecimal     \ Convert the unsigned number in R0 to a
+                                    \ string and store it in the buffer at R1
+                                    \ with a maximum string size of R2
+
+                                    \ --- End of replacement ------------------>
 
  MOV     R0, #30                    \ Print a VDU 30 command to move the text
  SWI     OS_WriteC                  \ cursor to the top-left corner of the
@@ -5799,7 +5812,16 @@
  SWI     OS_WriteC                  \ remove any characters from the previous
  SWI     OS_WriteC                  \ bullet count
 
- MOV     PC, R14                    \ Return from the subroutine
+                                    \ --- Mod: Code removed for AES ----------->
+
+\MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- And replaced by: -------------------->
+
+ LDMFD   R13!, {PC}                 \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -5822,22 +5844,35 @@
 
 .PrintScoreInBothBanks
 
+                                    \ --- Mod: Code added for AES ------------->
+
+ STMFD   R13!, {R14}                \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+                                    \ --- End of added code ------------------->
+
  STMFD   R13!, {R1-R2}              \ Store the arguments in R1 and R2 on the
                                     \ stack so can retrieve them below
 
  ADD     R1, R11, #stringBuffer     \ Set R1 = stringBuffer to use as a string
                                     \ buffer for the following call
 
- MOV     R2, #19                    \ Set R2 = 19, to use as the size of the
-                                    \ string buffer in the following call
-
                                     \ --- Mod: Code removed for AES ----------->
 
+\MOV     R2, #19                    \ Set R2 = 19, to use as the size of the
+\                                   \ string buffer in the following call
+\
 \SWI     OS_BinaryToDecimal         \ Convert the unsigned number in R0 to a
 \                                   \ string and store it in the buffer at R1
 \                                   \ with a maximum string size of R2
 
-                                    \ --- End of removed code ----------------->
+                                    \ --- And replaced by: -------------------->
+
+ BL      ConvertBinaryToDecimal     \ Convert the unsigned number in R0 to a
+                                    \ string and store it in the buffer at R1
+                                    \ with a maximum string size of R2
+
+                                    \ --- End of replacement ------------------>
 
  MOV     R0, #31                    \ Start printing the following VDU command:
  SWI     OS_WriteC                  \
@@ -5856,9 +5891,28 @@
                                     \ preserve them through the following
                                     \ OS_Byte call
 
- MOV     R0, #112                   \ Set the VDU driver screen bank to bank 1
- MOV     R1, #1
- SWI     OS_Byte
+                                    \ --- Mod: Code removed for AES ----------->
+
+\MOV     R0, #112                   \ Set the VDU driver screen bank to bank 1
+\MOV     R1, #1
+\SWI     OS_Byte
+
+                                    \ --- And replaced by: -------------------->
+
+ ADR     R0, screenBankNumber       \ Set R7 to the current screen bank
+ LDR     R7, [R0]
+
+ EOR     R6, R7, #1                 \ Set R6 to the opposite bank to the current
+                                    \ bank
+
+ ADR     R5, oswordSwitchBank       \ Set the OS_Word block to switch to bank R6
+ STRB    R6, [R5, #2]               \ and set R5 to the address of the block
+
+ ADR     R1, oswordSwitchBank       \ Switch the screen bank
+ MOV     R0, #244
+ SWI     OS_Word
+
+                                    \ --- End of replacement ------------------>
 
  LDMFD   R13, {R1-R2}               \ Retrieve R1 and R2 from the stack, so R1
                                     \ points to the string buffer and R2 is the
@@ -5879,9 +5933,22 @@
                                     \ the buffer until we have printed all R2 of
                                     \ them
 
- MOV     R0, #112                   \ Set the hardware and VDU screen banks to
- MOV     R1, #2                     \ screen bank 1
- SWI     OS_Byte
+                                    \ --- Mod: Code removed for AES ----------->
+
+\MOV     R0, #112                   \ Set the hardware and VDU screen banks to
+\MOV     R1, #2                     \ screen bank 1
+\SWI     OS_Byte
+
+                                    \ --- And replaced by: -------------------->
+
+ STRB    R7, [R5, #2]               \ Set the OS_Word block back to the current
+                                    \ bank
+
+ ADR     R1, oswordSwitchBank       \ Switch the screen bank
+ MOV     R0, #244
+ SWI     OS_Word
+
+                                    \ --- End of replacement ------------------>
 
  MOV     R0, #31                    \ Print the following VDU command:
  SWI     OS_WriteC                  \
@@ -5907,7 +5974,16 @@
                                     \ the buffer until we have printed all R2 of
                                     \ them
 
- MOV     PC, R14                    \ Return from the subroutine
+                                    \ --- Mod: Code removed for AES ----------->
+
+\MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- And replaced by: -------------------->
+
+ LDMFD   R13!, {PC}                 \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -9409,38 +9485,15 @@
 
                                     \ --- And replaced by: -------------------->
 
- STRB    R0, oswordCls+2            \ Store screen number in the OS_Word block
+ STRB    R0, oswordSwitchBank+2     \ Store the bank number in the OS_Word block
 
- ADR     R1, oswordCls              \ Switch to other screen bank and clear old
- MOV     R0, #240                   \ one
+ ADR     R1, oswordSwitchBank       \ Switch to the other screen bank and clear
+ MOV     R0, #240                   \ the one we are about to draw into
  SWI     OS_Word
 
  MOV     PC, R14                    \ Return from the subroutine
 
                                     \ --- End of replacement ------------------>
-
-\ ******************************************************************************
-\
-\       Name: oswordCls
-\       Type: Variable
-\   Category: Drawing pixels
-\    Summary: OS_Word block for bank switching and clearing the screen
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.oswordCls
-
- EQUB 3                             \ The number of bytes to transmit
-
- EQUB 0                             \ The number of bytes to receive
-
- EQUB 0                             \ The current screen bank number (0 or 1)
-
- ALIGN
-
-                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
@@ -12216,31 +12269,6 @@
 
 \ ******************************************************************************
 \
-\       Name: oswordPixel
-\       Type: Variable
-\   Category: Drawing pixels
-\    Summary: OS_Word block for drawing pixels
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.oswordPixel
-
- EQUB 5                             \ The number of bytes to transmit
-
- EQUB 0                             \ The number of bytes to receive
-
- EQUW &0000                         \ Mode 1 screen address of pixel byte
-
- EQUB 0                             \ Pixel byte to poke into screen address
-
- ALIGN
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
 \       Name: DrawPixel
 \       Type: Subroutine
 \   Category: Drawing pixels
@@ -12612,27 +12640,6 @@
 
 \ ******************************************************************************
 \
-\       Name: oswordMode
-\       Type: Variable
-\   Category: Drawing pixels
-\    Summary: OS_Word block for changing screen mode
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.oswordMode
-
- EQUB 2                             \ The number of bytes to transmit
-
- EQUB 0                             \ The number of bytes to receive
-
- ALIGN
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
 \       Name: Entry
 \       Type: Subroutine
 \   Category: Start and end
@@ -12652,7 +12659,7 @@
 
                                     \ --- And replaced by: -------------------->
 
- ADR     R1, oswordMode             \ Clear the screen
+ ADR     R1, oswordNoParams         \ Set the correct screen mode for the game
  MOV     R0, #242
  SWI     OS_Word
 
@@ -12815,12 +12822,8 @@
  MOV     R2, #1                     \ call to PrintScoreInBothBanks prints the
                                     \ high score at column 35 on row 1
 
-                                    \ --- Mod: Code removed for AES ----------->
-
-\BL      PrintScoreInBothBanks      \ Print the high score in R0 at column 35 on
-\                                   \ row 1, at the right end of the score bar
-
-                                    \ --- End of removed code ----------------->
+ BL      PrintScoreInBothBanks      \ Print the high score in R0 at column 35 on
+                                    \ row 1, at the right end of the score bar
 
  LDR     R0, initialScore           \ Initialise currentScore to the score that
  STR     R0, [R11, #currentScore]   \ we start each game with, which is set in
@@ -13011,13 +13014,9 @@
  MOV     R2, #1                     \ call to PrintScoreInBothBanks prints the
                                     \ number of lives at column 30 on row 1
 
-                                    \ --- Mod: Code removed for AES ----------->
-
-\BL      PrintScoreInBothBanks      \ Print the number of lives in R0 at column
-\                                   \ 30 on row 1, just before the high score
-\                                   \ towards the right end of the score bar
-
-                                    \ --- End of removed code ----------------->
+ BL      PrintScoreInBothBanks      \ Print the number of lives in R0 at column
+                                    \ 30 on row 1, just before the high score
+                                    \ towards the right end of the score bar
 
  MVN     R0, #0                     \ Set playingGame = -1 to flag that the game
  STR     R0, [R11, #playingGame]    \ is being played and that this is not the
@@ -13477,6 +13476,193 @@
 .polarDistance
 
  EQUD 0
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: tenThousand
+\       Type: Variable
+\   Category: Text
+\    Summary: Cap value for printing numbers
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.tenThousand
+
+ EQUD    10000
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: ConvertBinaryToDecimal
+\       Type: Subroutine
+\   Category: Text
+\    Summary: Convert a number in R0 into a string at R1 with a size of R2 (to
+\             replicate the OS_BinaryToDecimal call)
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.ConvertBinaryToDecimal
+
+ STMFD   R13!, {R0, R3-R5, R14}     \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R2, tenThousand            \ Cap R0 at 9999, for four digits
+ CMP     R0, R2
+ MOVCS   R0, #9999
+
+ MOV     R2, #0                     \ Set the string pointer in R2 to zero to
+                                    \ keep track of the string length
+
+ MOV     R5, #0                     \ Keep track of whether we have displayed a
+                                    \ digit, so we can strip leading zeroes
+
+                                    \ Start with the 1000s digit
+
+ MOV     R3, #0                     \ Set R3 to zero to tally the 1000s digit
+
+.bdec1
+
+ CMP     R0, #1000                  \ Calculate the 1000s digit
+ SUBCS   R0, R0, #1000
+ ADDCS   R3, R3, #1
+ BCS     bdec1
+
+ CMP     R3, #0                     \ If it is non-zero, convert the digit to a
+ ADDNE   R4, R3, #&30               \ string by adding the ASCII value of "0"
+ STRBNE  R4, [R1, R2]               \ (ASCII &30) and store it in the string at
+ ADDNE   R2, R2, #1                 \ R1 with offset R2, incrementing the offset
+ MOVNE   R5, #1                     \ and setting R5 to 1 to indicate we have
+                                    \ printed a digit
+
+                                    \ Now for the 100s digit
+
+ MOV     R3, #0                     \ Set R3 to zero to tally the 100s digit
+
+.bdec2
+
+ CMP     R0, #100                   \ Calculate the 100s digit
+ SUBCS   R0, R0, #100
+ ADDCS   R3, R3, #1
+ BCS     bdec2
+
+ ORRS    R4, R3, R5                 \ If both R3 and R5 are zero, skip the
+                                    \ following as this digit is zero and we
+                                    \ haven't yet displayed anything
+
+ ADDNE   R4, R3, #&30               \ Digit is non-zero so convert the digit to
+ STRBNE  R4, [R1, R2]               \ a string by adding the ASCII value of "0"
+ ADDNE   R2, R2, #1                 \ (ASCII &30) and store it in the string at
+ MOVNE   R5, #1                     \ R1 with offset R2, incrementing the offset
+                                    \ and setting R5 to 1 to indicate we have
+                                    \ printed a digit
+
+                                    \ Now for the 10s digit
+
+ MOV     R3, #0                     \ Set R3 to zero to tally the 10s digit
+
+.bdec3
+
+ CMP     R0, #10                    \ Calculate the 10s digit
+ SUBCS   R0, R0, #10
+ ADDCS   R3, R3, #1
+ BCS     bdec3
+
+ ORRS    R4, R3, R5                 \ If both R3 and R5 are zero, skip the
+                                    \ following as this digit is zero and we
+                                    \ haven't yet displayed anything
+
+ ADDNE   R4, R3, #&30               \ Digit is non-zero so convert the digit to
+ STRBNE  R4, [R1, R2]               \ a string by adding the ASCII value of "0"
+ ADDNE   R2, R2, #1                 \ (ASCII &30) and store it in the string at
+ MOVNE   R5, #1                     \ R1 with offset R2, incrementing the offset
+                                    \ and setting R5 to 1 to indicate we have
+                                    \ printed a digit
+
+                                    \ And now for the 1s digit, which is in R0
+
+ ADD     R3, R0, #&30               \ Convert R3 to a string by adding the ASCII
+ STRB    R3, [R1, R2]               \ value of "0" and store it in the string at
+ ADD     R2, R2, #1                 \ R1 with offset R2, incrementing the offset
+                                    \ to leave the string length in R2
+
+ LDMFD   R13!, {R0, R3-R5, PC}      \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: oswordSwitchBank
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: OS_Word block for bank switching and clearing the screen
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.oswordSwitchBank
+
+ EQUB 3                             \ The number of bytes to transmit
+
+ EQUB 0                             \ The number of bytes to receive
+
+ EQUB 0                             \ The current screen bank number (0 or 1)
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: oswordPixel
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: OS_Word block for drawing pixels
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.oswordPixel
+
+ EQUB 5                             \ The number of bytes to transmit
+
+ EQUB 0                             \ The number of bytes to receive
+
+ EQUW &0000                         \ Mode 1 screen address of pixel byte
+
+ EQUB 0                             \ Pixel byte to poke into screen address
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: oswordNoParams
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: OS_Word block with no parameters
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.oswordNoParams
+
+ EQUB 2                             \ The number of bytes to transmit
+
+ EQUB 0                             \ The number of bytes to receive
+
+ ALIGN
 
                                     \ --- End of added code ------------------->
 

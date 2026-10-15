@@ -1238,6 +1238,7 @@ dobj5:
  BNE     dobj3
  LDMFD   R13!, {R6-R12, PC}
 PrintCurrentScore:
+ STMFD   R13!, {R14}
  LDR     R0, [R11, #currentScore]
  ADD     R1, R11, #stringBuffer
  MOV     R2, #19
@@ -1247,6 +1248,7 @@ PrintCurrentScore:
  CMP     R0, #1488
  MOVHS   R4, #0x70000
  STRHS   R4, [R11, #gravity]
+ BL      ConvertBinaryToDecimal
  MOV     R0, #30
  SWI     OS_WriteC
  MOV     R0, #0x0A
@@ -1259,11 +1261,12 @@ prsc1:
  MOV     R0, #0x20
  SWI     OS_WriteC
  SWI     OS_WriteC
- MOV     PC, R14
+ LDMFD   R13!, {PC}
 PrintScoreInBothBanks:
+ STMFD   R13!, {R14}
  STMFD   R13!, {R1-R2}
  ADD     R1, R11, #stringBuffer
- MOV     R2, #19
+ BL      ConvertBinaryToDecimal
  MOV     R0, #31
  SWI     OS_WriteC
  LDMFD   R13!, {R3-R4}
@@ -1272,18 +1275,24 @@ PrintScoreInBothBanks:
  MOV     R0, R4
  SWI     OS_WriteC
  STMFD   R13!, {R1-R2}
- MOV     R0, #112
- MOV     R1, #1
- SWI     OS_Byte
+ ADR     R0, screenBankNumber
+ LDR     R7, [R0]
+ EOR     R6, R7, #1
+ ADR     R5, oswordSwitchBank
+ STRB    R6, [R5, #2]
+ ADR     R1, oswordSwitchBank
+ MOV     R0, #244
+ SWI     OS_Word
  LDMFD   R13, {R1-R2}
 prsb1:
  LDRB    R0, [R1], #1
  SWI     OS_WriteC
  SUBS    R2, R2, #1
  BNE     prsb1
- MOV     R0, #112
- MOV     R1, #2
- SWI     OS_Byte
+ STRB    R7, [R5, #2]
+ ADR     R1, oswordSwitchBank
+ MOV     R0, #244
+ SWI     OS_Word
  MOV     R0, #31
  SWI     OS_WriteC
  MOV     R0, R3
@@ -1296,7 +1305,7 @@ prsb2:
  SWI     OS_WriteC
  SUBS    R2, R2, #1
  BNE     prsb2
- MOV     PC, R14
+ LDMFD   R13!, {PC}
 fuelBarColour:
 .long    0x37373737
 sinTableAddr:
@@ -2075,16 +2084,11 @@ SwitchScreenBank:
  LDRB    R0, screenBankNumber
  EORS    R0, R0, #1
  STRB    R0, screenBankNumber
- STRB    R0, oswordCls+2
- ADR     R1, oswordCls
+ STRB    R0, oswordSwitchBank+2
+ ADR     R1, oswordSwitchBank
  MOV     R0, #240
  SWI     OS_Word
  MOV     PC, R14
-oswordCls:
-.byte 3
-.byte 0
-.byte 0
-.balign 4
 DrawQuadrilateral:
  STMFD   R13!, {R0-R12, R14}
  MOV     R8, #0x80
@@ -2601,12 +2605,6 @@ DrawHorizontalLine:
  ADD     R2, R2, R10
  BL      DrawPixelInRow
  LDMFD   R13!, {R0-R12, PC}
-oswordPixel:
-.byte 5
-.byte 0
-.word 0x0000
-.byte 0
-.balign 4
 DrawPixel:
  CMP     R0, #320
  CMPLO   R1, #239
@@ -2692,12 +2690,8 @@ AbortWithMemoryError:
 .byte    0
 .balign 4
  B       ReturnToDesktop
-oswordMode:
-.byte 2
-.byte 0
-.balign 4
 Entry:
- ADR     R1, oswordMode
+ ADR     R1, oswordNoParams
  MOV     R0, #242
  SWI     OS_Word
  STR     R13, stackPointerOnEntry
@@ -2737,6 +2731,7 @@ StartNewGame:
  STRHS   R0, [R11, #highScore]
  MOV     R1, #35
  MOV     R2, #1
+ BL      PrintScoreInBothBanks
  LDR     R0, initialScore
  STR     R0, [R11, #currentScore]
  LDR     R0, initialFuelLevel
@@ -2786,6 +2781,7 @@ PlacePlayerOnLaunchpad:
  LDR     R0, [R11, #remainingLives]
  MOV     R1, #30
  MOV     R2, #1
+ BL      PrintScoreInBothBanks
  MVN     R0, #0
  STR     R0, [R11, #playingGame]
  MOV     R0, #0
@@ -2936,6 +2932,67 @@ polarAngle:
 .long 0
 polarDistance:
 .long 0
+tenThousand:
+.long    10000
+ConvertBinaryToDecimal:
+ STMFD   R13!, {R0, R3-R5, R14}
+ LDR     R2, tenThousand
+ CMP     R0, R2
+ MOVCS   R0, #9999
+ MOV     R2, #0
+ MOV     R5, #0
+ MOV     R3, #0
+bdec1:
+ CMP     R0, #1000
+ SUBCS   R0, R0, #1000
+ ADDCS   R3, R3, #1
+ BCS     bdec1
+ CMP     R3, #0
+ ADDNE   R4, R3, #0x30
+ STRBNE  R4, [R1, R2]
+ ADDNE   R2, R2, #1
+ MOVNE   R5, #1
+ MOV     R3, #0
+bdec2:
+ CMP     R0, #100
+ SUBCS   R0, R0, #100
+ ADDCS   R3, R3, #1
+ BCS     bdec2
+ ORRS    R4, R3, R5
+ ADDNE   R4, R3, #0x30
+ STRBNE  R4, [R1, R2]
+ ADDNE   R2, R2, #1
+ MOVNE   R5, #1
+ MOV     R3, #0
+bdec3:
+ CMP     R0, #10
+ SUBCS   R0, R0, #10
+ ADDCS   R3, R3, #1
+ BCS     bdec3
+ ORRS    R4, R3, R5
+ ADDNE   R4, R3, #0x30
+ STRBNE  R4, [R1, R2]
+ ADDNE   R2, R2, #1
+ MOVNE   R5, #1
+ ADD     R3, R0, #0x30
+ STRB    R3, [R1, R2]
+ ADD     R2, R2, #1
+ LDMFD   R13!, {R0, R3-R5, PC}
+oswordSwitchBank:
+.byte 3
+.byte 0
+.byte 0
+.balign 4
+oswordPixel:
+.byte 5
+.byte 0
+.word 0x0000
+.byte 0
+.balign 4
+oswordNoParams:
+.byte 2
+.byte 0
+.balign 4
 objectRock:
 .long    6
 .long    8
