@@ -2922,10 +2922,12 @@ GetPolarAnglesFromKeyboard:
  LDR     R0, polarDistance
  LDRB    R2, keyBuffer+7
  TEQ     R2, #0xFF
- SUBEQ   R0, R0, #16 << 22
+ SUBEQ   R0, R0, #8 << 22
  LDRB    R2, keyBuffer+8
  TEQ     R2, #0xFF
- ADDEQ   R0, R0, #16 << 22
+ ADDEQ   R0, R0, #8 << 22
+ CMP     R0, #0
+ MOVLT   R0, #0
  STR     R0, polarDistance
  MOV     PC, R14
 polarAngle:

@@ -13433,11 +13433,14 @@
 
  LDRB    R2, keyBuffer+7            \ If pull up was pressed then decrease
  TEQ     R2, #&FF                   \ the distance
- SUBEQ   R0, R0, #16 << 22
+ SUBEQ   R0, R0, #8 << 22
 
  LDRB    R2, keyBuffer+8            \ If pitch down was pressed then increase
  TEQ     R2, #&FF                   \ the distance
- ADDEQ   R0, R0, #16 << 22
+ ADDEQ   R0, R0, #8 << 22
+
+ CMP     R0, #0                     \ Ensure R0 remains positive
+ MOVLT   R0, #0
 
  STR     R0, polarDistance          \ Store the new polar distance
 
