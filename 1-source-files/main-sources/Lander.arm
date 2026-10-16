@@ -12392,17 +12392,24 @@
  MOV     R8, R8, LSR R7             \ pixel at position R7 (0 on the left, 3 on
                                     \ the right)
 
+ MOV     R9, #%111101110111         \ Set R9 to the pixel mask for a pixel in
+ MOV     R9, R9, LSR R7             \ position R7
+
                                     \ So we now have:
                                     \
                                     \   * R6 = screen offset of mode 1 byte
                                     \
-                                    \   * R5 = pixel byte with pixel set
+                                    \   * R8 = pixel byte with pixel set
+                                    \
+                                    \   * R9 = pixel mask
 
  STRB    R6, oswordPixel+2          \ Store the screen address in the OS_Word
  MOV     R4, R6, LSR #8             \ block
  STRB    R4, oswordPixel+3
 
  STRB    R8, oswordPixel+4          \ Store the pixel byte in the OS_Word block
+
+ STRB    R9, oswordPixel+5          \ Store the pixel mask in the OS_Word block
 
  ADR     R1, oswordPixel            \ Draw the dot at the start of the line
  MOV     R0, #Tube_DrawPixel
@@ -13627,13 +13634,15 @@
 
 .oswordPixel
 
- EQUB 5                             \ The number of bytes to transmit
+ EQUB 6                             \ The number of bytes to transmit
 
  EQUB 0                             \ The number of bytes to receive
 
  EQUW &0000                         \ Mode 1 screen address of pixel byte
 
  EQUB 0                             \ Pixel byte to poke into screen address
+
+ EQUB 0                             \ Pixel mask
 
  ALIGN
 

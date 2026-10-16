@@ -890,13 +890,20 @@ ENDMACRO
 
  INY                    \ Increment Y to 4
 
+ LDA (OSSC),Y           \ Set R to byte #4 from the Y-th pixel block in OSSC,
+ STA R                  \ which contains the pixel byte
+
+ INY                    \ Increment Y to 5
+
  STY P                  \ Store Y in P
 
- LDA (OSSC),Y           \ Set A to byte #4 from the Y-th pixel block in OSSC,
-                        \ which contains the pixel byte
+ LDA (OSSC),Y           \ Set S to byte #5 from the Y-th pixel block in OSSC,
+ STA S                  \ which contains the pixel mask
 
- LDY #0                 \ Draw the pixel on-screen using OR logic
- ORA (SC),Y
+ LDY #0                 \ Draw the pixel on-screen using OR logic and a bit mask
+ LDA (SC),Y
+ AND S
+ ORA R
  STA (SC),Y
 
  LDY P                  \ Set Y to the index of this pixel's y-coordinate byte

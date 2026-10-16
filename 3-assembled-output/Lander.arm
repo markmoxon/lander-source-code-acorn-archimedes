@@ -13,6 +13,8 @@
 .set Tube_SetScreenBank, 130
 .set Tube_ClearScreen, 131
 .set Tube_SetScreenMode, 133
+.set Tube_BeginPixels, 134
+.set Tube_AddPixels, 135
 .set Tube_ReadKeyboard, 240
 .set Tube_DrawPixel, 241
 .set STORE, 256 * (TILES_X / 32)
@@ -2628,14 +2630,43 @@ DrawPixelInRow:
  ADD     R6, R6, #0x3500
  AND     R7, R2, #0x3
  MOV     R8, R8, LSR R7
+ MOV     R9, #0xf77
+ MOV     R9, R9, LSR R7
  STRB    R6, oswordPixel+2
  MOV     R4, R6, LSR #8
  STRB    R4, oswordPixel+3
  STRB    R8, oswordPixel+4
+ STRB    R9, oswordPixel+5
  ADR     R1, oswordPixel
  MOV     R0, #Tube_DrawPixel
  SWI     OS_Word
  LDMFD   R13!, {R2-R4, R8, PC}
+pixelBufferCounter:
+.long 0
+AddPixelToBuffer:
+ LDR     R0, pixelBufferCounter
+ ADD     R0, R0, #4
+ STR     R0, pixelBufferCounter
+ CMP     R0, #68
+ MOVGE   PC, R14
+ MOV     R0, #Tube_AddPixels
+ SWI     OS_WriteC
+ MOV     R0, R6
+ SWI     OS_WriteC
+ MOV     R0, R6, LSR #8
+ SWI     OS_WriteC
+ MOV     R0, R8
+ SWI     OS_WriteC
+ MOV     R0, R8
+ SWI     OS_WriteC
+ LDR     R0, pixelBufferCounter
+ ADD     R0, R0, #4
+ STR     R0, pixelBufferCounter
+ CMP     R0, #64
+ MOVNE   PC, R14
+ MOV     R0, #0
+ STR     R0, pixelBufferCounter
+ MOV     PC, R14
 DrawLineSegment:
  STRB    R8, [R11, #16]
  STRB    R8, [R11, #15]
@@ -2985,9 +3016,10 @@ bdec3:
  ADD     R2, R2, #1
  LDMFD   R13!, {R0, R3-R5, PC}
 oswordPixel:
-.byte 5
+.byte 6
 .byte 0
 .word 0x0000
+.byte 0
 .byte 0
 .balign 4
 oswordNoParams:
