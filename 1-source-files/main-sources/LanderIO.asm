@@ -40,6 +40,10 @@
 
  LOAD% = &2400          \ The load address of the main I/O processor code
 
+ WRCHV = &020E          \ The WRCHV vector that we intercept to implement our
+                        \ own custom OSWRCH commands for communicating over the
+                        \ Tube
+
  WORDV = &020C          \ The WORDV vector that we intercept to implement our
                         \ own custom OSWORD commands for communicating over the
                         \ Tube
@@ -53,6 +57,8 @@
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
 
  OSWORD = &FFF1         \ The address for the OSWORD routine
+
+ OSCLI = &FFF7          \ The address for the OSCLI routine
 
 \ ******************************************************************************
 \
@@ -148,6 +154,11 @@
  LDY #0                 \ and can therefore be used in-game
  JSR OSBYTE
 
+ LDA WRCHV              \ Store the current WRCHV vector in OHMYGOD(4 3)
+ STA OHMYGOD+3
+ LDA WRCHV+1
+ STA OHMYGOD+4
+
  LDA WORDV              \ Store the current WORDV vector in notours(2 1)
  STA notours+1
  LDA WORDV+1
@@ -161,7 +172,399 @@
 
  CLI                    \ Enable interrupts again
 
+ JSR PUTBACK            \ Call PUTBACK to point WRCHV to USOSWRCH, so from now
+                        \ on the handlers pointed to by the vectors will handle
+                        \ all character writes
+
+ LDX #LO(MESS1)         \ Set (Y X) to point to MESS1 ("RUN P.LANDER")
+ LDY #HI(MESS1)
+
+ JMP OSCLI              \ Call OSCLI to run the OS command in MESS1, which *RUNs
+                        \ the parasite code in RUN P.LANDER, returning from the
+                        \ subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: MESS1
+\       Type: Variable
+\   Category: Loader
+\    Summary: The OS command string for running the parasite code in P.LANDER
+\
+\ ******************************************************************************
+
+.MESS1
+
+ EQUS "RUN P.LANDER"
+ EQUB 13
+
+\ ******************************************************************************
+\
+\       Name: PUTBACK
+\       Type: Subroutine
+\   Category: Tube
+\    Summary: Reset the OSWRCH vector in WRCHV to point to USOSWRCH
+\  Deep dive: 6502 Second Processor Tube communication
+\
+\ ******************************************************************************
+
+.PUTBACK
+
+ LDA #128               \ Set A = 128 to denote the first entry in JMPTAB, i.e.
+                        \ USOSWRCH
+
+                        \ Fall through into USOSWRCH to set WRCHV to the first
+                        \ entry in JMPTAB - in other words, put WRCHV back to
+                        \ its original value of USOSWRCH
+
+\ ******************************************************************************
+\
+\       Name: USOSWRCH
+\       Type: Subroutine
+\   Category: Tube
+\    Summary: The custom OSWRCH routine for writing characters and implementing
+\             jump table commands
+\  Deep dive: 6502 Second Processor Tube communication
+\
+\ ------------------------------------------------------------------------------
+\
+\ WRCHV is set to point to this routine in the STARTUP routine that runs when
+\ the I/O processor code first loads (it's set via a call to PUTBACK).
+\
+\ This routine prints characters to the I/O processor's screen. For special jump
+\ table commands with characters in the range 128-147, the routine calls the
+\ corresponding routines in the JMPTAB table; all other characters are printed
+\ normally using the original OSWRCH.
+\
+\ To implement the special jump table commands, this routine sets the address
+\ in WRCHV so that calls to OSWRCH get vectored via the appropriate address from
+\ JMPTAB. The routine does the following, depending on the value in A:
+\
+\   * If A is in the range 128-147, it sets WRCHV to entry number A - 128 in
+\     the JMPTAB table (so 128 is the first entry, 129 the second, and so on)
+\
+\   * Otherwise it prints the character in A by calling the original OSWRCH
+\
+\ The vector can be reset to USOSWRCH by calling the PUTBACK routine, which is
+\ done at the end of all of the routines that are pointed to by JMPTAB.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The character to print:
+\
+\                         * 128-147: Run the jump command in A (see JMPTAB)
+\
+\                         * All others: Print the character in A
+\
+\ ******************************************************************************
+
+.USOSWRCH
+
+ STX SC                 \ Store X in SC so we can retrieve it later
+
+ TAX                    \ Store A in X
+
+ BPL OHMYGOD            \ If A < 128 jump to OHMYGOD to print the character in A
+
+ CPX #129               \ Also jump to OHMYGOD if we are printing character 129,
+ BEQ OHMYGOD            \ as we use that to change screen mode to shadow mode 1
+
+ ASL A                  \ Set X = A << 2
+ TAX                    \       = (A - 128) * 2 (because A >= 128)
+                        \
+                        \ so X can be used as an index into a jump table, where
+                        \ the table entries correspond to original values of A
+                        \ of 128 for entry 0, 129 for entry 1, 130 for entry 2,
+                        \ and so on
+
+ CPX #39                \ If X >= 39 then it is past the end of the jump table
+ BCS OHMYGOD            \ (JMPTAB contains addresses 0-19, so the last entry is
+                        \ for X = 38), so jump to OHMYGOD to print the
+                        \ character in A
+
+ LDA JMPTAB,X           \ Fetch the low byte of the jump table address pointed
+                        \ to by X from JMPTAB + X
+
+ SEI                    \ Disable interrupts while we update the WRCHV vector
+
+ STA WRCHV              \ Store the low byte of the jump table entry in the low
+                        \ byte of WRCHV
+
+ LDA JMPTAB+1,X         \ Fetch the high byte of the jump table address pointed
+ STA WRCHV+1            \ to by X from JMPTAB+1 + X, and store it in the high
+                        \ byte of WRCHV
+
+ CLI                    \ Enable interrupts again
+
  RTS                    \ Return from the subroutine
+
+.OHMYGOD
+
+ LDX SC                 \ Retrieve X from SC
+
+ JMP OSWRCH             \ Jump to OSWRCH to print the character in A, returning
+                        \ from the subroutine using a tail call (this address is
+                        \ updated in STARTUP to point to the original OSWRCH
+                        \ routine)
+
+\ ******************************************************************************
+\
+\       Name: JMPTAB
+\       Type: Variable
+\   Category: Tube
+\    Summary: The lookup table for OSWRCH jump commands (128-147)
+\  Deep dive: 6502 Second Processor Tube communication
+\
+\ ------------------------------------------------------------------------------
+\
+\ Once they have finished, routines in this table should reset WRCHV to point
+\ back to USOSWRCH again by calling the PUTBACK routine with a JMP as their last
+\ instruction.
+\
+\ ******************************************************************************
+
+.JMPTAB
+
+ EQUW USOSWRCH          \ 128 (&80)     0 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 129 (&81)     1 = Reserved for VDU code for mode 128+1
+ EQUW SetScreenBank     \ 130 (&82)     2 = Set screen bank to main or shadow
+ EQUW ClearScreen       \ 131 (&83)     3 = Switch screen bank and clear screen
+ EQUW USOSWRCH          \ 132 (&84)     4 = Reserved for VDU code for mode 128+4
+ EQUW SetScreenMode     \ 133 (&85)     5 = Set up the game's screen mode
+ EQUW USOSWRCH          \ 134 (&86)     6 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 135 (&87)     7 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 136 (&88)     8 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 137 (&89)     9 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 138 (&8A)    10 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 139 (&8B)    11 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 140 (&8C)    12 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 141 (&8D)    13 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 142 (&8E)    14 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 143 (&8F)    15 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 144 (&90)    16 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 145 (&91)    17 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 146 (&92)    18 = Put back to USOSWRCH
+ EQUW USOSWRCH          \ 147 (&93)    19 = Put back to USOSWRCH
+
+\ ******************************************************************************
+\
+\       Name: SetScreenBank
+\       Type: Subroutine
+\   Category: Screen
+\    Summary: Implement the #Tube_SetScreenBank <param> command (set screen bank)
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a #Tube_SetScreenBank <param>
+\ command. It switches the screen bank between shadow RAM and main memory.
+\
+\ Arguments:
+\
+\   A                   The screen bank
+\
+\                         * 0 = Draw into shadow RAM, display main memory
+\
+\                         * 1 = Draw into main memory, display shadow RAM
+\
+\ ******************************************************************************
+
+.SetScreenBank
+
+ JSR SetScreenBankToA   \ Switch the screen bank to the argument in A
+
+ JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
+                        \ return from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: SetScreenBankToA
+\       Type: Subroutine
+\   Category: Screen
+\    Summary: Switch the screen bank according to the value of A
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The screen bank
+\
+\                         * 0 = Draw into shadow RAM, display main memory
+\
+\                         * 1 = Draw into main memory, display shadow RAM
+\
+\ ******************************************************************************
+
+.SetScreenBankToA
+
+ CMP #0                 \ If argument is zero jump to sban1
+ BNE sban1
+
+                        \ Display main memory on screen and switch drawing to
+                        \ shadow RAM
+
+ LDA #%00000110         \ Set bits 1 and 2 of the Access Control Register at
+ STA VIA+&34            \ SHEILA &34 to switch shadow RAM into &3000-&7FFF and
+                        \ switch drawing to shadow RAM
+                        \
+                        \ Clear bit 0 to display main memory on screen
+
+ RTS                    \ Return from the subroutine
+
+.sban1
+
+                        \ Display shadow RAM on screen and switch drawing to
+                        \ main memory
+
+ LDA #%00000001         \ Clear bits 1 and 2 of the Access Control Register at
+ STA VIA+&34            \ SHEILA &34 to switch main memory into &3000-&7FFF and
+                        \ switch drawing to main memory
+                        \
+                        \ Set bit 0 to display shadow RAM on screen
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ClearScreen
+\       Type: Subroutine
+\   Category: Drawing the screen
+\    Summary: Clear the screen
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is run when the parasite sends a #Tube_ClearScreen <param>
+\ command. It switches the screen bank and clears the bank that's no longer
+\ being displayed.
+\
+\ Arguments:
+\
+\   A                   The screen bank
+\
+\                         * 0 = Draw into shadow RAM, display main memory
+\
+\                         * 1 = Draw into main memory, display shadow RAM
+\
+\ ******************************************************************************
+
+.ClearScreen
+
+ JSR SetScreenBankToA   \ Switch the screen bank to the argument in A
+
+ LDA #&35               \ Set P(1 0) = &3500
+ STA P+1
+ LDA #&00
+ STA P
+
+ LDX #&80-&35           \ The number of pages in screen memory, starting at
+                        \ &3500 (just below the two lines of scores)
+
+ LDY #0                 \ We want to zero one page of memory, so set Y as a byte
+                        \ counter
+
+.clsc1
+
+ STA (P),Y              \ Zero the Y-th byte of the P(1 0) memory block
+
+ DEY                    \ Decrement the byte counter
+
+ BNE clsc1              \ Loop back to copy the next byte until we have done a
+                        \ whole page of 256 bytes
+
+ INC P+1                \ Increment the high byte of the source address to point
+                        \ to the next page
+
+ DEX                    \ Decrement the page counter
+
+ BPL clsc1              \ Loop back to copy the next page until we have done X
+                        \ pages
+
+ JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
+                        \ return from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: SetScreenMode
+\       Type: Subroutine
+\   Category: Drawing the screen
+\    Summary: Set up the game's screen mode
+\
+\ ******************************************************************************
+
+.SetScreenMode
+
+ LDA #LO(B%)            \ Set the low byte of P(1 0) to point to the VDU code
+ STA P                  \ table at B%
+
+ LDA #HI(B%)            \ Set the high byte of P(1 0) to point to the VDU code
+ STA P+1                \ table at B%
+
+ LDY #0                 \ We are now going to send the VDU bytes in the table
+                        \ at B% to OSWRCH to set up the screen mode
+
+.mode1
+
+ LDA (P),Y              \ Set A to the Y-th byte of the B% table
+
+ CMP #&FF               \ If we have reached the end of the table, jump to mode2
+ BEQ mode2              \ to return from the subroutine
+
+ JSR OHMYGOD+2          \ Print the Y-th byte of the VDU command by calling the
+                        \ original OSWRCH address in the JMP instruction at
+                        \ OHMYGOD+2 (this ensures the reserved mode numbers can
+                        \ be printed properly)
+
+ INY                    \ Increment the loop counter
+
+ JMP mode1              \ Loop back for the next byte
+
+.mode2
+
+ JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
+                        \ return from the subroutine using a tail call
+
+\ ******************************************************************************
+\
+\       Name: B%
+\       Type: Variable
+\   Category: Drawing the screen
+\    Summary: VDU commands for setting up the mode 1 screen
+\
+\ ******************************************************************************
+
+.B%
+
+ EQUB 22, 129           \ Switch to screen mode 129 (shadow mode 1)
+
+ EQUB 23, 0, 10, 32     \ Set 6845 register R10 = %00100000 = 32
+ EQUB 0, 0, 0           \
+ EQUB 0, 0, 0           \ This is the "cursor start" register, and bits 5 and 6
+                        \ define the "cursor display mode", as follows:
+                        \
+                        \   * %00 = steady, non-blinking cursor
+                        \
+                        \   * %01 = do not display a cursor
+                        \
+                        \   * %10 = fast blinking cursor (blink at 1/16 of the
+                        \           field rate)
+                        \
+                        \   * %11 = slow blinking cursor (blink at 1/32 of the
+                        \           field rate)
+                        \
+                        \ We can therefore turn off the cursor completely by
+                        \ setting cursor display mode %01, with bit 6 of R10
+                        \ clear and bit 5 of R10 set
+
+ EQUB 19, 1, 1          \ Define logical colour 1 as red
+ EQUB 0, 0, 0
+
+ EQUB 19, 2, 2          \ Define logical colour 2 as green
+ EQUB 0, 0, 0
+
+ EQUB 19, 3, 4          \ Define logical colour 3 as blue
+ EQUB 0, 0, 0
+
+ EQUB 255               \ End of commands
 
 \ ******************************************************************************
 \
@@ -182,11 +585,11 @@
 
 .OSWVECS
 
- EQUW ClearScreen       \            240 (&F0)     0 = Switch bank, clear screen
+ EQUW SAFE              \            240 (&F0)     0 = Do nothing
  EQUW DrawPixel         \            241 (&F1)     1 = Draw pixel
- EQUW SetScreenMode     \            242 (&F2)     2 = Set the screen mode
+ EQUW SAFE              \            242 (&F2)     2 = Do nothing
  EQUW ReadKeyboard      \            243 (&F3)     3 = Scan keyboard
- EQUW SwitchBank        \            244 (&F4)     4 = Switch screen bank
+ EQUW SAFE              \            244 (&F4)     4 = Do nothing
  EQUW SAFE              \            245 (&F5)     5 = Do nothing
  EQUW SAFE              \            246 (&F6)     6 = Do nothing
  EQUW SAFE              \            247 (&F7)     7 = Do nothing
@@ -351,169 +754,6 @@
                         \ is effectively a JMP as we just passed through a BEQ)
 
  RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
-\       Name: SwitchBank
-\       Type: Subroutine
-\   Category: Drawing the screen
-\    Summary: Switch screen bank to the argument passed in the block
-\
-\ ******************************************************************************
-
-.SwitchBank
-
- LDY #2                 \ Fetch the argument (0 or 1)
- LDA (OSSC),Y
-
- BNE bank1              \ If argument is zero jump to bank1
-
-                        \ Display main memory on screen and switch drawing to
-                        \ shadow RAM
-
- LDA #%00000110         \ Set bits 1 and 2 of the Access Control Register at
- STA VIA+&34            \ SHEILA &34 to switch shadow RAM into &3000-&7FFF and
-                        \ switch drawing to shadow RAM
-                        \
-                        \ Clear bit 0 to display main memory on screen
-
- RTS                    \ Return from the subroutine
-
-.bank1
-
-                        \ Display shadow RAM on screen and switch drawing to
-                        \ main memory
-
- LDA #%00000001         \ Clear bits 1 and 2 of the Access Control Register at
- STA VIA+&34            \ SHEILA &34 to switch main memory into &3000-&7FFF and
-                        \ switch drawing to main memory
-                        \
-                        \ Set bit 0 to display shadow RAM on screen
-
- RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
-\       Name: ClearScreen
-\       Type: Subroutine
-\   Category: Drawing the screen
-\    Summary: Clear the screen
-\
-\ ******************************************************************************
-
-.ClearScreen
-
- JSR SwitchBank         \ Switch screen bank to the argument passed in the block
-
- LDA #&35               \ Set P(1 0) = &3500
- STA P+1
- LDA #&00
- STA P
-
- LDX #&80-&35           \ The number of pages in screen memory, starting at
-                        \ &3500 (just below the two lines of scores)
-
- LDY #0                 \ We want to zero one page of memory, so set Y as a byte
-                        \ counter
-
-.clsc1
-
- STA (P),Y              \ Zero the Y-th byte of the P(1 0) memory block
-
- DEY                    \ Decrement the byte counter
-
- BNE clsc1              \ Loop back to copy the next byte until we have done a
-                        \ whole page of 256 bytes
-
- INC P+1                \ Increment the high byte of the source address to point
-                        \ to the next page
-
- DEX                    \ Decrement the page counter
-
- BPL clsc1              \ Loop back to copy the next page until we have done X
-                        \ pages
-
- RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
-\       Name: SetScreenMode
-\       Type: Subroutine
-\   Category: Drawing the screen
-\    Summary: Clear the screen
-\
-\ ******************************************************************************
-
-.SetScreenMode
-
- LDA #LO(B%)            \ Set the low byte of P(1 0) to point to the VDU code
- STA P                  \ table at B%
-
- LDA #HI(B%)            \ Set the high byte of P(1 0) to point to the VDU code
- STA P+1                \ table at B%
-
- LDY #0                 \ We are now going to send the VDU bytes in the table
-                        \ at B% to OSWRCH to set up the screen mode
-
-.mode1
-
- LDA (P),Y              \ Set A to the Y-th byte of the B% table
-
- CMP #&FF               \ If we have reached the end of the table, jump to mode2
- BEQ mode2              \ to return from the subroutine
-
- JSR OSWRCH             \ Print the Y-th byte of the VDU command
-
- INY                    \ Increment the loop counter
-
- JMP mode1              \ Loop back for the next byte
-
-.mode2
-
- RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
-\       Name: B%
-\       Type: Variable
-\   Category: Drawing the screen
-\    Summary: VDU commands for setting up the mode 1 screen
-\
-\ ******************************************************************************
-
-.B%
-
- EQUB 22, 129           \ Switch to screen mode 129 (shadow mode 1)
-
- EQUB 23, 0, 10, 32     \ Set 6845 register R10 = %00100000 = 32
- EQUB 0, 0, 0           \
- EQUB 0, 0, 0           \ This is the "cursor start" register, and bits 5 and 6
-                        \ define the "cursor display mode", as follows:
-                        \
-                        \   * %00 = steady, non-blinking cursor
-                        \
-                        \   * %01 = do not display a cursor
-                        \
-                        \   * %10 = fast blinking cursor (blink at 1/16 of the
-                        \           field rate)
-                        \
-                        \   * %11 = slow blinking cursor (blink at 1/32 of the
-                        \           field rate)
-                        \
-                        \ We can therefore turn off the cursor completely by
-                        \ setting cursor display mode %01, with bit 6 of R10
-                        \ clear and bit 5 of R10 set
-
- EQUB 19, 1, 1          \ Define logical colour 1 as red
- EQUB 0, 0, 0
-
- EQUB 19, 2, 2          \ Define logical colour 2 as green
- EQUB 0, 0, 0
-
- EQUB 19, 3, 4          \ Define logical colour 3 as blue
- EQUB 0, 0, 0
-
- EQUB 255               \ End of commands
 
 \ ******************************************************************************
 \

@@ -10,6 +10,11 @@
 .set SMOKE_RISING_SPEED, 0x00080000
 .set UNDERCARRIAGE_Y, 0x00640000
 .set BUFFER_SIZE, 4308
+.set Tube_SetScreenBank, 130
+.set Tube_ClearScreen, 131
+.set Tube_SetScreenMode, 133
+.set Tube_DrawPixel, 241
+.set Tube_ReadKeyboard, 243
 .set STORE, 256 * (TILES_X / 32)
 .set LAUNCHPAD_Y, LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y
 .set LAUNCHPAD_SIZE, TILE_SIZE * 8
@@ -1278,21 +1283,20 @@ PrintScoreInBothBanks:
  ADR     R0, screenBankNumber
  LDR     R7, [R0]
  EOR     R6, R7, #1
- ADR     R5, oswordSwitchBank
- STRB    R6, [R5, #2]
- ADR     R1, oswordSwitchBank
- MOV     R0, #244
- SWI     OS_Word
+ MOV     R0, #Tube_SetScreenBank
+ SWI     OS_WriteC
+ MOV     R0, R6
+ SWI     OS_WriteC
  LDMFD   R13, {R1-R2}
 prsb1:
  LDRB    R0, [R1], #1
  SWI     OS_WriteC
  SUBS    R2, R2, #1
  BNE     prsb1
- STRB    R7, [R5, #2]
- ADR     R1, oswordSwitchBank
- MOV     R0, #244
- SWI     OS_Word
+ MOV     R0, #Tube_SetScreenBank
+ SWI     OS_WriteC
+ MOV     R0, R7
+ SWI     OS_WriteC
  MOV     R0, #31
  SWI     OS_WriteC
  MOV     R0, R3
@@ -2081,13 +2085,13 @@ screenBankNumber:
 divisionTableAddr:
 .long    divisionTable
 SwitchScreenBank:
- LDRB    R0, screenBankNumber
- EORS    R0, R0, #1
- STRB    R0, screenBankNumber
- STRB    R0, oswordSwitchBank+2
- ADR     R1, oswordSwitchBank
- MOV     R0, #240
- SWI     OS_Word
+ LDRB    R1, screenBankNumber
+ EORS    R1, R1, #1
+ STRB    R1, screenBankNumber
+ MOV     R0, #Tube_ClearScreen
+ SWI     OS_WriteC
+ MOV     R0, R1
+ SWI     OS_WriteC
  MOV     PC, R14
 DrawQuadrilateral:
  STMFD   R13!, {R0-R12, R14}
@@ -2629,7 +2633,7 @@ DrawPixelInRow:
  STRB    R4, oswordPixel+3
  STRB    R8, oswordPixel+4
  ADR     R1, oswordPixel
- MOV     R0, #241
+ MOV     R0, #Tube_DrawPixel
  SWI     OS_Word
  LDMFD   R13!, {R2-R4, R8, PC}
 DrawLineSegment:
@@ -2691,9 +2695,9 @@ AbortWithMemoryError:
 .balign 4
  B       ReturnToDesktop
 Entry:
- ADR     R1, oswordNoParams
- MOV     R0, #242
- SWI     OS_Word
+ MOV     R0, #Tube_SetScreenMode
+ SWI     OS_WriteC
+ SWI     OS_WriteC
  STR     R13, stackPointerOnEntry
  LDR     R13, stackAddr
  LDR     R11, workspaceAddr
@@ -2819,7 +2823,7 @@ MainLoop:
  STR     R0, keyBuffer+4
  STR     R0, keyBuffer+8
  ADR     R1, keyBuffer
- MOV     R0, #243
+ MOV     R0, #Tube_ReadKeyboard
  SWI     OS_Word
  LDRB    R2, keyBuffer+2
  TEQ     R2, #0xFF
@@ -2892,7 +2896,7 @@ PrintHexDigit:
  MOV     PC, R14
 WaitForSpace:
  ADR     R1, keyBuffer
- MOV     R0, #243
+ MOV     R0, #Tube_ReadKeyboard
  SWI     OS_Word
  LDRB    R2, keyBuffer+4
  TEQ     R2, #0xFF
@@ -2980,11 +2984,6 @@ bdec3:
  STRB    R3, [R1, R2]
  ADD     R2, R2, #1
  LDMFD   R13!, {R0, R3-R5, PC}
-oswordSwitchBank:
-.byte 3
-.byte 0
-.byte 0
-.balign 4
 oswordPixel:
 .byte 5
 .byte 0

@@ -81,11 +81,12 @@
 
                                     \ --- Mod: Code added for AES ------------->
 
- Tube_ClearScreen = 240             \ OSWORD calls to the I/O Processor
- Tube_DrawPixel = 241
- Tube_SetScreenMode = 242
+ Tube_SetScreenBank = 130           \ OSBYTE calls to the I/O Processor
+ Tube_ClearScreen = 131
+ Tube_SetScreenMode = 133
+
+ Tube_DrawPixel = 241               \ OSWORD calls to the I/O Processor
  Tube_ReadKeyboard = 243
- Tube_SwitchBank = 244
 
                                     \ --- End of added code ------------------->
 
@@ -5915,12 +5916,10 @@
  EOR     R6, R7, #1                 \ Set R6 to the opposite bank to the current
                                     \ bank
 
- ADR     R5, oswordSwitchBank       \ Set the OS_Word block to switch to bank R6
- STRB    R6, [R5, #2]               \ and set R5 to the address of the block
-
- ADR     R1, oswordSwitchBank       \ Switch the screen bank
- MOV     R0, #244
- SWI     OS_Word
+ MOV     R0, #Tube_SetScreenBank    \ Switch to screen bank R6
+ SWI     OS_WriteC
+ MOV     R0, R6
+ SWI     OS_WriteC
 
                                     \ --- End of replacement ------------------>
 
@@ -5951,12 +5950,10 @@
 
                                     \ --- And replaced by: -------------------->
 
- STRB    R7, [R5, #2]               \ Set the OS_Word block back to the current
-                                    \ bank
-
- ADR     R1, oswordSwitchBank       \ Switch the screen bank
- MOV     R0, #244
- SWI     OS_Word
+ MOV     R0, #Tube_SetScreenBank    \ Switch to screen bank R7
+ SWI     OS_WriteC
+ MOV     R0, R7
+ SWI     OS_WriteC
 
                                     \ --- End of replacement ------------------>
 
@@ -9391,16 +9388,16 @@
 
 .SwitchScreenBank
 
- LDRB    R0, screenBankNumber       \ Flip the current screen bank number in
- EORS    R0, R0, #1                 \ screenBankNumber between bank 0 and bank 1
- STRB    R0, screenBankNumber       \ which means:
-                                    \
-                                    \   * 0 = draw bank 1, show bank 2
-                                    \
-                                    \   * 1 = draw bank 2, show bank 1
-
                                     \ --- Mod: Code removed for AES ----------->
 
+\LDRB    R0, screenBankNumber       \ Flip the current screen bank number in
+\EORS    R0, R0, #1                 \ screenBankNumber between bank 0 and bank 1
+\STRB    R0, screenBankNumber       \ which means:
+\                                   \
+\                                   \   * 0 = draw bank 1, show bank 2
+\                                   \
+\                                   \   * 1 = draw bank 2, show bank 1
+\
 \LDRNE   R1, screenBank2Addr        \ Set screenAddr as follows:
 \LDREQ   R1, screenBank1Addr        \
 \STR     R1, screenAddr             \   * If screenBankNumber = 0, set it to the
@@ -9495,11 +9492,18 @@
 
                                     \ --- And replaced by: -------------------->
 
- STRB    R0, oswordSwitchBank+2     \ Store the bank number in the OS_Word block
+ LDRB    R1, screenBankNumber       \ Flip the current screen bank number in
+ EORS    R1, R1, #1                 \ screenBankNumber between bank 0 and bank 1
+ STRB    R1, screenBankNumber       \ which means:
+                                    \
+                                    \   * 0 = draw bank 1, show bank 2
+                                    \
+                                    \   * 1 = draw bank 2, show bank 1
 
- ADR     R1, oswordSwitchBank       \ Switch to the other screen bank and clear
- MOV     R0, #Tube_ClearScreen      \ the one we are about to draw into
- SWI     OS_Word
+ MOV     R0, #Tube_ClearScreen      \ Switch to screen bank R1 and clear the
+ SWI     OS_WriteC                  \ other screen bank so it's ready to be
+ MOV     R0, R1                     \ drawn into
+ SWI     OS_WriteC
 
  MOV     PC, R14                    \ Return from the subroutine
 
@@ -12669,9 +12673,9 @@
 
                                     \ --- And replaced by: -------------------->
 
- ADR     R1, oswordNoParams         \ Set the correct screen mode for the game
- MOV     R0, #Tube_SetScreenMode
- SWI     OS_Word
+ MOV     R0, #Tube_SetScreenMode    \ Set the correct screen mode for the game
+ SWI     OS_WriteC
+ SWI     OS_WriteC
 
                                     \ --- End of replacement ------------------>
 
@@ -13607,29 +13611,6 @@
 
  LDMFD   R13!, {R0, R3-R5, PC}      \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
-\       Name: oswordSwitchBank
-\       Type: Variable
-\   Category: Drawing pixels
-\    Summary: OS_Word block for bank switching and clearing the screen
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.oswordSwitchBank
-
- EQUB 3                             \ The number of bytes to transmit
-
- EQUB 0                             \ The number of bytes to receive
-
- EQUB 0                             \ The current screen bank number (0 or 1)
-
- ALIGN
 
                                     \ --- End of added code ------------------->
 
