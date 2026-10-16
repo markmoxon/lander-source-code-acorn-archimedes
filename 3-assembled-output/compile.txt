@@ -18,8 +18,8 @@ Source: "3-assembled-output/Lander.arm"
                             	    13: .set Tube_SetScreenBank, 130
                             	    14: .set Tube_ClearScreen, 131
                             	    15: .set Tube_SetScreenMode, 133
-                            	    16: .set Tube_DrawPixel, 241
-                            	    17: .set Tube_ReadKeyboard, 243
+                            	    16: .set Tube_ReadKeyboard, 240
+                            	    17: .set Tube_DrawPixel, 241
                             	    18: .set STORE, 256 * (TILES_X / 32)
                             	    19: .set LAUNCHPAD_Y, LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y
                             	    20: .set LAUNCHPAD_SIZE, TILE_SIZE * 8
@@ -2918,7 +2918,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00003720 1C000FE5        	  2823:  STR     R0, keyBuffer+4
 00:00003724 1C000FE5        	  2824:  STR     R0, keyBuffer+8
 00:00003728 28104FE2        	  2825:  ADR     R1, keyBuffer
-00:0000372C F300A0E3        	  2826:  MOV     R0, #Tube_ReadKeyboard
+00:0000372C F000A0E3        	  2826:  MOV     R0, #Tube_ReadKeyboard
 00:00003730 070000EF        	  2827:  SWI     OS_Word
 00:00003734 32205FE5        	  2828:  LDRB    R2, keyBuffer+2
 00:00003738 FF0032E3        	  2829:  TEQ     R2, #0xFF
@@ -2991,7 +2991,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00003834 0EF0A0E1        	  2896:  MOV     PC, R14
                             	  2897: WaitForSpace:
 00:00003838 4E1F4FE2        	  2898:  ADR     R1, keyBuffer
-00:0000383C F300A0E3        	  2899:  MOV     R0, #Tube_ReadKeyboard
+00:0000383C F000A0E3        	  2899:  MOV     R0, #Tube_ReadKeyboard
 00:00003840 070000EF        	  2900:  SWI     OS_Word
 00:00003844 40215FE5        	  2901:  LDRB    R2, keyBuffer+4
 00:00003848 FF0032E3        	  2902:  TEQ     R2, #0xFF
@@ -10474,7 +10474,7 @@ TerminateGraphicsBuffer          A:00002C38
 TransposeRotationMatrix          A:00002310
 Tube_ClearScreen                 S:00000083
 Tube_DrawPixel                   S:000000F1
-Tube_ReadKeyboard                S:000000F3
+Tube_ReadKeyboard                S:000000F0
 Tube_SetScreenBank               S:00000082
 Tube_SetScreenMode               S:00000085
 UNDERCARRIAGE_Y                  S:00640000
@@ -10796,9 +10796,9 @@ Symbols by value:
 000000C4 previousColumn
 000000CC typeOffset
 000000E4 tileCornerRow
+000000F0 Tube_ReadKeyboard
 000000F0 unusedConfig
 000000F1 Tube_DrawPixel
-000000F3 Tube_ReadKeyboard
 000000F4 objectType
 000000F8 tileRowOddEven
 00000100 altitude
@@ -11338,10 +11338,10 @@ ZP workspace (I/O processor) from &80 to &88 inclusive
      251F   00
      2520   FF
 .OSWVECS
-     2521   64 25
-     2523   68 25
+     2521   70 25
+     2523   9B 25
      2525   64 25
-     2527   96 25
+     2527   64 25
      2529   64 25
      252B   64 25
      252D   64 25
@@ -11377,62 +11377,62 @@ ZP workspace (I/O processor) from &80 to &88 inclusive
      2564   60         RTS
 .notours
      2565   4C FC FF   JMP &FFFC
-.DrawPixel
-     2568   A0 00      LDY #&00
-     256A   B1 80      LDA (&80),Y
-     256C   85 85      STA &85
-     256E   C8         INY
-     256F   C8         INY
-.PXLO
-     2570   B1 80      LDA (&80),Y
-     2572   85 82      STA &82
-     2574   C8         INY
-     2575   B1 80      LDA (&80),Y
-     2577   85 83      STA &83
-     2579   C8         INY
-     257A   84 84      STY &84
-     257C   B1 80      LDA (&80),Y
-     257E   A0 00      LDY #&00
-     2580   11 82      ORA (&82),Y
-     2582   91 82      STA (&82),Y
-     2584   A4 84      LDY &84
-     2586   C8         INY
-     2587   C4 85      CPY &85
-     2589   F0 02      BEQ &258D
-     258B   D0 E3      BNE &2570
-     258D   60         RTS
 .KYTB
-     258E   70
-     258F   68
-     2590   62
-     2591   66
-     2592   67
-     2593   42
-     2594   51
-     2595   41
+     2568   70
+     2569   68
+     256A   62
+     256B   66
+     256C   67
+     256D   42
+     256E   51
+     256F   41
 .ReadKeyboard
-     2596   A0 09      LDY #&09
+     2570   A0 09      LDY #&09
 .DKL2
-     2598   B9 8C 25   LDA &258C,Y
+     2572   B9 66 25   LDA &2566,Y
 Macro DKS4:
-     259B   A2 03      LDX #&03
-     259D   78         SEI
-     259E   8E 40 FE   STX &FE40
-     25A1   A2 7F      LDX #&7F
-     25A3   8E 43 FE   STX &FE43
-     25A6   8D 4F FE   STA &FE4F
-     25A9   AD 4F FE   LDA &FE4F
-     25AC   A2 0B      LDX #&0B
-     25AE   8E 40 FE   STX &FE40
-     25B1   58         CLI
+     2575   A2 03      LDX #&03
+     2577   78         SEI
+     2578   8E 40 FE   STX &FE40
+     257B   A2 7F      LDX #&7F
+     257D   8E 43 FE   STX &FE43
+     2580   8D 4F FE   STA &FE4F
+     2583   AD 4F FE   LDA &FE4F
+     2586   A2 0B      LDX #&0B
+     2588   8E 40 FE   STX &FE40
+     258B   58         CLI
 End macro DKS4
-     25B2   0A         ASL A
-     25B3   A9 00      LDA #&00
-     25B5   69 FF      ADC #&FF
-     25B7   49 FF      EOR #&FF
-     25B9   91 80      STA (&80),Y
-     25BB   88         DEY
-     25BC   C0 01      CPY #&01
-     25BE   D0 D8      BNE &2598
+     258C   0A         ASL A
+     258D   A9 00      LDA #&00
+     258F   69 FF      ADC #&FF
+     2591   49 FF      EOR #&FF
+     2593   91 80      STA (&80),Y
+     2595   88         DEY
+     2596   C0 01      CPY #&01
+     2598   D0 D8      BNE &2572
+     259A   60         RTS
+.DrawPixel
+     259B   A0 00      LDY #&00
+     259D   B1 80      LDA (&80),Y
+     259F   85 85      STA &85
+     25A1   C8         INY
+     25A2   C8         INY
+.PXLO
+     25A3   B1 80      LDA (&80),Y
+     25A5   85 82      STA &82
+     25A7   C8         INY
+     25A8   B1 80      LDA (&80),Y
+     25AA   85 83      STA &83
+     25AC   C8         INY
+     25AD   84 84      STY &84
+     25AF   B1 80      LDA (&80),Y
+     25B1   A0 00      LDY #&00
+     25B3   11 82      ORA (&82),Y
+     25B5   91 82      STA (&82),Y
+     25B7   A4 84      LDY &84
+     25B9   C8         INY
+     25BA   C4 85      CPY &85
+     25BC   F0 02      BEQ &25C0
+     25BE   D0 E3      BNE &25A3
      25C0   60         RTS
 Saving file '3-assembled-output/Lander.bin'

@@ -85,8 +85,8 @@
  Tube_ClearScreen = 131
  Tube_SetScreenMode = 133
 
- Tube_DrawPixel = 241               \ OSWORD calls to the I/O Processor
- Tube_ReadKeyboard = 243
+ Tube_ReadKeyboard = 240            \ OSWORD calls to the I/O Processor
+ Tube_DrawPixel = 241
 
                                     \ --- End of added code ------------------->
 
