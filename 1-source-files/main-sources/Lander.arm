@@ -79,6 +79,16 @@
  BUFFER_SIZE = 4308                 \ The size of each of the graphics buffers
                                     \ in bytes
 
+                                    \ --- Mod: Code added for AES ------------->
+
+ Tube_ClearScreen = 240             \ OSWORD calls to the I/O Processor
+ Tube_DrawPixel = 241
+ Tube_SetScreenMode = 242
+ Tube_ReadKeyboard = 243
+ Tube_SwitchBank = 244
+
+                                    \ --- End of added code ------------------->
+
 \ ******************************************************************************
 \
 \ Calculated constants
@@ -9488,7 +9498,7 @@
  STRB    R0, oswordSwitchBank+2     \ Store the bank number in the OS_Word block
 
  ADR     R1, oswordSwitchBank       \ Switch to the other screen bank and clear
- MOV     R0, #240                   \ the one we are about to draw into
+ MOV     R0, #Tube_ClearScreen      \ the one we are about to draw into
  SWI     OS_Word
 
  MOV     PC, R14                    \ Return from the subroutine
@@ -12391,7 +12401,7 @@
  STRB    R8, oswordPixel+4          \ Store the pixel byte in the OS_Word block
 
  ADR     R1, oswordPixel            \ Draw the dot at the start of the line
- MOV     R0, #241
+ MOV     R0, #Tube_DrawPixel
  SWI     OS_Word
 
  LDMFD   R13!, {R2-R4, R8, PC}      \ Retrieve the registers that we stored on
@@ -12660,7 +12670,7 @@
                                     \ --- And replaced by: -------------------->
 
  ADR     R1, oswordNoParams         \ Set the correct screen mode for the game
- MOV     R0, #242
+ MOV     R0, #Tube_SetScreenMode
  SWI     OS_Word
 
                                     \ --- End of replacement ------------------>
@@ -13120,8 +13130,8 @@
  STR     R0, keyBuffer+4
  STR     R0, keyBuffer+8
 
- ADR     R1, keyBuffer              \ Scan the keyboard
- MOV     R0, #243
+ ADR     R1, keyBuffer              \ Read the keyboard state into keyBuffer
+ MOV     R0, #Tube_ReadKeyboard
  SWI     OS_Word
 
  LDRB    R2, keyBuffer+2            \ If ESCAPE was pressed then jump to EndGame
@@ -13361,8 +13371,8 @@
 
 .WaitForSpace
 
- ADR     R1, keyBuffer              \ Scan the keyboard
- MOV     R0, #243
+ ADR     R1, keyBuffer              \ Read the keyboard state into keyBuffer
+ MOV     R0, #Tube_ReadKeyboard
  SWI     OS_Word
 
  LDRB    R2, keyBuffer+4            \ If Space was not pressed then loop back to
