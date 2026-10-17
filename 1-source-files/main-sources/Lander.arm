@@ -12260,6 +12260,9 @@
 
                                     \ --- And replaced by: -------------------->
 
+                                    \ This is used for drawing objects and the
+                                    \ fuel bar
+                                    \
                                     \ Called with:
                                     \
                                     \   * (R11, R12) = start point of line
@@ -12303,7 +12306,7 @@
 \       Type: Subroutine
 \   Category: Drawing pixels
 \    Summary: Draw a mode 1 pixel given the mode 13 coordinates, skipping the
-\             top two character rows of the screen
+\             top two character rows (used for particles and landscape dots)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12311,7 +12314,7 @@
 \
 \   R0                              The pixel x-coordinate (0-319)
 \
-\   R1                              The pixel y-coordinate (0-239)
+\   R1                              The pixel y-coordinate (0-238)
 \
 \   R8                              Colour as a mode 1 pixel byte
 \
@@ -12404,6 +12407,11 @@
                                     \ address, skipping the top two character
                                     \ rows
 
+ CMP     R6, #&3500                 \ If the address in R6 is not within screen
+ BCC     dpix1                      \ memory then jump tp dpix1 to return from
+ CMP     R6, #&8000                 \ the subroutine without drawing anything
+ BCS     dpix1
+
  AND     R7, R2, #%00000011         \ Shift the pixel byte in R8 to set the
  MOV     R8, R8, LSR R7             \ pixel at position R7 (0 on the left, 3 on
                                     \ the right)
@@ -12430,6 +12438,8 @@
  ADR     R1, oswordPixel            \ Draw the dot at the start of the line
  MOV     R0, #Tube_DrawPixel
  SWI     OS_Word
+
+.dpix1
 
  LDMFD   R13!, {R2-R4, R8, PC}      \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine

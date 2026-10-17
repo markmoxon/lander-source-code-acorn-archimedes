@@ -2566,6 +2566,7 @@ lineJump:
 .long    DrawLineSegment
 DrawHorizontalLine:
  STMFD   R13!, {R0-R12, R14}
+ SUB     R12, R12, #1
  MOV     R2, R11
  MOV     R3, R12, LSR #3
  AND     R4, R12, #0x7
@@ -2591,6 +2592,10 @@ DrawPixelInRow:
  ADD     R3, R3, R3, LSL #2
  ADD     R6, R5, R3, LSL #7
  ADD     R6, R6, #0x3500
+ CMP     R6, #0x3500
+ BCC     dpix1
+ CMP     R6, #0x8000
+ BCS     dpix1
  AND     R7, R2, #0x3
  MOV     R8, R8, LSR R7
  MOV     R9, #0xf77
@@ -2603,6 +2608,7 @@ DrawPixelInRow:
  ADR     R1, oswordPixel
  MOV     R0, #Tube_DrawPixel
  SWI     OS_Word
+dpix1:
  LDMFD   R13!, {R2-R4, R8, PC}
 DrawLineSegment:
  STRB    R8, [R11, #16]
