@@ -5602,7 +5602,7 @@
                                     \ sixth and seventh words of face data,
                                     \ which contain the numbers of the vertices
                                     \ that make up the face (in R4, R5 and R6),
-                                    \ and the face colour (in R7]
+                                    \ and the face colour (in R7)
 
  ADD     R10, R11, #vertexProjected \ Set R10 to the address of vertexProjected
                                     \
@@ -9327,16 +9327,8 @@
 \ ******************************************************************************
 
 .screenBank2Addr
-
-                                    \ --- Mod: Code removed for AES ----------->
-
-\EQUD    &01FD8000 + 320 * 16
-
-                                    \ --- And replaced by: -------------------->
-
- EQUD    0
-
-                                    \ --- End of replacement ------------------>
+ 
+ EQUD    &01FD8000 + 320 * 16
 
 \ ******************************************************************************
 \
@@ -9350,16 +9342,8 @@
 \ ******************************************************************************
 
 .screenBank1Addr
-
-                                    \ --- Mod: Code removed for AES ----------->
-
-\EQUD    &01FEC000 + 320 * 16
-
-                                    \ --- And replaced by: -------------------->
-
- EQUD    0
-
-                                    \ --- End of replacement ------------------>
+ 
+ EQUD    &01FEC000 + 320 * 16
 
 \ ******************************************************************************
 \
