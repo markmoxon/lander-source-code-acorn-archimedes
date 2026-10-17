@@ -5484,7 +5484,7 @@
                                     \ sixth and seventh words of face data,
                                     \ which contain the numbers of the vertices
                                     \ that make up the face (in R4, R5 and R6),
-                                    \ and the face colour (in R7]
+                                    \ and the face colour (in R7)
 
  ADD     R10, R11, #vertexProjected \ Set R10 to the address of vertexProjected
                                     \
