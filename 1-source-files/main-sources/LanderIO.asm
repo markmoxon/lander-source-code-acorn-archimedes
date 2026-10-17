@@ -109,7 +109,34 @@
 
  SKIP 1                 \ Temporary storage, used in a number of places
 
+.LINTAB
+
+ SKIP 1                 \ The offset of the first free byte in the TABLE buffer,
+                        \ which stores bytes in the current pixel as they are
+                        \ transmitted from the parasite using the OSWRCH
+                        \ commands
+
+.LINMAX
+
+ SKIP 1                 \ The number of pixels currently being transmitted from
+                        \ the parasite using the OSWRCH commands
+
  PRINT "ZP workspace (I/O processor) from ", ~ZP, "to ", ~P%-1, "inclusive"
+
+\ ******************************************************************************
+\
+\       Name: TABLE
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: The pixel buffer for pixel data transmitted from the parasite
+\
+\ ******************************************************************************
+
+ ORG CODE% - 256        \ Set the assembly address to the page before CODE%
+
+.TABLE
+
+ SKIP 256
 
 \ ******************************************************************************
 \
@@ -332,8 +359,8 @@
  EQUW ClearScreen       \ 131 (&83)     3 = Switch screen bank and clear screen
  EQUW USOSWRCH          \ 132 (&84)     4 = Reserved for VDU code for mode 128+4
  EQUW SetScreenMode     \ 133 (&85)     5 = Set up the game's screen mode
- EQUW USOSWRCH          \ 134 (&86)     6 = Put back to USOSWRCH
- EQUW USOSWRCH          \ 135 (&87)     7 = Put back to USOSWRCH
+ EQUW BeginPixels       \ 134 (&86)     6 = Start receiving pixels
+ EQUW AddPixel          \ 135 (&87)     7 = Receive a pixel to draw
  EQUW USOSWRCH          \ 136 (&88)     8 = Put back to USOSWRCH
  EQUW USOSWRCH          \ 137 (&89)     9 = Put back to USOSWRCH
  EQUW USOSWRCH          \ 138 (&8A)    10 = Put back to USOSWRCH
@@ -565,6 +592,118 @@
  EQUB 0, 0, 0
 
  EQUB 255               \ End of commands
+
+\ ******************************************************************************
+\
+\       Name: BeginPixels
+\       Type: Subroutine
+\   Category: Drawing lines
+\    Summary: Implement the #BeginPixels <size> command (start receiving a new
+\             batch of pixels to draw)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The number of pixels + 1
+\
+\ ******************************************************************************
+
+.BeginPixels
+
+ STA LINMAX             \ Set LINMAX to the number of bytes to expect + 1
+
+ LDA #0                 \ Set LINTAB = 0 to point to the position of the next
+ STA LINTAB             \ free byte in the TABLE buffer (i.e. the first byte, as
+                        \ we have just reset the buffer)
+
+ LDA #135               \ Execute a USOSWRCH 135 command so subsequent OSWRCH
+ JMP USOSWRCH           \ calls from the parasite can send pixels that get
+                        \ added to TABLE, and return from the subroutine using a
+                        \ tail call
+
+\ ******************************************************************************
+\
+\       Name: AddPixel
+\       Type: Subroutine
+\   Category: Drawing lines
+\    Summary: Implement the #AddPixel <byte> command (add a byte to a pixel and
+\             draw all pixels in the buffer once all bytes are received)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The byte to be added to the pixel that's currently being
+\                       transmitted to the I/O processor
+\
+\ ******************************************************************************
+
+.RTS1
+
+ RTS                    \ Return from the subroutine (this is called below)
+
+.AddPixel
+
+ INC LINTAB             \ LINTAB points to the last free byte in TABLE, which is
+                        \ where we're about to store the new byte in A, so
+                        \ increment LINTAB to point to the byte after this one
+
+ LDX LINTAB             \ Store the new byte in A at position LINTAB-1 in TABLE
+ STA TABLE-1,X          \ (which was the last free byte before we incremented
+                        \ LINTAB above)
+
+ INX                    \ Increment X, so it now points to the byte after the
+                        \ last free byte in TABLE (i.e. LINTAB + 1)
+
+ CPX LINMAX             \ If X < LINMAX, jump up to RTS1 to return from the
+ BCC RTS1               \ subroutine, as the data isn't complete yet (because
+                        \ LINMAX contains the number of bytes + 1)
+
+                        \ If we get here then X = LINMAX and we have received
+                        \ all the pixel data from the parasite, so now we draw
+                        \ them
+
+ LDX #0                 \ We are going to loop through all the pixels in the
+                        \ block, so set a counter in X, starting from 0
+
+ DEC LINMAX             \ Decrement LINMAX so it now contains 2 * number of
+                        \ points
+
+.LL27
+
+ STY R                  \ Store the loop counter in R so we can retrieve it
+                        \ after we draw the pixel
+
+ LDA TABLE,X            \ Set SC(1 0) to bytes #0 and #1 from the Y-th pixel
+ STA SC                 \ block, which contains the screen address of the pixel
+ LDA TABLE+1,X
+ STA SC+1
+
+ LDA TABLE+2,X          \ Set P to byte #2, which contains the pixel byte
+ STA P
+
+ LDA TABLE+2,X          \ Set Q to byte #3, which contains the pixel mask
+ STA Q
+
+ LDY #0                 \ Draw the pixel on-screen by clearing the relevant bits
+ LDA (SC),Y             \ with the mask in Q and inserting the relevant bits
+ AND Q                  \ from the pixel byte in P
+ ORA P
+ STA (SC),Y
+
+ INX                    \ Set A = A + 4 to move on to the next pixel
+ INX
+ INX
+ INX
+
+ CPX LINMAX             \ Loop back to LL27 to draw the next line segment, until
+ BCC LL27               \ we the loop counter has reached LINMAX (which contains
+                        \ 2 * number of points, so this is when we have run out
+                        \ of points)
+
+ JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
+                        \ return from the subroutine using a tail call
 
 \ ******************************************************************************
 \

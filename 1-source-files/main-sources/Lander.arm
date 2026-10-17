@@ -84,6 +84,8 @@
  Tube_SetScreenBank = 130           \ OSBYTE calls to the I/O Processor
  Tube_ClearScreen = 131
  Tube_SetScreenMode = 133
+ Tube_BeginPixels = 134
+ Tube_AddPixels = 135
 
  Tube_ReadKeyboard = 240            \ OSWORD calls to the I/O Processor
  Tube_DrawPixel = 241

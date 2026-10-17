@@ -2641,32 +2641,6 @@ DrawPixelInRow:
  MOV     R0, #Tube_DrawPixel
  SWI     OS_Word
  LDMFD   R13!, {R2-R4, R8, PC}
-pixelBufferCounter:
-.long 0
-AddPixelToBuffer:
- LDR     R0, pixelBufferCounter
- ADD     R0, R0, #4
- STR     R0, pixelBufferCounter
- CMP     R0, #68
- MOVGE   PC, R14
- MOV     R0, #Tube_AddPixels
- SWI     OS_WriteC
- MOV     R0, R6
- SWI     OS_WriteC
- MOV     R0, R6, LSR #8
- SWI     OS_WriteC
- MOV     R0, R8
- SWI     OS_WriteC
- MOV     R0, R8
- SWI     OS_WriteC
- LDR     R0, pixelBufferCounter
- ADD     R0, R0, #4
- STR     R0, pixelBufferCounter
- CMP     R0, #64
- MOVNE   PC, R14
- MOV     R0, #0
- STR     R0, pixelBufferCounter
- MOV     PC, R14
 DrawLineSegment:
  STRB    R8, [R11, #16]
  STRB    R8, [R11, #15]
