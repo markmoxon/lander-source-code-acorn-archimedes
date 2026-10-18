@@ -313,13 +313,13 @@ GetLandscapeTileColour:
  STMFD   R13!, {R0-R4, R14}
  LDR     R3, [R11, #prevAltitude]
  LDR     R4, [R11, #altitude]
- MOV     R8, #0x80
+ MOV     R8, #0xf0
  CMP     R4, #LAUNCHPAD_ALTITUDE
  CMPEQ   R3, #LAUNCHPAD_ALTITUDE
- MOVEQ   R8, #0x88
+ MOVEQ   R8, #0xff
  CMP     R4, #SEA_LEVEL
  CMPEQ   R3, #SEA_LEVEL
- MOVEQ   R8, #0x88
+ MOVEQ   R8, #0xff
  LDMFD   R13!, {R0-R4, PC}
 MoveAndDrawPlayer:
  STMFD   R13!, {R14}
@@ -1897,7 +1897,7 @@ Draw1x1ParticleFromBuffer:
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0x88
+ MOV     R8, #0xff
  BL      DrawPixel
  B       DrawNextFromGraphicsBuffer
 Draw2x1ParticleFromBuffer:
@@ -1905,32 +1905,36 @@ Draw2x1ParticleFromBuffer:
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0x88
- BL      DrawPixel
+ MOV     R8, #0xff
+ BL      Draw2PixelDash
  B       DrawNextFromGraphicsBuffer
 Draw2x2ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0x88
- BL      DrawPixel
+ MOV     R8, #0xff
+ BL      Draw2PixelDash
+ ADD     R1, R1, #1
+ BL      Draw2PixelDash
  B       DrawNextFromGraphicsBuffer
 Draw3x2ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0x88
- BL      DrawPixel
+ MOV     R8, #0xff
+ BL      Draw3PixelDash
+ ADD     R1, R1, #1
+ BL      Draw3PixelDash
  B       DrawNextFromGraphicsBuffer
 Draw3x1ParticleFromBuffer:
  LDR     R1, [R9], #4
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0x88
- BL      DrawPixel
+ MOV     R8, #0xff
+ BL      Draw3PixelDash
  B       DrawNextFromGraphicsBuffer
 DrawTriangleFromBuffer:
  LDMIA   R9!, {R0-R5, R8}
@@ -2569,10 +2573,11 @@ DrawHorizontalLine:
  MOV     R2, R11
  MOV     R3, R12, LSR #3
  AND     R4, R12, #0x7
- MOV     R8, #0x8
- BL      DrawPixelInRow
+ MOV     R8, #0xf
+ MOV     R9, #0xf77
+ BL      DrawPixels
  ADD     R2, R2, R10
- BL      DrawPixelInRow
+ BL      DrawPixels
  LDMFD   R13!, {R0-R12, PC}
 DrawPixel:
  CMP     R0, #320
@@ -2582,10 +2587,61 @@ DrawPixel:
  MOV     R3, R1, LSR #3
  AND     R4, R1, #0x7
  MOV     R2, R0
- BL      DrawPixelInRow
+ MOV     R9, #0xf77
+ BL      DrawPixels
  LDMFD   R13!, {R0-R12, PC}
-DrawPixelInRow:
- STMFD   R13!, {R2-R4, R8, R14}
+Draw2PixelDash:
+ CMP     R0, #320
+ CMPLO   R1, #238
+ MOVHS   PC, R14
+ STMFD   R13!, {R0-R12, R14}
+ MOV     R3, R1, LSR #3
+ AND     R4, R1, #0x7
+ MOV     R2, R0
+ AND     R5, R2, #0x3
+ CMP     R5, #0x3
+ BEQ     dash1
+ MOV     R9, #0xf33
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+dash1:
+ MOV     R9, #0xf77
+ BL      DrawPixels
+ ADD     R2, R2, #1
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+Draw3PixelDash:
+ CMP     R0, #320
+ CMPLO   R1, #237
+ MOVHS   PC, R14
+ STMFD   R13!, {R0-R12, R14}
+ MOV     R3, R1, LSR #3
+ AND     R4, R1, #0x7
+ MOV     R2, R0
+ AND     R5, R2, #0x3
+ CMP     R5, #3
+ BEQ     dasl1
+ CMP     R5, #2
+ BEQ     dasl2
+ MOV     R9, #0xf11
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+dasl1:
+ MOV     R9, #0xf77
+ BL      DrawPixels
+ ADD     R2, R2, #1
+ MOV     R9, #0xf33
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+dasl2:
+ MOV     R9, #0xf33
+ BL      DrawPixels
+ ADD     R2, R2, #2
+ MOV     R9, #0xf77
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+DrawPixels:
+ STMFD   R13!, {R2-R10, R14}
  MOV     R5, R2, LSR #2
  ADD     R5, R4, R5, LSL #3
  ADD     R3, R3, R3, LSL #2
@@ -2596,9 +2652,9 @@ DrawPixelInRow:
  CMP     R6, #0x8000
  BCS     dpix1
  AND     R7, R2, #0x3
- MOV     R8, R8, LSR R7
- MOV     R9, #0xf77
  MOV     R9, R9, LSR R7
+ EOR     R10, R9, #0xff
+ AND     R8, R8, R10
  STRB    R6, oswordPixel+2
  MOV     R4, R6, LSR #8
  STRB    R4, oswordPixel+3
@@ -2608,7 +2664,7 @@ DrawPixelInRow:
  MOV     R0, #Tube_DrawPixel
  SWI     OS_Word
 dpix1:
- LDMFD   R13!, {R2-R4, R8, PC}
+ LDMFD   R13!, {R2-R10, PC}
 DrawLineSegment:
  STRB    R8, [R11, #16]
  STRB    R8, [R11, #15]

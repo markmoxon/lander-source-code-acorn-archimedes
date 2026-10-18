@@ -1777,15 +1777,16 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%10000000             \ By default, set the colour in R8 to green
+ MOV     R8, #%11110000             \ By default, set R8 to colour 2 (green) for
+                                    \ the landscape dots
 
  CMP     R4, #LAUNCHPAD_ALTITUDE    \ If both the previous and current points
  CMPEQ   R3, #LAUNCHPAD_ALTITUDE    \ are on the launchpad, set the colour in R8
- MOVEQ   R8, #%10001000             \ to blue
+ MOVEQ   R8, #%11111111             \ to colour 3 (blue)
 
  CMP     R4, #SEA_LEVEL             \ If both the previous and current points
  CMPEQ   R3, #SEA_LEVEL             \ are at sea level, set the colour in R8 to
- MOVEQ   R8, #%10001000             \ blue
+ MOVEQ   R8, #%11111111             \ colour 3 (blue)
 
                                     \ --- End of replacement ------------------>
 
@@ -8224,7 +8225,7 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+ MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
 
  BL      DrawPixel                  \ Draw the particle
 
@@ -8314,9 +8315,9 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+ MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
 
- BL      DrawPixel                  \ Draw the particle
+ BL      Draw2PixelDash             \ Draw the particle
 
                                     \ --- End of replacement ------------------>
 
@@ -8406,9 +8407,12 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+ MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
 
- BL      DrawPixel                  \ Draw the particle
+ BL      Draw2PixelDash             \ Draw the top row of the particle
+
+ ADD     R1, R1, #1                 \ Draw the bottom row of the particle
+ BL      Draw2PixelDash
 
                                     \ --- End of replacement ------------------>
 
@@ -8500,9 +8504,12 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+ MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
 
- BL      DrawPixel                  \ Draw the particle
+ BL      Draw3PixelDash             \ Draw the top row of the particle
+
+ ADD     R1, R1, #1                 \ Draw the bottom row of the particle
+ BL      Draw3PixelDash
 
                                     \ --- End of replacement ------------------>
 
@@ -8591,9 +8598,9 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%10001000             \ Draw particles in colour 3 (blue)
+ MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
 
- BL      DrawPixel                  \ Draw the particle
+ BL      Draw3PixelDash             \ Draw the particle
 
                                     \ --- End of replacement ------------------>
 
@@ -12267,17 +12274,16 @@
 
  AND     R4, R12, #%00000111        \ Set R4 = pixel row within character
 
- MOV     R8, #%00001000             \ Draw ships/fuel in colour 1 (red)
+ MOV     R8, #%00001111             \ Draw ships/fuel in colour 1 (red)
 
- BL      DrawPixelInRow             \ Draw a pixel at the start of the line
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
 
-                                    \ Uncomment next section to draw a dot at
-                                    \ the end of the line
+ BL      DrawPixels                 \ Draw a pixel at the start of the line
 
  ADD     R2, R2, R10                \ Calculate the pixel x-coordinate of the
                                     \ end of the line
 
- BL      DrawPixelInRow             \ Draw the pixel at the end of the line
+ BL      DrawPixels                 \ Draw the pixel at the end of the line
 
  LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -12289,8 +12295,7 @@
 \       Name: DrawPixel
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Draw a mode 1 pixel given the mode 13 coordinates, skipping the
-\             top two character rows (used for particles and landscape dots)
+\    Summary: Draw a pixel at mode 13 coordinates (for particles and landscape)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12327,7 +12332,9 @@
                                     \   * R4 is the pixel row within the
                                     \     character row
 
- BL      DrawPixelInRow             \ Draw the pixel at the start of the line
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
+
+ BL      DrawPixels                 \ Draw the pixel
 
  LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -12336,10 +12343,173 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawPixelInRow
+\       Name: Draw2PixelDash
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Draw a mode 1 pixel given the character row
+\    Summary: Draw a two-pixel dash at mode 13 coordinates (for particles)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The pixel x-coordinate (0-319)
+\
+\   R1                              The pixel y-coordinate (0-237)
+\
+\   R8                              Colour as a mode 1 pixel byte
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.Draw2PixelDash
+
+ CMP     R0, #320                   \ Check to see if the pixel is off-screen,
+ CMPLO   R1, #238                   \ in which case return from the subroutine
+ MOVHS   PC, R14
+
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
+ AND     R4, R1, #%111              \ following:
+ MOV     R2, R0                     \
+                                    \   * R2 is the pixel x-coordinate of the
+                                    \     start of the line
+                                    \
+                                    \   * R3 is the character row (8 pixel rows
+                                    \     per character)
+                                    \
+                                    \   * R4 is the pixel row within the
+                                    \     character row
+
+ AND     R5, R2, #%00000011         \ If the first pixel in the dash is at the 
+ CMP     R5, #%00000011             \ rightmost end of the pixel row, jump to
+ BEQ     dash1                      \ dash1 to draw the dash as two single
+                                    \ pixels, one in each pixel dash
+
+ MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+.dash1
+
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ ADD     R2, R2, #1                 \ Move right by one pixel into the next
+                                    \ pixel byte
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: Draw3PixelDash
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a three-pixel dash at mode 13 coordinates (for particles)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The pixel x-coordinate (0-319)
+\
+\   R1                              The pixel y-coordinate (0-236)
+\
+\   R8                              Colour as a mode 1 pixel byte
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.Draw3PixelDash
+
+ CMP     R0, #320                   \ Check to see if the pixel is off-screen,
+ CMPLO   R1, #237                   \ in which case return from the subroutine
+ MOVHS   PC, R14
+
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
+ AND     R4, R1, #%111              \ following:
+ MOV     R2, R0                     \
+                                    \   * R2 is the pixel x-coordinate of the
+                                    \     start of the line
+                                    \
+                                    \   * R3 is the character row (8 pixel rows
+                                    \     per character)
+                                    \
+                                    \   * R4 is the pixel row within the
+                                    \     character row
+
+ AND     R5, R2, #%00000011         \ If the first pixel in the dash is at the 
+ CMP     R5, #3                     \ rightmost end of the pixel row, jump to
+ BEQ     dasl1                      \ dasl1 to draw the dash as a single and a
+                                    \ two-pixel dash, one in each pixel byte
+
+ CMP     R5, #2                     \ If the first two pixels in the dash are at
+ BEQ     dasl2                      \ the rightmost end of the pixel row, jump
+                                    \ to dasl2 to draw the dash as a two-pixel
+                                    \ dash and a pixel, one in each pixel byte
+
+ MOV     R9, #%111100010001         \ Set R9 to a three-pixel byte mask
+
+ BL      DrawPixels                 \ Draw the three-pixel dash
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+.dasl1
+
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
+
+ BL      DrawPixels                 \ Draw the single pixel
+
+ ADD     R2, R2, #1                 \ Move right by one pixel into the next
+                                    \ pixel byte
+
+ MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+.dasl2
+
+ MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ ADD     R2, R2, #2                 \ Move right by two pixels into the next
+                                    \ pixel byte
+
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
+
+ BL      DrawPixels                 \ Draw the single pixel
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: DrawPixels
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a single pixel, two-pixel dash or three-pixel dash
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12351,13 +12521,15 @@
 \
 \   R4                              Pixel row within the character row (0-7)
 \
+\   R9                              The pixel byte for the 1, 2 or 3-pixel dash
+\
 \ ******************************************************************************
 
                                     \ --- Mod: Code added for AES ------------->
 
-.DrawPixelInRow
+.DrawPixels
 
- STMFD   R13!, {R2-R4, R8, R14}     \ Store the registers that we want to use on
+ STMFD   R13!, {R2-R10, R14}        \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
                                     \ Calculate the address of the start of the
@@ -12396,12 +12568,15 @@
  CMP     R6, #&8000                 \ the subroutine without drawing anything
  BCS     dpix1
 
- AND     R7, R2, #%00000011         \ Shift the pixel byte in R8 to set the
- MOV     R8, R8, LSR R7             \ pixel at position R7 (0 on the left, 3 on
-                                    \ the right)
+ AND     R7, R2, #%00000011         \ Set R7 to the position of the pixel/dash
+                                    \ within the pixel byte (0 on the left, 3
+                                    \ on the right)
 
- MOV     R9, #%111101110111         \ Set R9 to the pixel mask for a pixel in
- MOV     R9, R9, LSR R7             \ position R7
+ MOV     R9, R9, LSR R7             \ Set R9 to the pixel mask for a pixel/dash
+                                    \ in position R7
+
+ EOR     R10, R9, #%11111111        \ Set R8 to the pixel byte for a pixel/dash
+ AND     R8, R8, R10                \ in position R7 with colour R8
 
                                     \ So we now have:
                                     \
@@ -12425,7 +12600,7 @@
 
 .dpix1
 
- LDMFD   R13!, {R2-R4, R8, PC}      \ Retrieve the registers that we stored on
+ LDMFD   R13!, {R2-R10, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
                                     \ --- End of added code ------------------->
