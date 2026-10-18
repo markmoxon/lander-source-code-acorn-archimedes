@@ -420,6 +420,8 @@ ship6:
  ADD     R3, R11, #rotationMatrix
  LDR     R14, objectPlayerAddr
  STR     R14, [R11, #objectData]
+ MOV     R0, #25
+ STRB    R0, [R11, #objectType]
  MOV     R0, #0
  MOV     R2, #LANDSCAPE_Z_MID
  BL      DrawObject

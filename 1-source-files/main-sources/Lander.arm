@@ -2285,6 +2285,14 @@
  LDR     R14, objectPlayerAddr      \ Set objectData to the object blueprint
  STR     R14, [R11, #objectData]    \ for the player's ship
 
+
+                                    \ --- Mod: Code added for AES ------------->
+
+ MOV     R0, #25                    \ Set the object type in objectType to 25 so
+ STRB    R0, [R11, #objectType]     \ the ship gets drawn in red
+
+                                    \ --- End of added code ------------------->
+
  MOV     R0, #0                     \ Set the coordinates in (R0, R1, R2) so
  MOV     R2, #LANDSCAPE_Z_MID       \ the ship gets drawn in the middle of the
                                     \ screen or slightly below if the ship is
