@@ -2043,9 +2043,9 @@ term1:
  BPL     term1
  LDMFD   R13!, {R12, PC}
 screenBank2Addr:
-.long    0
+.long    0x01FD8000 + 320 * 16
 screenBank1Addr:
-.long    0
+.long    0x01FEC000 + 320 * 16
 screenBankNumber:
 .long    0
 divisionTableAddr:
@@ -2566,7 +2566,6 @@ lineJump:
 .long    DrawLineSegment
 DrawHorizontalLine:
  STMFD   R13!, {R0-R12, R14}
- SUB     R12, R12, #1
  MOV     R2, R11
  MOV     R3, R12, LSR #3
  AND     R4, R12, #0x7
