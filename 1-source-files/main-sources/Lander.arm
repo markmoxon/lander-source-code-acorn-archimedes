@@ -5615,106 +5615,121 @@
                                     \ i.e. the pixel coordinate for the first
                                     \ object vertex
 
- LDR     R1, [R11, #yVertex]        \ Set R1 to yVertex, the y-coordinate of the
-                                    \ rotated normal
+                                    \ --- Mod: Code removed for AES ----------->
 
- LDR     R0, [R11, #xVertex]        \ Set R0 to xVertex, the x-coordinate of the
-                                    \ rotated normal
+\LDR     R1, [R11, #yVertex]        \ Set R1 to yVertex, the y-coordinate of the
+\                                   \ rotated normal
+\
+\LDR     R0, [R11, #xVertex]        \ Set R0 to xVertex, the x-coordinate of the
+\                                   \ rotated normal
+\
+\RSB     R1, R1, #&80000000         \ Set R1 = (&80000000 - R1) >> 28
+\MOV     R1, R1, LSR #28            \        = (&80000000 - yVertex) >> 28
+\                                   \
+\                                   \ So R1 is in the range 0 to 8 and is
+\                                   \ bigger when the normal is pointing more
+\                                   \ vertically (i.e. when the normal vector
+\                                   \ has a negative y-coordinate with a larger
+\                                   \ magnitude, as the y-axis points down the
+\                                   \ screen)
+\                                   \
+\                                   \ So a bigger, more negative R1 means
+\                                   \ brighter colours
+\
+\CMP     R0, #0                     \ If R0 is negative then the normal is
+\ADDMI   R1, R1, #1                 \ pointing more towards the left then the
+\                                   \ right, so increment R1 to make the face
+\                                   \ slightly brighter (as the light source is
+\                                   \ a little bit to the left)
+\
+\SUBS    R1, R1, #5                 \ Set R1 = max(0, R1 - 5)
+\MOVMI   R1, #0                     \
+\                                   \ So R1 is now between 0 and 3, and can be
+\                                   \ added to the colour numbers below to add
+\                                   \ the correct level of brightness
+\
+\MOV     R8, #%00001111             \ Set R0 = bits 8-11 of the colour in R7, so
+\AND     R0, R8, R7, LSR #8         \ if the face colour is &rgb, this is &r
+\
+\AND     R2, R8, R7, LSR #4         \ Set R2 = bits 4-7 of the colour in R7, so
+\                                   \ if the face colour is &rgb, this is &g
+\
+\AND     R7, R7, R8                 \ Set R7 = bits 0-3 of the colour in R7, so
+\                                   \ if the face colour is &rgb, this is &b
+\
+\ADD     R0, R0, R1                 \ Set R0 = R0 + R1 and clip to a maximum
+\CMP     R0, #16                    \ value of 15, so this adds the face
+\MOVHS   R0, #15                    \ brightness to the red channel and ensures
+\                                   \ the result fits into four bits
+\
+\ADD     R2, R2, R1                 \ Set R2 = R2 + R1 and clip to a maximum
+\CMP     R2, #16                    \ value of %00001111, so this adds the face
+\MOVHS   R2, #15                    \ brightness to the green channel and
+\                                   \ ensures the result fits into four bits
+\
+\ADD     R7, R7, R1                 \ Set R7 = R7 + R1 and clip to a maximum
+\CMP     R7, #16                    \ value of %00001111, so this adds the face
+\MOVHS   R7, #15                    \ brightness to the blue channel and ensures
+\                                   \ the result fits into four bits
+\
+\                                   \ We now build a VIDC colour number in R8
+\                                   \ by combining the three channels into one
+\                                   \ byte, which we then replicate four times
+\                                   \ to get a 32-bit colour number
+\                                   \
+\                                   \ The byte is of the form:
+\                                   \
+\                                   \   * Bit 7 = blue bit 3
+\                                   \   * Bit 6 = green bit 3
+\                                   \   * Bit 5 = green bit 2
+\                                   \   * Bit 4 = red bit 3
+\                                   \   * Bit 3 = blue bit 2
+\                                   \   * Bit 2 = red bit 2
+\                                   \   * Bit 1 = sum of red/green/blue bit 1
+\                                   \   * Bit 0 = sum of red/green/blue bit 0
+\                                   \
+\                                   \ We now build this colour number in R8 from
+\                                   \ the red, green and blue values in R0, R2
+\                                   \ and R7
+\
+\ORR     R8, R2, R7                 \ Set R8 to the bottom three bits of:
+\AND     R8, R8, #%00000011         \
+\ORR     R8, R8, R0                 \ (the bottom two bits of R2 OR R7) OR R0
+\AND     R8, R8, #%00000111         \
+\                                   \ So this sets bits 0, 1 and 2 of R8 as
+\                                   \ required
+\
+\TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
+\ORRNE   R8, R8, #%00010000         \ set bit 4 of R8
+\
+\AND     R2, R2, #%00001100         \ Clear all bits of the green channel in R2
+\                                   \ except bits 2-3
+\
+\ORR     R8, R8, R2, LSL #3         \ And stick them into bits 5-6 of R8
+\
+\TST     R7, #%00000100             \ If bit 2 of the blue channel in R7 is set,
+\ORRNE   R8, R8, #%00001000         \ set bit 3 of R8
+\
+\TST     R7, #%00001000             \ If bit 3 of the blue channel in R7 is set,
+\ORRNE   R8, R8, #%10000000         \ set bit 7 of R8
+\
+\ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
+\ORR     R8, R8, R8, LSL #16        \ other three bytes in the word to produce
+\ORR     R8, R8, R8, LSL #24        \ a four-pixel colour word containing four
+\                                   \ pixels of this colour
 
- RSB     R1, R1, #&80000000         \ Set R1 = (&80000000 - R1) >> 28
- MOV     R1, R1, LSR #28            \        = (&80000000 - yVertex) >> 28
-                                    \
-                                    \ So R1 is in the range 0 to 8 and is
-                                    \ bigger when the normal is pointing more
-                                    \ vertically (i.e. when the normal vector
-                                    \ has a negative y-coordinate with a larger
-                                    \ magnitude, as the y-axis points down the
-                                    \ screen)
-                                    \
-                                    \ So a bigger, more negative R1 means
-                                    \ brighter colours
+                                    \ --- And replaced by: -------------------->
 
- CMP     R0, #0                     \ If R0 is negative then the normal is
- ADDMI   R1, R1, #1                 \ pointing more towards the left then the
-                                    \ right, so increment R1 to make the face
-                                    \ slightly brighter (as the light source is
-                                    \ a little bit to the left)
+ MOV     R8, #%11110000             \ By default, set R8 to colour 2 (green) for
+                                    \ all objects
 
- SUBS    R1, R1, #5                 \ Set R1 = max(0, R1 - 5)
- MOVMI   R1, #0                     \
-                                    \ So R1 is now between 0 and 3, and can be
-                                    \ added to the colour numbers below to add
-                                    \ the correct level of brightness
+ LDRB    R7, [R11, #objectType]    \ Set R8 to colour 1 (red) for gazebo (#5)
+ CMP     R7, #5                    \ or object numbers #8 and up, i.e. building
+ MOVEQ   R8, #%00001111             \ (#8) and rocket (#9-11) and all destroyed
+ CMP     R7, #8                    \ objects (#12 and up)
+ MOVCS   R8, #%00001111
 
- MOV     R8, #%00001111             \ Set R0 = bits 8-11 of the colour in R7, so
- AND     R0, R8, R7, LSR #8         \ if the face colour is &rgb, this is &r
-
- AND     R2, R8, R7, LSR #4         \ Set R2 = bits 4-7 of the colour in R7, so
-                                    \ if the face colour is &rgb, this is &g
-
- AND     R7, R7, R8                 \ Set R7 = bits 0-3 of the colour in R7, so
-                                    \ if the face colour is &rgb, this is &b
-
- ADD     R0, R0, R1                 \ Set R0 = R0 + R1 and clip to a maximum
- CMP     R0, #16                    \ value of 15, so this adds the face
- MOVHS   R0, #15                    \ brightness to the red channel and ensures
-                                    \ the result fits into four bits
-
- ADD     R2, R2, R1                 \ Set R2 = R2 + R1 and clip to a maximum
- CMP     R2, #16                    \ value of %00001111, so this adds the face
- MOVHS   R2, #15                    \ brightness to the green channel and
-                                    \ ensures the result fits into four bits
-
- ADD     R7, R7, R1                 \ Set R7 = R7 + R1 and clip to a maximum
- CMP     R7, #16                    \ value of %00001111, so this adds the face
- MOVHS   R7, #15                    \ brightness to the blue channel and ensures
-                                    \ the result fits into four bits
-
-                                    \ We now build a VIDC colour number in R8
-                                    \ by combining the three channels into one
-                                    \ byte, which we then replicate four times
-                                    \ to get a 32-bit colour number
-                                    \
-                                    \ The byte is of the form:
-                                    \
-                                    \   * Bit 7 = blue bit 3
-                                    \   * Bit 6 = green bit 3
-                                    \   * Bit 5 = green bit 2
-                                    \   * Bit 4 = red bit 3
-                                    \   * Bit 3 = blue bit 2
-                                    \   * Bit 2 = red bit 2
-                                    \   * Bit 1 = sum of red/green/blue bit 1
-                                    \   * Bit 0 = sum of red/green/blue bit 0
-                                    \
-                                    \ We now build this colour number in R8 from
-                                    \ the red, green and blue values in R0, R2
-                                    \ and R7
-
- ORR     R8, R2, R7                 \ Set R8 to the bottom three bits of:
- AND     R8, R8, #%00000011         \
- ORR     R8, R8, R0                 \ (the bottom two bits of R2 OR R7) OR R0
- AND     R8, R8, #%00000111         \
-                                    \ So this sets bits 0, 1 and 2 of R8 as
-                                    \ required
-
- TST     R0, #%00001000             \ If bit 3 of the red channel in R0 is set,
- ORRNE   R8, R8, #%00010000         \ set bit 4 of R8
-
- AND     R2, R2, #%00001100         \ Clear all bits of the green channel in R2
-                                    \ except bits 2-3
-
- ORR     R8, R8, R2, LSL #3         \ And stick them into bits 5-6 of R8
-
- TST     R7, #%00000100             \ If bit 2 of the blue channel in R7 is set,
- ORRNE   R8, R8, #%00001000         \ set bit 3 of R8
-
- TST     R7, #%00001000             \ If bit 3 of the blue channel in R7 is set,
- ORRNE   R8, R8, #%10000000         \ set bit 7 of R8
-
- ORR     R8, R8, R8, LSL #8         \ Duplicate the lower byte of R8 into the
- ORR     R8, R8, R8, LSL #16        \ other three bytes in the word to produce
- ORR     R8, R8, R8, LSL #24        \ a four-pixel colour word containing four
-                                    \ pixels of this colour
+                                    \ --- End of replacement ------------------>
 
                                     \ Finally we can draw the face, using the
                                     \ colour in R8
@@ -6022,7 +6037,15 @@
 
 .fuelBarColour
 
- EQUD    &37373737
+                                    \ --- Mod: Code removed for AES ----------->
+
+\EQUD    &37373737
+
+                                    \ --- And replaced by: -------------------->
+
+ EQUD    %00001111                  \ Colour 1 (red)
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -6100,13 +6123,13 @@
 \
 \ADD     R11, R7, #320              \ Set R11 to the address in R7, plus 320 to
 \                                   \ move it down by one pixel line
-\
-\LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
-\                                   \ we need to poke into screen memory to draw
-\                                   \ four pixels in the correct colour for the
-\                                   \ fuel bar
 
                                     \ --- And replaced by: -------------------->
+
+ LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+                                    \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
 
  MOV     R11, #0                    \ Set (R11, R12) = (0, 0)
  MOV     R12, #0
@@ -12273,8 +12296,6 @@
  MOV     R3, R12, LSR #3            \ Set R3 = character row
 
  AND     R4, R12, #%00000111        \ Set R4 = pixel row within character
-
- MOV     R8, #%00001111             \ Draw ships/fuel in colour 1 (red)
 
  MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
 
