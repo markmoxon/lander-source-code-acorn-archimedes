@@ -725,7 +725,7 @@
 .OSWVECS
 
  EQUW ReadKeyboard      \            240 (&F0)     0 = Read keyboard
- EQUW DrawPixel         \            241 (&F1)     1 = Draw pixel
+ EQUW SAFE              \            241 (&F1)     1 = Do nothing
  EQUW SAFE              \            242 (&F2)     2 = Do nothing
  EQUW SAFE              \            243 (&F3)     3 = Do nothing
  EQUW SAFE              \            244 (&F4)     4 = Do nothing
@@ -981,83 +981,6 @@ ENDMACRO
 
  CPY #1                 \ Loop back until we have processed all the keys
  BNE DKL2
-
- RTS                    \ Return from the subroutine
-
-\ ******************************************************************************
-\
-\       Name: DrawPixel
-\       Type: Subroutine
-\   Category: Drawing pixels
-\    Summary: Draw a pixel
-\
-\ ------------------------------------------------------------------------------
-\
-\ Arguments:
-\
-\   OSSC(1 0)           A parameter block as follows:
-\
-\                         * Byte #0 = The size of the pixel buffer being sent
-\
-\                         * Bytes #2-#3 = The screen address of the byte
-\                                         containing the pixel
-\
-\                         * Byte #4 = The pixel byte to ORA into the screen
-\
-\                         * Byte #5-#7 = Next pixel
-\
-\                       and so on
-\
-\ ******************************************************************************
-
-.DrawPixel
-
- LDY #0                 \ Set Q to byte #0 from the block pointed to by OSSC,
- LDA (OSSC),Y           \ which contains the size of the pixel buffer
- STA Q
-
- INY                    \ Increment Y to 2, so y now points at the data for the
- INY                    \ first pixel in the command block
-
-.PXLO
-
- LDA (OSSC),Y           \ Set SC(1 0) to bytes #2-#3 from the Y-th pixel block
- STA SC                 \ in OSSC, which contains the screen offset, and add to
- INY                    \ &3000 for mode 1 screen memory
- LDA (OSSC),Y
- STA SC+1
-
- INY                    \ Increment Y to 4
-
- LDA (OSSC),Y           \ Set R to byte #4 from the Y-th pixel block in OSSC,
- STA R                  \ which contains the pixel byte
-
- INY                    \ Increment Y to 5
-
- STY P                  \ Store Y in P
-
- LDA (OSSC),Y           \ Set S to byte #5 from the Y-th pixel block in OSSC,
- STA S                  \ which contains the pixel mask
-
- LDY #0                 \ Draw the pixel on-screen using OR logic and a bit mask
- LDA (SC),Y
- AND S
- ORA R
- STA (SC),Y
-
- LDY P                  \ Set Y to the index of this pixel's y-coordinate byte
-                        \ in the command block, which we stored in P above
-
- INY                    \ Increment Y, so it now points to the first byte of
-                        \ the next pixel in the command block
-
- CPY Q                  \ If the index has reached the value in Q (which
- BEQ P%+4               \ contains the size of the pixel buffer), skip the next
-                        \ instruction
-
- BNE PXLO               \ We haven't reached the end of the buffer, so loop back
-                        \ to PXLO to draw the next pixel in the buffer (this BNE
-                        \ is effectively a JMP as we just passed through a BEQ)
 
  RTS                    \ Return from the subroutine
 

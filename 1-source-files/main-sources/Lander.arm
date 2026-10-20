@@ -81,14 +81,13 @@
 
                                     \ --- Mod: Code added for AES ------------->
 
- Tube_SetScreenBank = 130           \ OSBYTE calls to the I/O Processor
+ Tube_SetScreenBank = 130           \ OSBYTE calls to the I/O processor
  Tube_ClearScreen = 131
  Tube_SetScreenMode = 133
  Tube_BeginPixels = 134
  Tube_AddPixels = 135
 
- Tube_ReadKeyboard = 240            \ OSWORD calls to the I/O Processor
- Tube_DrawPixel = 241
+ Tube_ReadKeyboard = 240            \ OSWORD calls to the I/O processor
 
                                     \ --- End of added code ------------------->
 
@@ -12607,8 +12606,8 @@
  EOR     R10, R9, #%11111111        \ Set R8 to the pixel byte for a pixel/dash
  AND     R8, R8, R10                \ in position R7 with colour R8
 
- BL      DrawPixelIntoBuffer        \ Draw the following pixel into the pixel
-                                    \ buffer, transmitting to the I/O Processor
+ BL      DrawPixelIntoPixelBuffer   \ Draw the following pixel into the pixel
+                                    \ buffer, transmitting to the I/O processor
                                     \ when full:
                                     \
                                     \   * R6 = screen address of mode 1 byte
@@ -13835,10 +13834,10 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawPixelIntoBuffer
+\       Name: DrawPixelIntoPixelBuffer
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Buffer one pixel to be sent to the I/O Processor
+\    Summary: Store one pixel in the I/O processor pixel buffer
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13854,7 +13853,7 @@
 
                                     \ --- Mod: Code added for AES ------------->
 
-.DrawPixelIntoBuffer
+.DrawPixelIntoPixelBuffer
 
  STMFD   R13!, {R14}                \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
@@ -13883,7 +13882,7 @@
  CMP     R5, #63*4                  \ If R5 >= 252 then we just filled the last
  BLCS    TransmitPixelBuffer        \ entry in the 63-pixel buffer, so call the
                                     \ TransmitPixelBuffer routine to send the
-                                    \ buffer to the I/O Processor and set R5 to
+                                    \ buffer to the I/O processor and set R5 to
                                     \ zero, so we can reset the pointer in the
                                     \ next instruction
 
@@ -13900,7 +13899,7 @@
 \       Name: TransmitPixelBuffer
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Transmit the contents of the pixel buffer to the I/O Processor
+\    Summary: Transmit the contents of the pixel buffer to the I/O processor
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13924,7 +13923,7 @@
 
 .TransmitPixelBuffer
 
- MOV     R0, #Tube_BeginPixels      \ Tell the I/O Processor to expect the pixel
+ MOV     R0, #Tube_BeginPixels      \ Tell the I/O processor to expect the pixel
  SWI     OS_WriteC                  \ data by sending the size of the buffer in
  ADD     R0, R5, #1                 \ R5, plus 1 (as that's what the AddPixel
  SWI     OS_WriteC                  \ routine in the I/O processor expects)
@@ -13941,16 +13940,16 @@
                                     \ big-endian like the 6502
 
  MOV     R0, R2                     \ Send byte #0 of this pixel's data to the
- SWI     OS_WriteC                  \ I/O Processor
+ SWI     OS_WriteC                  \ I/O processor
 
  MOV     R0, R2, LSR #8             \ Send byte #1 of this pixel's data to the
- SWI     OS_WriteC                  \ I/O Processor
+ SWI     OS_WriteC                  \ I/O processor
 
  MOV     R0, R2, LSR #16            \ Send byte #2 of this pixel's data to the
- SWI     OS_WriteC                  \ I/O Processor
+ SWI     OS_WriteC                  \ I/O processor
 
  MOV     R0, R2, LSR #24            \ Send byte #3 of this pixel's data to the
- SWI     OS_WriteC                  \ I/O Processor
+ SWI     OS_WriteC                  \ I/O processor
 
  ADD     R1, R1, #4                 \ Increment the byte counter in R1
 
@@ -13975,7 +13974,8 @@
 \       Name: FlushPixelBuffer
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Transmit the contents of the pixel buffer to the I/O Processor
+\    Summary: Transmit any remaining pixels in the pixel buffer to the I/O
+\             processor
 \
 \ ******************************************************************************
 
@@ -14021,7 +14021,7 @@
 \       Name: pixelBuffer
 \       Type: Variable
 \   Category: Drawing pixels
-\    Summary: Buffer for up to 64 pixels to be sent to the I/O Processor
+\    Summary: Buffer for up to 64 pixels to be sent to the I/O processor
 \
 \ ******************************************************************************
 
