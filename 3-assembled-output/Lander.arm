@@ -2800,18 +2800,6 @@ PlacePlayerOnLaunchpad:
  MOV     R2, #0
  STMIA   R3!, {R0-R2}
  BL      ResetMousePosition
-keyBuffer:
-.byte 2
-.byte 10
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.balign 4
 MainLoop:
  MOV     R0, #0
  STRB    R0, keyBuffer+2
@@ -2891,6 +2879,18 @@ PrintHexDigit:
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
  MOV     PC, R14
+keyBuffer:
+.byte 2
+.byte 10
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.balign 4
 WaitForSpace:
  ADR     R1, keyBuffer
  MOV     R0, #Tube_ReadKeyboard

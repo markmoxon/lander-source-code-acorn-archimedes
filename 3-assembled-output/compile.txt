@@ -2776,7 +2776,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000351E 6D656D6F72792E  	  2689: .byte    "memory."
 00:00003525 00              	  2690: .byte    0
                             	  2691: .balign 4
-00:00003528 9E0000EA        	  2692:  B       ReturnToDesktop
+00:00003528 9B0000EA        	  2692:  B       ReturnToDesktop
                             	  2693: Entry:
 00:0000352C 8500A0E3        	  2694:  MOV     R0, #Tube_SetScreenMode
 00:00003530 000000EF        	  2695:  SWI     OS_WriteC
@@ -2895,131 +2895,131 @@ Source: "3-assembled-output/Lander.arm"
 00:000036F4 0020A0E3        	  2800:  MOV     R2, #0
 00:000036F8 0700A3E8        	  2801:  STMIA   R3!, {R0-R2}
 00:000036FC 6AFFFFEB        	  2802:  BL      ResetMousePosition
-                            	  2803: keyBuffer:
-00:00003700 02              	  2804: .byte 2
-00:00003701 0A              	  2805: .byte 10
-00:00003702 00              	  2806: .byte 0
-00:00003703 00              	  2807: .byte 0
-00:00003704 00              	  2808: .byte 0
-00:00003705 00              	  2809: .byte 0
-00:00003706 00              	  2810: .byte 0
-00:00003707 00              	  2811: .byte 0
-00:00003708 00              	  2812: .byte 0
-00:00003709 00              	  2813: .byte 0
-                            	  2814: .balign 4
-                            	  2815: MainLoop:
-00:0000370C 0000A0E3        	  2816:  MOV     R0, #0
-00:00003710 16004FE5        	  2817:  STRB    R0, keyBuffer+2
-00:00003714 19004FE5        	  2818:  STRB    R0, keyBuffer+3
-00:00003718 1C000FE5        	  2819:  STR     R0, keyBuffer+4
-00:0000371C 1C000FE5        	  2820:  STR     R0, keyBuffer+8
-00:00003720 28104FE2        	  2821:  ADR     R1, keyBuffer
-00:00003724 F000A0E3        	  2822:  MOV     R0, #Tube_ReadKeyboard
-00:00003728 070000EF        	  2823:  SWI     OS_Word
-00:0000372C 32205FE5        	  2824:  LDRB    R2, keyBuffer+2
-00:00003730 FF0032E3        	  2825:  TEQ     R2, #0xFF
-00:00003734 1100000A        	  2826:  BEQ     EndGame
-00:00003738 F6F6FFEB        	  2827:  BL      MoveAndDrawPlayer
-00:0000373C 18019BE5        	  2828:  LDR     R0, [R11, #mainLoopCount]
-00:00003740 000CA0E1        	  2829:  MOV     R0, R0, LSL #24
-00:00003744 8010A0E1        	  2830:  MOV     R1, R0, LSL #1
-00:00003748 CFFAFFEB        	  2831:  BL      CalculateRotationMatrix
-00:0000374C 3FF9FFEB        	  2832:  BL      DropRocksFromTheSky
-00:00003750 EBF7FFEB        	  2833:  BL      MoveAndDrawParticles
-00:00003754 64F9FFEB        	  2834:  BL      DrawObjects
-00:00003758 00FDFFEB        	  2835:  BL      AddTerminatorsToBuffers
-00:0000375C 4BF6FFEB        	  2836:  BL      DrawLandscapeAndBuffers
-00:00003760 0FFAFFEB        	  2837:  BL      PrintCurrentScore
-00:00003764 52FAFFEB        	  2838:  BL      DrawFuelLevel
-00:00003768 A30000EB        	  2839:  BL      FlushPixelBuffer
-00:0000376C 0BFDFFEB        	  2840:  BL      SwitchScreenBank
-00:00003770 18E19BE5        	  2841:  LDR     R14, [R11, #mainLoopCount]
-00:00003774 01E08EE2        	  2842:  ADD     R14, R14, #1
-00:00003778 18E18BE5        	  2843:  STR     R14, [R11, #mainLoopCount]
-00:0000377C E2FFFFEA        	  2844:  B       MainLoop
-                            	  2845: EndGame:
-00:00003780 7E00A0E3        	  2846:  MOV     R0, #126
-00:00003784 060000EF        	  2847:  SWI     OS_Byte
-00:00003788 1600A0E3        	  2848:  MOV     R0, #22
-00:0000378C 000000EF        	  2849:  SWI     OS_WriteC
-00:00003790 0000A0E3        	  2850:  MOV     R0, #0
-00:00003794 000000EF        	  2851:  SWI     OS_WriteC
-00:00003798 0400A0E3        	  2852:  MOV     R0, #4
-00:0000379C 0010A0E3        	  2853:  MOV     R1, #0
-00:000037A0 0020A0E3        	  2854:  MOV     R2, #0
-00:000037A4 060000EF        	  2855:  SWI     OS_Byte
-                            	  2856: ReturnToDesktop:
-00:000037A8 0040BDE8        	  2857:  LDMFD   R13!, {R14}
-00:000037AC 18D31FE5        	  2858:  LDR     R13, stackPointerOnEntry
-00:000037B0 110000EF        	  2859:  SWI     OS_Exit
-                            	  2860: PrintHexNumber:
-00:000037B4 1E00A0E3        	  2861:  MOV     R0, #30
-00:000037B8 000000EF        	  2862:  SWI     OS_WriteC
-00:000037BC 0A00A0E3        	  2863:  MOV     R0, #0x0A
-00:000037C0 000000EF        	  2864:  SWI     OS_WriteC
-00:000037C4 FF5F2DE9        	  2865:  STMFD   R13!, {R0-R12, R14}
-00:000037C8 210EA0E1        	  2866:  MOV     R0, R1, LSR #28
-00:000037CC 120000EB        	  2867:  BL      PrintHexDigit
-00:000037D0 210CA0E1        	  2868:  MOV     R0, R1, LSR #24
-00:000037D4 100000EB        	  2869:  BL      PrintHexDigit
-00:000037D8 210AA0E1        	  2870:  MOV     R0, R1, LSR #20
-00:000037DC 0E0000EB        	  2871:  BL      PrintHexDigit
-00:000037E0 2108A0E1        	  2872:  MOV     R0, R1, LSR #16
-00:000037E4 0C0000EB        	  2873:  BL      PrintHexDigit
-00:000037E8 2106A0E1        	  2874:  MOV     R0, R1, LSR #12
-00:000037EC 0A0000EB        	  2875:  BL      PrintHexDigit
-00:000037F0 2104A0E1        	  2876:  MOV     R0, R1, LSR #8
-00:000037F4 080000EB        	  2877:  BL      PrintHexDigit
-00:000037F8 2102A0E1        	  2878:  MOV     R0, R1, LSR #4
-00:000037FC 060000EB        	  2879:  BL      PrintHexDigit
-00:00003800 0100A0E1        	  2880:  MOV     R0, R1
-00:00003804 040000EB        	  2881:  BL      PrintHexDigit
-00:00003808 0A00A0E3        	  2882:  MOV     R0, #0xA
-00:0000380C 000000EF        	  2883:  SWI     OS_WriteC
-00:00003810 0D00A0E3        	  2884:  MOV     R0, #0xD
-00:00003814 000000EF        	  2885:  SWI     OS_WriteC
-00:00003818 FF9FBDE8        	  2886:  LDMFD   R13!, {R0-R12, PC}
-                            	  2887: PrintHexDigit:
-00:0000381C 0F0000E2        	  2888:  AND     R0, R0, #0xF
-00:00003820 0A0050E3        	  2889:  CMP     R0, #0xA
-00:00003824 37008022        	  2890:  ADDHS   R0, R0, #0x37
-00:00003828 30008032        	  2891:  ADDLO   R0, R0, #0x30
-00:0000382C 000000EF        	  2892:  SWI     OS_WriteC
-00:00003830 0EF0A0E1        	  2893:  MOV     PC, R14
+                            	  2803: MainLoop:
+00:00003700 0000A0E3        	  2804:  MOV     R0, #0
+00:00003704 1E01CFE5        	  2805:  STRB    R0, keyBuffer+2
+00:00003708 1B01CFE5        	  2806:  STRB    R0, keyBuffer+3
+00:0000370C 18018FE5        	  2807:  STR     R0, keyBuffer+4
+00:00003710 18018FE5        	  2808:  STR     R0, keyBuffer+8
+00:00003714 431F8FE2        	  2809:  ADR     R1, keyBuffer
+00:00003718 F000A0E3        	  2810:  MOV     R0, #Tube_ReadKeyboard
+00:0000371C 070000EF        	  2811:  SWI     OS_Word
+00:00003720 0221DFE5        	  2812:  LDRB    R2, keyBuffer+2
+00:00003724 FF0032E3        	  2813:  TEQ     R2, #0xFF
+00:00003728 1100000A        	  2814:  BEQ     EndGame
+00:0000372C F9F6FFEB        	  2815:  BL      MoveAndDrawPlayer
+00:00003730 18019BE5        	  2816:  LDR     R0, [R11, #mainLoopCount]
+00:00003734 000CA0E1        	  2817:  MOV     R0, R0, LSL #24
+00:00003738 8010A0E1        	  2818:  MOV     R1, R0, LSL #1
+00:0000373C D2FAFFEB        	  2819:  BL      CalculateRotationMatrix
+00:00003740 42F9FFEB        	  2820:  BL      DropRocksFromTheSky
+00:00003744 EEF7FFEB        	  2821:  BL      MoveAndDrawParticles
+00:00003748 67F9FFEB        	  2822:  BL      DrawObjects
+00:0000374C 03FDFFEB        	  2823:  BL      AddTerminatorsToBuffers
+00:00003750 4EF6FFEB        	  2824:  BL      DrawLandscapeAndBuffers
+00:00003754 12FAFFEB        	  2825:  BL      PrintCurrentScore
+00:00003758 55FAFFEB        	  2826:  BL      DrawFuelLevel
+00:0000375C A60000EB        	  2827:  BL      FlushPixelBuffer
+00:00003760 0EFDFFEB        	  2828:  BL      SwitchScreenBank
+00:00003764 18E19BE5        	  2829:  LDR     R14, [R11, #mainLoopCount]
+00:00003768 01E08EE2        	  2830:  ADD     R14, R14, #1
+00:0000376C 18E18BE5        	  2831:  STR     R14, [R11, #mainLoopCount]
+00:00003770 E2FFFFEA        	  2832:  B       MainLoop
+                            	  2833: EndGame:
+00:00003774 7E00A0E3        	  2834:  MOV     R0, #126
+00:00003778 060000EF        	  2835:  SWI     OS_Byte
+00:0000377C 1600A0E3        	  2836:  MOV     R0, #22
+00:00003780 000000EF        	  2837:  SWI     OS_WriteC
+00:00003784 0000A0E3        	  2838:  MOV     R0, #0
+00:00003788 000000EF        	  2839:  SWI     OS_WriteC
+00:0000378C 0400A0E3        	  2840:  MOV     R0, #4
+00:00003790 0010A0E3        	  2841:  MOV     R1, #0
+00:00003794 0020A0E3        	  2842:  MOV     R2, #0
+00:00003798 060000EF        	  2843:  SWI     OS_Byte
+                            	  2844: ReturnToDesktop:
+00:0000379C 0040BDE8        	  2845:  LDMFD   R13!, {R14}
+00:000037A0 0CD31FE5        	  2846:  LDR     R13, stackPointerOnEntry
+00:000037A4 110000EF        	  2847:  SWI     OS_Exit
+                            	  2848: PrintHexNumber:
+00:000037A8 1E00A0E3        	  2849:  MOV     R0, #30
+00:000037AC 000000EF        	  2850:  SWI     OS_WriteC
+00:000037B0 0A00A0E3        	  2851:  MOV     R0, #0x0A
+00:000037B4 000000EF        	  2852:  SWI     OS_WriteC
+00:000037B8 FF5F2DE9        	  2853:  STMFD   R13!, {R0-R12, R14}
+00:000037BC 210EA0E1        	  2854:  MOV     R0, R1, LSR #28
+00:000037C0 120000EB        	  2855:  BL      PrintHexDigit
+00:000037C4 210CA0E1        	  2856:  MOV     R0, R1, LSR #24
+00:000037C8 100000EB        	  2857:  BL      PrintHexDigit
+00:000037CC 210AA0E1        	  2858:  MOV     R0, R1, LSR #20
+00:000037D0 0E0000EB        	  2859:  BL      PrintHexDigit
+00:000037D4 2108A0E1        	  2860:  MOV     R0, R1, LSR #16
+00:000037D8 0C0000EB        	  2861:  BL      PrintHexDigit
+00:000037DC 2106A0E1        	  2862:  MOV     R0, R1, LSR #12
+00:000037E0 0A0000EB        	  2863:  BL      PrintHexDigit
+00:000037E4 2104A0E1        	  2864:  MOV     R0, R1, LSR #8
+00:000037E8 080000EB        	  2865:  BL      PrintHexDigit
+00:000037EC 2102A0E1        	  2866:  MOV     R0, R1, LSR #4
+00:000037F0 060000EB        	  2867:  BL      PrintHexDigit
+00:000037F4 0100A0E1        	  2868:  MOV     R0, R1
+00:000037F8 040000EB        	  2869:  BL      PrintHexDigit
+00:000037FC 0A00A0E3        	  2870:  MOV     R0, #0xA
+00:00003800 000000EF        	  2871:  SWI     OS_WriteC
+00:00003804 0D00A0E3        	  2872:  MOV     R0, #0xD
+00:00003808 000000EF        	  2873:  SWI     OS_WriteC
+00:0000380C FF9FBDE8        	  2874:  LDMFD   R13!, {R0-R12, PC}
+                            	  2875: PrintHexDigit:
+00:00003810 0F0000E2        	  2876:  AND     R0, R0, #0xF
+00:00003814 0A0050E3        	  2877:  CMP     R0, #0xA
+00:00003818 37008022        	  2878:  ADDHS   R0, R0, #0x37
+00:0000381C 30008032        	  2879:  ADDLO   R0, R0, #0x30
+00:00003820 000000EF        	  2880:  SWI     OS_WriteC
+00:00003824 0EF0A0E1        	  2881:  MOV     PC, R14
+                            	  2882: keyBuffer:
+00:00003828 02              	  2883: .byte 2
+00:00003829 0A              	  2884: .byte 10
+00:0000382A 00              	  2885: .byte 0
+00:0000382B 00              	  2886: .byte 0
+00:0000382C 00              	  2887: .byte 0
+00:0000382D 00              	  2888: .byte 0
+00:0000382E 00              	  2889: .byte 0
+00:0000382F 00              	  2890: .byte 0
+00:00003830 00              	  2891: .byte 0
+00:00003831 00              	  2892: .byte 0
+                            	  2893: .balign 4
                             	  2894: WaitForSpace:
-00:00003834 4F1F4FE2        	  2895:  ADR     R1, keyBuffer
+00:00003834 14104FE2        	  2895:  ADR     R1, keyBuffer
 00:00003838 F000A0E3        	  2896:  MOV     R0, #Tube_ReadKeyboard
 00:0000383C 070000EF        	  2897:  SWI     OS_Word
-00:00003840 44215FE5        	  2898:  LDRB    R2, keyBuffer+4
+00:00003840 1C205FE5        	  2898:  LDRB    R2, keyBuffer+4
 00:00003844 FF0032E3        	  2899:  TEQ     R2, #0xFF
 00:00003848 F9FFFF1A        	  2900:  BNE     WaitForSpace
 00:0000384C 0EF0A0E1        	  2901:  MOV     PC, R14
                             	  2902: ReadKeyboardMouseButtons:
 00:00003850 0020A0E3        	  2903:  MOV     R2, #0
-00:00003854 58115FE5        	  2904:  LDRB    R1, keyBuffer+4
+00:00003854 30105FE5        	  2904:  LDRB    R1, keyBuffer+4
 00:00003858 FF0031E3        	  2905:  TEQ     R1, #0xFF
 00:0000385C 04208203        	  2906:  ORREQ   R2, R2, #0x4
-00:00003860 65115FE5        	  2907:  LDRB    R1, keyBuffer+3
+00:00003860 3D105FE5        	  2907:  LDRB    R1, keyBuffer+3
 00:00003864 FF0031E3        	  2908:  TEQ     R1, #0xFF
 00:00003868 02208203        	  2909:  ORREQ   R2, R2, #0x2
-00:0000386C 6B115FE5        	  2910:  LDRB    R1, keyBuffer+9
+00:0000386C 43105FE5        	  2910:  LDRB    R1, keyBuffer+9
 00:00003870 FF0031E3        	  2911:  TEQ     R1, #0xFF
 00:00003874 01208203        	  2912:  ORREQ   R2, R2, #0x1
 00:00003878 0EF0A0E1        	  2913:  MOV     PC, R14
                             	  2914: GetPolarAnglesFromKeyboard:
 00:0000387C 44109FE5        	  2915:  LDR     R1, polarAngle
-00:00003880 83215FE5        	  2916:  LDRB    R2, keyBuffer+5
+00:00003880 5B205FE5        	  2916:  LDRB    R2, keyBuffer+5
 00:00003884 FF0032E3        	  2917:  TEQ     R2, #0xFF
 00:00003888 01124102        	  2918:  SUBEQ   R1, R1, #64 << 22
-00:0000388C 8E215FE5        	  2919:  LDRB    R2, keyBuffer+6
+00:0000388C 66205FE5        	  2919:  LDRB    R2, keyBuffer+6
 00:00003890 FF0032E3        	  2920:  TEQ     R2, #0xFF
 00:00003894 01128102        	  2921:  ADDEQ   R1, R1, #64 << 22
 00:00003898 28108FE5        	  2922:  STR     R1, polarAngle
 00:0000389C 28009FE5        	  2923:  LDR     R0, polarDistance
-00:000038A0 A1215FE5        	  2924:  LDRB    R2, keyBuffer+7
+00:000038A0 79205FE5        	  2924:  LDRB    R2, keyBuffer+7
 00:000038A4 FF0032E3        	  2925:  TEQ     R2, #0xFF
 00:000038A8 02044002        	  2926:  SUBEQ   R0, R0, #8 << 22
-00:000038AC AC215FE5        	  2927:  LDRB    R2, keyBuffer+8
+00:000038AC 84205FE5        	  2927:  LDRB    R2, keyBuffer+8
 00:000038B0 FF0032E3        	  2928:  TEQ     R2, #0xFF
 00:000038B4 02048002        	  2929:  ADDEQ   R0, R0, #8 << 22
 00:000038B8 000050E3        	  2930:  CMP     R0, #0
@@ -10501,7 +10501,7 @@ DrawTriangleShadowToBuffer       A:00002A8C
 DrawTriangleToBuffer             A:00002ABC
 DropARockFromTheSky              A:00001AE8
 DropRocksFromTheSky              A:00001C50
-EndGame                          A:00003780
+EndGame                          A:00003774
 Entry                            A:0000352C
 FlushPixelBuffer                 A:000039FC
 GameOver                         A:000016AC
@@ -10534,7 +10534,7 @@ LandOnLaunchpad                  A:000015BC
 LoseLife                         A:00001630
 LoseLifeFromParticleLoop         A:0000162C
 MAX_PARTICLES                    S:000001E4
-MainLoop                         A:0000370C
+MainLoop                         A:00003700
 MoveAndDrawParticles             A:00001704
 MoveAndDrawPlayer                A:00001318
 MultiplyVectorByConstant         A:000027F0
@@ -10548,8 +10548,8 @@ PLAYER_FRONT_Z                   S:06000000
 PlaceObjectsOnMap                A:00003624
 PlacePlayerOnLaunchpad           A:000036A8
 PrintCurrentScore                A:00001FA4
-PrintHexDigit                    A:0000381C
-PrintHexNumber                   A:000037B4
+PrintHexDigit                    A:00003810
+PrintHexNumber                   A:000037A8
 PrintScoreInBothBanks            A:00002000
 ProcessObjectDestruction         A:000018D8
 ProjectParticleOntoScreen        A:00002518
@@ -10557,7 +10557,7 @@ ProjectVertexOntoScreen          A:000025F0
 ROCK_HEIGHT                      S:20000000
 ReadKeyboardMouseButtons         A:00003850
 ResetMousePosition               A:000034AC
-ReturnToDesktop                  A:000037A8
+ReturnToDesktop                  A:0000379C
 SAFE_HEIGHT                      S:01800000
 SEA_LEVEL                        S:05500000
 SMOKE_HEIGHT                     S:00C00000
@@ -10637,7 +10637,7 @@ highScore                        S:00000138
 initialFuelLevel                 A:00003498
 initialHighScore                 A:00003494
 initialScore                     A:00003490
-keyBuffer                        A:00003700
+keyBuffer                        A:00003828
 labOffset                        S:0000006C
 land1                            A:000010E0
 land2                            A:00001118
@@ -11180,12 +11180,12 @@ Symbols by value:
 00003650 snew2
 00003690 snew3
 000036A8 PlacePlayerOnLaunchpad
-00003700 keyBuffer
-0000370C MainLoop
-00003780 EndGame
-000037A8 ReturnToDesktop
-000037B4 PrintHexNumber
-0000381C PrintHexDigit
+00003700 MainLoop
+00003774 EndGame
+0000379C ReturnToDesktop
+000037A8 PrintHexNumber
+00003810 PrintHexDigit
+00003828 keyBuffer
 00003834 WaitForSpace
 00003850 ReadKeyboardMouseButtons
 0000387C GetPolarAnglesFromKeyboard

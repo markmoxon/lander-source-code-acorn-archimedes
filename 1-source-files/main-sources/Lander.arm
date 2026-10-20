@@ -13310,36 +13310,6 @@
 
 \ ******************************************************************************
 \
-\       Name: keyBuffer
-\       Type: Subroutine
-\   Category: Keyboard
-\    Summary: The keyboard buffer OS_Word block
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.keyBuffer
-
- EQUB 2                             \ The number of bytes to transmit
-
- EQUB 10                            \ The number of bytes to receive
-
- EQUB 0                             \ ESCAPE    keyBuffer+2      Quit
- EQUB 0                             \ ?         keyBuffer+3      Hover
- EQUB 0                             \ Space     keyBuffer+4      Thrust
- EQUB 0                             \ <         keyBuffer+5      Yaw left
- EQUB 0                             \ >         keyBuffer+6      Yaw right
- EQUB 0                             \ X         keyBuffer+7      Pull up
- EQUB 0                             \ S         keyBuffer+8      Pitch down
- EQUB 0                             \ A         keyBuffer+9      Fire
-
- ALIGN
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
 \       Name: MainLoop
 \       Type: Subroutine
 \   Category: Main loop
@@ -13606,6 +13576,36 @@
  SWI     OS_WriteC                  \ Print the character in R0
 
  MOV     PC, R14                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: keyBuffer
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: The keyboard buffer OS_Word block
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.keyBuffer
+
+ EQUB 2                             \ The number of bytes to transmit
+
+ EQUB 10                            \ The number of bytes to receive
+
+ EQUB 0                             \ ESCAPE    keyBuffer+2      Quit
+ EQUB 0                             \ ?         keyBuffer+3      Hover
+ EQUB 0                             \ Space     keyBuffer+4      Thrust
+ EQUB 0                             \ <         keyBuffer+5      Yaw left
+ EQUB 0                             \ >         keyBuffer+6      Yaw right
+ EQUB 0                             \ X         keyBuffer+7      Pull up
+ EQUB 0                             \ S         keyBuffer+8      Pitch down
+ EQUB 0                             \ A         keyBuffer+9      Fire
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
