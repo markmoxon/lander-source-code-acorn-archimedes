@@ -9116,6 +9116,12 @@
                                     \ buffer (see bufferJump for a full list of
                                     \ drawing commands)
 
+                                    \ --- Mod: Code added for AES ------------->
+
+ MOV     R8, #%11111111             \ Make object shadows colour 3 (blue)
+
+                                    \ --- End of added code ------------------->
+
  STMIA   R9!, {R0-R5, R8}           \ Store the three pixel coordinates from R0
                                     \ to R5, and then the colour in R8, in the
                                     \ buffer
@@ -13009,7 +13015,14 @@
 \MOV     R0, #13                    \ screen bank 1
 \SWI     OS_WriteC
 
-                                    \ --- End of removed code ----------------->
+                                    \ --- And replaced by: -------------------->
+
+ MOV     R0, #17                    \ Set text colour 2 (green)
+ SWI     OS_WriteC
+ MOV     R0, #2
+ SWI     OS_WriteC
+
+                                    \ --- End of replacement ------------------>
 
  SWI     OS_WriteS                  \ Write the game's title into the top line
  EQUS    "Lander Demo/Practice "    \ of the screen, where it remains for the
@@ -13053,6 +13066,11 @@
  SWI     OS_WriteC
  MOV     R0, #0
  SWI     OS_WriteC
+ SWI     OS_WriteC
+
+ MOV     R0, #17                    \ Set text colour 2 (green)
+ SWI     OS_WriteC
+ MOV     R0, #2
  SWI     OS_WriteC
 
                                     \ --- End of replacement ------------------>
