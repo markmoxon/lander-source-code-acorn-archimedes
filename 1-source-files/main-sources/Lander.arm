@@ -13401,7 +13401,7 @@
 
                                     \ --- Mod: Code added for AES ------------->
 
-\BL      FlushPixelBuffer           \ We have finished drawing, so transmit any
+ BL      FlushPixelBuffer           \ We have finished drawing, so transmit any
                                     \ remaining pixels from the pixel buffer to
                                     \ the I/O processor
 
@@ -13856,41 +13856,41 @@
 
 .DrawPixelIntoBuffer
 
- STMFD   R13!, {R12, R14}           \ Store the registers that we want to use on
+ STMFD   R13!, {R14}                \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
  ADR     R10, pixelBuffer           \ Set R10 to the address of the pixel buffer
 
- LDR     R11, pixelBufferPointer    \ Set R11 to the pointer, which points to the
+ LDR     R5, pixelBufferPointer     \ Set R5 to the pointer, which points to the
                                     \ offset of the first free entry in the
                                     \ buffer
 
- ADD     R12, R10, R11              \ Set R2 to the address of the first free
+ ADD     R4, R10, R5                \ Set R4 to the address of the first free
                                     \ entry in the buffer, which is where we
                                     \ will add the new pixel
 
- STRB    R6, [R12]                  \ Store the screen address in the buffer
+ STRB    R6, [R4]                   \ Store the screen address in the buffer
  MOV     R7, R6, LSR #8             \ with the low byte first
- STRB    R7, [R12, #1]
+ STRB    R7, [R4, #1]
 
- STRB    R8, [R12, #2]              \ Store the pixel byte in the buffer
+ STRB    R8, [R4, #2]               \ Store the pixel byte in the buffer
 
- STRB    R9, [R12, #3]              \ Store the pixel mask in the buffer
+ STRB    R9, [R4, #3]               \ Store the pixel mask in the buffer
 
- ADD     R11, R11, #4               \ Increment the pixel buffer pointer to the
+ ADD     R5, R5, #4                 \ Increment the pixel buffer pointer to the
                                     \ next entry in the buffer
 
- CMP     R11, #63*4                 \ If R11 >= 252 then we just filled the last
+ CMP     R5, #63*4                  \ If R5 >= 252 then we just filled the last
  BLCS    TransmitPixelBuffer        \ entry in the 63-pixel buffer, so call the
                                     \ TransmitPixelBuffer routine to send the
-                                    \ buffer to the I/O Processor and set R11 to
+                                    \ buffer to the I/O Processor and set R5 to
                                     \ zero, so we can reset the pointer in the
                                     \ next instruction
 
- STR     R11, pixelBufferPointer    \ Update the pixel buffer pointer to the
+ STR     R5, pixelBufferPointer     \ Update the pixel buffer pointer to the
                                     \ new value
 
- LDMFD   R13!, {R12, PC}            \ Retrieve the registers that we stored on
+ LDMFD   R13!, {PC}                 \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
 
                                     \ --- End of added code ------------------->
@@ -13908,14 +13908,14 @@
 \
 \   R10                             The address of the pixel buffer
 \
-\   R11                             The pixel buffer pointer for the entry past
+\   R5                              The pixel buffer pointer for the entry past
 \                                   the end of the buffer
 \
 \ ------------------------------------------------------------------------------
 \
 \ Returns:
 \
-\   R11                             The new value of the pixel buffer pointer
+\   R5                              The new value of the pixel buffer pointer
 \                                   (always zero)
 \
 \ ******************************************************************************
@@ -13926,7 +13926,7 @@
 
  MOV     R0, #Tube_BeginPixels      \ Tell the I/O Processor to expect the pixel
  SWI     OS_WriteC                  \ data by sending the size of the buffer in
- ADD     R0, R11, #1                \ R11, plus 1 (as that's what the AddPixel
+ ADD     R0, R5, #1                 \ R5, plus 1 (as that's what the AddPixel
  SWI     OS_WriteC                  \ routine in the I/O processor expects)
 
  MOV     R1, #0                     \ Set R1 = 0 to use as a byte counter as we
@@ -13954,7 +13954,7 @@
 
  ADD     R1, R1, #4                 \ Increment the byte counter in R1
 
- CMP     R1, R11                    \ Loop back until we have reached the entry
+ CMP     R1, R5                     \ Loop back until we have reached the entry
  BCC     tran1                      \ at the end of the buffer
 
                                     \ We have now sent all bytes to the I/O
@@ -13962,14 +13962,13 @@
                                     \ independently of the parasite (because we
                                     \ have used OS_Byte to send the data)
 
- MOV     R11, #0                    \ Set R11 to zero to return as the new value
+ MOV     R5, #0                     \ Set R11 to zero to return as the new value
                                     \ of the pixel buffer pointer, as we have
                                     \ now emptied the buffer
 
  MOV     PC, R14                    \ Return from the subroutine
 
                                     \ --- End of added code ------------------->
-
 
 \ ******************************************************************************
 \
@@ -13987,9 +13986,9 @@
  STMFD   R13!, {R14}                \ Store the registers that we want to use on
                                     \ the stack so they can be preserved
 
- LDR     R11, pixelBufferPointer    \ Set R11 to the pixel buffer pointer
+ LDR     R5, pixelBufferPointer     \ Set R5 to the pixel buffer pointer
 
- CMP     R11, #0                    \ If the pointer is zero then the buffer is
+ CMP     R5, #0                     \ If the pointer is zero then the buffer is
  LDMEQFD R13!, {PC}                 \ empty, so return from the subroutine
 
  ADR     R10, pixelBuffer           \ Set R10 to the address of the pixel buffer
@@ -13997,8 +13996,7 @@
  BL      TransmitPixelBuffer        \ Transmit the contents of the pixel buffer
                                     \ to the I/O processor
 
- MOV     R11, #0                    \ Reset the pixel buffer pointer
- STR     R11, pixelBufferPointer 
+ STR     R5, pixelBufferPointer     \ Zero the pixel buffer pointer
 
  LDMFD   R13!, {PC}                 \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine

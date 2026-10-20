@@ -2834,6 +2834,7 @@ MainLoop:
  BL      DrawLandscapeAndBuffers
  BL      PrintCurrentScore
  BL      DrawFuelLevel
+ BL      FlushPixelBuffer
  BL      SwitchScreenBank
  LDR     R14, [R11, #mainLoopCount]
  ADD     R14, R14, #1
@@ -2979,24 +2980,24 @@ bdec3:
  ADD     R2, R2, #1
  LDMFD   R13!, {R0, R3-R5, PC}
 DrawPixelIntoBuffer:
- STMFD   R13!, {R12, R14}
+ STMFD   R13!, {R14}
  ADR     R10, pixelBuffer
- LDR     R11, pixelBufferPointer
- ADD     R12, R10, R11
- STRB    R6, [R12]
+ LDR     R5, pixelBufferPointer
+ ADD     R4, R10, R5
+ STRB    R6, [R4]
  MOV     R7, R6, LSR #8
- STRB    R7, [R12, #1]
- STRB    R8, [R12, #2]
- STRB    R9, [R12, #3]
- ADD     R11, R11, #4
- CMP     R11, #63*4
+ STRB    R7, [R4, #1]
+ STRB    R8, [R4, #2]
+ STRB    R9, [R4, #3]
+ ADD     R5, R5, #4
+ CMP     R5, #63*4
  BLCS    TransmitPixelBuffer
- STR     R11, pixelBufferPointer
- LDMFD   R13!, {R12, PC}
+ STR     R5, pixelBufferPointer
+ LDMFD   R13!, {PC}
 TransmitPixelBuffer:
  MOV     R0, #Tube_BeginPixels
  SWI     OS_WriteC
- ADD     R0, R11, #1
+ ADD     R0, R5, #1
  SWI     OS_WriteC
  MOV     R1, #0
 tran1:
@@ -3010,19 +3011,18 @@ tran1:
  MOV     R0, R2, LSR #24
  SWI     OS_WriteC
  ADD     R1, R1, #4
- CMP     R1, R11
+ CMP     R1, R5
  BCC     tran1
- MOV     R11, #0
+ MOV     R5, #0
  MOV     PC, R14
 FlushPixelBuffer:
  STMFD   R13!, {R14}
- LDR     R11, pixelBufferPointer
- CMP     R11, #0
+ LDR     R5, pixelBufferPointer
+ CMP     R5, #0
  LDMEQFD R13!, {PC}
  ADR     R10, pixelBuffer
  BL      TransmitPixelBuffer
- MOV     R11, #0
- STR     R11, pixelBufferPointer 
+ STR     R5, pixelBufferPointer
  LDMFD   R13!, {PC}
 pixelBufferPointer:
 .long 0
