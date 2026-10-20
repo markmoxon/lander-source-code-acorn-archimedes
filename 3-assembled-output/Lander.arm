@@ -223,6 +223,7 @@ land4:
  LDRB    R0, [R11, #tileCornerRow]
  SUBS    R0, R0, #2
  BLPL    DrawGraphicsBuffer
+ BLPL    FlushPixelBuffer
  LDRB    R0, [R11, #tileCornerRow]
  ADDS    R0, R0, #1
  CMP     R0, #TILES_Z
@@ -245,8 +246,10 @@ land4:
 land5:
  MOV     R0, #TILES_Z - 2
  BL      DrawGraphicsBuffer
+ BL      FlushPixelBuffer
  MOV     R0, #TILES_Z - 1
  BL      DrawGraphicsBuffer
+ BL      FlushPixelBuffer
  LDMFD   R13!, {R5-R9, PC}
 GetLandscapeAltitude:
  LDR     R0, [R11, #altitude]
@@ -1178,6 +1181,7 @@ dobj5:
  ADD     R9, R9, #16
  SUBS    R8, R8, #1
  BNE     dobj3
+ BL      FlushPixelBuffer
  LDMFD   R13!, {R6-R12, PC}
 PrintCurrentScore:
  STMFD   R13!, {R14}
@@ -2619,15 +2623,14 @@ DrawPixels:
  ADD     R6, R5, R3, LSL #7
  ADD     R6, R6, #0x3500
  CMP     R6, #0x3500
- BCC     dpix1
+ LDMCCFD R13!, {R2-R10, PC}
  CMP     R6, #0x8000
- BCS     dpix1
+ LDMCSFD R13!, {R2-R10, PC}
  AND     R7, R2, #0x3
  MOV     R9, R9, LSR R7
  EOR     R10, R9, #0xff
  AND     R8, R8, R10
  BL      DrawPixelIntoPixelBuffer
-dpix1:
  LDMFD   R13!, {R2-R10, PC}
 DrawLineSegment:
  STRB    R8, [R11, #16]
@@ -3000,7 +3003,7 @@ TransmitPixelBuffer:
  SWI     OS_WriteC
  MOV     R1, #0
 tran1:
- LDR     R2, [R10], #4
+ LDR     R2, [R10, R1]
  MOV     R0, R2
  SWI     OS_WriteC
  MOV     R0, R2, LSR #8

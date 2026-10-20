@@ -1205,6 +1205,13 @@
                                     \ number, i.e. one that is positive, draw
                                     \ the contents of the buffer
 
+                                    \ --- Mod: Code added for AES ------------->
+
+ BLPL    FlushPixelBuffer           \ Transmit any remaining pixels from the
+                                    \ pixel buffer to the I/O processor
+
+                                    \ --- End of added code ------------------->
+
  LDRB    R0, [R11, #tileCornerRow]  \ Set R0 to the number of the tile corner
                                     \ row we are currently processing
 
@@ -1273,8 +1280,22 @@
  MOV     R0, #TILES_Z - 2           \ Draw the contents of the penultimate
  BL      DrawGraphicsBuffer         \ graphics buffer
 
+                                    \ --- Mod: Code added for AES ------------->
+
+ BL      FlushPixelBuffer           \ Transmit any remaining pixels from the
+                                    \ pixel buffer to the I/O processor
+
+                                    \ --- End of added code ------------------->
+
  MOV     R0, #TILES_Z - 1           \ Draw the contents of the last graphics
  BL      DrawGraphicsBuffer         \ buffer
+
+                                    \ --- Mod: Code added for AES ------------->
+
+ BL      FlushPixelBuffer           \ Transmit any remaining pixels from the
+                                    \ pixel buffer to the I/O processor
+
+                                    \ --- End of added code ------------------->
 
  LDMFD   R13!, {R5-R9, PC}          \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -5732,7 +5753,7 @@
 
  LDRB    R7, [R11, #objectType]    \ Set R8 to colour 1 (red) for gazebo (#5)
  CMP     R7, #5                    \ or object numbers #8 and up, i.e. building
- MOVEQ   R8, #%00001111             \ (#8) and rocket (#9-11) and all destroyed
+ MOVEQ   R8, #%00001111            \ (#8) and rocket (#9-11) and all destroyed
  CMP     R7, #8                    \ objects (#12 and up)
  MOVCS   R8, #%00001111
 
@@ -5784,6 +5805,14 @@
 
  BNE     dobj3                      \ Loop back to dobj3 to move on to the next
                                     \ face, until we have processed them all
+
+                                    \ --- Mod: Code added for AES ------------->
+
+ BL      FlushPixelBuffer           \ We have finished drawing the object, so
+                                    \ transmit any remaining pixels from the
+                                    \ pixel buffer to the I/O processor
+
+                                    \ --- End of added code ------------------->
 
  LDMFD   R13!, {R6-R12, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -12592,9 +12621,9 @@
                                     \ rows
 
  CMP     R6, #&3500                 \ If the address in R6 is not within screen
- BCC     dpix1                      \ memory then jump tp dpix1 to return from
+ LDMCCFD R13!, {R2-R10, PC}         \ memory then jump tp dpix1 to return from
  CMP     R6, #&8000                 \ the subroutine without drawing anything
- BCS     dpix1
+ LDMCSFD R13!, {R2-R10, PC}
 
  AND     R7, R2, #%00000011         \ Set R7 to the position of the pixel/dash
                                     \ within the pixel byte (0 on the left, 3
@@ -12615,8 +12644,6 @@
                                     \   * R8 = pixel byte with pixel set
                                     \
                                     \   * R9 = pixel mask
-
-.dpix1
 
  LDMFD   R13!, {R2-R10, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -13879,7 +13906,7 @@
  ADD     R5, R5, #4                 \ Increment the pixel buffer pointer to the
                                     \ next entry in the buffer
 
- CMP     R5, #63*4                  \ If R5 >= 252 then we just filled the last
+ CMP     R5, #63*4                  \ If R5 >= 63*4 then we just filled the last
  BLCS    TransmitPixelBuffer        \ entry in the 63-pixel buffer, so call the
                                     \ TransmitPixelBuffer routine to send the
                                     \ buffer to the I/O processor and set R5 to
@@ -13905,10 +13932,9 @@
 \
 \ Arguments:
 \
-\   R10                             The address of the pixel buffer
+\   R5                              The pixel buffer pointer
 \
-\   R5                              The pixel buffer pointer for the entry past
-\                                   the end of the buffer
+\   R10                             The address of the pixel buffer
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13928,12 +13954,12 @@
  ADD     R0, R5, #1                 \ R5, plus 1 (as that's what the AddPixel
  SWI     OS_WriteC                  \ routine in the I/O processor expects)
 
- MOV     R1, #0                     \ Set R1 = 0 to use as a byte counter as we
-                                    \ transmit each pixel
+ MOV     R1, #0                     \ Set R1 = 0 to use as an index counter as
+                                    \ we transmit each pixel
 
 .tran1
 
- LDR     R2, [R10], #4              \ Fetch the four bytes of pixel data into
+ LDR     R2, [R10, R1]              \ Fetch the four bytes of pixel data into
                                     \ R2, which will load the first byte into
                                     \ the lowest 8 bits of R2 and the last byte
                                     \ into the highest bits of R2, as the ARM is
@@ -13951,7 +13977,7 @@
  MOV     R0, R2, LSR #24            \ Send byte #3 of this pixel's data to the
  SWI     OS_WriteC                  \ I/O processor
 
- ADD     R1, R1, #4                 \ Increment the byte counter in R1
+ ADD     R1, R1, #4                 \ Increment the index counter in R1
 
  CMP     R1, R5                     \ Loop back until we have reached the entry
  BCC     tran1                      \ at the end of the buffer
