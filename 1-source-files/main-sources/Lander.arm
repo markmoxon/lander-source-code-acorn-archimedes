@@ -6159,29 +6159,15 @@
 \
 \ADD     R11, R7, #320              \ Set R11 to the address in R7, plus 320 to
 \                                   \ move it down by one pixel line
-
-                                    \ --- And replaced by: -------------------->
-
- LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
-                                    \ we need to poke into screen memory to draw
-                                    \ four pixels in the correct colour for the
-                                    \ fuel bar
-
- MOV     R11, #0                    \ Set (R11, R12) = (0, 0)
- MOV     R12, #0
-
-                                    \ --- End of replacement ------------------>
-
- MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
-                                    \         = fuel level / 16
-
- BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
-                                    \ starting at screen address R11 and drawing
-                                    \ to the right in the colour in R8, so
-                                    \ that's the top pixel row of the bar
-
-                                    \ --- Mod: Code removed for AES ----------->
-
+\
+\MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
+\                                   \         = fuel level / 16
+\
+\BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
+\                                   \ starting at screen address R11 and drawing
+\                                   \ to the right in the colour in R8, so
+\                                   \ that's the top pixel row of the bar
+\
 \ADD     R11, R7, #2*320            \ Set R11 to the address in R7, plus 640 to
 \                                   \ move it down by two pixel lines
 \
@@ -6192,20 +6178,12 @@
 \
 \MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
 \                                   \         = fuel level / 16
-
-                                    \ --- And replaced by: -------------------->
-
- ADD     R12, R12, #1               \ Move to next pixel line down
-
-                                    \ --- End of replacement ------------------>
-
- BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
-                                    \ starting at screen address R11 and drawing
-                                    \ to the right in the colour in R8, so
-                                    \ that's the middle pixel row of the bar
-
-                                    \ --- Mod: Code removed for AES ----------->
-
+\
+\BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
+\                                   \ starting at screen address R11 and drawing
+\                                   \ to the right in the colour in R8, so
+\                                   \ that's the middle pixel row of the bar
+\
 \ADD     R11, R7, #3*320            \ Set R11 to the address in R7, plus 960 to
 \                                   \ move it down by two pixel lines
 \
@@ -6216,17 +6194,84 @@
 \
 \MOV     R10, R1, LSR #4            \ Set R10 = R1 >> 4
 \                                   \         = fuel level / 16
+\
+\BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
+\                                   \ starting at screen address R11 and drawing
+\                                   \ to the right in the colour in R8, so
+\                                   \ that's the bottom pixel row of the bar
 
                                     \ --- And replaced by: -------------------->
 
- ADD     R12, R12, #1               \ Move to next pixel line down
+ MOV     R6, #&3500                 \ Set R6 to the address in mode 1 screen
+                                    \ memory for the fuel bar
+
+ LDR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+                                    \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
+
+ MOV     R9, #%00000000             \ Set R9 to the pixel mask for a full byte
+                                    \ of four pixels
+
+ MOVS    R12, R1, LSR #6            \ Set R10 = R1 >> 6
+                                    \         = (fuel level / 16) / 4
+                                    \
+                                    \ So this is the number of whole pixel bytes
+                                    \ of four pixels in the fuel bar, which we
+                                    \ can use as a counter in the following loop
+
+ BEQ     fuel2                      \ If R10 = 0 then we have no full bytes to
+                                    \ draw, so jump to fuel2 to skip the loop
+
+.fuel1
+
+ BL      DrawPixelIntoPixelBuffer   \ Draw three four-pixel dashes into the
+ ADD     R6, R6, #1                 \ pixel buffer to make the fuel line three
+ BL      DrawPixelIntoPixelBuffer   \ pixels high
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+
+ ADD     R6, R6, #6                 \ Move to the next pixel byte along (there
+                                    \ are eight bytes per character block)
+
+ SUBS    R12, R12, #1               \ Decrement the loop counter in R12
+
+ BNE     fuel1                      \ Loop back until we have drawn all the full
+                                    \ pixel bytes in the fuel bar
+
+.fuel2
+
+ LDR     R1, [R11, #fuelLevel]      \ Set R1 to the current fuel level in
+                                    \ fuelLevel
+
+ MOV     R12, R1, LSR #4            \ Set R12 = R1 >> 4
+                                    \         = fuel level / 16
+
+ ANDS    R12, R12, #3               \ Calculate the number of pixels in the
+                                    \ remainder of the fuel bar (0 to 3)
+
+ LDMEQFD R13!, {R10-R12, PC}        \ If there are no more pixels to draw, 
+                                    \ return from the subroutine
+
+ CMP     R12, #1                    \ If we need to draw one more pixel, set
+ MOVEQ   R8, #%00001000             \ the pixel byte in R9 and mask in R8
+ MOVEQ   R9, #%01110111
+
+ CMP     R12, #2                    \ If we need to draw two more pixels, set
+ MOVEQ   R8, #%00001100             \ the pixel byte in R9 and mask in R8
+ MOVEQ   R9, #%00110011
+
+ CMP     R12, #3                    \ If we need to draw three more pixels, set
+ MOVEQ   R8, #%00001110             \ the pixel byte in R9 and mask in R8
+ MOVEQ   R9, #%00010001
+
+ BL      DrawPixelIntoPixelBuffer   \ Draw three dashes of the right size into
+ ADD     R6, R6, #1                 \ the pixel buffer
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
 
                                     \ --- End of replacement ------------------>
-
- BL      DrawHorizontalLine         \ Draw a horizontal line of length R10,
-                                    \ starting at screen address R11 and drawing
-                                    \ to the right in the colour in R8, so
-                                    \ that's the bottom pixel row of the bar
 
  LDMFD   R13!, {R10-R12, PC}        \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
@@ -13852,7 +13897,7 @@
 \       Name: DrawPixelIntoPixelBuffer
 \       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: Store one pixel in the I/O processor pixel buffer
+\    Summary: Store one pixel byte in the I/O processor pixel buffer
 \
 \ ------------------------------------------------------------------------------
 \
