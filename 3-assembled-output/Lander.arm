@@ -2627,14 +2627,7 @@ DrawPixels:
  MOV     R9, R9, LSR R7
  EOR     R10, R9, #0xff
  AND     R8, R8, R10
- STRB    R6, oswordPixel+2
- MOV     R4, R6, LSR #8
- STRB    R4, oswordPixel+3
- STRB    R8, oswordPixel+4
- STRB    R9, oswordPixel+5
- ADR     R1, oswordPixel
- MOV     R0, #Tube_DrawPixel
- SWI     OS_Word
+ BL      DrawPixelIntoBuffer
 dpix1:
  LDMFD   R13!, {R2-R10, PC}
 DrawLineSegment:
@@ -2985,17 +2978,63 @@ bdec3:
  STRB    R3, [R1, R2]
  ADD     R2, R2, #1
  LDMFD   R13!, {R0, R3-R5, PC}
-oswordPixel:
-.byte 6
-.byte 0
-.word 0x0000
-.byte 0
-.byte 0
-.balign 4
-oswordNoParams:
-.byte 2
-.byte 0
-.balign 4
+DrawPixelIntoBuffer:
+ STMFD   R13!, {R12, R14}
+ ADR     R10, pixelBuffer
+ LDR     R11, pixelBufferPointer
+ ADD     R12, R10, R11
+ STRB    R6, [R12]
+ MOV     R7, R6, LSR #8
+ STRB    R7, [R12, #1]
+ STRB    R8, [R12, #2]
+ STRB    R9, [R12, #3]
+ ADD     R11, R11, #4
+ CMP     R11, #63*4
+ BLCS    TransmitPixelBuffer
+ STR     R11, pixelBufferPointer
+ LDMFD   R13!, {R12, PC}
+TransmitPixelBuffer:
+ MOV     R0, #Tube_BeginPixels
+ SWI     OS_WriteC
+ ADD     R0, R11, #1
+ SWI     OS_WriteC
+ MOV     R1, #0
+tran1:
+ LDR     R2, [R10], #4
+ MOV     R0, R2
+ SWI     OS_WriteC
+ MOV     R0, R2, LSR #8
+ SWI     OS_WriteC
+ MOV     R0, R2, LSR #16
+ SWI     OS_WriteC
+ MOV     R0, R2, LSR #24
+ SWI     OS_WriteC
+ ADD     R1, R1, #4
+ CMP     R1, R11
+ BCC     tran1
+ MOV     R11, #0
+ MOV     PC, R14
+FlushPixelBuffer:
+ STMFD   R13!, {R14}
+ LDR     R11, pixelBufferPointer
+ CMP     R11, #0
+ LDMEQFD R13!, {PC}
+ ADR     R10, pixelBuffer
+ BL      TransmitPixelBuffer
+ MOV     R11, #0
+ STR     R11, pixelBufferPointer 
+ LDMFD   R13!, {PC}
+pixelBufferPointer:
+.long 0
+pixelBuffer:
+.long 0, 0, 0, 0, 0, 0, 0, 0
+.long 0, 0, 0, 0, 0, 0, 0, 0
+.long 0, 0, 0, 0, 0, 0, 0, 0
+.long 0, 0, 0, 0, 0, 0, 0, 0
+.long 0, 0, 0, 0, 0, 0, 0, 0
+.long 0, 0, 0, 0, 0, 0, 0, 0
+.long 0, 0, 0, 0, 0, 0, 0, 0
+.long 0, 0, 0, 0, 0, 0, 0, 0
 objectRock:
 .long    6
 .long    8

@@ -605,7 +605,7 @@
 \
 \ Arguments:
 \
-\   A                   The number of pixels + 1
+\   A                   The number of bytes to expect + 1
 \
 \ ******************************************************************************
 

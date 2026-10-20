@@ -12607,25 +12607,15 @@
  EOR     R10, R9, #%11111111        \ Set R8 to the pixel byte for a pixel/dash
  AND     R8, R8, R10                \ in position R7 with colour R8
 
-                                    \ So we now have:
+ BL      DrawPixelIntoBuffer        \ Draw the following pixel into the pixel
+                                    \ buffer, transmitting to the I/O Processor
+                                    \ when full:
                                     \
-                                    \   * R6 = screen offset of mode 1 byte
+                                    \   * R6 = screen address of mode 1 byte
                                     \
                                     \   * R8 = pixel byte with pixel set
                                     \
                                     \   * R9 = pixel mask
-
- STRB    R6, oswordPixel+2          \ Store the screen address in the OS_Word
- MOV     R4, R6, LSR #8             \ block
- STRB    R4, oswordPixel+3
-
- STRB    R8, oswordPixel+4          \ Store the pixel byte in the OS_Word block
-
- STRB    R9, oswordPixel+5          \ Store the pixel mask in the OS_Word block
-
- ADR     R1, oswordPixel            \ Draw the dot at the start of the line
- MOV     R0, #Tube_DrawPixel
- SWI     OS_Word
 
 .dpix1
 
@@ -13409,6 +13399,14 @@
 
  BL      DrawFuelLevel              \ Draw the fuel bar
 
+                                    \ --- Mod: Code added for AES ------------->
+
+\BL      FlushPixelBuffer           \ We have finished drawing, so transmit any
+                                    \ remaining pixels from the pixel buffer to
+                                    \ the I/O processor
+
+                                    \ --- End of added code ------------------->
+
  BL      SwitchScreenBank           \ Switch screen banks and clear the newly
                                     \ hidden screen bank to black
 
@@ -13837,49 +13835,211 @@
 
 \ ******************************************************************************
 \
-\       Name: oswordPixel
-\       Type: Variable
+\       Name: DrawPixelIntoBuffer
+\       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: OS_Word block for drawing pixels
+\    Summary: Buffer one pixel to be sent to the I/O Processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R6                              Screen address of mode 1 byte
+\
+\   R8                              Pixel byte with pixel set
+\
+\   R9                              Pixel mask
 \
 \ ******************************************************************************
 
                                     \ --- Mod: Code added for AES ------------->
 
-.oswordPixel
+.DrawPixelIntoBuffer
 
- EQUB 6                             \ The number of bytes to transmit
+ STMFD   R13!, {R12, R14}           \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
 
- EQUB 0                             \ The number of bytes to receive
+ ADR     R10, pixelBuffer           \ Set R10 to the address of the pixel buffer
 
- EQUW &0000                         \ Mode 1 screen address of pixel byte
+ LDR     R11, pixelBufferPointer    \ Set R11 to the pointer, which points to the
+                                    \ offset of the first free entry in the
+                                    \ buffer
 
- EQUB 0                             \ Pixel byte to poke into screen address
+ ADD     R12, R10, R11              \ Set R2 to the address of the first free
+                                    \ entry in the buffer, which is where we
+                                    \ will add the new pixel
 
- EQUB 0                             \ Pixel mask
+ STRB    R6, [R12]                  \ Store the screen address in the buffer
+ MOV     R7, R6, LSR #8             \ with the low byte first
+ STRB    R7, [R12, #1]
 
- ALIGN
+ STRB    R8, [R12, #2]              \ Store the pixel byte in the buffer
+
+ STRB    R9, [R12, #3]              \ Store the pixel mask in the buffer
+
+ ADD     R11, R11, #4               \ Increment the pixel buffer pointer to the
+                                    \ next entry in the buffer
+
+ CMP     R11, #63*4                 \ If R11 >= 252 then we just filled the last
+ BLCS    TransmitPixelBuffer        \ entry in the 63-pixel buffer, so call the
+                                    \ TransmitPixelBuffer routine to send the
+                                    \ buffer to the I/O Processor and set R11 to
+                                    \ zero, so we can reset the pointer in the
+                                    \ next instruction
+
+ STR     R11, pixelBufferPointer    \ Update the pixel buffer pointer to the
+                                    \ new value
+
+ LDMFD   R13!, {R12, PC}            \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
                                     \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
-\       Name: oswordNoParams
-\       Type: Variable
+\       Name: TransmitPixelBuffer
+\       Type: Subroutine
 \   Category: Drawing pixels
-\    Summary: OS_Word block with no parameters
+\    Summary: Transmit the contents of the pixel buffer to the I/O Processor
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R10                             The address of the pixel buffer
+\
+\   R11                             The pixel buffer pointer for the entry past
+\                                   the end of the buffer
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   R11                             The new value of the pixel buffer pointer
+\                                   (always zero)
 \
 \ ******************************************************************************
 
                                     \ --- Mod: Code added for AES ------------->
 
-.oswordNoParams
+.TransmitPixelBuffer
 
- EQUB 2                             \ The number of bytes to transmit
+ MOV     R0, #Tube_BeginPixels      \ Tell the I/O Processor to expect the pixel
+ SWI     OS_WriteC                  \ data by sending the size of the buffer in
+ ADD     R0, R11, #1                \ R11, plus 1 (as that's what the AddPixel
+ SWI     OS_WriteC                  \ routine in the I/O processor expects)
 
- EQUB 0                             \ The number of bytes to receive
+ MOV     R1, #0                     \ Set R1 = 0 to use as a byte counter as we
+                                    \ transmit each pixel
 
- ALIGN
+.tran1
+
+ LDR     R2, [R10], #4              \ Fetch the four bytes of pixel data into
+                                    \ R2, which will load the first byte into
+                                    \ the lowest 8 bits of R2 and the last byte
+                                    \ into the highest bits of R2, as the ARM is
+                                    \ big-endian like the 6502
+
+ MOV     R0, R2                     \ Send byte #0 of this pixel's data to the
+ SWI     OS_WriteC                  \ I/O Processor
+
+ MOV     R0, R2, LSR #8             \ Send byte #1 of this pixel's data to the
+ SWI     OS_WriteC                  \ I/O Processor
+
+ MOV     R0, R2, LSR #16            \ Send byte #2 of this pixel's data to the
+ SWI     OS_WriteC                  \ I/O Processor
+
+ MOV     R0, R2, LSR #24            \ Send byte #3 of this pixel's data to the
+ SWI     OS_WriteC                  \ I/O Processor
+
+ ADD     R1, R1, #4                 \ Increment the byte counter in R1
+
+ CMP     R1, R11                    \ Loop back until we have reached the entry
+ BCC     tran1                      \ at the end of the buffer
+
+                                    \ We have now sent all bytes to the I/O
+                                    \ Processor, which is now drawing the pixels
+                                    \ independently of the parasite (because we
+                                    \ have used OS_Byte to send the data)
+
+ MOV     R11, #0                    \ Set R11 to zero to return as the new value
+                                    \ of the pixel buffer pointer, as we have
+                                    \ now emptied the buffer
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+
+\ ******************************************************************************
+\
+\       Name: FlushPixelBuffer
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Transmit the contents of the pixel buffer to the I/O Processor
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.FlushPixelBuffer
+
+ STMFD   R13!, {R14}                \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R11, pixelBufferPointer    \ Set R11 to the pixel buffer pointer
+
+ CMP     R11, #0                    \ If the pointer is zero then the buffer is
+ LDMEQFD R13!, {PC}                 \ empty, so return from the subroutine
+
+ ADR     R10, pixelBuffer           \ Set R10 to the address of the pixel buffer
+
+ BL      TransmitPixelBuffer        \ Transmit the contents of the pixel buffer
+                                    \ to the I/O processor
+
+ MOV     R11, #0                    \ Reset the pixel buffer pointer
+ STR     R11, pixelBufferPointer 
+
+ LDMFD   R13!, {PC}                 \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: pixelBufferPointer
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: The offset within the pixel buffer of the next free entry
+\
+\ ******************************************************************************
+
+.pixelBufferPointer
+
+ EQUD 0
+
+\ ******************************************************************************
+\
+\       Name: pixelBuffer
+\       Type: Variable
+\   Category: Drawing pixels
+\    Summary: Buffer for up to 64 pixels to be sent to the I/O Processor
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.pixelBuffer
+
+ EQUD 0, 0, 0, 0, 0, 0, 0, 0        \ 256 bytes (64 32-bit words), one for each
+ EQUD 0, 0, 0, 0, 0, 0, 0, 0        \ pixel as follows:
+ EQUD 0, 0, 0, 0, 0, 0, 0, 0        \
+ EQUD 0, 0, 0, 0, 0, 0, 0, 0        \   * Byts #0-#1 = BBC Micro screen address
+ EQUD 0, 0, 0, 0, 0, 0, 0, 0        \
+ EQUD 0, 0, 0, 0, 0, 0, 0, 0        \   * Byte #2 = pixel byte to poke into
+ EQUD 0, 0, 0, 0, 0, 0, 0, 0        \               screen address
+ EQUD 0, 0, 0, 0, 0, 0, 0, 0        \
+                                    \   * Byte #3 = pixel mask
 
                                     \ --- End of added code ------------------->
 
