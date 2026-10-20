@@ -2511,7 +2511,7 @@ trin46:
  BMI     trin47
  CMP     R4, #0
  MOVPL   R0, R4, LSR #16
- MOVPL   R11, R4, LSR #16
+ ADDPL   R11, R11, R4, LSR #16
  MOVMI   R0, #0
  CMP     R5, #0x01400000
  RSBLO   R10, R0, R5, LSR #16

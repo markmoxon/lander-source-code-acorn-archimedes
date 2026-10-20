@@ -12054,24 +12054,12 @@
                                     \ The shift removes the fractional part from
                                     \ R4
 
-                                    \ --- Mod: Code removed for AES ----------->
-
-\ADDPL   R11, R11, R4, LSR #16      \ If the left end of the line is positive,
-\                                   \ set R11 = R11 + R4 >> 16
-\                                   \         = screen address of row + x1
-\                                   \
-\                                   \ So R11 contains the screen address of the
-\                                   \ left end of the line to draw
-
-                                    \ --- And replaced by: -------------------->
-
- MOVPL   R11, R4, LSR #16           \ Set R11 = R4 >> 16
-                                    \         = x1
+ ADDPL   R11, R11, R4, LSR #16      \ If the left end of the line is positive,
+                                    \ set R11 = R11 + R4 >> 16
+                                    \         = screen address of row + x1
                                     \
-                                    \ So R11 contains the x-coordinate of the
+                                    \ So R11 contains the screen address of the
                                     \ left end of the line to draw
-
-                                    \ --- End of replacement ------------------>
 
  MOVMI   R0, #0                     \ If the left end of the line is negative,
                                     \ i.e. off the left edge of the screen, then
