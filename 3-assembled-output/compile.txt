@@ -11485,7 +11485,7 @@ ZP workspace (I/O processor) from &80 to &8A inclusive
      2547   85 83      STA &83
      2549   BD 02 23   LDA &2302,X
      254C   85 84      STA &84
-     254E   BD 02 23   LDA &2302,X
+     254E   BD 03 23   LDA &2303,X
      2551   85 85      STA &85
      2553   A0 00      LDY #&00
      2555   B1 82      LDA (&82),Y

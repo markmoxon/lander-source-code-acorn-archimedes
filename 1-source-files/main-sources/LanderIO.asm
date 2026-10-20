@@ -683,7 +683,7 @@
  LDA TABLE+2,X          \ Set P to byte #2, which contains the pixel byte
  STA P
 
- LDA TABLE+2,X          \ Set Q to byte #3, which contains the pixel mask
+ LDA TABLE+3,X          \ Set Q to byte #3, which contains the pixel mask
  STA Q
 
  LDY #0                 \ Draw the pixel on-screen by clearing the relevant bits
@@ -692,7 +692,7 @@
  ORA P
  STA (SC),Y
 
- INX                    \ Set A = A + 4 to move on to the next pixel
+ INX                    \ Set X = X + 4 to move on to the next pixel
  INX
  INX
  INX
