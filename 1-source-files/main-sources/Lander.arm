@@ -8329,7 +8329,11 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
+ AND     R8, R7, #&FF               \ Draw bullets in colour 1 (red), particle
+ CMP     R8, #&FF                   \ shadows in colour 3 (blue) and all other
+ MOVEQ   R8, #%00001111             \ particles using their VIDC colour as the
+ CMP     R8, #0                     \ pixel byte (which will be colourful)
+ MOVEQ   R8, #%11111111
 
  BL      DrawPixel                  \ Draw the particle
 
@@ -8419,7 +8423,11 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
+ AND     R8, R7, #&FF               \ Draw bullets in colour 1 (red), particle
+ CMP     R8, #&FF                   \ shadows in colour 3 (blue) and all other
+ MOVEQ   R8, #%00001111             \ particles using their VIDC colour as the
+ CMP     R8, #0                     \ pixel byte (which will be colourful)
+ MOVEQ   R8, #%11111111
 
  BL      Draw2PixelDash             \ Draw the particle
 
@@ -8511,7 +8519,11 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
+ AND     R8, R7, #&FF               \ Draw bullets in colour 1 (red), particle
+ CMP     R8, #&FF                   \ shadows in colour 3 (blue) and all other
+ MOVEQ   R8, #%00001111             \ particles using their VIDC colour as the
+ CMP     R8, #0                     \ pixel byte (which will be colourful)
+ MOVEQ   R8, #%11111111
 
  BL      Draw2PixelDash             \ Draw the top row of the particle
 
@@ -8608,7 +8620,11 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
+ AND     R8, R7, #&FF               \ Draw bullets in colour 1 (red), particle
+ CMP     R8, #&FF                   \ shadows in colour 3 (blue) and all other
+ MOVEQ   R8, #%00001111             \ particles using their VIDC colour as the
+ CMP     R8, #0                     \ pixel byte (which will be colourful)
+ MOVEQ   R8, #%11111111
 
  BL      Draw3PixelDash             \ Draw the top row of the particle
 
@@ -8702,7 +8718,11 @@
 
                                     \ --- And replaced by: -------------------->
 
- MOV     R8, #%11111111             \ Draw particles in colour 3 (blue)
+ AND     R8, R7, #&FF               \ Draw bullets in colour 1 (red), particle
+ CMP     R8, #&FF                   \ shadows in colour 3 (blue) and all other
+ MOVEQ   R8, #%00001111             \ particles using their VIDC colour as the
+ CMP     R8, #0                     \ pixel byte (which will be colourful)
+ MOVEQ   R8, #%11111111
 
  BL      Draw3PixelDash             \ Draw the particle
 

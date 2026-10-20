@@ -1266,15 +1266,39 @@ DrawFuelLevel:
  SUBS    R1, R1, R2
  MOVMI   R1, #0
  STR     R1, [R11, #fuelLevel]
+ MOV     R6, #0x3500
  LDR     R8, fuelBarColour
- MOV     R11, #0
- MOV     R12, #0
- MOV     R10, R1, LSR #4
- BL      DrawHorizontalLine
- ADD     R12, R12, #1
- BL      DrawHorizontalLine
- ADD     R12, R12, #1
- BL      DrawHorizontalLine
+ MOV     R9, #0x0
+ MOVS    R12, R1, LSR #6
+ BEQ     fuel2
+fuel1:
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #6
+ SUBS    R12, R12, #1
+ BNE     fuel1
+fuel2:
+ LDR     R1, [R11, #fuelLevel]
+ MOV     R12, R1, LSR #4
+ ANDS    R12, R12, #3
+ LDMEQFD R13!, {R10-R12, PC}
+ CMP     R12, #1
+ MOVEQ   R8, #0x8
+ MOVEQ   R9, #0x77
+ CMP     R12, #2
+ MOVEQ   R8, #0xc
+ MOVEQ   R9, #0x33
+ CMP     R12, #3
+ MOVEQ   R8, #0xe
+ MOVEQ   R9, #0x11
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
  LDMFD   R13!, {R10-R12, PC}
 graphicsBufferEndAddr:
 .long    graphicsBuffersEnd
@@ -1873,7 +1897,11 @@ Draw1x1ParticleFromBuffer:
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0xff
+ AND     R8, R7, #0xFF
+ CMP     R8, #0xFF
+ MOVEQ   R8, #0xf
+ CMP     R8, #0
+ MOVEQ   R8, #0xff
  BL      DrawPixel
  B       DrawNextFromGraphicsBuffer
 Draw2x1ParticleFromBuffer:
@@ -1881,7 +1909,11 @@ Draw2x1ParticleFromBuffer:
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0xff
+ AND     R8, R7, #0xFF
+ CMP     R8, #0xFF
+ MOVEQ   R8, #0xf
+ CMP     R8, #0
+ MOVEQ   R8, #0xff
  BL      Draw2PixelDash
  B       DrawNextFromGraphicsBuffer
 Draw2x2ParticleFromBuffer:
@@ -1889,7 +1921,11 @@ Draw2x2ParticleFromBuffer:
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0xff
+ AND     R8, R7, #0xFF
+ CMP     R8, #0xFF
+ MOVEQ   R8, #0xf
+ CMP     R8, #0
+ MOVEQ   R8, #0xff
  BL      Draw2PixelDash
  ADD     R1, R1, #1
  BL      Draw2PixelDash
@@ -1899,7 +1935,11 @@ Draw3x2ParticleFromBuffer:
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0xff
+ AND     R8, R7, #0xFF
+ CMP     R8, #0xFF
+ MOVEQ   R8, #0xf
+ CMP     R8, #0
+ MOVEQ   R8, #0xff
  BL      Draw3PixelDash
  ADD     R1, R1, #1
  BL      Draw3PixelDash
@@ -1909,7 +1949,11 @@ Draw3x1ParticleFromBuffer:
  MOV     R0, R1, LSR #20
  MOV     R7, R1, LSR #12
  AND     R1, R1, #0xFF
- MOV     R8, #0xff
+ AND     R8, R7, #0xFF
+ CMP     R8, #0xFF
+ MOVEQ   R8, #0xf
+ CMP     R8, #0
+ MOVEQ   R8, #0xff
  BL      Draw3PixelDash
  B       DrawNextFromGraphicsBuffer
 DrawTriangleFromBuffer:
@@ -1958,6 +2002,7 @@ DrawTriangleShadowToBuffer:
  LDR     R9, [R12, R14, LSR #22]
  MOV     R7, #18
  STR     R7, [R9], #4
+ MOV     R8, #0xff
  STMIA   R9!, {R0-R5, R8}
  STR     R9, [R12, R14, LSR #22]
  LDMFD   R13!, {R9, PC}
@@ -2703,6 +2748,10 @@ Entry:
  MOV     R2, #0
  SWI     OS_Byte
  BL      InitialiseParticleData
+ MOV     R0, #17
+ SWI     OS_WriteC
+ MOV     R0, #2
+ SWI     OS_WriteC
  SWI     OS_WriteS
 .byte    "Lander Demo/Practice "
 .byte    "(C) D.J.Braben 1987"
@@ -2713,6 +2762,10 @@ Entry:
  SWI     OS_WriteC
  MOV     R0, #0
  SWI     OS_WriteC
+ SWI     OS_WriteC
+ MOV     R0, #17
+ SWI     OS_WriteC
+ MOV     R0, #2
  SWI     OS_WriteC
  SWI     OS_WriteS
 .byte    "Lander Demo/Practice "
