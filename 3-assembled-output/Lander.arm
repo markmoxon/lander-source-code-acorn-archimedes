@@ -2626,93 +2626,6 @@ DrawHorizontalLine:
  ADD     R2, R2, R10
  BL      DrawPixels
  LDMFD   R13!, {R0-R12, PC}
-DrawPixel:
- CMP     R0, #320
- CMPLO   R1, #239
- MOVHS   PC, R14
- STMFD   R13!, {R0-R12, R14}
- MOV     R3, R1, LSR #3
- AND     R4, R1, #0x7
- MOV     R2, R0
- MOV     R9, #0xf77
- BL      DrawPixels
- LDMFD   R13!, {R0-R12, PC}
-Draw2PixelDash:
- CMP     R0, #320
- CMPLO   R1, #238
- MOVHS   PC, R14
- STMFD   R13!, {R0-R12, R14}
- MOV     R3, R1, LSR #3
- AND     R4, R1, #0x7
- MOV     R2, R0
- AND     R5, R2, #0x3
- CMP     R5, #0x3
- BEQ     dash1
- MOV     R9, #0xf33
- BL      DrawPixels
- LDMFD   R13!, {R0-R12, PC}
-dash1:
- MOV     R9, #0xf77
- BL      DrawPixels
- ADD     R2, R2, #1
- BL      DrawPixels
- LDMFD   R13!, {R0-R12, PC}
-Draw3PixelDash:
- CMP     R0, #320
- CMPLO   R1, #237
- MOVHS   PC, R14
- STMFD   R13!, {R0-R12, R14}
- MOV     R3, R1, LSR #3
- AND     R4, R1, #0x7
- MOV     R2, R0
- AND     R5, R2, #0x3
- CMP     R5, #3
- BEQ     dasl1
- CMP     R5, #2
- BEQ     dasl2
- MOV     R9, #0xf11
- BL      DrawPixels
- LDMFD   R13!, {R0-R12, PC}
-dasl1:
- MOV     R9, #0xf77
- BL      DrawPixels
- ADD     R2, R2, #1
- MOV     R9, #0xf33
- BL      DrawPixels
- LDMFD   R13!, {R0-R12, PC}
-dasl2:
- MOV     R9, #0xf33
- BL      DrawPixels
- ADD     R2, R2, #2
- MOV     R9, #0xf77
- BL      DrawPixels
- LDMFD   R13!, {R0-R12, PC}
-DrawPixels:
- STMFD   R13!, {R2-R10, R14}
- MOV     R5, R2, LSR #2
- ADD     R5, R4, R5, LSL #3
- ADD     R3, R3, R3, LSL #2
- ADD     R6, R5, R3, LSL #7
- ADD     R6, R6, #0x3500
- CMP     R6, #0x3780
- LDMCCFD R13!, {R2-R10, PC}
- CMP     R6, #0x8000
- LDMCSFD R13!, {R2-R10, PC}
- BL      UpdateScreenAddrs
- AND     R7, R2, #0x3
- MOV     R9, R9, LSR R7
- EOR     R10, R9, #0xff
- AND     R8, R8, R10
- BL      DrawPixelIntoPixelBuffer
- LDMFD   R13!, {R2-R10, PC}
-UpdateScreenAddrs:
- LDR     R7, minScreenAddr
- CMP     R6, R7
- STRLO   R6, minScreenAddr
- LDR     R7, maxScreenAddr
- CMP     R6, R7
- STRHI   R6, maxScreenAddr
- MOV     PC, R14
 DrawLineSegment:
  STRB    R8, [R11, #16]
  STRB    R8, [R11, #15]
@@ -2972,6 +2885,93 @@ PrintHexDigit:
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
  MOV     PC, R14
+DrawPixel:
+ CMP     R0, #320
+ CMPLO   R1, #239
+ MOVHS   PC, R14
+ STMFD   R13!, {R0-R12, R14}
+ MOV     R3, R1, LSR #3
+ AND     R4, R1, #0x7
+ MOV     R2, R0
+ MOV     R9, #0xf77
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+Draw2PixelDash:
+ CMP     R0, #320
+ CMPLO   R1, #238
+ MOVHS   PC, R14
+ STMFD   R13!, {R0-R12, R14}
+ MOV     R3, R1, LSR #3
+ AND     R4, R1, #0x7
+ MOV     R2, R0
+ AND     R5, R2, #0x3
+ CMP     R5, #0x3
+ BEQ     dash1
+ MOV     R9, #0xf33
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+dash1:
+ MOV     R9, #0xf77
+ BL      DrawPixels
+ ADD     R2, R2, #1
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+Draw3PixelDash:
+ CMP     R0, #320
+ CMPLO   R1, #237
+ MOVHS   PC, R14
+ STMFD   R13!, {R0-R12, R14}
+ MOV     R3, R1, LSR #3
+ AND     R4, R1, #0x7
+ MOV     R2, R0
+ AND     R5, R2, #0x3
+ CMP     R5, #3
+ BEQ     dasl1
+ CMP     R5, #2
+ BEQ     dasl2
+ MOV     R9, #0xf11
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+dasl1:
+ MOV     R9, #0xf77
+ BL      DrawPixels
+ ADD     R2, R2, #1
+ MOV     R9, #0xf33
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+dasl2:
+ MOV     R9, #0xf33
+ BL      DrawPixels
+ ADD     R2, R2, #2
+ MOV     R9, #0xf77
+ BL      DrawPixels
+ LDMFD   R13!, {R0-R12, PC}
+DrawPixels:
+ STMFD   R13!, {R2-R10, R14}
+ MOV     R5, R2, LSR #2
+ ADD     R5, R4, R5, LSL #3
+ ADD     R3, R3, R3, LSL #2
+ ADD     R6, R5, R3, LSL #7
+ ADD     R6, R6, #0x3500
+ CMP     R6, #0x3780
+ LDMCCFD R13!, {R2-R10, PC}
+ CMP     R6, #0x8000
+ LDMCSFD R13!, {R2-R10, PC}
+ BL      UpdateScreenAddrs
+ AND     R7, R2, #0x3
+ MOV     R9, R9, LSR R7
+ EOR     R10, R9, #0xff
+ AND     R8, R8, R10
+ BL      DrawPixelIntoPixelBuffer
+ LDMFD   R13!, {R2-R10, PC}
+UpdateScreenAddrs:
+ LDR     R7, minScreenAddr
+ CMP     R6, R7
+ STRLO   R6, minScreenAddr
+ LDR     R7, maxScreenAddr
+ CMP     R6, R7
+ STRHI   R6, maxScreenAddr
+ MOV     PC, R14
 keyBuffer:
 .byte 2
 .byte 10
@@ -3035,7 +3035,6 @@ polarDistance:
 tenThousand:
 .long    10000
 ConvertBinaryToDecimal:
- STMFD   R13!, {R0, R3-R5, R14}
  LDR     R2, tenThousand
  CMP     R0, R2
  MOVCS   R0, #9999
@@ -3077,7 +3076,7 @@ bdec3:
  ADD     R3, R0, #0x30
  STRB    R3, [R1, R2]
  ADD     R2, R2, #1
- LDMFD   R13!, {R0, R3-R5, PC}
+ MOV     PC, R14
 DrawPixelIntoPixelBuffer:
  STMFD   R13!, {R14}
  ADR     R10, pixelBuffer

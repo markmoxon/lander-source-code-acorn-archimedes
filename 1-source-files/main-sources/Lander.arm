@@ -2835,23 +2835,11 @@
  MOV     R0, #16                    \ which moves the text cursor to column 1 on
  SWI     OS_WriteC                  \ row 16, halfway down the screen
 
-                                    \ --- Mod: Code removed for AES ----------->
-
-\SWI     OS_WriteS                  \ Print the Game Over message
-\EQUS    "GAME OVER - press a "
-\EQUS    "key to start again"
-\EQUB    0
-\ALIGN
-
-                                    \ --- And replaced by: -------------------->
-
  SWI     OS_WriteS                  \ Print the Game Over message
  EQUS    "GAME OVER - press "
  EQUS    "Space to start again"
  EQUB    0
  ALIGN
-
-                                    \ --- End of replacement ------------------>
 
                                     \ --- Mod: Code removed for AES ----------->
 
@@ -6942,8 +6930,6 @@
 \ ******************************************************************************
 
 .GetMouseInPolarCoordinates
-
-                                    \ --- Mod: Code removed for AES ----------->
 
                                     \ In the following, let's call the mouse
                                     \ x- and y-coordinates xMouse and yMouse
@@ -12463,339 +12449,6 @@
 
 \ ******************************************************************************
 \
-\       Name: DrawPixel
-\       Type: Subroutine
-\   Category: Drawing pixels
-\    Summary: Draw a pixel at mode 13 coordinates (for particles and landscape)
-\
-\ ------------------------------------------------------------------------------
-\
-\ Arguments:
-\
-\   R0                              The pixel x-coordinate (0-319)
-\
-\   R1                              The pixel y-coordinate (0-238)
-\
-\   R8                              Colour as a mode 1 pixel byte
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.DrawPixel
-
- CMP     R0, #320                   \ Check to see if the pixel is off-screen,
- CMPLO   R1, #239                   \ in which case return from the subroutine
- MOVHS   PC, R14
-
- STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
-                                    \ the stack so they can be preserved
-
- MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
- AND     R4, R1, #%111              \ following:
- MOV     R2, R0                     \
-                                    \   * R2 is the pixel x-coordinate of the
-                                    \     start of the line
-                                    \
-                                    \   * R3 is the character row (8 pixel rows
-                                    \     per character)
-                                    \
-                                    \   * R4 is the pixel row within the
-                                    \     character row
-
- MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
-
- BL      DrawPixels                 \ Draw the pixel
-
- LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
-\       Name: Draw2PixelDash
-\       Type: Subroutine
-\   Category: Drawing pixels
-\    Summary: Draw a two-pixel dash at mode 13 coordinates (for particles)
-\
-\ ------------------------------------------------------------------------------
-\
-\ Arguments:
-\
-\   R0                              The pixel x-coordinate (0-319)
-\
-\   R1                              The pixel y-coordinate (0-237)
-\
-\   R8                              Colour as a mode 1 pixel byte
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.Draw2PixelDash
-
- CMP     R0, #320                   \ Check to see if the pixel is off-screen,
- CMPLO   R1, #238                   \ in which case return from the subroutine
- MOVHS   PC, R14
-
- STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
-                                    \ the stack so they can be preserved
-
- MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
- AND     R4, R1, #%111              \ following:
- MOV     R2, R0                     \
-                                    \   * R2 is the pixel x-coordinate of the
-                                    \     start of the line
-                                    \
-                                    \   * R3 is the character row (8 pixel rows
-                                    \     per character)
-                                    \
-                                    \   * R4 is the pixel row within the
-                                    \     character row
-
- AND     R5, R2, #%00000011         \ If the first pixel in the dash is at the 
- CMP     R5, #%00000011             \ rightmost end of the pixel row, jump to
- BEQ     dash1                      \ dash1 to draw the dash as two single
-                                    \ pixels, one in each pixel dash
-
- MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
-
- BL      DrawPixels                 \ Draw the two-pixel dash
-
- LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
-
-.dash1
-
- MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
-
- BL      DrawPixels                 \ Draw the two-pixel dash
-
- ADD     R2, R2, #1                 \ Move right by one pixel into the next
-                                    \ pixel byte
-
- BL      DrawPixels                 \ Draw the two-pixel dash
-
- LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
-\       Name: Draw3PixelDash
-\       Type: Subroutine
-\   Category: Drawing pixels
-\    Summary: Draw a three-pixel dash at mode 13 coordinates (for particles)
-\
-\ ------------------------------------------------------------------------------
-\
-\ Arguments:
-\
-\   R0                              The pixel x-coordinate (0-319)
-\
-\   R1                              The pixel y-coordinate (0-236)
-\
-\   R8                              Colour as a mode 1 pixel byte
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.Draw3PixelDash
-
- CMP     R0, #320                   \ Check to see if the pixel is off-screen,
- CMPLO   R1, #237                   \ in which case return from the subroutine
- MOVHS   PC, R14
-
- STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
-                                    \ the stack so they can be preserved
-
- MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
- AND     R4, R1, #%111              \ following:
- MOV     R2, R0                     \
-                                    \   * R2 is the pixel x-coordinate of the
-                                    \     start of the line
-                                    \
-                                    \   * R3 is the character row (8 pixel rows
-                                    \     per character)
-                                    \
-                                    \   * R4 is the pixel row within the
-                                    \     character row
-
- AND     R5, R2, #%00000011         \ If the first pixel in the dash is at the 
- CMP     R5, #3                     \ rightmost end of the pixel row, jump to
- BEQ     dasl1                      \ dasl1 to draw the dash as a single and a
-                                    \ two-pixel dash, one in each pixel byte
-
- CMP     R5, #2                     \ If the first two pixels in the dash are at
- BEQ     dasl2                      \ the rightmost end of the pixel row, jump
-                                    \ to dasl2 to draw the dash as a two-pixel
-                                    \ dash and a pixel, one in each pixel byte
-
- MOV     R9, #%111100010001         \ Set R9 to a three-pixel byte mask
-
- BL      DrawPixels                 \ Draw the three-pixel dash
-
- LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
-
-.dasl1
-
- MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
-
- BL      DrawPixels                 \ Draw the single pixel
-
- ADD     R2, R2, #1                 \ Move right by one pixel into the next
-                                    \ pixel byte
-
- MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
-
- BL      DrawPixels                 \ Draw the two-pixel dash
-
- LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
-
-.dasl2
-
- MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
-
- BL      DrawPixels                 \ Draw the two-pixel dash
-
- ADD     R2, R2, #2                 \ Move right by two pixels into the next
-                                    \ pixel byte
-
- MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
-
- BL      DrawPixels                 \ Draw the single pixel
-
- LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
-\       Name: DrawPixels
-\       Type: Subroutine
-\   Category: Drawing pixels
-\    Summary: Draw a single pixel, two-pixel dash or three-pixel dash
-\
-\ ------------------------------------------------------------------------------
-\
-\ Arguments:
-\
-\   R2                              Pixel x-coordinate of the pixel
-\
-\   R3                              Character row (8 pixel rows per character)
-\
-\   R4                              Pixel row within the character row (0-7)
-\
-\   R9                              The pixel byte for the 1, 2 or 3-pixel dash
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.DrawPixels
-
- STMFD   R13!, {R2-R10, R14}        \ Store the registers that we want to use on
-                                    \ the stack so they can be preserved
-
-                                    \ Calculate the address of the start of the
-                                    \ mode 1 pixel line containing the pixel:
-                                    \
-                                    \   R3 * 640 + R4
-                                    \
-                                    \ Add (R2 / 4) * 8 to get the address of the
-                                    \ pixel byte containing the pixel
-                                    \
-                                    \   (R2 / 4) * 8 + R3 * 640 + R4
-                                    \
-                                    \ Add &3000 to get a mode 1 screen address
-                                    \
-                                    \ Calculate the pixel number (0-3) within
-                                    \ the pixel byte:
-                                    \
-                                    \   R2 AND %00000011
-                                    \
-                                    \ and use this to create the pixel byte to
-                                    \ poke into screen memory
-
- MOV     R5, R2, LSR #2             \ Set R5 = (R2 / 4) * 8 + R4
- ADD     R5, R4, R5, LSL #3
-
- ADD     R3, R3, R3, LSL #2         \ Set R6 = R5 + ((R3 + R3 << 2) << 7)
- ADD     R6, R5, R3, LSL #7         \        = R5 + ((R3 + 4 * R3) * 128)
-                                    \        = R5 + R3 * 640
-
- ADD     R6, R6, #&3500             \ Add &3500 to get a mode 1 screen memory
-                                    \ address, skipping the top two character
-                                    \ rows
-
- CMP     R6, #&3780                 \ If the address in R6 is not within screen
- LDMCCFD R13!, {R2-R10, PC}         \ memory below the fuel bar, then jump to
- CMP     R6, #&8000                 \ dpix1 to return from the subroutine
- LDMCSFD R13!, {R2-R10, PC}         \ without drawing anything
-
- BL      UpdateScreenAddrs          \ Call UpdateScreenAddrs to update the
-                                    \ screen address range for clearing the
-                                    \ screen, so we include this pixel byte in
-                                    \ the screen clear
-
- AND     R7, R2, #%00000011         \ Set R7 to the position of the pixel/dash
-                                    \ within the pixel byte (0 on the left, 3
-                                    \ on the right)
-
- MOV     R9, R9, LSR R7             \ Set R9 to the pixel mask for a pixel/dash
-                                    \ in position R7
-
- EOR     R10, R9, #%11111111        \ Set R8 to the pixel byte for a pixel/dash
- AND     R8, R8, R10                \ in position R7 with colour R8
-
- BL      DrawPixelIntoPixelBuffer   \ Draw the following pixel into the pixel
-                                    \ buffer, transmitting to the I/O processor
-                                    \ when full:
-                                    \
-                                    \   * R6 = screen address of mode 1 byte
-                                    \
-                                    \   * R8 = pixel byte with pixel set
-                                    \
-                                    \   * R9 = pixel mask
-
- LDMFD   R13!, {R2-R10, PC}         \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
-\       Name: UpdateScreenAddrs
-\       Type: Subroutine
-\   Category: Drawing pixels
-\    Summary: Update the screen address range for clearing the screen
-\
-\ ******************************************************************************
-
-                                    \ --- Mod: Code added for AES ------------->
-
-.UpdateScreenAddrs
-
- LDR     R7, minScreenAddr          \ Update the minimum screen address
- CMP     R6, R7
- STRLO   R6, minScreenAddr
-
- LDR     R7, maxScreenAddr          \ Update the maximum screen address
- CMP     R6, R7
- STRHI   R6, maxScreenAddr
-
- MOV     PC, R14                    \ Return from the subroutine
-
-                                    \ --- End of added code ------------------->
-
-\ ******************************************************************************
-\
 \       Name: DrawLineSegment
 \       Type: Subroutine
 \   Category: Drawing lines
@@ -13737,6 +13390,339 @@
  SWI     OS_WriteC                  \ Print the character in R0
 
  MOV     PC, R14                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: DrawPixel
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a pixel at mode 13 coordinates (for particles and landscape)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The pixel x-coordinate (0-319)
+\
+\   R1                              The pixel y-coordinate (0-238)
+\
+\   R8                              Colour as a mode 1 pixel byte
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.DrawPixel
+
+ CMP     R0, #320                   \ Check to see if the pixel is off-screen,
+ CMPLO   R1, #239                   \ in which case return from the subroutine
+ MOVHS   PC, R14
+
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
+ AND     R4, R1, #%111              \ following:
+ MOV     R2, R0                     \
+                                    \   * R2 is the pixel x-coordinate of the
+                                    \     start of the line
+                                    \
+                                    \   * R3 is the character row (8 pixel rows
+                                    \     per character)
+                                    \
+                                    \   * R4 is the pixel row within the
+                                    \     character row
+
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
+
+ BL      DrawPixels                 \ Draw the pixel
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: Draw2PixelDash
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a two-pixel dash at mode 13 coordinates (for particles)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The pixel x-coordinate (0-319)
+\
+\   R1                              The pixel y-coordinate (0-237)
+\
+\   R8                              Colour as a mode 1 pixel byte
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.Draw2PixelDash
+
+ CMP     R0, #320                   \ Check to see if the pixel is off-screen,
+ CMPLO   R1, #238                   \ in which case return from the subroutine
+ MOVHS   PC, R14
+
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
+ AND     R4, R1, #%111              \ following:
+ MOV     R2, R0                     \
+                                    \   * R2 is the pixel x-coordinate of the
+                                    \     start of the line
+                                    \
+                                    \   * R3 is the character row (8 pixel rows
+                                    \     per character)
+                                    \
+                                    \   * R4 is the pixel row within the
+                                    \     character row
+
+ AND     R5, R2, #%00000011         \ If the first pixel in the dash is at the 
+ CMP     R5, #%00000011             \ rightmost end of the pixel row, jump to
+ BEQ     dash1                      \ dash1 to draw the dash as two single
+                                    \ pixels, one in each pixel dash
+
+ MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+.dash1
+
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ ADD     R2, R2, #1                 \ Move right by one pixel into the next
+                                    \ pixel byte
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: Draw3PixelDash
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a three-pixel dash at mode 13 coordinates (for particles)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R0                              The pixel x-coordinate (0-319)
+\
+\   R1                              The pixel y-coordinate (0-236)
+\
+\   R8                              Colour as a mode 1 pixel byte
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.Draw3PixelDash
+
+ CMP     R0, #320                   \ Check to see if the pixel is off-screen,
+ CMPLO   R1, #237                   \ in which case return from the subroutine
+ MOVHS   PC, R14
+
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ MOV     R3, R1, LSR #3             \ Convert (R0, R1) coordinates into the
+ AND     R4, R1, #%111              \ following:
+ MOV     R2, R0                     \
+                                    \   * R2 is the pixel x-coordinate of the
+                                    \     start of the line
+                                    \
+                                    \   * R3 is the character row (8 pixel rows
+                                    \     per character)
+                                    \
+                                    \   * R4 is the pixel row within the
+                                    \     character row
+
+ AND     R5, R2, #%00000011         \ If the first pixel in the dash is at the 
+ CMP     R5, #3                     \ rightmost end of the pixel row, jump to
+ BEQ     dasl1                      \ dasl1 to draw the dash as a single and a
+                                    \ two-pixel dash, one in each pixel byte
+
+ CMP     R5, #2                     \ If the first two pixels in the dash are at
+ BEQ     dasl2                      \ the rightmost end of the pixel row, jump
+                                    \ to dasl2 to draw the dash as a two-pixel
+                                    \ dash and a pixel, one in each pixel byte
+
+ MOV     R9, #%111100010001         \ Set R9 to a three-pixel byte mask
+
+ BL      DrawPixels                 \ Draw the three-pixel dash
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+.dasl1
+
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
+
+ BL      DrawPixels                 \ Draw the single pixel
+
+ ADD     R2, R2, #1                 \ Move right by one pixel into the next
+                                    \ pixel byte
+
+ MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+.dasl2
+
+ MOV     R9, #%111100110011         \ Set R9 to a two-pixel byte mask
+
+ BL      DrawPixels                 \ Draw the two-pixel dash
+
+ ADD     R2, R2, #2                 \ Move right by two pixels into the next
+                                    \ pixel byte
+
+ MOV     R9, #%111101110111         \ Set R9 to a single pixel byte mask
+
+ BL      DrawPixels                 \ Draw the single pixel
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: DrawPixels
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Draw a single pixel, two-pixel dash or three-pixel dash
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   R2                              Pixel x-coordinate of the pixel
+\
+\   R3                              Character row (8 pixel rows per character)
+\
+\   R4                              Pixel row within the character row (0-7)
+\
+\   R9                              The pixel byte for the 1, 2 or 3-pixel dash
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.DrawPixels
+
+ STMFD   R13!, {R2-R10, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+                                    \ Calculate the address of the start of the
+                                    \ mode 1 pixel line containing the pixel:
+                                    \
+                                    \   R3 * 640 + R4
+                                    \
+                                    \ Add (R2 / 4) * 8 to get the address of the
+                                    \ pixel byte containing the pixel
+                                    \
+                                    \   (R2 / 4) * 8 + R3 * 640 + R4
+                                    \
+                                    \ Add &3000 to get a mode 1 screen address
+                                    \
+                                    \ Calculate the pixel number (0-3) within
+                                    \ the pixel byte:
+                                    \
+                                    \   R2 AND %00000011
+                                    \
+                                    \ and use this to create the pixel byte to
+                                    \ poke into screen memory
+
+ MOV     R5, R2, LSR #2             \ Set R5 = (R2 / 4) * 8 + R4
+ ADD     R5, R4, R5, LSL #3
+
+ ADD     R3, R3, R3, LSL #2         \ Set R6 = R5 + ((R3 + R3 << 2) << 7)
+ ADD     R6, R5, R3, LSL #7         \        = R5 + ((R3 + 4 * R3) * 128)
+                                    \        = R5 + R3 * 640
+
+ ADD     R6, R6, #&3500             \ Add &3500 to get a mode 1 screen memory
+                                    \ address, skipping the top two character
+                                    \ rows
+
+ CMP     R6, #&3780                 \ If the address in R6 is not within screen
+ LDMCCFD R13!, {R2-R10, PC}         \ memory below the fuel bar, then jump to
+ CMP     R6, #&8000                 \ dpix1 to return from the subroutine
+ LDMCSFD R13!, {R2-R10, PC}         \ without drawing anything
+
+ BL      UpdateScreenAddrs          \ Call UpdateScreenAddrs to update the
+                                    \ screen address range for clearing the
+                                    \ screen, so we include this pixel byte in
+                                    \ the screen clear
+
+ AND     R7, R2, #%00000011         \ Set R7 to the position of the pixel/dash
+                                    \ within the pixel byte (0 on the left, 3
+                                    \ on the right)
+
+ MOV     R9, R9, LSR R7             \ Set R9 to the pixel mask for a pixel/dash
+                                    \ in position R7
+
+ EOR     R10, R9, #%11111111        \ Set R8 to the pixel byte for a pixel/dash
+ AND     R8, R8, R10                \ in position R7 with colour R8
+
+ BL      DrawPixelIntoPixelBuffer   \ Draw the following pixel into the pixel
+                                    \ buffer, transmitting to the I/O processor
+                                    \ when full:
+                                    \
+                                    \   * R6 = screen address of mode 1 byte
+                                    \
+                                    \   * R8 = pixel byte with pixel set
+                                    \
+                                    \   * R9 = pixel mask
+
+ LDMFD   R13!, {R2-R10, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: UpdateScreenAddrs
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Update the screen address range for clearing the screen
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.UpdateScreenAddrs
+
+ LDR     R7, minScreenAddr          \ Update the minimum screen address
+ CMP     R6, R7
+ STRLO   R6, minScreenAddr
+
+ LDR     R7, maxScreenAddr          \ Update the maximum screen address
+ CMP     R6, R7
+ STRHI   R6, maxScreenAddr
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
