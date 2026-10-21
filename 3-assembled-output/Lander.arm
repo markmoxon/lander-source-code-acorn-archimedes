@@ -1288,13 +1288,10 @@ fuel2:
  BEQ     fuel3
  CMP     R12, #1
  MOVEQ   R8, #0x8
- MOVEQ   R9, #0x0
  CMP     R12, #2
  MOVEQ   R8, #0xc
- MOVEQ   R9, #0x0
  CMP     R12, #3
  MOVEQ   R8, #0xe
- MOVEQ   R9, #0x0
  BL      DrawPixelIntoPixelBuffer
  ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
@@ -1302,7 +1299,6 @@ fuel2:
  BL      DrawPixelIntoPixelBuffer
 fuel3:
  MOV     R8, #0x0
- MOV     R9, #0x0
  ADD     R6, R6, #6
  BL      DrawPixelIntoPixelBuffer
  ADD     R6, R6, #1

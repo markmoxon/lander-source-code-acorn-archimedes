@@ -6233,33 +6233,30 @@
                                     \ when the fuel level is dropping
 
  CMP     R12, #1                    \ If we need to draw one more pixel, set
- MOVEQ   R8, #%00001000             \ the pixel byte in R8 and mask in R9
- MOVEQ   R9, #%00000000
+ MOVEQ   R8, #%00001000             \ the pixel byte in R8
 
  CMP     R12, #2                    \ If we need to draw two more pixels, set
- MOVEQ   R8, #%00001100             \ the pixel byte in R8 and mask in R9
- MOVEQ   R9, #%00000000
+ MOVEQ   R8, #%00001100             \ the pixel byte in R8
 
  CMP     R12, #3                    \ If we need to draw three more pixels, set
- MOVEQ   R8, #%00001110             \ the pixel byte in R8 and mask in R9
- MOVEQ   R9, #%00000000
+ MOVEQ   R8, #%00001110             \ the pixel byte in R8
 
  BL      DrawPixelIntoPixelBuffer   \ Draw three dashes of the right size into
- ADD     R6, R6, #1                 \ the pixel buffer
- BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1                 \ the pixel buffer using the pixel byte in
+ BL      DrawPixelIntoPixelBuffer   \ R8 and the mask in R9
  ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
 
 .fuel3
 
  MOV     R8, #%00000000             \ Draw a blank pixel byte after the end of
- MOV     R9, #%00000000             \ the fuel bar to save us having to clear
+                                    \ the fuel bar to save us having to clear
                                     \ this part of the screen, by zeroing the
-                                    \ pixel byte in R8 and mask in R9
+                                    \ pixel byte in R8
 
  ADD     R6, R6, #6                 \ Draw three blank lines into the pixel
- BL      DrawPixelIntoPixelBuffer   \ buffer
- ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer   \ buffer using the pixel byte in R8 and the
+ ADD     R6, R6, #1                 \ mask in R9
  BL      DrawPixelIntoPixelBuffer
  ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
