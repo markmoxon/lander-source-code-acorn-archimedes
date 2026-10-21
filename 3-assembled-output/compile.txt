@@ -50,7 +50,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    45: .set OS_Byte, 0x06
                             	    46: .set OS_Word, 0x07
                             	    47: .set OS_Exit, 0x11
-                            	    48: .set stack, 0x0000B1FC
+                            	    48: .set stack, CODE + 0x0000A1FC
                             	    49: .set workspace, stack + 4
                             	    50: .set xObject, 0x00
                             	    51: .set yObject, 0x04

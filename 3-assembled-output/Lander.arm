@@ -45,7 +45,7 @@
 .set OS_Byte, 0x06
 .set OS_Word, 0x07
 .set OS_Exit, 0x11
-.set stack, 0x0000B1FC
+.set stack, CODE + 0x0000A1FC
 .set workspace, stack + 4
 .set xObject, 0x00
 .set yObject, 0x04

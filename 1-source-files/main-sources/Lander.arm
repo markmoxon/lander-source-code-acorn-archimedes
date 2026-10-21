@@ -238,21 +238,10 @@
 \
 \ ******************************************************************************
 
-                                    \ --- Mod: Code removed for AES ----------->
-
-\stack = &000121FC                  \ The stack is after the end of the main
+ stack = CODE + &0000A1FC           \ The stack is after the end of the main
                                     \ game code and descends from this address
-                                    \ down to &00012000 (to give a stack size of
-                                    \ 512 32-bit entries)
-
-                                    \ --- And replaced by: -------------------->
-
- stack = &0000B1FC                  \ The stack is after the end of the main
-                                    \ game code and descends from this address
-                                    \ down to &0000B000 (to give a stack size of
-                                    \ 512 32-bit entries)
-
-                                    \ --- End of replacement ------------------>
+                                    \ down to CODE + &0000A000 (&00012000) to
+                                    \ give a stack size of 512 32-bit entries
 
  workspace = stack + 4              \ The variable workspace starts just after
                                     \ the top of the stack
@@ -5922,7 +5911,7 @@
                                     \ --- End of added code ------------------->
 
  STMFD   R13!, {R1-R2}              \ Store the arguments in R1 and R2 on the
-                                    \ stack so can retrieve them below
+                                    \ stack so we can retrieve them below
 
  ADD     R1, R11, #stringBuffer     \ Set R1 = stringBuffer to use as a string
                                     \ buffer for the following call
