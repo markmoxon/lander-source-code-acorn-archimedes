@@ -39,7 +39,7 @@
 .set OS_Word, 0x07
 .set OS_Mouse, 0x1C
 .set OS_BinaryToDecimal, 0x28
-.set stack, 0x000121FC
+.set stack, CODE + 0x0000A1FC
 .set workspace, stack + 4
 .set xObject, 0x00
 .set yObject, 0x04

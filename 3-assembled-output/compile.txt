@@ -44,7 +44,7 @@ Source: "3-assembled-output/Lander.arm"
                             	    39: .set OS_Word, 0x07
                             	    40: .set OS_Mouse, 0x1C
                             	    41: .set OS_BinaryToDecimal, 0x28
-                            	    42: .set stack, 0x000121FC
+                            	    42: .set stack, CODE + 0x0000A1FC
                             	    43: .set workspace, stack + 4
                             	    44: .set xObject, 0x00
                             	    45: .set yObject, 0x04

@@ -208,10 +208,10 @@
 \
 \ ******************************************************************************
 
- stack = &000121FC                  \ The stack is after the end of the main
+ stack = CODE + &0000A1FC           \ The stack is after the end of the main
                                     \ game code and descends from this address
-                                    \ down to &00012000 (to give a stack size of
-                                    \ 512 32-bit entries)
+                                    \ down to CODE + &0000A000 (&00012000) to
+                                    \ give a stack size of 512 32-bit entries
 
  workspace = stack + 4              \ The variable workspace starts just after
                                     \ the top of the stack
