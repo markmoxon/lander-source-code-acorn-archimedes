@@ -478,24 +478,52 @@
 
  JSR SetScreenBankToA   \ Switch the screen bank to the argument in A
 
- LDA #&35               \ Set P(1 0) = &3500
- STA P+1
- LDA #&00
+ LDA minScreenAddr      \ Set P(1 0) = minScreenAddr(1 0)
  STA P
+ LDA minScreenAddr+1
+ STA P+1
 
- LDX #&80-&35           \ The number of pages in screen memory, starting at
-                        \ &3500 (just below the two lines of scores)
+ LDY #0                 \ Set Y = 0 so we can use STA (P),Y to mean STA (P)
 
- LDY #0                 \ We want to zero one page of memory, so set Y as a byte
-                        \ counter
+ TYA                    \ Set A = 0 to use when clearing the screen
 
 .clsc1
+
+ STA (P),Y              \ Zero screen memory at P(1 0)
+
+ INC P                  \ Increment the low byte of P(1 0)
+
+ BNE clsc1              \ Loop back until we have reached the end of the page
+                        \ containing P(1 0)
+
+ INC P+1                \ Increment the high byte of P(1 0) so it points to the
+                        \ start of the next page
+
+                        \ We now blank the full pages in the range
+
+ LDA maxScreenAddr+1    \ Set A to the number of pages in screen memory between
+ SEC                    \ maxScreenAddr(1 0) and P(1 0)
+ SBC P+1
+
+ BEQ clsc3              \ If there are no full pages, jump to clsc3 to clear the
+                        \ partial page at maxScreenAddr(1 0)
+
+                        \ Otherwise we have A full pages to blank at P(1 0)
+
+ TAX                    \ Set X to the number of pages in screen memory between
+                        \ maxScreenAddr and minScreenAddr
+
+ LDY #0                 \ Set Y = 0 as a byte counter for each page
+
+ TYA                    \ Set A = 0 to use when clearing the screen
+
+.clsc2
 
  STA (P),Y              \ Zero the Y-th byte of the P(1 0) memory block
 
  DEY                    \ Decrement the byte counter
 
- BNE clsc1              \ Loop back to copy the next byte until we have done a
+ BNE clsc2              \ Loop back to copy the next byte until we have done a
                         \ whole page of 256 bytes
 
  INC P+1                \ Increment the high byte of the source address to point
@@ -503,8 +531,39 @@
 
  DEX                    \ Decrement the page counter
 
- BPL clsc1              \ Loop back to copy the next page until we have done X
+ BNE clsc2              \ Loop back to copy the next page until we have done X
                         \ pages
+
+.clsc3
+
+                        \ We now clear the partial page from P(1 0) to
+                        \ maxScreenAddr(1 0)
+
+ LDA maxScreenAddr      \ Set A to the number of bytes in screen memory between
+ SEC                    \ P(1 0) and maxScreenAddr(1 0), given that the high
+ SBC P                  \ bytes match
+ 
+ BEQ clsc5              \ If there are no bytes pages, jump to clsc5 to finish
+
+                        \ Otherwise we have A bytes to blank at P(1 0)
+
+ TAY                    \ Set Y to the number of bytes in screen memory between
+                        \ P(1 0) and maxScreenAddr(1 0)
+
+ LDA #0                 \ Set A = 0 to use when clearing the screen
+
+.clsc4
+
+ STA (P),Y              \ Zero the Y-th byte of the P(1 0) memory block
+
+ DEY                    \ Decrement the byte counter
+
+ BNE clsc4              \ Loop back to copy the next byte until we have done the
+                        \ whole partial page
+
+ STA (P),Y              \ Zero the byte at P(1 0)
+
+.clsc5
 
  JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
                         \ return from the subroutine using a tail call
@@ -724,7 +783,7 @@
 .OSWVECS
 
  EQUW ReadKeyboard      \            240 (&F0)     0 = Read keyboard
- EQUW SAFE              \            241 (&F1)     1 = Do nothing
+ EQUW SetScreenRange    \            241 (&F1)     1 = Set max/min screen addrs
  EQUW SAFE              \            242 (&F2)     2 = Do nothing
  EQUW SAFE              \            243 (&F3)     3 = Do nothing
  EQUW SAFE              \            244 (&F4)     4 = Do nothing
@@ -911,7 +970,7 @@ ENDMACRO
 \       Name: ReadKeyboard
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Implement the OSWORD 243 command (scan the keyboard)
+\    Summary: Implement the OSWORD 240 command (scan the keyboard)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -982,6 +1041,66 @@ ENDMACRO
  BNE DKL2
 
  RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: SetScreenRange
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Implement the OSWORD 241 command (set the maximum and minimum
+\             address for the current frame)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   OSSC                The address of the table in which to log the key presses
+\
+\ ******************************************************************************
+
+.SetScreenRange
+
+ LDY #2                 \ Fetch bytes #2 and #3 from the parameter block and
+ LDA (OSSC),Y           \ store them in minScreenAddr(1 0)
+ STA minScreenAddr
+ INY
+ LDA (OSSC),Y
+ STA minScreenAddr+1
+
+ INY                    \ Fetch bytes #4 and #5 from the parameter block and
+ LDA (OSSC),Y           \ store them in maxScreenAddr(1 0)
+ STA maxScreenAddr
+ INY
+ LDA (OSSC),Y
+ STA maxScreenAddr+1
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: minScreenAddr
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: The lowest screen address containing content in this frame
+\
+\ ******************************************************************************
+
+.minScreenAddr
+
+ EQUW &3500
+
+\ ******************************************************************************
+\
+\       Name: maxScreenAddr
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: The highest screen address containing content in this frame
+\
+\ ******************************************************************************
+
+.maxScreenAddr
+
+ EQUW &7FFF
 
 \ ******************************************************************************
 \

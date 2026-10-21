@@ -16,6 +16,7 @@
 .set Tube_BeginPixels, 134
 .set Tube_AddPixels, 135
 .set Tube_ReadKeyboard, 240
+.set Tube_SendScreenRange, 241
 .set STORE, 256 * (TILES_X / 32)
 .set LAUNCHPAD_Y, LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y
 .set LAUNCHPAD_SIZE, TILE_SIZE * 8
@@ -1284,16 +1285,25 @@ fuel2:
  LDR     R1, [R11, #fuelLevel]
  MOV     R12, R1, LSR #4
  ANDS    R12, R12, #3
- LDMEQFD R13!, {R10-R12, PC}
+ BEQ     fuel3
  CMP     R12, #1
  MOVEQ   R8, #0x8
- MOVEQ   R9, #0x77
+ MOVEQ   R9, #0x0
  CMP     R12, #2
  MOVEQ   R8, #0xc
- MOVEQ   R9, #0x33
+ MOVEQ   R9, #0x0
  CMP     R12, #3
  MOVEQ   R8, #0xe
- MOVEQ   R9, #0x11
+ MOVEQ   R9, #0x0
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+fuel3:
+ MOV     R8, #0x0
+ MOV     R9, #0x0
+ ADD     R6, R6, #6
  BL      DrawPixelIntoPixelBuffer
  ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
@@ -2083,7 +2093,24 @@ SwitchScreenBank:
  SWI     OS_WriteC
  MOV     R0, R1
  SWI     OS_WriteC
+ LDR     R0, minScreenAddr
+ STRB    R0, oswordScreenRange+2
+ MOV     R0, R0, LSR #8
+ STRB    R0, oswordScreenRange+3
+ LDR     R0, maxScreenAddr
+ STRB    R0, oswordScreenRange+4
+ MOV     R0, R0, LSR #8
+ STRB    R0, oswordScreenRange+5
+ ADR     R1, oswordScreenRange
+ MOV     R0, #Tube_SendScreenRange
+ SWI     OS_Word
  MOV     PC, R14
+oswordScreenRange:
+.byte 6
+.byte 0
+.word 0x3500
+.word 0x7FFF
+.balign 4
 DrawQuadrilateral:
  STMFD   R13!, {R0-R12, R14}
  BL      DrawPixel
@@ -2667,16 +2694,25 @@ DrawPixels:
  ADD     R3, R3, R3, LSL #2
  ADD     R6, R5, R3, LSL #7
  ADD     R6, R6, #0x3500
- CMP     R6, #0x3500
+ CMP     R6, #0x3780
  LDMCCFD R13!, {R2-R10, PC}
  CMP     R6, #0x8000
  LDMCSFD R13!, {R2-R10, PC}
+ BL      UpdateScreenAddrs
  AND     R7, R2, #0x3
  MOV     R9, R9, LSR R7
  EOR     R10, R9, #0xff
  AND     R8, R8, R10
  BL      DrawPixelIntoPixelBuffer
  LDMFD   R13!, {R2-R10, PC}
+UpdateScreenAddrs:
+ LDR     R7, minScreenAddr
+ CMP     R6, R7
+ STRLO   R6, minScreenAddr
+ LDR     R7, maxScreenAddr
+ CMP     R6, R7
+ STRHI   R6, maxScreenAddr
+ MOV     PC, R14
 DrawLineSegment:
  STRB    R8, [R11, #16]
  STRB    R8, [R11, #15]
@@ -2865,6 +2901,10 @@ MainLoop:
  LDRB    R2, keyBuffer+2
  TEQ     R2, #0xFF
  BEQ     EndGame
+ MOV     R0, #0x3500
+ STR     R0, maxScreenAddr
+ MOV     R0, #0x7FFF
+ STR     R0, minScreenAddr
  BL      MoveAndDrawPlayer
  LDR     R0, [R11, #mainLoopCount]
  MOV     R0, R0, LSL #24
@@ -2986,6 +3026,10 @@ GetPolarAnglesFromKeyboard:
  MOV     PC, R14
 polarAngle:
 .long 0
+minScreenAddr:
+.long 0x3500
+maxScreenAddr:
+.long 0x7FFF
 polarDistance:
 .long 0
 tenThousand:

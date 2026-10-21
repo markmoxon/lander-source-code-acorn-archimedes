@@ -88,6 +88,7 @@
  Tube_AddPixels = 135
 
  Tube_ReadKeyboard = 240            \ OSWORD calls to the I/O processor
+ Tube_SendScreenRange = 241
 
                                     \ --- End of added code ------------------->
 
@@ -6250,23 +6251,38 @@
  ANDS    R12, R12, #3               \ Calculate the number of pixels in the
                                     \ remainder of the fuel bar (0 to 3)
 
- LDMEQFD R13!, {R10-R12, PC}        \ If there are no more pixels to draw, 
-                                    \ return from the subroutine
+ BEQ     fuel3                      \ If there are no more pixels to draw, jump
+                                    \ to fuel3 to erase the end of the line for
+                                    \ when the fuel level is dropping
 
  CMP     R12, #1                    \ If we need to draw one more pixel, set
- MOVEQ   R8, #%00001000             \ the pixel byte in R9 and mask in R8
- MOVEQ   R9, #%01110111
+ MOVEQ   R8, #%00001000             \ the pixel byte in R8 and mask in R9
+ MOVEQ   R9, #%00000000
 
  CMP     R12, #2                    \ If we need to draw two more pixels, set
- MOVEQ   R8, #%00001100             \ the pixel byte in R9 and mask in R8
- MOVEQ   R9, #%00110011
+ MOVEQ   R8, #%00001100             \ the pixel byte in R8 and mask in R9
+ MOVEQ   R9, #%00000000
 
  CMP     R12, #3                    \ If we need to draw three more pixels, set
- MOVEQ   R8, #%00001110             \ the pixel byte in R9 and mask in R8
- MOVEQ   R9, #%00010001
+ MOVEQ   R8, #%00001110             \ the pixel byte in R8 and mask in R9
+ MOVEQ   R9, #%00000000
 
  BL      DrawPixelIntoPixelBuffer   \ Draw three dashes of the right size into
  ADD     R6, R6, #1                 \ the pixel buffer
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+
+.fuel3
+
+ MOV     R8, #%00000000             \ Draw a blank pixel byte after the end of
+ MOV     R9, #%00000000             \ the fuel bar to save us having to clear
+                                    \ this part of the screen, by zeroing the
+                                    \ pixel byte in R8 and mask in R9
+
+ ADD     R6, R6, #6                 \ Draw three blank lines into the pixel
+ BL      DrawPixelIntoPixelBuffer   \ buffer
+ ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
  ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
@@ -9644,9 +9660,48 @@
  MOV     R0, R1                     \ drawn into
  SWI     OS_WriteC
 
+ LDR     R0, minScreenAddr          \ Poke minScreenAddr into the OS_Word block
+ STRB    R0, oswordScreenRange+2
+ MOV     R0, R0, LSR #8
+ STRB    R0, oswordScreenRange+3
+
+ LDR     R0, maxScreenAddr          \ Poke maxScreenAddr into the OS_Word block
+ STRB    R0, oswordScreenRange+4
+ MOV     R0, R0, LSR #8
+ STRB    R0, oswordScreenRange+5
+
+ ADR     R1, oswordScreenRange      \ Send the maximum and minimum screen
+ MOV     R0, #Tube_SendScreenRange  \ addresses to the I/O processor for the
+ SWI     OS_Word                    \ frame we just drew
+
  MOV     PC, R14                    \ Return from the subroutine
 
                                     \ --- End of replacement ------------------>
+
+\ ******************************************************************************
+\
+\       Name: oswordScreenRange
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: The screen address range OS_Word block
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.oswordScreenRange
+
+ EQUB 6                             \ The number of bytes to transmit
+
+ EQUB 0                             \ The number of bytes to receive
+
+ EQUW &3500                         \ The minimum screen address
+
+ EQUW &7FFF                         \ The maximum screen address
+
+ ALIGN
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
@@ -12679,10 +12734,15 @@
                                     \ address, skipping the top two character
                                     \ rows
 
- CMP     R6, #&3500                 \ If the address in R6 is not within screen
- LDMCCFD R13!, {R2-R10, PC}         \ memory then jump tp dpix1 to return from
- CMP     R6, #&8000                 \ the subroutine without drawing anything
- LDMCSFD R13!, {R2-R10, PC}
+ CMP     R6, #&3780                 \ If the address in R6 is not within screen
+ LDMCCFD R13!, {R2-R10, PC}         \ memory below the fuel bar, then jump to
+ CMP     R6, #&8000                 \ dpix1 to return from the subroutine
+ LDMCSFD R13!, {R2-R10, PC}         \ without drawing anything
+
+ BL      UpdateScreenAddrs          \ Call UpdateScreenAddrs to update the
+                                    \ screen address range for clearing the
+                                    \ screen, so we include this pixel byte in
+                                    \ the screen clear
 
  AND     R7, R2, #%00000011         \ Set R7 to the position of the pixel/dash
                                     \ within the pixel byte (0 on the left, 3
@@ -12706,6 +12766,31 @@
 
  LDMFD   R13!, {R2-R10, PC}         \ Retrieve the registers that we stored on
                                     \ the stack and return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: UpdateScreenAddrs
+\       Type: Subroutine
+\   Category: Drawing pixels
+\    Summary: Update the screen address range for clearing the screen
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.UpdateScreenAddrs
+
+ LDR     R7, minScreenAddr          \ Update the minimum screen address
+ CMP     R6, R7
+ STRLO   R6, minScreenAddr
+
+ LDR     R7, maxScreenAddr          \ Update the maximum screen address
+ CMP     R6, R7
+ STRHI   R6, maxScreenAddr
+
+ MOV     PC, R14                    \ Return from the subroutine
 
                                     \ --- End of added code ------------------->
 
@@ -13420,6 +13505,11 @@
  TEQ     R2, #&FF                   \ to quit the game
  BEQ     EndGame
 
+ MOV     R0, #&3500                 \ Reset the max and min screen addresses so
+ STR     R0, maxScreenAddr          \ we can record the screen extent for the
+ MOV     R0, #&7FFF                 \ next frame
+ STR     R0, minScreenAddr
+
                                     \ --- End of replacement ------------------>
 
  BL      MoveAndDrawPlayer          \ Move the player's ship and draw it into
@@ -13792,6 +13882,40 @@
 .polarAngle
 
  EQUD 0
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: minScreenAddr
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: The lowest screen address containing content in this frame
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.minScreenAddr
+
+ EQUD &3500
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: maxScreenAddr
+\       Type: Variable
+\   Category: Keyboard
+\    Summary: The highest screen address containing content in this frame
+\
+\ ******************************************************************************
+
+                                    \ --- Mod: Code added for AES ------------->
+
+.maxScreenAddr
+
+ EQUD &7FFF
 
                                     \ --- End of added code ------------------->
 
