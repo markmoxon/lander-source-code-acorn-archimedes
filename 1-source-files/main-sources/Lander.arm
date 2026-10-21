@@ -224,10 +224,10 @@
 \
 \ ******************************************************************************
 
- stack = &000121FC                  \ The stack is after the end of the main
+ stack = CODE + &0000A1FC           \ The stack is after the end of the main
                                     \ game code and descends from this address
-                                    \ down to &00012000 (to give a stack size of
-                                    \ 512 32-bit entries)
+                                    \ down to CODE + &0000A000 (&00012000) to
+                                    \ give a stack size of 512 32-bit entries
 
  workspace = stack + 4              \ The variable workspace starts just after
                                     \ the top of the stack
@@ -5507,7 +5507,7 @@
                                     \ sixth and seventh words of face data,
                                     \ which contain the numbers of the vertices
                                     \ that make up the face (in R4, R5 and R6),
-                                    \ and the face colour (in R7]
+                                    \ and the face colour (in R7)
 
  ADD     R10, R11, #vertexProjected \ Set R10 to the address of vertexProjected
                                     \
@@ -5753,7 +5753,7 @@
 .PrintScoreInBothBanks
 
  STMFD   R13!, {R1-R2}              \ Store the arguments in R1 and R2 on the
-                                    \ stack so can retrieve them below
+                                    \ stack so we can retrieve them below
 
  ADD     R1, R11, #stringBuffer     \ Set R1 = stringBuffer to use as a string
                                     \ buffer for the following call

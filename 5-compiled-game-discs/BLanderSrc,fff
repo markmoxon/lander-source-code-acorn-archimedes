@@ -220,10 +220,10 @@ REM Workspace variables
 REM
 REM ******************************************************************************
 
- stack = &000121FC                  : REM The stack is after the end of the main
+ stack = CODE + &0000A1FC           : REM The stack is after the end of the main
                                     : REM game code and descends from this address
-                                    : REM down to &00012000 [to give a stack size of
-                                    : REM 512 32-bit entries]
+                                    : REM down to CODE + &0000A000 [&00012000] to
+                                    : REM give a stack size of 512 32-bit entries
 
  workspace = stack + 4              : REM The variable workspace starts just after
                                     : REM the top of the stack
@@ -5749,7 +5749,7 @@ REM ****************************************************************************
 .PrintScoreInBothBanks
 
  STMFD   R13!, {R1-R2}              \ Store the arguments in R1 and R2 on the
-                                    \ stack so can retrieve them below
+                                    \ stack so we can retrieve them below
 
  ADD     R1, R11, #stringBuffer     \ Set R1 = stringBuffer to use as a string
                                     \ buffer for the following call
