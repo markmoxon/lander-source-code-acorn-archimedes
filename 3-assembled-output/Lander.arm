@@ -580,6 +580,7 @@ GameOver:
 .balign 4
  BL      SwitchScreenBank
  BL      WaitForSpace
+ BL      DrawFullFuelBarInBothBanks
  B       StartNewGame
 graphicsBuffEndAddr2:
 .long    graphicsBuffersEnd
@@ -1272,15 +1273,14 @@ DrawFuelLevel:
  MOV     R9, #0x0
  MOVS    R12, R1, LSR #6
  BEQ     fuel2
-fuel1:
+ ADD     R6, R6, R12, LSL #3
+ SUB     R6, R6, #8
  BL      DrawPixelIntoPixelBuffer
  ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
  ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
  ADD     R6, R6, #6
- SUBS    R12, R12, #1
- BNE     fuel1
 fuel2:
  LDR     R1, [R11, #fuelLevel]
  MOV     R12, R1, LSR #4
@@ -2104,7 +2104,7 @@ SwitchScreenBank:
 oswordScreenRange:
 .byte 6
 .byte 0
-.word 0x3500
+.word 0x3780
 .word 0x7FFF
 .balign 4
 DrawQuadrilateral:
@@ -2798,6 +2798,7 @@ PlacePlayerOnLaunchpad:
  MOV     R2, #0
  STMIA   R3!, {R0-R2}
  BL      ResetMousePosition
+ BL      DrawFullFuelBarInBothBanks
 MainLoop:
  MOV     R0, #0
  STRB    R0, keyBuffer+2
@@ -2810,7 +2811,7 @@ MainLoop:
  LDRB    R2, keyBuffer+2
  TEQ     R2, #0xFF
  BEQ     EndGame
- MOV     R0, #0x3500
+ MOV     R0, #0x3780
  STR     R0, maxScreenAddr
  MOV     R0, #0x7FFF
  STR     R0, minScreenAddr
@@ -3023,7 +3024,7 @@ GetPolarAnglesFromKeyboard:
 polarAngle:
 .long 0
 minScreenAddr:
-.long 0x3500
+.long 0x3780
 maxScreenAddr:
 .long 0x7FFF
 polarDistance:
@@ -3129,6 +3130,70 @@ pixelBuffer:
 .long 0, 0, 0, 0, 0, 0, 0, 0
 .long 0, 0, 0, 0, 0, 0, 0, 0
 .long 0, 0, 0, 0, 0, 0, 0, 0
+DrawFullFuelBarInBothBanks:
+ STMFD   R13!, {R14}
+ ADR     R0, screenBankNumber
+ LDR     R7, [R0]
+ EOR     R6, R7, #1
+ MOV     R0, #Tube_SetScreenBank
+ SWI     OS_WriteC
+ MOV     R0, R6
+ SWI     OS_WriteC
+ BL      DrawFullFuelBar
+ MOV     R0, #Tube_SetScreenBank
+ SWI     OS_WriteC
+ MOV     R0, R7
+ SWI     OS_WriteC
+ BL      DrawFullFuelBar
+ LDMFD   R13!, {PC}
+DrawFullFuelBar:
+ STMFD   R13!, {R0-R12, R14}
+ LDR     R1, [R11, #fuelLevel]
+ MOV     R6, #0x3500
+ ADR     R8, fuelBarColour
+ LDR     R8, [R8]
+ MOV     R9, #0x0
+ MOVS    R12, R1, LSR #6
+ BEQ     fbar2
+fbar1:
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #6
+ SUBS    R12, R12, #1
+ BNE     fbar1
+fbar2:
+ LDR     R1, [R11, #fuelLevel]
+ MOV     R12, R1, LSR #4
+ ANDS    R12, R12, #3
+ BEQ     fbar3
+ CMP     R12, #1
+ MOVEQ   R8, #0x8
+ CMP     R12, #2
+ MOVEQ   R8, #0xc
+ CMP     R12, #3
+ MOVEQ   R8, #0xe
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #6
+fbar3:
+ MOV     R8, #0x0
+fbar4:
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+ ADD     R6, R6, #6
+ CMP     R6, #0x3780
+ BCC     fbar4
+ BL      FlushPixelBuffer
+ LDMFD   R13!, {R0-R12, PC}
 objectRock:
 .long    6
 .long    8

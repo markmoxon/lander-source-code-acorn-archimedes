@@ -2859,6 +2859,10 @@
 
  BL      WaitForSpace               \ Wait for Space to be pressed
 
+ BL      DrawFullFuelBarInBothBanks \ Draw the full fuel bar in both banks, so
+                                    \ we can just update the changes during the
+                                    \ game
+
                                     \ --- End of replacement ------------------>
 
  B       StartNewGame               \ Jump to StartNewGame to start a brand new
@@ -6191,31 +6195,26 @@
  MOV     R9, #%00000000             \ Set R9 to the pixel mask for a full byte
                                     \ of four pixels
 
- MOVS    R12, R1, LSR #6            \ Set R10 = R1 >> 6
+ MOVS    R12, R1, LSR #6            \ Set R12 = R1 >> 6
                                     \         = (fuel level / 16) / 4
                                     \
                                     \ So this is the number of whole pixel bytes
                                     \ of four pixels in the fuel bar, which we
                                     \ can use as a counter in the following loop
 
- BEQ     fuel2                      \ If R10 = 0 then we have no full bytes to
+ BEQ     fuel2                      \ If R12 = 0 then we have no full bytes to
                                     \ draw, so jump to fuel2 to skip the loop
 
-.fuel1
+ ADD     R6, R6, R12, LSL #3        \ Set R12 to the address of the last full
+ SUB     R6, R6, #8                 \ byte
 
  BL      DrawPixelIntoPixelBuffer   \ Draw three four-pixel dashes into the
- ADD     R6, R6, #1                 \ pixel buffer to make the fuel line three
- BL      DrawPixelIntoPixelBuffer   \ pixels high
+ ADD     R6, R6, #1                 \ pixel buffer to draw the last full byte of
+ BL      DrawPixelIntoPixelBuffer   \ the fuel bar
  ADD     R6, R6, #1
  BL      DrawPixelIntoPixelBuffer
 
- ADD     R6, R6, #6                 \ Move to the next pixel byte along (there
-                                    \ are eight bytes per character block)
-
- SUBS    R12, R12, #1               \ Decrement the loop counter in R12
-
- BNE     fuel1                      \ Loop back until we have drawn all the full
-                                    \ pixel bytes in the fuel bar
+ ADD     R6, R6, #6                 \ Move to next character block
 
 .fuel2
 
@@ -9667,7 +9666,7 @@
 
  EQUB 0                             \ The number of bytes to receive
 
- EQUW &3500                         \ The minimum screen address
+ EQUW &3780                         \ The minimum screen address
 
  EQUW &7FFF                         \ The maximum screen address
 
@@ -13103,6 +13102,14 @@
  BL      ResetMousePosition         \ Reset the mouse position to (511, 511),
                                     \ ready for the game
 
+                                    \ --- Mod: Code added for AES ------------->
+
+ BL      DrawFullFuelBarInBothBanks \ Draw the full fuel bar in both banks, so
+                                    \ we can just update the changes during the
+                                    \ game
+
+                                    \ --- End of added code ------------------->
+
 \ ******************************************************************************
 \
 \       Name: MainLoop
@@ -13144,7 +13151,7 @@
  TEQ     R2, #&FF                   \ to quit the game
  BEQ     EndGame
 
- MOV     R0, #&3500                 \ Reset the max and min screen addresses so
+ MOV     R0, #&3780                 \ Reset the max and min screen addresses so
  STR     R0, maxScreenAddr          \ we can record the screen extent for the
  MOV     R0, #&7FFF                 \ next frame
  STR     R0, minScreenAddr
@@ -13870,7 +13877,7 @@
 
 .minScreenAddr
 
- EQUD &3500
+ EQUD &3780
 
                                     \ --- End of added code ------------------->
 
@@ -14229,6 +14236,153 @@
                                     \   * Byte #3 = pixel mask
 
                                     \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name: DrawFullFuelBarInBothBanks
+\       Type: Subroutine
+\   Category: Score bar
+\    Summary: Draw the entire fuel bar at the top of the screen in both banks
+\
+\ ******************************************************************************
+
+.DrawFullFuelBarInBothBanks
+
+ STMFD   R13!, {R14}                \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ ADR     R0, screenBankNumber       \ Set R7 to the current screen bank
+ LDR     R7, [R0]
+
+ EOR     R6, R7, #1                 \ Set R6 to the opposite bank to the current
+                                    \ bank
+
+ MOV     R0, #Tube_SetScreenBank    \ Switch to screen bank R6
+ SWI     OS_WriteC
+ MOV     R0, R6
+ SWI     OS_WriteC
+
+ BL      DrawFullFuelBar            \ Draw the fuel bar
+
+ MOV     R0, #Tube_SetScreenBank    \ Switch to screen bank R7
+ SWI     OS_WriteC
+ MOV     R0, R7
+ SWI     OS_WriteC
+
+ BL      DrawFullFuelBar            \ Draw the fuel bar
+
+ LDMFD   R13!, {PC}                 \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+\ ******************************************************************************
+\
+\       Name: DrawFullFuelBar
+\       Type: Subroutine
+\   Category: Score bar
+\    Summary: Draw the entire fuel bar at the top of the screen
+\
+\ ******************************************************************************
+
+.DrawFullFuelBar
+
+ STMFD   R13!, {R0-R12, R14}        \ Store the registers that we want to use on
+                                    \ the stack so they can be preserved
+
+ LDR     R1, [R11, #fuelLevel]      \ Set R1 to the current fuel level in
+                                    \ fuelLevel
+
+ MOV     R6, #&3500                 \ Set R6 to the address in mode 1 screen
+                                    \ memory for the fuel bar
+
+ ADR     R8, fuelBarColour          \ Set R8 to the four-pixel colour word that
+ LDR     R8, [R8]                   \ we need to poke into screen memory to draw
+                                    \ four pixels in the correct colour for the
+                                    \ fuel bar
+
+ MOV     R9, #%00000000             \ Set R9 to the pixel mask for a full byte
+                                    \ of four pixels
+
+ MOVS    R12, R1, LSR #6            \ Set R12 = R1 >> 6
+                                    \         = (fuel level / 16) / 4
+                                    \
+                                    \ So this is the number of whole pixel bytes
+                                    \ of four pixels in the fuel bar, which we
+                                    \ can use as a counter in the following loop
+
+ BEQ     fbar2                      \ If R12 = 0 then we have no full bytes to
+                                    \ draw, so jump to fbar2 to skip the loop
+
+.fbar1
+
+ BL      DrawPixelIntoPixelBuffer   \ Draw three four-pixel dashes into the
+ ADD     R6, R6, #1                 \ pixel buffer to make the fuel line three
+ BL      DrawPixelIntoPixelBuffer   \ pixels high
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+
+ ADD     R6, R6, #6                 \ Move to the next pixel byte along (there
+                                    \ are eight bytes per character block)
+
+ SUBS    R12, R12, #1               \ Decrement the loop counter in R12
+
+ BNE     fbar1                      \ Loop back until we have drawn all the full
+                                    \ pixel bytes in the fuel bar
+
+.fbar2
+
+ LDR     R1, [R11, #fuelLevel]      \ Set R1 to the current fuel level in
+                                    \ fuelLevel
+
+ MOV     R12, R1, LSR #4            \ Set R12 = R1 >> 4
+                                    \         = fuel level / 16
+
+ ANDS    R12, R12, #3               \ Calculate the number of pixels in the
+                                    \ remainder of the fuel bar (0 to 3)
+
+ BEQ     fbar3                      \ If there are no more pixels to draw, jump
+                                    \ to fbar3 to erase to the end of the line
+
+ CMP     R12, #1                    \ If we need to draw one more pixel, set
+ MOVEQ   R8, #%00001000             \ the pixel byte in R8
+
+ CMP     R12, #2                    \ If we need to draw two more pixels, set
+ MOVEQ   R8, #%00001100             \ the pixel byte in R8
+
+ CMP     R12, #3                    \ If we need to draw three more pixels, set
+ MOVEQ   R8, #%00001110             \ the pixel byte in R8
+
+ BL      DrawPixelIntoPixelBuffer   \ Draw three dashes of the right size into
+ ADD     R6, R6, #1                 \ the pixel buffer using the pixel byte in
+ BL      DrawPixelIntoPixelBuffer   \ R8 and the mask in R9
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+
+ ADD     R6, R6, #6                 \ Move to the next character block
+
+.fbar3
+
+ MOV     R8, #%00000000             \ Draw blank pixel bytes after the end of
+                                    \ the fuel bar to save us having to clear
+                                    \ this part of the screen, so zero the pixel
+                                    \ byte in R8
+
+.fbar4
+
+ BL      DrawPixelIntoPixelBuffer   \ Draw three blank lines into the pixel
+ ADD     R6, R6, #1                 \ buffer using the pixel byte in R8 and the
+ BL      DrawPixelIntoPixelBuffer   \ mask in R9
+ ADD     R6, R6, #1
+ BL      DrawPixelIntoPixelBuffer
+
+ ADD     R6, R6, #6                 \ Move to the next character block
+
+ CMP     R6, #&3780                 \ Keep erasing until we reach the next
+ BCC     fbar4                      \ character row at address &3780
+
+ BL      FlushPixelBuffer           \ Draw the fuel bar
+
+ LDMFD   R13!, {R0-R12, PC}         \ Retrieve the registers that we stored on
+                                    \ the stack and return from the subroutine
 
 \ ******************************************************************************
 \
