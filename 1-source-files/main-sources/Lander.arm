@@ -13967,9 +13967,6 @@
 
 .ConvertBinaryToDecimal
 
- STMFD   R13!, {R0, R3-R5, R14}     \ Store the registers that we want to use on
-                                    \ the stack so they can be preserved
-
  LDR     R2, tenThousand            \ Cap R0 at 9999, for four digits
  CMP     R0, R2
  MOVCS   R0, #9999
@@ -14049,8 +14046,7 @@
  ADD     R2, R2, #1                 \ R1 with offset R2, incrementing the offset
                                     \ to leave the string length in R2
 
- LDMFD   R13!, {R0, R3-R5, PC}      \ Retrieve the registers that we stored on
-                                    \ the stack and return from the subroutine
+ MOV     PC, R14                    \ Return from the subroutine
 
                                     \ --- End of added code ------------------->
 
