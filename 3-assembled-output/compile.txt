@@ -15,11 +15,11 @@ Source: "3-assembled-output/Lander.arm"
                             	    10: .set SMOKE_RISING_SPEED, 0x00080000
                             	    11: .set UNDERCARRIAGE_Y, 0x00640000
                             	    12: .set BUFFER_SIZE, 4308
-                            	    13: .set Tube_SetScreenBank, 130
-                            	    14: .set Tube_ClearScreen, 131
-                            	    15: .set Tube_SetScreenMode, 133
-                            	    16: .set Tube_BeginPixels, 134
-                            	    17: .set Tube_AddPixels, 135
+                            	    13: .set Tube_AddPixels, 130
+                            	    14: .set Tube_BeginPixels, 131
+                            	    15: .set Tube_SetScreenBank, 132
+                            	    16: .set Tube_ClearScreen, 133
+                            	    17: .set Tube_SetScreenMode, 134
                             	    18: .set Tube_ReadKeyboard, 240
                             	    19: .set Tube_SendScreenRange, 241
                             	    20: .set Tube_ScanKeyboard, 242
@@ -1306,7 +1306,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00002034 030B8FE21C0080E2	  1227:  ADR     R0, screenBankNumber
 00:0000203C 007090E5        	  1228:  LDR     R7, [R0]
 00:00002040 016027E2        	  1229:  EOR     R6, R7, #1
-00:00002044 8200A0E3        	  1230:  MOV     R0, #Tube_SetScreenBank
+00:00002044 8400A0E3        	  1230:  MOV     R0, #Tube_SetScreenBank
 00:00002048 000000EF        	  1231:  SWI     OS_WriteC
 00:0000204C 0600A0E1        	  1232:  MOV     R0, R6
 00:00002050 000000EF        	  1233:  SWI     OS_WriteC
@@ -1316,7 +1316,7 @@ Source: "3-assembled-output/Lander.arm"
 00:0000205C 000000EF        	  1237:  SWI     OS_WriteC
 00:00002060 012052E2        	  1238:  SUBS    R2, R2, #1
 00:00002064 FBFFFF1A        	  1239:  BNE     prsb1
-00:00002068 8200A0E3        	  1240:  MOV     R0, #Tube_SetScreenBank
+00:00002068 8400A0E3        	  1240:  MOV     R0, #Tube_SetScreenBank
 00:0000206C 000000EF        	  1241:  SWI     OS_WriteC
 00:00002070 0700A0E1        	  1242:  MOV     R0, R7
 00:00002074 000000EF        	  1243:  SWI     OS_WriteC
@@ -2165,7 +2165,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00002C60 10105FE5        	  2086:  LDRB    R1, screenBankNumber
 00:00002C64 011031E2        	  2087:  EORS    R1, R1, #1
 00:00002C68 18104FE5        	  2088:  STRB    R1, screenBankNumber
-00:00002C6C 8300A0E3        	  2089:  MOV     R0, #Tube_ClearScreen
+00:00002C6C 8500A0E3        	  2089:  MOV     R0, #Tube_ClearScreen
 00:00002C70 000000EF        	  2090:  SWI     OS_WriteC
 00:00002C74 0100A0E1        	  2091:  MOV     R0, R1
 00:00002C78 000000EF        	  2092:  SWI     OS_WriteC
@@ -2769,7 +2769,7 @@ Source: "3-assembled-output/Lander.arm"
                             	  2682: .balign 4
 00:000034E0 A90000EA        	  2683:  B       ReturnToDesktop
                             	  2684: Entry:
-00:000034E4 8500A0E3        	  2685:  MOV     R0, #Tube_SetScreenMode
+00:000034E4 8600A0E3        	  2685:  MOV     R0, #Tube_SetScreenMode
 00:000034E8 000000EF        	  2686:  SWI     OS_WriteC
 00:000034EC 000000EF        	  2687:  SWI     OS_WriteC
 00:000034F0 A4D00FE5        	  2688:  STR     R13, stackPointerOnEntry
@@ -3186,7 +3186,7 @@ Source: "3-assembled-output/Lander.arm"
 00:00003AF8 6C508FE5        	  3091:  STR     R5, pixelBufferPointer
 00:00003AFC 0080BDE8        	  3092:  LDMFD   R13!, {PC}
                             	  3093: TransmitPixelBuffer:
-00:00003B00 8600A0E3        	  3094:  MOV     R0, #Tube_BeginPixels
+00:00003B00 8300A0E3        	  3094:  MOV     R0, #Tube_BeginPixels
 00:00003B04 000000EF        	  3095:  SWI     OS_WriteC
 00:00003B08 010085E2        	  3096:  ADD     R0, R5, #1
 00:00003B0C 000000EF        	  3097:  SWI     OS_WriteC
@@ -3287,12 +3287,12 @@ Source: "3-assembled-output/Lander.arm"
 00:00003C74 010A4FE2240040E2	  3136:  ADR     R0, screenBankNumber
 00:00003C7C 007090E5        	  3137:  LDR     R7, [R0]
 00:00003C80 016027E2        	  3138:  EOR     R6, R7, #1
-00:00003C84 8200A0E3        	  3139:  MOV     R0, #Tube_SetScreenBank
+00:00003C84 8400A0E3        	  3139:  MOV     R0, #Tube_SetScreenBank
 00:00003C88 000000EF        	  3140:  SWI     OS_WriteC
 00:00003C8C 0600A0E1        	  3141:  MOV     R0, R6
 00:00003C90 000000EF        	  3142:  SWI     OS_WriteC
 00:00003C94 050000EB        	  3143:  BL      DrawFullFuelBar
-00:00003C98 8200A0E3        	  3144:  MOV     R0, #Tube_SetScreenBank
+00:00003C98 8400A0E3        	  3144:  MOV     R0, #Tube_SetScreenBank
 00:00003C9C 000000EF        	  3145:  SWI     OS_WriteC
 00:00003CA0 0700A0E1        	  3146:  MOV     R0, R7
 00:00003CA4 000000EF        	  3147:  SWI     OS_WriteC
@@ -10736,13 +10736,13 @@ TILE_SIZE                        S:01000000
 TerminateGraphicsBuffer          A:00002C1C
 TransmitPixelBuffer              A:00003B00
 TransposeRotationMatrix          A:00002290
-Tube_BeginPixels                 S:00000086
-Tube_ClearScreen                 S:00000083
+Tube_BeginPixels                 S:00000083
+Tube_ClearScreen                 S:00000085
 Tube_ReadKeyboard                S:000000F0
 Tube_ScanKeyboard                S:000000F2
 Tube_SendScreenRange             S:000000F1
-Tube_SetScreenBank               S:00000082
-Tube_SetScreenMode               S:00000085
+Tube_SetScreenBank               S:00000084
+Tube_SetScreenMode               S:00000086
 UNDERCARRIAGE_Y                  S:00640000
 UpdateScreenAddrs                A:00003958
 WaitForKeyPress                  A:00003980
@@ -11064,11 +11064,11 @@ Symbols by value:
 0000006C labOffset
 00000074 xCoord
 00000078 yCoord
-00000082 Tube_SetScreenBank
-00000083 Tube_ClearScreen
+00000083 Tube_BeginPixels
 00000084 xObjectScaled
-00000085 Tube_SetScreenMode
-00000086 Tube_BeginPixels
+00000084 Tube_SetScreenBank
+00000085 Tube_ClearScreen
+00000086 Tube_SetScreenMode
 00000094 xPlayer
 00000098 yPlayer
 000000A0 xVelocity
@@ -11548,12 +11548,12 @@ ZP workspace (I/O processor) from &80 to &8A inclusive
 .JMPTAB
      247E   5B 24
      2480   5B 24
-     2482   A6 24
-     2484   BC 24
-     2486   5B 24
-     2488   FF 24
-     248A   38 25
-     248C   44 25
+     2482   44 25
+     2484   38 25
+     2486   A6 24
+     2488   BC 24
+     248A   FF 24
+     248C   5B 24
      248E   5B 24
      2490   5B 24
      2492   5B 24
@@ -11671,7 +11671,7 @@ ZP workspace (I/O processor) from &80 to &8A inclusive
      2538   85 8A      STA &8A
      253A   A9 00      LDA #&00
      253C   85 89      STA &89
-     253E   A9 87      LDA #&87
+     253E   A9 82      LDA #&82
      2540   4C 5B 24   JMP &245B
 .RTS1
      2543   60         RTS

@@ -10,11 +10,11 @@
 .set SMOKE_RISING_SPEED, 0x00080000
 .set UNDERCARRIAGE_Y, 0x00640000
 .set BUFFER_SIZE, 4308
-.set Tube_SetScreenBank, 130
-.set Tube_ClearScreen, 131
-.set Tube_SetScreenMode, 133
-.set Tube_BeginPixels, 134
-.set Tube_AddPixels, 135
+.set Tube_AddPixels, 130
+.set Tube_BeginPixels, 131
+.set Tube_SetScreenBank, 132
+.set Tube_ClearScreen, 133
+.set Tube_SetScreenMode, 134
 .set Tube_ReadKeyboard, 240
 .set Tube_SendScreenRange, 241
 .set Tube_ScanKeyboard, 242

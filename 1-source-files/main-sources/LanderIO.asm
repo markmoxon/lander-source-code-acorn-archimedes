@@ -402,12 +402,12 @@
 
  EQUW USOSWRCH          \ 128 (&80)     0 = Put back to USOSWRCH
  EQUW USOSWRCH          \ 129 (&81)     1 = Reserved for VDU code for mode 128+1
- EQUW SetScreenBank     \ 130 (&82)     2 = Set screen bank to main or shadow
- EQUW ClearScreen       \ 131 (&83)     3 = Switch screen bank and clear screen
- EQUW USOSWRCH          \ 132 (&84)     4 = Reserved for VDU code for mode 128+4
- EQUW SetScreenMode     \ 133 (&85)     5 = Set up the game's screen mode
- EQUW BEGINLIN          \ 134 (&86)     6 = Start receiving pixels
- EQUW ADDBYT            \ 135 (&87)     7 = Receive a pixel to draw
+ EQUW ADDBYT            \ 130 (&82)     2 = Receive a pixel to draw
+ EQUW BEGINLIN          \ 131 (&83)     3 = Start receiving pixels
+ EQUW SetScreenBank     \ 132 (&84)     4 = Set screen bank to main or shadow
+ EQUW ClearScreen       \ 133 (&85)     5 = Switch screen bank and clear screen
+ EQUW SetScreenMode     \ 134 (&86)     6 = Set up the game's screen mode
+ EQUW USOSWRCH          \ 135 (&87)     7 = Put back to USOSWRCH
  EQUW USOSWRCH          \ 136 (&88)     8 = Put back to USOSWRCH
  EQUW USOSWRCH          \ 137 (&89)     9 = Put back to USOSWRCH
  EQUW USOSWRCH          \ 138 (&8A)    10 = Put back to USOSWRCH
@@ -738,21 +738,10 @@
  STA LINTAB             \ free byte in the TABLE buffer (i.e. the first byte, as
                         \ we have just reset the buffer)
 
-                        \ --- Mod: Code removed for AES: ---------------------->
-
-\LDA #130               \ Execute a USOSWRCH 130 command so subsequent OSWRCH
-\JMP USOSWRCH           \ calls from the parasite can send coordinates that get
-\                       \ added to TABLE, and return from the subroutine using a
-\                       \ tail call
-
-                        \ --- And replaced by: -------------------------------->
-
- LDA #135               \ Execute a USOSWRCH 135 command so subsequent OSWRCH
- JMP USOSWRCH           \ calls from the parasite can send pixels that get
+ LDA #130               \ Execute a USOSWRCH 130 command so subsequent OSWRCH
+ JMP USOSWRCH           \ calls from the parasite can send coordinates that get
                         \ added to TABLE, and return from the subroutine using a
                         \ tail call
-
-                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
