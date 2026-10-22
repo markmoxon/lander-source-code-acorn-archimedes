@@ -784,7 +784,7 @@
 
  EQUW ReadKeyboard      \            240 (&F0)     0 = Read keyboard
  EQUW SetScreenRange    \            241 (&F1)     1 = Set max/min screen addrs
- EQUW SAFE              \            242 (&F2)     2 = Do nothing
+ EQUW ScanKeyboard      \            242 (&F2)     2 = Scan keyboard
  EQUW SAFE              \            243 (&F3)     3 = Do nothing
  EQUW SAFE              \            244 (&F4)     4 = Do nothing
  EQUW SAFE              \            245 (&F5)     5 = Do nothing
@@ -970,7 +970,8 @@ ENDMACRO
 \       Name: ReadKeyboard
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Implement the OSWORD 240 command (scan the keyboard)
+\    Summary: Implement the OSWORD 240 command (read the keyboard for flight
+\             keys)
 \
 \ ------------------------------------------------------------------------------
 \
@@ -1039,6 +1040,86 @@ ENDMACRO
 
  CPY #1                 \ Loop back until we have processed all the keys
  BNE DKL2
+
+ RTS                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name: ScanKeyboard
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Implement the OSWORD 242 command (scan the keyboard for any key
+\             press)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   OSSC                The address of the table in which to log the key presses
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   OSSC                The table is updated as follows:
+\
+\                         * Byte #2: A key is being pressed (0 = no, &FF = yes)
+\
+\ ******************************************************************************
+
+.ScanKeyboard
+
+ LDA #16                \ We start scanning from internal key number 16 ("Q"),
+                        \ so we set A as a loop counter
+
+ SED                    \ Set the D flag to enter decimal mode. Because
+                        \ internal key numbers are all valid BCD (Binary Coded
+                        \ Decimal) numbers, setting this flag ensures we only
+                        \ loop through valid key numbers. To put this another
+                        \ way, when written in hexadecimal, internal key numbers
+                        \ only use the digits 0-9 and none of the letters A-F,
+                        \ and setting the D flag makes the following loop
+                        \ iterate through the following values of A:
+                        \
+                        \ &10, &11, &12, &13, &14, &15, &16, &17, &18, &19,
+                        \ &20, &21, &22, &23, &24, &25, &26, &27, &28, &29,
+                        \ &30, &31...
+                        \
+                        \ and so on up to &79, and then &80, at which point the
+                        \ loop terminates. This lets us efficiently work our
+                        \ way through all the internal key numbers without
+                        \ wasting time on numbers that aren't valid in BCD
+
+.DKL3
+
+ DKS4                   \ Include macro DKS4 to check whether the key in A is
+                        \ being pressed, and if it is, set bit 7 of A
+
+ TAX                    \ Copy the key press result into X
+
+ BMI DK1                \ If bit 7 is set, i.e. the key is being pressed, skip
+                        \ to DK1
+
+ CLC                    \ Otherwise this key is not being pressed, so increment
+ ADC #1                 \ the loop counter in A. We couldn't use an INX or INY
+                        \ instruction here because the only instructions that
+                        \ support decimal mode are ADC and SBC. INX and INY
+                        \ always increment in binary mode, whatever the setting
+                        \ of the D flag, so instead we have to use an ADC
+
+ BPL DKL3               \ Loop back to test the next key, ending the loop when
+                        \ A is negative (i.e. A = &80 = 128 = %10000000)
+
+.DK1
+
+ CLD                    \ Clear the D flag to return to binary mode
+
+ EOR #%10000000         \ EOR A with #%10000000 to flip bit 7, so A now contains
+                        \ 0 if no key has been pressed, or the internal key
+                        \ number if a key has been pressed
+
+ LDY #2                 \ Stores the "other key" result in byte #2 of the block
+ STA (OSSC),Y           \ pointed to by OSSC
 
  RTS                    \ Return from the subroutine
 

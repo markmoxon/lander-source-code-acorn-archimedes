@@ -89,6 +89,7 @@
 
  Tube_ReadKeyboard = 240            \ OSWORD calls to the I/O processor
  Tube_SendScreenRange = 241
+ Tube_ScanKeyboard = 242
 
                                     \ --- End of added code ------------------->
 
@@ -2825,8 +2826,8 @@
  SWI     OS_WriteC                  \ row 16, halfway down the screen
 
  SWI     OS_WriteS                  \ Print the Game Over message
- EQUS    "GAME OVER - press "
- EQUS    "Space to start again"
+ EQUS    "GAME OVER - press a "
+ EQUS    "key to start again"
  EQUB    0
  ALIGN
 
@@ -2857,7 +2858,7 @@
  BL      SwitchScreenBank           \ Switch screen banks and clear the newly
                                     \ hidden screen bank to black
 
- BL      WaitForSpace               \ Wait for Space to be pressed
+ BL      WaitForKeyPress            \ Wait for a key to be pressed
 
  BL      DrawFullFuelBarInBothBanks \ Draw the full fuel bar in both banks, so
                                     \ we can just update the changes during the
@@ -13749,24 +13750,24 @@
 
 \ ******************************************************************************
 \
-\       Name: WaitForSpace
+\       Name: WaitForKeyPress
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Wait for Space to be pressed
+\    Summary: Wait for a key to be pressed
 \
 \ ******************************************************************************
 
                                     \ --- Mod: Code added for AES ------------->
 
-.WaitForSpace
+.WaitForKeyPress
 
  ADR     R1, keyBuffer              \ Read the keyboard state into keyBuffer
- MOV     R0, #Tube_ReadKeyboard
+ MOV     R0, #Tube_ScanKeyboard
  SWI     OS_Word
 
- LDRB    R2, keyBuffer+4            \ If Space was not pressed then loop back to
- TEQ     R2, #&FF                   \ keep checking the keyboard
- BNE     WaitForSpace
+ LDRB    R2, keyBuffer+2            \ If no key was pressed then loop back to
+ CMP     R2, #0                     \ keep checking the keyboard
+ BEQ     WaitForKeyPress
 
  MOV     PC, R14                    \ Return from the subroutine
 

@@ -17,6 +17,7 @@
 .set Tube_AddPixels, 135
 .set Tube_ReadKeyboard, 240
 .set Tube_SendScreenRange, 241
+.set Tube_ScanKeyboard, 242
 .set STORE, 256 * (TILES_X / 32)
 .set LAUNCHPAD_Y, LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y
 .set LAUNCHPAD_SIZE, TILE_SIZE * 8
@@ -574,12 +575,12 @@ GameOver:
  MOV     R0, #16
  SWI     OS_WriteC
  SWI     OS_WriteS
-.byte    "GAME OVER - press "
-.byte    "Space to start again"
+.byte    "GAME OVER - press a "
+.byte    "key to start again"
 .byte    0
 .balign 4
  BL      SwitchScreenBank
- BL      WaitForSpace
+ BL      WaitForKeyPress
  BL      DrawFullFuelBarInBothBanks
  B       StartNewGame
 graphicsBuffEndAddr2:
@@ -2981,13 +2982,13 @@ keyBuffer:
 .byte 0
 .byte 0
 .balign 4
-WaitForSpace:
+WaitForKeyPress:
  ADR     R1, keyBuffer
- MOV     R0, #Tube_ReadKeyboard
+ MOV     R0, #Tube_ScanKeyboard
  SWI     OS_Word
- LDRB    R2, keyBuffer+4
- TEQ     R2, #0xFF
- BNE     WaitForSpace
+ LDRB    R2, keyBuffer+2
+ CMP     R2, #0
+ BEQ     WaitForKeyPress
  MOV     PC, R14
 ReadKeyboardMouseButtons:
  MOV     R2, #0
