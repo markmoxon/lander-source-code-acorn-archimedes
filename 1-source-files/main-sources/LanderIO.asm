@@ -52,6 +52,8 @@
                         \ such as the video ULA, 6845 CRTC and 6522 VIAs (also
                         \ known as SHEILA)
 
+ NVOSWRCH = &FFCB       \ The address for the non-vectored OSWRCH routine
+
  OSWRCH = &FFEE         \ The address for the OSWRCH routine
 
  OSBYTE = &FFF4         \ The address for the OSBYTE routine
@@ -180,11 +182,6 @@
  LDX #1                 \ cursor editing, so the cursor keys return ASCII values
  LDY #0                 \ and can therefore be used in-game
  JSR OSBYTE
-
- LDA WRCHV              \ Store the current WRCHV vector in OHMYGOD(4 3)
- STA OHMYGOD+3
- LDA WRCHV+1
- STA OHMYGOD+4
 
  LDA WORDV              \ Store the current WORDV vector in notours(2 1)
  STA notours+1
@@ -330,10 +327,17 @@
 
  LDX SC                 \ Retrieve X from SC
 
- JMP OSWRCH             \ Jump to OSWRCH to print the character in A, returning
-                        \ from the subroutine using a tail call (this address is
-                        \ updated in STARTUP to point to the original OSWRCH
-                        \ routine)
+                        \ --- Mod: Code removed for AES: ---------------------->
+
+\JMP TT26               \ Jump to TT26 to print the character in A, returning
+\                       \ from the subroutine using a tail call
+
+                        \ --- And replaced by: -------------------------------->
+
+ JMP NVOSWRCH           \ Jump to the non-vectored OSWRCH to print the character
+                        \ in A, returning from the subroutine using a tail call
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
