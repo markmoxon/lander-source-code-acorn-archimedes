@@ -3045,7 +3045,7 @@ bdec1:
  BCS     bdec1
  CMP     R3, #0
  ADDNE   R4, R3, #0x30
- STRBNE  R4, [R1, R2]
+ STRNEB  R4, [R1, R2]
  ADDNE   R2, R2, #1
  MOVNE   R5, #1
  MOV     R3, #0
@@ -3056,7 +3056,7 @@ bdec2:
  BCS     bdec2
  ORRS    R4, R3, R5
  ADDNE   R4, R3, #0x30
- STRBNE  R4, [R1, R2]
+ STRNEB  R4, [R1, R2]
  ADDNE   R2, R2, #1
  MOVNE   R5, #1
  MOV     R3, #0
@@ -3067,7 +3067,7 @@ bdec3:
  BCS     bdec3
  ORRS    R4, R3, R5
  ADDNE   R4, R3, #0x30
- STRBNE  R4, [R1, R2]
+ STRNEB  R4, [R1, R2]
  ADDNE   R2, R2, #1
  MOVNE   R5, #1
  ADD     R3, R0, #0x30

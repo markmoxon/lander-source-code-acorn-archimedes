@@ -13962,14 +13962,14 @@
 
 .bdec1
 
- CMP     R0, #1000                  \ Calculate the 1000s digit
+ CMP     R0, #1000                  \ Calculate the 1000s digit in R3
  SUBCS   R0, R0, #1000
  ADDCS   R3, R3, #1
  BCS     bdec1
 
  CMP     R3, #0                     \ If it is non-zero, convert the digit to a
  ADDNE   R4, R3, #&30               \ string by adding the ASCII value of "0"
- STRBNE  R4, [R1, R2]               \ (ASCII &30) and store it in the string at
+ STRNEB  R4, [R1, R2]               \ (ASCII &30) and store it in the string at
  ADDNE   R2, R2, #1                 \ R1 with offset R2, incrementing the offset
  MOVNE   R5, #1                     \ and setting R5 to 1 to indicate we have
                                     \ printed a digit
@@ -13980,7 +13980,7 @@
 
 .bdec2
 
- CMP     R0, #100                   \ Calculate the 100s digit
+ CMP     R0, #100                   \ Calculate the 100s digit in R3
  SUBCS   R0, R0, #100
  ADDCS   R3, R3, #1
  BCS     bdec2
@@ -13990,13 +13990,13 @@
                                     \ haven't yet displayed anything
 
  ADDNE   R4, R3, #&30               \ Digit is non-zero so convert the digit to
- STRBNE  R4, [R1, R2]               \ a string by adding the ASCII value of "0"
+ STRNEB  R4, [R1, R2]               \ a string by adding the ASCII value of "0"
  ADDNE   R2, R2, #1                 \ (ASCII &30) and store it in the string at
  MOVNE   R5, #1                     \ R1 with offset R2, incrementing the offset
                                     \ and setting R5 to 1 to indicate we have
                                     \ printed a digit
 
-                                    \ Now for the 10s digit
+                                    \ Now for the 10s digit in R3
 
  MOV     R3, #0                     \ Set R3 to zero to tally the 10s digit
 
@@ -14012,7 +14012,7 @@
                                     \ haven't yet displayed anything
 
  ADDNE   R4, R3, #&30               \ Digit is non-zero so convert the digit to
- STRBNE  R4, [R1, R2]               \ a string by adding the ASCII value of "0"
+ STRNEB  R4, [R1, R2]               \ a string by adding the ASCII value of "0"
  ADDNE   R2, R2, #1                 \ (ASCII &30) and store it in the string at
  MOVNE   R5, #1                     \ R1 with offset R2, incrementing the offset
                                     \ and setting R5 to 1 to indicate we have
