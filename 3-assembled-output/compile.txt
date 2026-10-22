@@ -11651,7 +11651,7 @@ ZP workspace (I/O processor) from &80 to &8A inclusive
      2534   00
      2535   13
      2536   01
-     2537   01
+     2537   05
      2538   00
      2539   00
      253A   00
