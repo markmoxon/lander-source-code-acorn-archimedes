@@ -11507,10 +11507,10 @@ ZP workspace (I/O processor) from &80 to &8A inclusive
      2429   A0 00      LDY #&00
      242B   20 F4 FF   JSR &FFF4
      242E   AD 0C 02   LDA &020C
-     2431   8D C4 25   STA &25C4
+     2431   8D CE 25   STA &25CE
      2434   AD 0D 02   LDA &020D
-     2437   8D C5 25   STA &25C5
-     243A   A9 9F      LDA #&9F
+     2437   8D CF 25   STA &25CF
+     243A   A9 A9      LDA #&A9
      243C   78         SEI
      243D   8D 0C 02   STA &020C
      2440   A9 25      LDA #&25
@@ -11548,11 +11548,11 @@ ZP workspace (I/O processor) from &80 to &8A inclusive
 .JMPTAB
      247E   5B 24
      2480   5B 24
-     2482   44 25
-     2484   38 25
+     2482   4E 25
+     2484   42 25
      2486   A6 24
-     2488   BC 24
-     248A   FF 24
+     2488   C6 24
+     248A   09 25
      248C   5B 24
      248E   5B 24
      2490   5B 24
@@ -11571,259 +11571,263 @@ ZP workspace (I/O processor) from &80 to &8A inclusive
      24A9   4C 59 24   JMP &2459
 .SetScreenBankToA
      24AC   C9 00      CMP #&00
-     24AE   D0 06      BNE &24B6
-     24B0   A9 06      LDA #&06
-     24B2   8D 34 FE   STA &FE34
-     24B5   60         RTS
+     24AE   D0 0B      BNE &24BB
+     24B0   AD 34 FE   LDA &FE34
+     24B3   29 F8      AND #&F8
+     24B5   09 06      ORA #&06
+     24B7   8D 34 FE   STA &FE34
+     24BA   60         RTS
 .sban1
-     24B6   A9 01      LDA #&01
-     24B8   8D 34 FE   STA &FE34
-     24BB   60         RTS
+     24BB   AD 34 FE   LDA &FE34
+     24BE   29 F8      AND #&F8
+     24C0   09 01      ORA #&01
+     24C2   8D 34 FE   STA &FE34
+     24C5   60         RTS
 .ClearScreen
-     24BC   20 AC 24   JSR &24AC
-     24BF   AD 3D 26   LDA &263D
-     24C2   85 84      STA &84
-     24C4   AD 3E 26   LDA &263E
-     24C7   85 85      STA &85
-     24C9   A0 00      LDY #&00
-     24CB   98         TYA
+     24C6   20 AC 24   JSR &24AC
+     24C9   AD 47 26   LDA &2647
+     24CC   85 84      STA &84
+     24CE   AD 48 26   LDA &2648
+     24D1   85 85      STA &85
+     24D3   A0 00      LDY #&00
+     24D5   98         TYA
 .clsc1
-     24CC   91 84      STA (&84),Y
-     24CE   E6 84      INC &84
-     24D0   D0 FA      BNE &24CC
-     24D2   E6 85      INC &85
-     24D4   AD 40 26   LDA &2640
-     24D7   38         SEC
-     24D8   E5 85      SBC &85
-     24DA   F0 0E      BEQ &24EA
-     24DC   AA         TAX
-     24DD   A0 00      LDY #&00
-     24DF   98         TYA
+     24D6   91 84      STA (&84),Y
+     24D8   E6 84      INC &84
+     24DA   D0 FA      BNE &24D6
+     24DC   E6 85      INC &85
+     24DE   AD 4A 26   LDA &264A
+     24E1   38         SEC
+     24E2   E5 85      SBC &85
+     24E4   F0 0E      BEQ &24F4
+     24E6   AA         TAX
+     24E7   A0 00      LDY #&00
+     24E9   98         TYA
 .clsc2
-     24E0   91 84      STA (&84),Y
-     24E2   88         DEY
-     24E3   D0 FB      BNE &24E0
-     24E5   E6 85      INC &85
-     24E7   CA         DEX
-     24E8   D0 F6      BNE &24E0
+     24EA   91 84      STA (&84),Y
+     24EC   88         DEY
+     24ED   D0 FB      BNE &24EA
+     24EF   E6 85      INC &85
+     24F1   CA         DEX
+     24F2   D0 F6      BNE &24EA
 .clsc3
-     24EA   AD 3F 26   LDA &263F
-     24ED   38         SEC
-     24EE   E5 84      SBC &84
-     24F0   F0 0A      BEQ &24FC
-     24F2   A8         TAY
-     24F3   A9 00      LDA #&00
+     24F4   AD 49 26   LDA &2649
+     24F7   38         SEC
+     24F8   E5 84      SBC &84
+     24FA   F0 0A      BEQ &2506
+     24FC   A8         TAY
+     24FD   A9 00      LDA #&00
 .clsc4
-     24F5   91 84      STA (&84),Y
-     24F7   88         DEY
-     24F8   D0 FB      BNE &24F5
-     24FA   91 84      STA (&84),Y
+     24FF   91 84      STA (&84),Y
+     2501   88         DEY
+     2502   D0 FB      BNE &24FF
+     2504   91 84      STA (&84),Y
 .clsc5
-     24FC   4C 59 24   JMP &2459
+     2506   4C 59 24   JMP &2459
 .SetScreenMode
-     24FF   A9 19      LDA #&19
-     2501   85 84      STA &84
-     2503   A9 25      LDA #&25
-     2505   85 85      STA &85
-     2507   A0 00      LDY #&00
+     2509   A9 23      LDA #&23
+     250B   85 84      STA &84
+     250D   A9 25      LDA #&25
+     250F   85 85      STA &85
+     2511   A0 00      LDY #&00
 .mode1
-     2509   B1 84      LDA (&84),Y
-     250B   C9 FF      CMP #&FF
-     250D   F0 07      BEQ &2516
-     250F   20 7B 24   JSR &247B
-     2512   C8         INY
-     2513   4C 09 25   JMP &2509
+     2513   B1 84      LDA (&84),Y
+     2515   C9 FF      CMP #&FF
+     2517   F0 07      BEQ &2520
+     2519   20 7B 24   JSR &247B
+     251C   C8         INY
+     251D   4C 13 25   JMP &2513
 .mode2
-     2516   4C 59 24   JMP &2459
+     2520   4C 59 24   JMP &2459
 .B%
-     2519   16
-     251A   81
-     251B   17
-     251C   00
-     251D   0A
-     251E   20
-     251F   00
-     2520   00
-     2521   00
-     2522   00
-     2523   00
-     2524   00
-     2525   13
-     2526   01
-     2527   05
-     2528   00
+     2523   16
+     2524   81
+     2525   17
+     2526   00
+     2527   0A
+     2528   20
      2529   00
      252A   00
-     252B   13
-     252C   02
-     252D   02
+     252B   00
+     252C   00
+     252D   00
      252E   00
-     252F   00
-     2530   00
-     2531   13
-     2532   03
-     2533   04
+     252F   13
+     2530   01
+     2531   05
+     2532   00
+     2533   00
      2534   00
-     2535   00
-     2536   00
-     2537   FF
+     2535   13
+     2536   02
+     2537   02
+     2538   00
+     2539   00
+     253A   00
+     253B   13
+     253C   03
+     253D   04
+     253E   00
+     253F   00
+     2540   00
+     2541   FF
 .BEGINLIN
-     2538   85 8A      STA &8A
-     253A   A9 00      LDA #&00
-     253C   85 89      STA &89
-     253E   A9 82      LDA #&82
-     2540   4C 5B 24   JMP &245B
+     2542   85 8A      STA &8A
+     2544   A9 00      LDA #&00
+     2546   85 89      STA &89
+     2548   A9 82      LDA #&82
+     254A   4C 5B 24   JMP &245B
 .RTS1
-     2543   60         RTS
+     254D   60         RTS
 .ADDBYT
-     2544   E6 89      INC &89
-     2546   A6 89      LDX &89
-     2548   9D FF 22   STA &22FF,X
-     254B   E8         INX
-     254C   E4 8A      CPX &8A
-     254E   90 F3      BCC &2543
-     2550   A2 00      LDX #&00
-     2552   C6 8A      DEC &8A
+     254E   E6 89      INC &89
+     2550   A6 89      LDX &89
+     2552   9D FF 22   STA &22FF,X
+     2555   E8         INX
+     2556   E4 8A      CPX &8A
+     2558   90 F3      BCC &254D
+     255A   A2 00      LDX #&00
+     255C   C6 8A      DEC &8A
 .LL27
-     2554   84 86      STY &86
-     2556   BD 00 23   LDA &2300,X
-     2559   85 82      STA &82
-     255B   BD 01 23   LDA &2301,X
-     255E   85 83      STA &83
-     2560   BD 02 23   LDA &2302,X
-     2563   85 84      STA &84
-     2565   BD 03 23   LDA &2303,X
-     2568   85 85      STA &85
-     256A   A0 00      LDY #&00
-     256C   B1 82      LDA (&82),Y
-     256E   25 85      AND &85
-     2570   05 84      ORA &84
-     2572   91 82      STA (&82),Y
-     2574   E8         INX
-     2575   E8         INX
-     2576   E8         INX
-     2577   E8         INX
-     2578   E4 8A      CPX &8A
-     257A   90 D8      BCC &2554
+     255E   84 86      STY &86
+     2560   BD 00 23   LDA &2300,X
+     2563   85 82      STA &82
+     2565   BD 01 23   LDA &2301,X
+     2568   85 83      STA &83
+     256A   BD 02 23   LDA &2302,X
+     256D   85 84      STA &84
+     256F   BD 03 23   LDA &2303,X
+     2572   85 85      STA &85
+     2574   A0 00      LDY #&00
+     2576   B1 82      LDA (&82),Y
+     2578   25 85      AND &85
+     257A   05 84      ORA &84
+     257C   91 82      STA (&82),Y
+     257E   E8         INX
+     257F   E8         INX
+     2580   E8         INX
+     2581   E8         INX
+     2582   E4 8A      CPX &8A
+     2584   90 D8      BCC &255E
 .DRLR1
-     257C   4C 59 24   JMP &2459
+     2586   4C 59 24   JMP &2459
 .OSWVECS
-     257F   CE 25
-     2581   23 26
-     2583   F9 25
-     2585   C2 25
-     2587   C2 25
-     2589   C2 25
-     258B   C2 25
-     258D   C2 25
-     258F   C2 25
-     2591   C2 25
-     2593   C2 25
-     2595   C2 25
-     2597   C2 25
-     2599   C2 25
-     259B   C2 25
-     259D   C2 25
+     2589   D8 25
+     258B   2D 26
+     258D   03 26
+     258F   CC 25
+     2591   CC 25
+     2593   CC 25
+     2595   CC 25
+     2597   CC 25
+     2599   CC 25
+     259B   CC 25
+     259D   CC 25
+     259F   CC 25
+     25A1   CC 25
+     25A3   CC 25
+     25A5   CC 25
+     25A7   CC 25
 .NWOSWD
-     259F   C9 F0      CMP #&F0
-     25A1   90 20      BCC &25C3
-     25A3   86 80      STX &80
-     25A5   84 81      STY &81
-     25A7   48         PHA
-     25A8   E9 F0      SBC #&F0
-     25AA   0A         ASL A
-     25AB   AA         TAX
-     25AC   BD 7F 25   LDA &257F,X
-     25AF   8D BB 25   STA &25BB
-     25B2   BD 80 25   LDA &2580,X
-     25B5   8D BC 25   STA &25BC
-     25B8   A6 80      LDX &80
+     25A9   C9 F0      CMP #&F0
+     25AB   90 20      BCC &25CD
+     25AD   86 80      STX &80
+     25AF   84 81      STY &81
+     25B1   48         PHA
+     25B2   E9 F0      SBC #&F0
+     25B4   0A         ASL A
+     25B5   AA         TAX
+     25B6   BD 89 25   LDA &2589,X
+     25B9   8D C5 25   STA &25C5
+     25BC   BD 8A 25   LDA &258A,X
+     25BF   8D C6 25   STA &25C6
+     25C2   A6 80      LDX &80
 .JSRV
-     25BA   20 FC FF   JSR &FFFC
-     25BD   68         PLA
-     25BE   A6 80      LDX &80
-     25C0   A4 81      LDY &81
+     25C4   20 FC FF   JSR &FFFC
+     25C7   68         PLA
+     25C8   A6 80      LDX &80
+     25CA   A4 81      LDY &81
 .SAFE
-     25C2   60         RTS
+     25CC   60         RTS
 .notours
-     25C3   4C FC FF   JMP &FFFC
+     25CD   4C FC FF   JMP &FFFC
 .KYTB
-     25C6   70
-     25C7   68
-     25C8   62
-     25C9   66
-     25CA   67
-     25CB   42
-     25CC   51
-     25CD   41
+     25D0   70
+     25D1   68
+     25D2   62
+     25D3   66
+     25D4   67
+     25D5   42
+     25D6   51
+     25D7   41
 .KEYBOARD
-     25CE   A0 09      LDY #&09
+     25D8   A0 09      LDY #&09
 .DKL2
-     25D0   B9 C4 25   LDA &25C4,Y
+     25DA   B9 CE 25   LDA &25CE,Y
 Macro DKS4:
-     25D3   A2 03      LDX #&03
-     25D5   78         SEI
-     25D6   8E 40 FE   STX &FE40
-     25D9   A2 7F      LDX #&7F
-     25DB   8E 43 FE   STX &FE43
-     25DE   8D 4F FE   STA &FE4F
-     25E1   AD 4F FE   LDA &FE4F
-     25E4   A2 0B      LDX #&0B
-     25E6   8E 40 FE   STX &FE40
-     25E9   58         CLI
+     25DD   A2 03      LDX #&03
+     25DF   78         SEI
+     25E0   8E 40 FE   STX &FE40
+     25E3   A2 7F      LDX #&7F
+     25E5   8E 43 FE   STX &FE43
+     25E8   8D 4F FE   STA &FE4F
+     25EB   AD 4F FE   LDA &FE4F
+     25EE   A2 0B      LDX #&0B
+     25F0   8E 40 FE   STX &FE40
+     25F3   58         CLI
 End macro DKS4
-     25EA   0A         ASL A
-     25EB   A9 00      LDA #&00
-     25ED   69 FF      ADC #&FF
-     25EF   49 FF      EOR #&FF
-     25F1   91 80      STA (&80),Y
-     25F3   88         DEY
-     25F4   C0 01      CPY #&01
-     25F6   D0 D8      BNE &25D0
-     25F8   60         RTS
+     25F4   0A         ASL A
+     25F5   A9 00      LDA #&00
+     25F7   69 FF      ADC #&FF
+     25F9   49 FF      EOR #&FF
+     25FB   91 80      STA (&80),Y
+     25FD   88         DEY
+     25FE   C0 01      CPY #&01
+     2600   D0 D8      BNE &25DA
+     2602   60         RTS
 .ScanKeyboard
-     25F9   A9 10      LDA #&10
-     25FB   F8         SED
+     2603   A9 10      LDA #&10
+     2605   F8         SED
 .DKL3
 Macro DKS4:
-     25FC   A2 03      LDX #&03
-     25FE   78         SEI
-     25FF   8E 40 FE   STX &FE40
-     2602   A2 7F      LDX #&7F
-     2604   8E 43 FE   STX &FE43
-     2607   8D 4F FE   STA &FE4F
-     260A   AD 4F FE   LDA &FE4F
-     260D   A2 0B      LDX #&0B
-     260F   8E 40 FE   STX &FE40
-     2612   58         CLI
+     2606   A2 03      LDX #&03
+     2608   78         SEI
+     2609   8E 40 FE   STX &FE40
+     260C   A2 7F      LDX #&7F
+     260E   8E 43 FE   STX &FE43
+     2611   8D 4F FE   STA &FE4F
+     2614   AD 4F FE   LDA &FE4F
+     2617   A2 0B      LDX #&0B
+     2619   8E 40 FE   STX &FE40
+     261C   58         CLI
 End macro DKS4
-     2613   AA         TAX
-     2614   30 05      BMI &261B
-     2616   18         CLC
-     2617   69 01      ADC #&01
-     2619   10 E1      BPL &25FC
+     261D   AA         TAX
+     261E   30 05      BMI &2625
+     2620   18         CLC
+     2621   69 01      ADC #&01
+     2623   10 E1      BPL &2606
 .DK1
-     261B   D8         CLD
-     261C   49 80      EOR #&80
-     261E   A0 02      LDY #&02
-     2620   91 80      STA (&80),Y
-     2622   60         RTS
+     2625   D8         CLD
+     2626   49 80      EOR #&80
+     2628   A0 02      LDY #&02
+     262A   91 80      STA (&80),Y
+     262C   60         RTS
 .SetScreenRange
-     2623   A0 02      LDY #&02
-     2625   B1 80      LDA (&80),Y
-     2627   8D 3D 26   STA &263D
-     262A   C8         INY
-     262B   B1 80      LDA (&80),Y
-     262D   8D 3E 26   STA &263E
-     2630   C8         INY
-     2631   B1 80      LDA (&80),Y
-     2633   8D 3F 26   STA &263F
-     2636   C8         INY
-     2637   B1 80      LDA (&80),Y
-     2639   8D 40 26   STA &2640
-     263C   60         RTS
+     262D   A0 02      LDY #&02
+     262F   B1 80      LDA (&80),Y
+     2631   8D 47 26   STA &2647
+     2634   C8         INY
+     2635   B1 80      LDA (&80),Y
+     2637   8D 48 26   STA &2648
+     263A   C8         INY
+     263B   B1 80      LDA (&80),Y
+     263D   8D 49 26   STA &2649
+     2640   C8         INY
+     2641   B1 80      LDA (&80),Y
+     2643   8D 4A 26   STA &264A
+     2646   60         RTS
 .minScreenAddr
-     263D   80 37
+     2647   80 37
 .maxScreenAddr
-     263F   FF 7F
+     2649   FF 7F
 Saving file '3-assembled-output/Lander.bin'

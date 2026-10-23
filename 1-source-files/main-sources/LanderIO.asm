@@ -479,10 +479,10 @@
                         \ Display main memory on screen and switch drawing to
                         \ shadow RAM
 
- LDA #%00000110         \ Set bits 1 and 2 of the Access Control Register at
- STA VIA+&34            \ SHEILA &34 to switch shadow RAM into &3000-&7FFF and
-                        \ switch drawing to shadow RAM
-                        \
+ LDA VIA+&34            \ Set bits 1 and 2 of the Access Control Register at
+ AND #%11111000         \ SHEILA &34 to switch shadow RAM into &3000-&7FFF and
+ ORA #%00000110         \ switch drawing to shadow RAM
+ STA VIA+&34            \
                         \ Clear bit 0 to display main memory on screen
 
  RTS                    \ Return from the subroutine
@@ -492,10 +492,10 @@
                         \ Display shadow RAM on screen and switch drawing to
                         \ main memory
 
- LDA #%00000001         \ Clear bits 1 and 2 of the Access Control Register at
- STA VIA+&34            \ SHEILA &34 to switch main memory into &3000-&7FFF and
-                        \ switch drawing to main memory
-                        \
+ LDA VIA+&34            \ Clear bits 1 and 2 of the Access Control Register at
+ AND #%11111000         \ SHEILA &34 to switch main memory into &3000-&7FFF and
+ ORA #%00000001         \ switch drawing to main memory
+ STA VIA+&34            \
                         \ Set bit 0 to display shadow RAM on screen
 
  RTS                    \ Return from the subroutine
