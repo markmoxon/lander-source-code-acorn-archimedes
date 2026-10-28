@@ -40,6 +40,8 @@ See the [introduction](#introduction) for more information.
 
 * [Extending the landscape with BigLander](#extending-the-landscape-with-biglander)
 
+* [Lander on the ARM Evaluation System](#lander-on-the-arm-evaluation-system)
+
 * [Building Lander from the source](#building-lander-from-the-source)
 
   * [Requirements](#requirements)
@@ -142,7 +144,17 @@ BigLander should work on all versions of RISC OS, but to get it working on a Ras
 
 If BigLander on your Pi is blurry, you can change the GPU upscaler method. Edit the CONFIG/TXT in !Boot.Loader and add `scaling_kernel=8` on a new line before rebooting. This will probably make your desktop a bit messy, but BigLander should now look pretty great (and you can remove the line to go back to blurry BigLander and a crisp desktop).
 
-For more information on BigLander, see the [accompanying website](https://lander.bbcelite.com/deep_dives/hacking_the_landscape.html).
+For more information on BigLander, see the [accompanying website](https://lander.bbcelite.com/hacks/big_lander/).
+
+## Lander on the ARM Evaluation System
+
+This repository also includes a version of Lander for the ARM Evaluation System (AES). The AES code is in a separate branch called `arm-evaluation-system`, and apart from the code differences to make Lander work across the Tube, this branch is identical to the main branch and the same build process applies.
+
+The main difference is that the AES version of Lander comes on an SSD disc image. This is suitable for loading into a real BBC Master with either an ARM Evaluation System or an emulated co-processor system like a PiTubeDirect or LX9. It is also suitable for emulators that support the BBC Master and the ARM Evaluation System. Note that a BBC Master is required; the BBC Micro is not supported as shadow RAM is required.
+
+The annotated source files in the `arm-evaluation-system` branch contain both the original Lander code and all of the modifications for the AES, so you can look through the source to see exactly what's changed. Any code that I've removed from the original version is commented out in the source files, so when they are assembled they produce the AES-compatible binaries, while still containing details of all the modifications. You can find all the diffs by searching the sources for `Mod:`.
+
+For more information on Lander on the ARM Evaluation System, see the [accompanying website](https://lander.bbcelite.com/hacks/arm_evaluation_system_lander/).
 
 ## Building Lander from the source
 
