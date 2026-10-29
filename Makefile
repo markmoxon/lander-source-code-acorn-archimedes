@@ -69,7 +69,8 @@ ifeq ($(OS), Windows_NT)
 	move !Lander.zip "5-compiled-game-discs\zip\"
 	rmdir /q /s !Lander
 
-	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome Welcome
+	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome\Game Welcome\Game
+	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome\Library Welcome\Library
 	tar -ca --exclude ".*" -f Game.zip Welcome
 	move Game.zip "5-compiled-game-discs\zip\"
 	rmdir /q /s Welcome
