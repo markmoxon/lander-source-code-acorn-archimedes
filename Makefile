@@ -41,11 +41,13 @@ all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
 ifeq ($(OS), Windows_NT)
-	del /q /f 5-compiled-game-discs\arthur\Game\*
-	del /q /f 5-compiled-game-discs\riscos\!Lander\*
+	del /q /f 5-compiled-game-discs\arthur\Welcome\Game\*
+	del /q /f 5-compiled-game-discs\arthur\Welcome\Library\*
+	del /q /f 5-compiled-game-discs\riscos\!BigLander\*
 	del /q /f 5-compiled-game-discs\zip\*
 else
-	rm -fr 5-compiled-game-discs/arthur/Game/*
+	rm -fr 5-compiled-game-discs/arthur/Welcome/Game/*
+	rm -fr 5-compiled-game-discs/arthur/Welcome/Library/*
 	rm -fr 5-compiled-game-discs/riscos/!BigLander/*
 	rm -fr 5-compiled-game-discs/zip/*
 endif
@@ -53,13 +55,17 @@ endif
 	$(VASM) -a2 -m2 -quiet -Fbin -DTILES_X=${x} -DTILES_Z=${z} -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
 
 ifeq ($(OS), Windows_NT)
-	copy 3-assembled-output\GameCode.inf 5-compiled-game-discs\arthur\Game\GameCode.inf
-	copy "1-source-files\other-sources\arthur\Lander,ffb" "5-compiled-game-discs\arthur\Game\Lander,ffb"
-	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\arthur\Game\GameCode
+	copy "1-source-files\other-sources\arthur\BigLander,ffb" "5-compiled-game-discs\arthur\Welcome\Game\BigLander,ffb"
+	copy 3-assembled-output\GameCode.inf 5-compiled-game-discs\arthur\Welcome\Game\GameCode.inf
+	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\arthur\Welcome\Game\GameCode
+	copy "1-source-files\other-sources\arthur\UseDeskTop,ffe" "5-compiled-game-discs\arthur\Welcome\Library\UseDeskTop,ffe"
+	copy "1-source-files\other-sources\arthur\UseGame,ffe" "5-compiled-game-discs\arthur\Welcome\Library\UseGame,ffe"
 else
-	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Game/GameCode.inf
-	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/arthur/Game/BigLander,ffb
-	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/Game/GameCode
+	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/arthur/Welcome/Game/BigLander,ffb
+	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Welcome/Game/GameCode.inf
+	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/Welcome/Game/GameCode
+	cp 1-source-files/other-sources/arthur/UseDeskTop,ffe 5-compiled-game-discs/arthur/Welcome/Library/UseDeskTop,ffe
+	cp 1-source-files/other-sources/arthur/UseGame,ffe 5-compiled-game-discs/arthur/Welcome/Library/UseGame,ffe
 endif
 
 	@$(PYTHON) 2-build-files/export-symbols.py
@@ -93,10 +99,11 @@ ifeq ($(OS), Windows_NT)
 	move !BigLander.zip "5-compiled-game-discs\zip\"
 	rmdir /q /s !BigLander
 
-	xcopy /q /y /i 5-compiled-game-discs\arthur\Game Game
-	tar -ca --exclude ".*" -f Game.zip Game
+	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome\Game Welcome\Game
+	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome\Library Welcome\Library
+	tar -ca --exclude ".*" -f Game.zip Welcome
 	move Game.zip "5-compiled-game-discs\zip\"
-	rmdir /q /s Game
+	rmdir /q /s Welcome
 else
 	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/BLanderSrc,fff
 
@@ -105,10 +112,10 @@ else
 	mv \!BigLander.zip 5-compiled-game-discs/zip
 	rm -fr \!BigLander
 
-	cp -r 5-compiled-game-discs/arthur/Game .
-	zip -r Game.zip Game -x "*/.*"
+	cp -r 5-compiled-game-discs/arthur/Welcome .
+	zip -r Game.zip Welcome -x "*/.*"
 	mv Game.zip 5-compiled-game-discs/zip
-	rm -fr Game
+	rm -fr Welcome
 endif
 
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
