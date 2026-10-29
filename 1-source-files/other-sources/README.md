@@ -2,7 +2,7 @@
 
 This folder contains other source files for Lander on the Acorn Archimedes.
 
-* [arthur](arthur) contains the BBC BASIC loader for the Arthur operating system
+* [arthur](arthur) contains the BBC BASIC loader and A305 scripts for the Arthur operating system
 
 * [riscos](riscos) contains the files that make up the !Lander RISC OS application folder
 

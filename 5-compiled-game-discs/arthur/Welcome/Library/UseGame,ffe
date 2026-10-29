@@ -1,0 +1,13 @@
+*|> &.Library.UseGame
+*|
+*| This enables the user to play Lander on a 512K machine
+*|
+*CONFIGURE SCREENSIZE 20
+*CONFIGURE LANGUAGE 0
+*UNPLUG FontManager
+*UNPLUG WindowManager
+*|
+*| Now press CTRL-BREAK and then type */GAME.LANDER
+*|
+*| To reconfigure your machine to use the desktop, type */UseDeskTop
+*|

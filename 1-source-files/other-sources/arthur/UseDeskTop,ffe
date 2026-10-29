@@ -1,0 +1,12 @@
+*|> &.Library.UseDeskTop
+*|
+*| This enables the user to use the DeskTop 
+*| after playing Lander on a 512K machine
+*|
+*CONFIGURE SCREENSIZE 0
+*CONFIGURE LANGUAGE 3
+*RMREINIT FontManager
+*RMREINIT WindowManager
+*|
+*| Now press CTRL-BREAK to start up DeskTop
+*|

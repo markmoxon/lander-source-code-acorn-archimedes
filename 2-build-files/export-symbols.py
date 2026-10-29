@@ -42,7 +42,7 @@ def convert(input_file, output_file, inf_file):
     inf = "$.Gamecode        008000 " + exec_address[-6:].upper() + " " + file_size[-6:].upper()
     inf_file.write(inf)
 
-    shutil.copy("5-compiled-game-discs/arthur/Game/GameCode", "5-compiled-game-discs/arthur/Game/GameCode,8000-" + exec_address[-4:].upper())
+    shutil.copy("5-compiled-game-discs/arthur/Welcome/Game/GameCode", "5-compiled-game-discs/arthur/Welcome/Game/GameCode,8000-" + exec_address[-4:].upper())
 
 
 print("Extracting exported variables from 1-source-files/Lander.arm")
