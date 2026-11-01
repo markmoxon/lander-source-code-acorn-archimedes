@@ -584,6 +584,8 @@
 
                                     \ --- Mod: Code added for AES ------------->
 
+.BinaryEntry
+
  B       Entry                      \ Jump to Entry to start the game
 
                                     \ --- End of added code ------------------->
@@ -2295,7 +2297,6 @@
 
  LDR     R14, objectPlayerAddr      \ Set objectData to the object blueprint
  STR     R14, [R11, #objectData]    \ for the player's ship
-
 
                                     \ --- Mod: Code added for AES ------------->
 
@@ -13697,7 +13698,7 @@
 \
 \       Name: UpdateScreenAddrs
 \       Type: Subroutine
-\   Category: Drawing pixels
+\   Category: Drawing the screen
 \    Summary: Update the screen address range for clearing the screen
 \
 \ ******************************************************************************
@@ -13869,7 +13870,7 @@
 \
 \       Name: minScreenAddr
 \       Type: Variable
-\   Category: Keyboard
+\   Category: Drawing the screen
 \    Summary: The lowest screen address containing content in this frame
 \
 \ ******************************************************************************
@@ -13886,7 +13887,7 @@
 \
 \       Name: maxScreenAddr
 \       Type: Variable
-\   Category: Keyboard
+\   Category: Drawing the screen
 \    Summary: The highest screen address containing content in this frame
 \
 \ ******************************************************************************

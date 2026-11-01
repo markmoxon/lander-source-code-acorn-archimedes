@@ -427,7 +427,7 @@
 \
 \       Name: SetScreenBank
 \       Type: Subroutine
-\   Category: Screen
+\   Category: Drawing the screen
 \    Summary: Implement the #Tube_SetScreenBank <param> command (set screen bank)
 \
 \ ------------------------------------------------------------------------------
@@ -445,6 +445,8 @@
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for AES: ------------------------>
+
 .SetScreenBank
 
  JSR SetScreenBankToA   \ Switch the screen bank to the argument in A
@@ -452,11 +454,13 @@
  JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
                         \ return from the subroutine using a tail call
 
+                        \ --- End of added code ------------------------------->
+
 \ ******************************************************************************
 \
 \       Name: SetScreenBankToA
 \       Type: Subroutine
-\   Category: Screen
+\   Category: Drawing the screen
 \    Summary: Switch the screen bank according to the value of A
 \
 \ ------------------------------------------------------------------------------
@@ -470,6 +474,8 @@
 \                         * 1 = Draw into main memory, display shadow RAM
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for AES: ------------------------>
 
 .SetScreenBankToA
 
@@ -500,6 +506,8 @@
 
  RTS                    \ Return from the subroutine
 
+                        \ --- End of added code ------------------------------->
+
 \ ******************************************************************************
 \
 \       Name: ClearScreen
@@ -522,6 +530,8 @@
 \                         * 1 = Draw into main memory, display shadow RAM
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for AES: ------------------------>
 
 .ClearScreen
 
@@ -617,6 +627,8 @@
  JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
                         \ return from the subroutine using a tail call
 
+                        \ --- End of added code ------------------------------->
+
 \ ******************************************************************************
 \
 \       Name: SetScreenMode
@@ -625,6 +637,8 @@
 \    Summary: Set up the game's screen mode
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for AES: ------------------------>
 
 .SetScreenMode
 
@@ -658,6 +672,8 @@
  JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
                         \ return from the subroutine using a tail call
 
+                        \ --- End of added code ------------------------------->
+
 \ ******************************************************************************
 \
 \       Name: B%
@@ -666,6 +682,8 @@
 \    Summary: VDU commands for setting up the mode 1 screen
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for AES: ------------------------>
 
 .B%
 
@@ -700,6 +718,8 @@
  EQUB 0, 0, 0
 
  EQUB 255               \ End of commands
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -1447,7 +1467,7 @@ ENDMACRO
 \
 \       Name: SetScreenRange
 \       Type: Subroutine
-\   Category: Keyboard
+\   Category: Drawing the screen
 \    Summary: Implement the OSWORD 241 command (set the maximum and minimum
 \             address for the current frame)
 \
@@ -1485,7 +1505,7 @@ ENDMACRO
 \
 \       Name: minScreenAddr
 \       Type: Variable
-\   Category: Keyboard
+\   Category: Drawing the screen
 \    Summary: The lowest screen address containing content in this frame
 \
 \ ******************************************************************************
@@ -1502,7 +1522,7 @@ ENDMACRO
 \
 \       Name: maxScreenAddr
 \       Type: Variable
-\   Category: Keyboard
+\   Category: Drawing the screen
 \    Summary: The highest screen address containing content in this frame
 \
 \ ******************************************************************************

@@ -125,6 +125,7 @@
 .set objectMap, 0x4400 + STORE * 2
 .set buffers, 0x14400 + STORE * 2
 .org CODE
+BinaryEntry:
  B       Entry
 landscapeOffset:
 .long    -LANDSCAPE_X
