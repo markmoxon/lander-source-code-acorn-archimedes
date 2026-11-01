@@ -1178,18 +1178,26 @@ ENDMACRO
                         \ --- Mod: Code removed for AES: ---------------------->
 
 \EQUB 0                 \ Pad the table out so that the first key is at KYTB+1
-\
-\                       \ These are the primary flight controls (pitch, roll,
-\                       \ speed and lasers):
-\
-\EQUB &68 + 128         \ ?         KYTB+1      Slow down
-\EQUB &62 + 128         \ Space     KYTB+2      Speed up
-\EQUB &66 + 128         \ <         KYTB+3      Roll left
-\EQUB &67 + 128         \ >         KYTB+4      Roll right
-\EQUB &42 + 128         \ X         KYTB+5      Pull up
-\EQUB &51 + 128         \ S         KYTB+6      Pitch down
-\EQUB &41 + 128         \ A         KYTB+7      Fire lasers
-\
+
+                        \ --- And replaced by: -------------------------------->
+
+ EQUB &70               \ ESCAPE    KYTB+0      Quit
+
+                        \ --- End of replacement ------------------------------>
+
+                        \ These are the primary flight controls (pitch, roll,
+                        \ speed and lasers):
+
+ EQUB &68 + 128         \ ?         KYTB+1      Slow down
+ EQUB &62 + 128         \ Space     KYTB+2      Speed up
+ EQUB &66 + 128         \ <         KYTB+3      Roll left
+ EQUB &67 + 128         \ >         KYTB+4      Roll right
+ EQUB &42 + 128         \ X         KYTB+5      Pull up
+ EQUB &51 + 128         \ S         KYTB+6      Pitch down
+ EQUB &41 + 128         \ A         KYTB+7      Fire lasers
+
+                        \ --- Mod: Code removed for AES: ---------------------->
+
 \                       \ These are the secondary flight controls:
 \
 \EQUB &60               \ TAB       KYTB+8      Energy bomb
@@ -1206,19 +1214,7 @@ ENDMACRO
 \                       \ but because the I/O processor only uses this table for
 \                       \ the primary flight keys, this byte isn't used
 
-                        \ --- And replaced by: -------------------------------->
-
- EQUB &70               \ ESCAPE    KYTB+0      Quit
- EQUB &68               \ ?         KYTB+1      Hover
- EQUB &62               \ Space     KYTB+2      Thrust
- EQUB &66               \ <         KYTB+3      Yaw left
- EQUB &67               \ >         KYTB+4      Yaw right
- EQUB &42               \ X         KYTB+5      Pull up
- EQUB &51               \ S         KYTB+6      Pitch down
- EQUB &41               \ A         KYTB+7      Fire
-
-                        \ --- End of replacement ------------------------------>
-
+                        \ --- End of removed code ----------------------------->
 
 \ ******************************************************************************
 \

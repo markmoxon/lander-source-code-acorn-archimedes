@@ -11753,13 +11753,13 @@ ZP workspace (I/O processor) from &80 to &8A inclusive
      25CD   4C FC FF   JMP &FFFC
 .KYTB
      25D0   70
-     25D1   68
-     25D2   62
-     25D3   66
-     25D4   67
-     25D5   42
-     25D6   51
-     25D7   41
+     25D1   E8
+     25D2   E2
+     25D3   E6
+     25D4   E7
+     25D5   C2
+     25D6   D1
+     25D7   C1
 .KEYBOARD
      25D8   A0 09      LDY #&09
 .DKL2
