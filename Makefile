@@ -1,5 +1,6 @@
 VASM?=vasmarm_std
 PYTHON?=python
+DISC?=oaknut-disc
 
 # The deploy target deploys !Lander to a web server so archi.medes.live can load it
 #
@@ -16,31 +17,37 @@ all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
 ifeq ($(OS), Windows_NT)
-	del /q /f 5-compiled-game-discs\arthur\Welcome\Game\*
-	del /q /f 5-compiled-game-discs\arthur\Welcome\Library\*
-	del /q /f 5-compiled-game-discs\riscos\!Lander\*
-	del /q /f 5-compiled-game-discs\zip\*
+	rmdir /s /q 5-compiled-game-discs\adfs
+	mkdir 5-compiled-game-discs\adfs
+	mkdir 5-compiled-game-discs\adfs\Arthur
+	mkdir 5-compiled-game-discs\adfs\Arthur\Game
+	mkdir 5-compiled-game-discs\adfs\Arthur\Library
+	mkdir 5-compiled-game-discs\adfs\RISC_OS
+	mkdir 5-compiled-game-discs\adfs\RISC_OS\!Lander
 else
-	rm -fr 5-compiled-game-discs/arthur/Welcome/Game/*
-	rm -fr 5-compiled-game-discs/arthur/Welcome/Library/*
-	rm -fr 5-compiled-game-discs/riscos/!Lander/*
-	rm -fr 5-compiled-game-discs/zip/*
+	rm -fr 5-compiled-game-discs/adfs
+	mkdir 5-compiled-game-discs/adfs
+	mkdir 5-compiled-game-discs/adfs/Arthur
+	mkdir 5-compiled-game-discs/adfs/Arthur/Game
+	mkdir 5-compiled-game-discs/adfs/Arthur/Library
+	mkdir 5-compiled-game-discs/adfs/RISC_OS
+	mkdir 5-compiled-game-discs/adfs/RISC_OS/!Lander
 endif
 
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
 
 ifeq ($(OS), Windows_NT)
-	copy "1-source-files\other-sources\arthur\Lander,ffb" "5-compiled-game-discs\arthur\Welcome\Game\Lander,ffb"
-	copy 3-assembled-output\GameCode.inf 5-compiled-game-discs\arthur\Welcome\Game\GameCode.inf
-	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\arthur\Welcome\Game\GameCode
-	copy "1-source-files\other-sources\arthur\UseDeskTop,ffe" "5-compiled-game-discs\arthur\Welcome\Library\UseDeskTop,ffe"
-	copy "1-source-files\other-sources\arthur\UseGame,ffe" "5-compiled-game-discs\arthur\Welcome\Library\UseGame,ffe"
+	copy "1-source-files\other-sources\arthur\Lander,ffb" "5-compiled-game-discs\adfs\Arthur\Game\Lander,ffb"
+	copy 3-assembled-output\GameCode.inf 5-compiled-game-discs\adfs\Arthur\Game\GameCode.inf
+	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\adfs\Arthur\Game\GameCode
+	copy "1-source-files\other-sources\arthur\UseDeskTop,ffe" "5-compiled-game-discs\adfs\Arthur\Library\UseDeskTop,ffe"
+	copy "1-source-files\other-sources\arthur\UseGame,ffe" "5-compiled-game-discs\adfs\Arthur\Library\UseGame,ffe"
 else
-	cp 1-source-files/other-sources/arthur/Lander,ffb 5-compiled-game-discs/arthur/Welcome/Game/Lander,ffb
-	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Welcome/Game/GameCode.inf
-	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/Welcome/Game/GameCode
-	cp 1-source-files/other-sources/arthur/UseDeskTop,ffe 5-compiled-game-discs/arthur/Welcome/Library/UseDeskTop,ffe
-	cp 1-source-files/other-sources/arthur/UseGame,ffe 5-compiled-game-discs/arthur/Welcome/Library/UseGame,ffe
+	cp 1-source-files/other-sources/arthur/Lander,ffb 5-compiled-game-discs/adfs/Arthur/Game/Lander,ffb
+	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/adfs/Arthur/Game/GameCode.inf
+	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/adfs/Arthur/Game/GameCode
+	cp 1-source-files/other-sources/arthur/UseDeskTop,ffe 5-compiled-game-discs/adfs/Arthur/Library/UseDeskTop,ffe
+	cp 1-source-files/other-sources/arthur/UseGame,ffe 5-compiled-game-discs/adfs/Arthur/Library/UseGame,ffe
 endif
 
 	@$(PYTHON) 2-build-files/export-symbols.py
@@ -48,44 +55,29 @@ endif
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
 
 ifeq ($(OS), Windows_NT)
-	copy "1-source-files\other-sources\riscos\!Run,feb" "5-compiled-game-discs\riscos\!Lander\!Run,feb"
-	copy "1-source-files\other-sources\riscos\!Sprites,ff9" "5-compiled-game-discs\riscos\!Lander\!Sprites,ff9"
-	copy "1-source-files\other-sources\riscos\MemAlloc,ffa" "5-compiled-game-discs\riscos\!Lander\MemAlloc,ffa"
-	copy 3-assembled-output\!RunImage.bin "5-compiled-game-discs\riscos\!Lander\!RunImage,ff8"
+	copy "1-source-files\other-sources\riscos\!Run,feb" "5-compiled-game-discs\adfs\RISC_OS\!Lander\!Run,feb"
+	copy "1-source-files\other-sources\riscos\!Sprites,ff9" "5-compiled-game-discs\adfs\RISC_OS\!Lander\!Sprites,ff9"
+	copy "1-source-files\other-sources\riscos\MemAlloc,ffa" "5-compiled-game-discs\adfs\RISC_OS\!Lander\MemAlloc,ffa"
+	copy 3-assembled-output\!RunImage.bin "5-compiled-game-discs\adfs\RISC_OS\!Lander\!RunImage,ff8"
 else
-	cp 1-source-files/other-sources/riscos/!Run,feb 5-compiled-game-discs/riscos/!Lander/!Run,feb
-	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/riscos/!Lander/!Sprites,ff9
-	cp 1-source-files/other-sources/riscos/MemAlloc,ffa 5-compiled-game-discs/riscos/!Lander/MemAlloc,ffa
-	cp 3-assembled-output/!RunImage.bin 5-compiled-game-discs/riscos/!Lander/!RunImage,ff8
+	cp 1-source-files/other-sources/riscos/!Run,feb 5-compiled-game-discs/adfs/RISC_OS/!Lander/!Run,feb
+	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/adfs/RISC_OS/!Lander/!Sprites,ff9
+	cp 1-source-files/other-sources/riscos/MemAlloc,ffa 5-compiled-game-discs/adfs/RISC_OS/!Lander/MemAlloc,ffa
+	cp 3-assembled-output/!RunImage.bin 5-compiled-game-discs/adfs/RISC_OS/!Lander/!RunImage,ff8
 endif
 
 	@$(PYTHON) 2-build-files/convert-to-basic.py
 
+	$(DISC) create 5-compiled-game-discs/lander.adf --title "Lander" --geometry e
+	$(DISC) import 5-compiled-game-discs/lander.adf 5-compiled-game-discs/adfs
+
+	$(DISC) create 5-compiled-game-discs/lander-source.adf --title "LanderSrc" --geometry e
+	$(DISC) put 5-compiled-game-discs/lander-source.adf:$$.LanderSrc 3-assembled-output/LanderSrc,fff
+
 ifeq ($(OS), Windows_NT)
-	copy "3-assembled-output\LanderSrc,fff" "5-compiled-game-discs\LanderSrc,fff"
-
-	xcopy /q /y /i 5-compiled-game-discs\riscos\!Lander !Lander
-	tar -ca --exclude ".*" -f !Lander.zip !Lander
-	move !Lander.zip "5-compiled-game-discs\zip\"
-	rmdir /q /s !Lander
-
-	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome\Game Welcome\Game
-	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome\Library Welcome\Library
-	tar -ca --exclude ".*" -f Game.zip Welcome
-	move Game.zip "5-compiled-game-discs\zip\"
-	rmdir /q /s Welcome
+	rmdir /s /q 5-compiled-game-discs\adfs
 else
-	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/LanderSrc,fff
-
-	cp -r 5-compiled-game-discs/riscos/!Lander .
-	zip -r \!Lander.zip !Lander -x "*/.*"
-	mv \!Lander.zip 5-compiled-game-discs/zip
-	rm -fr \!Lander
-
-	cp -r 5-compiled-game-discs/arthur/Welcome .
-	zip -r Game.zip Welcome -x "*/.*"
-	mv Game.zip 5-compiled-game-discs/zip
-	rm -fr Welcome
+	rm -fr 5-compiled-game-discs/adfs
 endif
 
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
