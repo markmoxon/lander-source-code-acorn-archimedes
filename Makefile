@@ -70,10 +70,10 @@ all:
 	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-13-11.adf:$$.Arthur.Library 5-compiled-game-discs/big-lander.adf:$$.Arthur.Library
 
   ifeq ($(OS), Windows_NT)
-	del q /f  5-compiled-game-discs\big-lander-13-11.adf
-	del q /f  5-compiled-game-discs\big-lander-20-20.adf
-	del q /f  5-compiled-game-discs\big-lander-65-65.adf
-	del q /f  5-compiled-game-discs\big-lander-122-122.adf
+	del /q /f  5-compiled-game-discs\big-lander-13-11.adf
+	del /q /f  5-compiled-game-discs\big-lander-20-20.adf
+	del /q /f  5-compiled-game-discs\big-lander-65-65.adf
+	del /q /f  5-compiled-game-discs\big-lander-122-122.adf
   else
 	rm -fr 5-compiled-game-discs/big-lander-13-11.adf
 	rm -fr 5-compiled-game-discs/big-lander-20-20.adf
@@ -112,17 +112,18 @@ ifeq ($(OS), Windows_NT)
 	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\adfs\Arthur\Game\GameCode
 	copy "1-source-files\other-sources\arthur\UseDeskTop,ffe" "5-compiled-game-discs\adfs\Arthur\Library\UseDeskTop,ffe"
 	copy "1-source-files\other-sources\arthur\UseGame,ffe" "5-compiled-game-discs\adfs\Arthur\Library\UseGame,ffe"
+	copy "1-source-files\other-sources\riscos\!Help,fff" "3-assembled-output\!Help,fff"
 else
 	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/adfs/Arthur/Game/BigLander,ffb
 	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/adfs/Arthur/Game/GameCode.inf
 	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/adfs/Arthur/Game/GameCode
 	cp 1-source-files/other-sources/arthur/UseDeskTop,ffe 5-compiled-game-discs/adfs/Arthur/Library/UseDeskTop,ffe
 	cp 1-source-files/other-sources/arthur/UseGame,ffe 5-compiled-game-discs/adfs/Arthur/Library/UseGame,ffe
+	cp 1-source-files/other-sources/riscos/!Help,fff 3-assembled-output/!Help,fff
 endif
 
 	@$(PYTHON) 2-build-files/export-symbols.py
 
-	cp 1-source-files/other-sources/riscos/!Help,fff 3-assembled-output/!Help,fff
 	echo "\n\nBuild: $$(date +%Y-%m-%d\ %H-%M-%S)" >> 3-assembled-output/!Help,fff
 	echo "\nTile corners: TILES_X = ${x}" >> 3-assembled-output/!Help,fff
 	echo "              TILES_Z = ${z}" >> 3-assembled-output/!Help,fff
