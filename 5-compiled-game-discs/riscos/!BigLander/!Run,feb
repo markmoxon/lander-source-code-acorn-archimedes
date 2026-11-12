@@ -1,3 +1,0 @@
-| !Run file for !BigLander (see lander.bbcelite.com)
-WimpSlot -min 400K -max 400K
-Run <Obey$Dir>.!RunImage

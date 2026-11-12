@@ -1,5 +1,6 @@
 VASM?=vasmarm_std
 PYTHON?=python
+DISC?=oaknut-disc
 
 # A make command with no arguments will build BigLander with 64 x 64 tiles
 # (i.e. TILES_X = 65 and TILES_Z = 65)
@@ -41,31 +42,37 @@ all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
 ifeq ($(OS), Windows_NT)
-	del /q /f 5-compiled-game-discs\arthur\Welcome\Game\*
-	del /q /f 5-compiled-game-discs\arthur\Welcome\Library\*
-	del /q /f 5-compiled-game-discs\riscos\!BigLander\*
-	del /q /f 5-compiled-game-discs\zip\*
+	if exist 5-compiled-game-discs\adfs rmdir /s /q 5-compiled-game-discs\adfs
+	mkdir 5-compiled-game-discs\adfs
+	mkdir 5-compiled-game-discs\adfs\Arthur
+	mkdir 5-compiled-game-discs\adfs\Arthur\Game
+	mkdir 5-compiled-game-discs\adfs\Arthur\Library
+	mkdir 5-compiled-game-discs\adfs\RISC_OS
+	mkdir 5-compiled-game-discs\adfs\RISC_OS\!BigLander
 else
-	rm -fr 5-compiled-game-discs/arthur/Welcome/Game/*
-	rm -fr 5-compiled-game-discs/arthur/Welcome/Library/*
-	rm -fr 5-compiled-game-discs/riscos/!BigLander/*
-	rm -fr 5-compiled-game-discs/zip/*
+	rm -fr 5-compiled-game-discs/adfs
+	mkdir 5-compiled-game-discs/adfs
+	mkdir 5-compiled-game-discs/adfs/Arthur
+	mkdir 5-compiled-game-discs/adfs/Arthur/Game
+	mkdir 5-compiled-game-discs/adfs/Arthur/Library
+	mkdir 5-compiled-game-discs/adfs/RISC_OS
+	mkdir 5-compiled-game-discs/adfs/RISC_OS/!BigLander
 endif
 
 	$(VASM) -a2 -m2 -quiet -Fbin -DTILES_X=${x} -DTILES_Z=${z} -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
 
 ifeq ($(OS), Windows_NT)
-	copy "1-source-files\other-sources\arthur\BigLander,ffb" "5-compiled-game-discs\arthur\Welcome\Game\BigLander,ffb"
-	copy 3-assembled-output\GameCode.inf 5-compiled-game-discs\arthur\Welcome\Game\GameCode.inf
-	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\arthur\Welcome\Game\GameCode
-	copy "1-source-files\other-sources\arthur\UseDeskTop,ffe" "5-compiled-game-discs\arthur\Welcome\Library\UseDeskTop,ffe"
-	copy "1-source-files\other-sources\arthur\UseGame,ffe" "5-compiled-game-discs\arthur\Welcome\Library\UseGame,ffe"
+	copy "1-source-files\other-sources\arthur\BigLander,ffb" "5-compiled-game-discs\adfs\Arthur\Game\BigLander,ffb"
+	copy 3-assembled-output\GameCode.inf 5-compiled-game-discs\adfs\Arthur\Game\GameCode.inf
+	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\adfs\Arthur\Game\GameCode
+	copy "1-source-files\other-sources\arthur\UseDeskTop,ffe" "5-compiled-game-discs\adfs\Arthur\Library\UseDeskTop,ffe"
+	copy "1-source-files\other-sources\arthur\UseGame,ffe" "5-compiled-game-discs\adfs\Arthur\Library\UseGame,ffe"
 else
-	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/arthur/Welcome/Game/BigLander,ffb
-	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/arthur/Welcome/Game/GameCode.inf
-	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/arthur/Welcome/Game/GameCode
-	cp 1-source-files/other-sources/arthur/UseDeskTop,ffe 5-compiled-game-discs/arthur/Welcome/Library/UseDeskTop,ffe
-	cp 1-source-files/other-sources/arthur/UseGame,ffe 5-compiled-game-discs/arthur/Welcome/Library/UseGame,ffe
+	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/adfs/Arthur/Game/BigLander,ffb
+	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/adfs/Arthur/Game/GameCode.inf
+	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/adfs/Arthur/Game/GameCode
+	cp 1-source-files/other-sources/arthur/UseDeskTop,ffe 5-compiled-game-discs/adfs/Arthur/Library/UseDeskTop,ffe
+	cp 1-source-files/other-sources/arthur/UseGame,ffe 5-compiled-game-discs/adfs/Arthur/Library/UseGame,ffe
 endif
 
 	@$(PYTHON) 2-build-files/export-symbols.py
@@ -78,44 +85,37 @@ endif
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
 
 ifeq ($(OS), Windows_NT)
-	copy "1-source-files\other-sources\riscos\!Run,feb" "5-compiled-game-discs\riscos\!BigLander\!Run,feb"
-	copy "1-source-files\other-sources\riscos\!Sprites,ff9" "5-compiled-game-discs\riscos\!BigLander\!Sprites,ff9"
-	copy "1-source-files\other-sources\riscos\MemAlloc,ffa" "5-compiled-game-discs\riscos\!BigLander\MemAlloc,ffa"
-	copy 3-assembled-output\!RunImage.bin "5-compiled-game-discs\riscos\!BigLander\!RunImage,ff8"
+	copy "3-assembled-output\!Run,feb" "5-compiled-game-discs\adfs\RISC_OS\!BigLander\!Run,feb"
+	copy "1-source-files\other-sources\riscos\!Sprites,ff9" "5-compiled-game-discs\adfs\RISC_OS\!BigLander\!Sprites,ff9"
+	copy 3-assembled-output\!RunImage.bin "5-compiled-game-discs\adfs\RISC_OS\!BigLander\!RunImage,ff8"
+	copy "3-assembled-output\!Help,fff" "5-compiled-game-discs\adfs\RISC_OS\!BigLander\!Help,fff"
 else
-	cp 3-assembled-output/!Run,feb 5-compiled-game-discs/riscos/!BigLander/!Run,feb
-	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/riscos/!BigLander/!Sprites,ff9
-	cp 3-assembled-output/!Help,fff 5-compiled-game-discs/riscos/!BigLander/!Help,fff
-	cp 3-assembled-output/!RunImage.bin 5-compiled-game-discs/riscos/!BigLander/!RunImage,ff8
+	cp 3-assembled-output/!Run,feb 5-compiled-game-discs/adfs/RISC_OS/!BigLander/!Run,feb
+	cp 1-source-files/other-sources/riscos/!Sprites,ff9 5-compiled-game-discs/adfs/RISC_OS/!BigLander/!Sprites,ff9
+	cp 3-assembled-output/!RunImage.bin 5-compiled-game-discs/adfs/RISC_OS/!BigLander/!RunImage,ff8
+	cp 3-assembled-output/!Help,fff 5-compiled-game-discs/adfs/RISC_OS/!BigLander/!Help,fff
 endif
 
 	@$(PYTHON) 2-build-files/convert-to-basic.py ${x} ${z}
 
+	$(DISC) create 5-compiled-game-discs/big-lander.adf --title "BigLander" --geometry e
+	$(DISC) import 5-compiled-game-discs/big-lander.adf 5-compiled-game-discs/adfs
+
+	$(DISC) create 5-compiled-game-discs/big-lander-source.adf --title "BLanderSrc" --geometry e
+	$(DISC) put 5-compiled-game-discs/big-lander-source.adf:$$.BLanderSrc 3-assembled-output/LanderSrc,fff
+
+	$(DISC) chmod --recursive 5-compiled-game-discs/big-lander.adf:$$.* WR/
+	$(DISC) chmod --recursive 5-compiled-game-discs/big-lander-source.adf:$$.* WR/
+
+	$(DISC) set-datestamp --recursive 5-compiled-game-discs/big-lander.adf:$$.* now
+	$(DISC) put --force 5-compiled-game-discs/big-lander.adf:$$.Arthur.Game.Gamecode 5-compiled-game-discs/adfs/Arthur/Game/Gamecode 
+
+	$(DISC) set-datestamp --recursive 5-compiled-game-discs/big-lander-source.adf:$$.* now
+
 ifeq ($(OS), Windows_NT)
-	copy "3-assembled-output\LanderSrc,fff" "5-compiled-game-discs\BLanderSrc,fff"
-
-	xcopy /q /y /i 5-compiled-game-discs\riscos\!BigLander !BigLander
-	tar -ca --exclude ".*" -f !BigLander.zip !BigLander
-	move !BigLander.zip "5-compiled-game-discs\zip\"
-	rmdir /q /s !BigLander
-
-	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome\Game Welcome\Game
-	xcopy /q /y /i 5-compiled-game-discs\arthur\Welcome\Library Welcome\Library
-	tar -ca --exclude ".*" -f Game.zip Welcome
-	move Game.zip "5-compiled-game-discs\zip\"
-	rmdir /q /s Welcome
+	rmdir /s /q 5-compiled-game-discs\adfs
 else
-	cp 3-assembled-output/LanderSrc,fff 5-compiled-game-discs/BLanderSrc,fff
-
-	cp -r 5-compiled-game-discs/riscos/!BigLander .
-	zip -r \!BigLander.zip !BigLander -x "*/.*"
-	mv \!BigLander.zip 5-compiled-game-discs/zip
-	rm -fr \!BigLander
-
-	cp -r 5-compiled-game-discs/arthur/Welcome .
-	zip -r Game.zip Welcome -x "*/.*"
-	mv Game.zip 5-compiled-game-discs/zip
-	rm -fr Welcome
+	rm -fr 5-compiled-game-discs/adfs
 endif
 
 	@$(PYTHON) 2-build-files/crc32.py 4-reference-binaries 3-assembled-output
