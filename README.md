@@ -8,7 +8,7 @@
 
 **Elite hacks:** [Elite-A](https://github.com/markmoxon/elite-a-source-code-bbc-micro) | [Two-player Elite](https://github.com/markmoxon/elite-two-player-6502-second-processor) | [Teletext Elite](https://github.com/markmoxon/teletext-elite) | [Elite 3D](https://github.com/markmoxon/elite-3d) | [Elite Universe Editor](https://github.com/markmoxon/elite-universe-editor) | [Flicker-free Commodore 64 Elite](https://github.com/markmoxon/c64-elite-flicker-free) | [Elite over Econet](https://github.com/markmoxon/elite-over-econet) | [!EliteNet](https://github.com/markmoxon/elite-over-econet-acorn-archimedes)
 
-**Elite Compendium:** [BBC Master](https://github.com/markmoxon/elite-compendium-bbc-master) | [BBC Micro](https://github.com/markmoxon/elite-compendium-bbc-micro) | [BBC Micro B+](https://github.com/markmoxon/elite-compendium-bbc-micro-b-plus) | [Acorn Electron](https://github.com/markmoxon/elite-compendium-acorn-electron)
+**Elite Compendium:** [BBC Master](https://github.com/markmoxon/elite-compendium-bbc-master) | [BBC Micro](https://github.com/markmoxon/elite-compendium-bbc-micro) | [BBC Micro B+](https://github.com/markmoxon/elite-compendium-bbc-micro-b-plus) | [Acorn Electron](https://github.com/markmoxon/elite-compendium-acorn-electron) | [Commodore 64](https://github.com/markmoxon/elite-compendium-commodore-64)
 
 **Other sources:** [Aviator (BBC Micro)](https://github.com/markmoxon/aviator-source-code-bbc-micro) | [Revs (BBC Micro)](https://github.com/markmoxon/revs-source-code-bbc-micro) | [The Sentinel (BBC Micro)](https://github.com/markmoxon/the-sentinel-source-code-bbc-micro) | [Lander (Acorn Archimedes)](https://github.com/markmoxon/lander-source-code-acorn-archimedes)
 
@@ -76,6 +76,8 @@ The code on this site has been reconstructed from a disassembly of the version r
 
 The commentary is copyright &copy; Mark Moxon. Any misunderstandings or mistakes in the documentation are entirely my fault.
 
+Thank you to Rob Smallshire for [oaknut-disc](https://rob-smallshire.github.io/oaknut/disc/index.html), which produces the ADFS disc image.
+
 ### A note on licences, copyright etc.
 
 This repository is _not_ provided with a licence, and there is intentionally no `LICENSE` file provided.
@@ -118,7 +120,7 @@ There are five main folders in this repository, which reflect the order of the b
 
 * [4-reference-binaries](4-reference-binaries) contains the correct binaries for each release, so we can verify that our assembled output matches the reference.
 
-* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process: folders that contains the compiled game for each variant and which can be run on real hardware or in an emulator, plus zips of those folders for easier deployment. It also contains version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter. The Arthur variant contains the GameCode binary in two formats: as a pair of files (GameCode and GameCode.inf) that is suitable for programs that support inf files, or as a single file (GameCode,8000-A614) that will work with HostFS. Both options contain the load and execution address of the file, and you should choose the one that works for you when copying the game to your emulator or Archimedes.
+* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process. The build produces two ADFS disc images. The first, `Lander.adf`, contains the game for both Arthur and RISC OS, and it can be run on real hardware or in an emulator. The second, `LanderArc.adf`, contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
 
 ## Extending the landscape with BigLander
 
@@ -170,6 +172,8 @@ You will need the following to build Lander from the source:
 
 * Python. The build process has only been tested on 3.x, but 2.7 might work.
 
+* The [oaknut-disc Python tool](https://rob-smallshire.github.io/oaknut/disc/index.html), which can be installed using `pip install oaknut-disc` (pipx, uv and uvx are also supported).
+
 * Mac and Linux users may need to install `make` if it isn't already present (for Windows users, `make.exe` is included in this repository).
 
 Let's look at how to build Lander from the source.
@@ -184,7 +188,7 @@ All being well, entering the following into a command window:
 make.bat
 ```
 
-will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs` folder, which contain the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a zip file for each variant, which can be found in the `zip` folder (note that these zips do not contain RISC OS filetype metadata; filetypes are included as filename suffixes, so they will work with HostFS).
+will produce a file called `Lander.adf` in the `5-compiled-game-discs` folder. This ADFS disc image contains both the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a file called `LanderSrc.adf` that contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
 
 ### Mac and Linux
 
@@ -196,27 +200,21 @@ All being well, entering the following into a terminal window:
 make
 ```
 
-will produce folders called `arthur` and `riscos` in the `5-compiled-game-discs` folder, which contain the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a zip file for each variant, which can be found in the `zip` folder (note that these zips do not contain RISC OS filetype metadata; filetypes are included as filename suffixes, so they will work with HostFS).
+will produce a file called `Lander.adf` in the `5-compiled-game-discs` folder. This ADFS disc image contains both the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a file called `LanderSrc.adf` that contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
 
 ### Archimedes
 
-The build process outlined above produces a file called `LanderSrc,fff` in the `5-compiled-game-discs` folder, or `BLanderSrc,fff` if you are building BigLander. These files contain versions of the game source that can be built on an Archimedes.
+The build process outlined above produces a file called `LanderSrc.adf` in the `5-compiled-game-discs` folder, or `BLanderSrc.adf` if you are building BigLander. This ADFS disc image contains a version of the game source that can be built on an Archimedes.
 
 To build the source on an Archimedes, you first need to convert the BBC BASIC text file into tokenised BBC BASIC. If you have RISC OS 3, then you can use Edit to do this, as follows:
 
-* Download the source as a BBC BASIC text file for [Lander](https://raw.githubusercontent.com/markmoxon/lander-source-code-acorn-archimedes/main/5-compiled-game-discs/LanderSrc%2Cfff) or [BigLander](https://raw.githubusercontent.com/markmoxon/lander-source-code-acorn-archimedes/big-landscape/5-compiled-game-discs/BLanderSrc%2Cfff).
-
-* Copy the file to an Archimedes machine (if you aren't already downloading it in RISC OS).
-
-* If you are using HostFS then the filetype should be set automatically, but if you need to set it manually, it should be a Text file.
-
-* Load the text file into Edit. You should see the fully documented source code appear.
+* Open the disc and load the text file into Edit. You should see the fully documented source code appear.
 
 * Click Menu on Edit's icon bar icon, choose "BASIC options > Line number increment" and set the value to 1.
 
 * Click Menu over Edit's window, choose "Misc > Set type" and set the value to BASIC.
 
-* Save the file, which is now a BASIC program.
+* Save the file, which is now a BASIC program. You will probably need to save this to a different disc, as the source takes up most of an ADFS floppy disc.
 
 You now have the Lander source in BBC BASIC, which is how David Braben originally wrote it (though without quite so many comments).
 
