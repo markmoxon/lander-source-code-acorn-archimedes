@@ -152,6 +152,10 @@ endif
 	$(DISC) set-datestamp --recursive 5-compiled-game-discs/big-lander-${x}-${z}.adf:$$.* now
 	$(DISC) put --force 5-compiled-game-discs/big-lander-${x}-${z}.adf:$$.Arthur.Game.Gamecode 5-compiled-game-discs/adfs/Arthur/Game/Gamecode 
 
+	$(DISC) create 5-compiled-game-discs/big-lander-source.adf --title "BLanderSrc" --geometry e
+	$(DISC) put 5-compiled-game-discs/big-lander-source.adf:$$.BLanderSrc 3-assembled-output/LanderSrc,fff
+	$(DISC) chmod --recursive 5-compiled-game-discs/big-lander-source.adf:$$.* WR/
+
 ifeq ($(OS), Windows_NT)
 	rmdir /s /q 5-compiled-game-discs\adfs
 else

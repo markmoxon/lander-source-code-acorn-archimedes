@@ -124,23 +124,23 @@ There are five main folders in this repository, which reflect the order of the b
 
 ## Extending the landscape with BigLander
 
-This repository also includes a version of Lander with a much bigger landscape: 64 by 64 tiles, to be precise (as compared to the original 12 by 10 tiles). This version also runs on all versions of RISC OS (the original only works on Arthur and RISC OS 2). The big-landscape code is in a separate branch called `big-landscape`, and apart from the code differences for the landscape size and later versions of RISC OS, this branch is identical to the main branch and the same build process applies.
+This repository also includes a version of Lander with a much bigger landscape: up to 121 by 121 tiles, to be precise (as compared to the original 12 by 10 tiles). This version also runs on all versions of RISC OS (the original only works on Arthur and RISC OS 2). The BigLander code is in a separate branch called `big-lander`, and apart from the code differences for the landscape size and later versions of RISC OS, this branch is identical to the main branch and the same build process applies.
 
-The landscape size is configurable. The default is 64 by 64 tiles (which equates to TILES_X = 65 and TILES_Z = 65), but you can set your own values by passing x and z parameters to the build. For example, building BigLander like this on Mac or Linux:
+The landscape size is configurable. By default the branch will build an ADFS disc image containing four landscape sizes, but you can set your own landscape size by passing x and z parameters to the build, for the number of tile corners (the number of tiles will be one less in each direction). For example, building BigLander like this on Mac or Linux:
 
 ```
-make x=122 z=122
+make x=101 z=101
 ```
 
 or this on Windows:
 
 ```
-make.bat x=122 z=122
+make.bat x=101 z=101
 ```
 
-would build BigLander with a landscape size of 121 x 121 tiles (i.e. TILES_X = 122 and TILES_Z = 122). The number of tiles is given in the !Help file of the generated application, along with the build date.
+would build BigLander with a landscape size of 100 x 100 tiles (i.e. TILES_X = 101 and TILES_Z = 101). The number of tile corners is given in the !Help file of the generated application, along with the build date.
 
-The annotated source files in the `big-landscape` branch contain both the original Lander code and all of the modifications for the bigger landscape, so you can look through the source to see exactly what's changed. Any code that I've removed from the original version is commented out in the source files, so when they are assembled they produce the big-landscape binaries, while still containing details of all the modifications. You can find all the diffs by searching the sources for `Mod:`.
+The annotated source files in the `big-lander` branch contain both the original Lander code and all of the modifications for the bigger landscape, so you can look through the source to see exactly what's changed. Any code that I've removed from the original version is commented out in the source files, so when they are assembled they produce the BigLander binaries, while still containing details of all the modifications. You can find all the diffs by searching the sources for `Mod:`.
 
 BigLander should work on all versions of RISC OS, but to get it working on a Raspberry Pi, you may need to create a text file in the !Boot.Loader folder called CMDLINE/TXT, containing the word `disable_mode_changes` (reboot after you create this). Make sure you have !ADFFS loaded, and then BigLander should run. You can see a video guide to this process [on YouTube](https://www.youtube.com/watch?v=HpQk1l7Rvu0).
 
@@ -190,6 +190,8 @@ make.bat
 
 will produce a file called `Lander.adf` in the `5-compiled-game-discs` folder. This ADFS disc image contains both the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a file called `LanderSrc.adf` that contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
 
+Note that to create the same directory structure as the original Arthur Welcome disc, you should move the Game and Library directories into the root directory of the disc, i.e. the $ directory.
+
 ### Mac and Linux
 
 The build process uses a standard GNU `Makefile`, so you just need to install `make` if your system doesn't already have it. If vasm or Python are not on your path, then you can either fix this, or you can edit the `Makefile` and change the `VASM` and `PYTHON` variables in the first two lines to point to their locations (you need the `vasmarm_std` executable). You also need to change directory to the repository folder (i.e. the same folder as `Makefile`).
@@ -201,6 +203,8 @@ make
 ```
 
 will produce a file called `Lander.adf` in the `5-compiled-game-discs` folder. This ADFS disc image contains both the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a file called `LanderSrc.adf` that contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
+
+Note that to create the same directory structure as the original Arthur Welcome disc, you should move the Game and Library directories into the root directory of the disc, i.e. the $ directory.
 
 ### Archimedes
 
