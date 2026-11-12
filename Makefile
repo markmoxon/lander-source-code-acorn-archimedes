@@ -17,7 +17,7 @@ all:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
 ifeq ($(OS), Windows_NT)
-	rmdir /s /q 5-compiled-game-discs\adfs
+	if exist 5-compiled-game-discs\adfs rmdir /s /q 5-compiled-game-discs\adfs
 	mkdir 5-compiled-game-discs\adfs
 	mkdir 5-compiled-game-discs\adfs\Arthur
 	mkdir 5-compiled-game-discs\adfs\Arthur\Game
