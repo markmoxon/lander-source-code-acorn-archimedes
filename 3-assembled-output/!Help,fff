@@ -5,7 +5,10 @@ It should work on all versions of RISC OS.
 
 See lander.bbcelite.com for details.
 
-Build: 2026-11-12 14-01-47
+Build: 2026-11-12 15-51-51
 
-Tiles: TILES_X = 65
-       TILES_Z = 65
+Tile corners: TILES_X = 65
+              TILES_Z = 65
+
+To get the number of tiles in each direction,
+subtract 1 from the number of tile corners.

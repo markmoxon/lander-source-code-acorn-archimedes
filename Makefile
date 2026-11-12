@@ -29,6 +29,14 @@ DISC?=oaknut-disc
 #
 # https://archi.medes.live/#ff=14400&disc=https://server.com/path/to/!BigLander.zip&autoboot=desktop%20filer_opendir%20HostFS::HostFS.$
 
+custom=yes
+
+ifndef x
+  ifndef z
+    custom=no
+  endif
+endif
+
 ifndef x
   x=65
 endif
@@ -38,7 +46,44 @@ ifndef z
 endif
 
 .PHONY:all
+ifeq ($(custom), yes)
+all: biglander
+else
 all:
+	$(DISC) create 5-compiled-game-discs/big-lander.adf --title "BigLander" --geometry e
+
+	$(MAKE) biglander x=13 z=11
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-13-11.adf:$$.RISC_OS.!BigLander 5-compiled-game-discs/big-lander.adf:$$.RISC_OS.13x11.!BigLander
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-13-11.adf:$$.Arthur.Game 5-compiled-game-discs/big-lander.adf:$$.Arthur.13x11.Game
+
+	$(MAKE) biglander x=20 z=20
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-20-20.adf:$$.RISC_OS.!BigLander 5-compiled-game-discs/big-lander.adf:$$.RISC_OS.20x20.!BigLander
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-13-11.adf:$$.Arthur.Game 5-compiled-game-discs/big-lander.adf:$$.Arthur.20x20.Game
+
+	$(MAKE) biglander x=122 z=122
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-122-122.adf:$$.RISC_OS.!BigLander 5-compiled-game-discs/big-lander.adf:$$.RISC_OS.122x122.!BigLander
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-13-11.adf:$$.Arthur.Game 5-compiled-game-discs/big-lander.adf:$$.Arthur.122x122.Game
+
+	$(MAKE) biglander x=65 z=65
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-65-65.adf:$$.RISC_OS.!BigLander 5-compiled-game-discs/big-lander.adf:$$.RISC_OS.65x65.!BigLander
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-13-11.adf:$$.Arthur.Game 5-compiled-game-discs/big-lander.adf:$$.Arthur.65x65.Game
+	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-13-11.adf:$$.Arthur.Library 5-compiled-game-discs/big-lander.adf:$$.Arthur.Library
+
+  ifeq ($(OS), Windows_NT)
+	del q /f  5-compiled-game-discs\big-lander-13-11.adf
+	del q /f  5-compiled-game-discs\big-lander-20-20.adf
+	del q /f  5-compiled-game-discs\big-lander-65-65.adf
+	del q /f  5-compiled-game-discs\big-lander-122-122.adf
+  else
+	rm -fr 5-compiled-game-discs/big-lander-13-11.adf
+	rm -fr 5-compiled-game-discs/big-lander-20-20.adf
+	rm -fr 5-compiled-game-discs/big-lander-65-65.adf
+	rm -fr 5-compiled-game-discs/big-lander-122-122.adf
+  endif
+endif
+
+.PHONY:biglander
+biglander:
 	@$(PYTHON) 2-build-files/convert-to-vasm.py
 
 ifeq ($(OS), Windows_NT)
@@ -79,8 +124,10 @@ endif
 
 	cp 1-source-files/other-sources/riscos/!Help,fff 3-assembled-output/!Help,fff
 	echo "\n\nBuild: $$(date +%Y-%m-%d\ %H-%M-%S)" >> 3-assembled-output/!Help,fff
-	echo "\nTiles: TILES_X = ${x}" >> 3-assembled-output/!Help,fff
-	echo "       TILES_Z = ${z}" >> 3-assembled-output/!Help,fff
+	echo "\nTile corners: TILES_X = ${x}" >> 3-assembled-output/!Help,fff
+	echo "              TILES_Z = ${z}" >> 3-assembled-output/!Help,fff
+	echo "\nTo get the number of tiles in each direction," >> 3-assembled-output/!Help,fff
+	echo "subtract 1 from the number of tile corners." >> 3-assembled-output/!Help,fff
 
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
 
@@ -98,19 +145,12 @@ endif
 
 	@$(PYTHON) 2-build-files/convert-to-basic.py ${x} ${z}
 
-	$(DISC) create 5-compiled-game-discs/big-lander.adf --title "BigLander" --geometry e
-	$(DISC) import 5-compiled-game-discs/big-lander.adf 5-compiled-game-discs/adfs
+	$(DISC) create 5-compiled-game-discs/big-lander-${x}-${z}.adf --title "BigLander" --geometry e
+	$(DISC) import 5-compiled-game-discs/big-lander-${x}-${z}.adf 5-compiled-game-discs/adfs
 
-	$(DISC) create 5-compiled-game-discs/big-lander-source.adf --title "BLanderSrc" --geometry e
-	$(DISC) put 5-compiled-game-discs/big-lander-source.adf:$$.BLanderSrc 3-assembled-output/LanderSrc,fff
-
-	$(DISC) chmod --recursive 5-compiled-game-discs/big-lander.adf:$$.* WR/
-	$(DISC) chmod --recursive 5-compiled-game-discs/big-lander-source.adf:$$.* WR/
-
-	$(DISC) set-datestamp --recursive 5-compiled-game-discs/big-lander.adf:$$.* now
-	$(DISC) put --force 5-compiled-game-discs/big-lander.adf:$$.Arthur.Game.Gamecode 5-compiled-game-discs/adfs/Arthur/Game/Gamecode 
-
-	$(DISC) set-datestamp --recursive 5-compiled-game-discs/big-lander-source.adf:$$.* now
+	$(DISC) chmod --recursive 5-compiled-game-discs/big-lander-${x}-${z}.adf:$$.* WR/
+	$(DISC) set-datestamp --recursive 5-compiled-game-discs/big-lander-${x}-${z}.adf:$$.* now
+	$(DISC) put --force 5-compiled-game-discs/big-lander-${x}-${z}.adf:$$.Arthur.Game.Gamecode 5-compiled-game-discs/adfs/Arthur/Game/Gamecode 
 
 ifeq ($(OS), Windows_NT)
 	rmdir /s /q 5-compiled-game-discs\adfs
