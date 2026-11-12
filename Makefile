@@ -70,12 +70,13 @@ endif
 
 	$(DISC) create 5-compiled-game-discs/lander.adf --title "Lander" --geometry e
 	$(DISC) import 5-compiled-game-discs/lander.adf 5-compiled-game-discs/adfs
+	$(DISC) mkdir 5-compiled-game-discs/lander.adf:$$.test
 
 	$(DISC) create 5-compiled-game-discs/lander-source.adf --title "LanderSrc" --geometry e
 	$(DISC) put 5-compiled-game-discs/lander-source.adf:$$.LanderSrc 3-assembled-output/LanderSrc,fff
 
-	$(DISC) chmod --recursive 5-compiled-game-discs/lander.adf:$$.* WR/R
-	$(DISC) chmod --recursive 5-compiled-game-discs/lander-source.adf:$$.* WR/R
+	$(DISC) chmod --recursive 5-compiled-game-discs/lander.adf:$$.* WR/
+	$(DISC) chmod --recursive 5-compiled-game-discs/lander-source.adf:$$.* WR/
 
 	$(DISC) set-datestamp --recursive 5-compiled-game-discs/lander.adf:$$.* now
 	$(DISC) set-datestamp --recursive 5-compiled-game-discs/lander-source.adf:$$.* now
