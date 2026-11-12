@@ -78,6 +78,8 @@ endif
 	$(DISC) chmod --recursive 5-compiled-game-discs/lander-source.adf:$$.* WR/
 
 	$(DISC) set-datestamp --recursive 5-compiled-game-discs/lander.adf:$$.* now
+	$(DISC) put --force 5-compiled-game-discs/lander.adf:$$.Arthur.Game.Gamecode 5-compiled-game-discs/adfs/Arthur/Game/Gamecode 
+
 	$(DISC) set-datestamp --recursive 5-compiled-game-discs/lander-source.adf:$$.* now
 
 ifeq ($(OS), Windows_NT)
