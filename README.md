@@ -120,7 +120,7 @@ There are five main folders in this repository, which reflect the order of the b
 
 * [4-reference-binaries](4-reference-binaries) contains the correct binaries for each release, so we can verify that our assembled output matches the reference.
 
-* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process. The build produces two ADFS disc images. The first, `Lander.adf`, contains the game for both Arthur and RISC OS, and it can be run on real hardware or in an emulator. The second, `LanderArc.adf`, contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
+* [5-compiled-game-discs](5-compiled-game-discs) contains the final output of the build process. The build produces two ADFS disc images. The first, `lander.adf`, contains the game for both Arthur and RISC OS, and it can be run on real hardware or in an emulator. The second, `lander-source.adf`, contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
 
 ## Extending the landscape with BigLander
 
@@ -188,7 +188,7 @@ All being well, entering the following into a command window:
 make.bat
 ```
 
-will produce a file called `Lander.adf` in the `5-compiled-game-discs` folder. This ADFS disc image contains both the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a file called `LanderSrc.adf` that contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
+will produce a file called `lander.adf` in the `5-compiled-game-discs` folder. This ADFS disc image contains both the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a file called `lander-source.adf` that contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
 
 Note that to create the same directory structure as the original Arthur Welcome disc, you should move the Game and Library directories into the root directory of the disc, i.e. the $ directory.
 
@@ -202,7 +202,7 @@ All being well, entering the following into a terminal window:
 make
 ```
 
-will produce a file called `Lander.adf` in the `5-compiled-game-discs` folder. This ADFS disc image contains both the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a file called `LanderSrc.adf` that contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
+will produce a file called `lander.adf` in the `5-compiled-game-discs` folder. This ADFS disc image contains both the Arthur and RISC OS variants of the game, which you can then load into an emulator, or into a real Acorn Archimedes using a device like a Gotek. It also produces a file called `LanderSrc.adf` that contains a version of the source code that can be built on an Archimedes; see the [Archimedes](#archimedes) section for information on the latter.
 
 Note that to create the same directory structure as the original Arthur Welcome disc, you should move the Game and Library directories into the root directory of the disc, i.e. the $ directory.
 
