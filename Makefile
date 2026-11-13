@@ -112,23 +112,35 @@ ifeq ($(OS), Windows_NT)
 	copy 3-assembled-output\GameCode.bin 5-compiled-game-discs\adfs\Arthur\Game\GameCode
 	copy "1-source-files\other-sources\arthur\UseDeskTop,ffe" "5-compiled-game-discs\adfs\Arthur\Library\UseDeskTop,ffe"
 	copy "1-source-files\other-sources\arthur\UseGame,ffe" "5-compiled-game-discs\adfs\Arthur\Library\UseGame,ffe"
-	copy "1-source-files\other-sources\riscos\!Help,fff" "3-assembled-output\!Help,fff"
 else
 	cp 1-source-files/other-sources/arthur/BigLander,ffb 5-compiled-game-discs/adfs/Arthur/Game/BigLander,ffb
 	cp 3-assembled-output/GameCode.inf 5-compiled-game-discs/adfs/Arthur/Game/GameCode.inf
 	cp 3-assembled-output/GameCode.bin 5-compiled-game-discs/adfs/Arthur/Game/GameCode
 	cp 1-source-files/other-sources/arthur/UseDeskTop,ffe 5-compiled-game-discs/adfs/Arthur/Library/UseDeskTop,ffe
 	cp 1-source-files/other-sources/arthur/UseGame,ffe 5-compiled-game-discs/adfs/Arthur/Library/UseGame,ffe
-	cp 1-source-files/other-sources/riscos/!Help,fff 3-assembled-output/!Help,fff
 endif
 
 	@$(PYTHON) 2-build-files/export-symbols.py
 
+ifeq ($(OS), Windows_NT)
+	copy /y "1-source-files\other-sources\riscos\!Help,fff" "3-assembled-output\!Help,fff"
+	echo:>> "3-assembled-output\!Help,fff"
+	echo:>> "3-assembled-output\!Help,fff"
+	echo Build: %DATE% %TIME%>> "3-assembled-output\!Help,fff"
+	echo:>> "3-assembled-output\!Help,fff"
+	echo Tile corners: TILES_X = ${x}>> "3-assembled-output\!Help,fff"
+	echo               TILES_Z = ${z}>> "3-assembled-output\!Help,fff"
+	echo:>> "3-assembled-output\!Help,fff"
+	echo To get the number of tiles in each direction,>> "3-assembled-output\!Help,fff"
+	echo subtract 1 from the number of tile corners.>> "3-assembled-output\!Help,fff"
+else
+	cp 1-source-files/other-sources/riscos/!Help,fff 3-assembled-output/!Help,fff
 	echo "\n\nBuild: $$(date +%Y-%m-%d\ %H-%M-%S)" >> 3-assembled-output/!Help,fff
 	echo "\nTile corners: TILES_X = ${x}" >> 3-assembled-output/!Help,fff
 	echo "              TILES_Z = ${z}" >> 3-assembled-output/!Help,fff
 	echo "\nTo get the number of tiles in each direction," >> 3-assembled-output/!Help,fff
 	echo "subtract 1 from the number of tile corners." >> 3-assembled-output/!Help,fff
+endif
 
 	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
 
