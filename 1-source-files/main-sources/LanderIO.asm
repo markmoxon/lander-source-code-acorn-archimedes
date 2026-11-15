@@ -435,6 +435,8 @@
 \ This routine is run when the parasite sends a #Tube_SetScreenBank <param>
 \ command. It switches the screen bank between shadow RAM and main memory.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   A                   The screen bank
@@ -521,6 +523,8 @@
 \ command. It switches the screen bank and clears the bank that's no longer
 \ being displayed.
 \
+\ ------------------------------------------------------------------------------
+\
 \ Arguments:
 \
 \   A                   The screen bank
@@ -529,11 +533,24 @@
 \
 \                         * 1 = Draw into main memory, display shadow RAM
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   ClearScreenBank     Clear the screen bank and return using an RTS
+\
 \ ******************************************************************************
 
                         \ --- Mod: Code added for AES: ------------------------>
 
 .ClearScreen
+
+ JSR ClearScreenBank    \ Clear the specified screen bank
+
+ JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
+                        \ return from the subroutine using a tail call
+
+.ClearScreenBank
 
  JSR SetScreenBankToA   \ Switch the screen bank to the argument in A
 
@@ -624,8 +641,7 @@
 
 .clsc5
 
- JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
-                        \ return from the subroutine using a tail call
+ RTS                    \ Return from the subroutine
 
                         \ --- End of added code ------------------------------->
 
@@ -668,6 +684,12 @@
  JMP mode1              \ Loop back for the next byte
 
 .mode2
+
+ LDA #1                 \ Clear screen memory for bank 1
+ JSR ClearScreenBank
+
+ LDA #0                 \ Clear screen memory for bank 0
+ JSR ClearScreenBank
 
  JMP PUTBACK            \ Jump to PUTBACK to restore the USOSWRCH handler and
                         \ return from the subroutine using a tail call
@@ -1514,7 +1536,7 @@ ENDMACRO
 
 .minScreenAddr
 
- EQUW &3780
+ EQUW &3000
 
                         \ --- End of added code ------------------------------->
 
