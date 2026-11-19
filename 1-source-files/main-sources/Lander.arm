@@ -13722,7 +13722,7 @@
 \ ******************************************************************************
 \
 \       Name: keyBuffer
-\       Type: Subroutine
+\       Type: Variable
 \   Category: Keyboard
 \    Summary: The keyboard buffer OS_Word block
 \
