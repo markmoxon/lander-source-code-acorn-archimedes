@@ -1,6 +1,22 @@
-This is an extended version of !Lander that has a
-larger landscape.
+This is an extended version of Lander that has a
+larger landscape and keyboard support.
 
 It should work on all versions of RISC OS.
+
+To fly using the mouse, just play as normal.
+
+To fly using the keyboard, press "K" while on the
+launchpad and use the following keys:
+
+S       Pitch down
+X       Pull up
+<       Rotate anti-clockwise
+>       Rotate clockwise
+A       Fire
+Space   Thrust
+?       Hover
+
+Press "J" while on the launchpad to switch back
+to the mouse.
 
 See lander.bbcelite.com for details.

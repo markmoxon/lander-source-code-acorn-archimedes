@@ -353,11 +353,13 @@ GetLandscapeTileColour:
  LDMFD   R13!, {R0-R4, PC}
 MoveAndDrawPlayer:
  STMFD   R13!, {R14}
- SWI     OS_Mouse
+ BL      ReadKeyboardMouseButtons
  STRB    R2, [R11, #fuelBurnRate]
  LDR     R14, [R11, #fuelLevel]
  CMP     R14, #0
  STREQB  R14, [R11, #fuelBurnRate]
+ TEQ     R7, #0xFF
+ BEQ     GetPolarAnglesFromKeyboard
  CMP     R0, #1024
  MOVHS   R0, #1024
  SUBHS   R0, R0, #1
@@ -367,6 +369,7 @@ MoveAndDrawPlayer:
  MOV     R0, R0, LSL #22
  MOV     R1, R1, LSL #22
  BL      GetMouseInPolarCoordinates
+move1:
  CMP     R0, #0x40000000
  MOVHS   R0, #0x40000000
  SUBHS   R0, R0, #1
@@ -563,7 +566,7 @@ LandOnLaunchpad:
  STR     R4, [R11, #yVelocity]
  STR     R5, [R11, #zVelocity]
  STR     R1, [R11, #yPlayer]
- MOV     PC, R14
+ B       CheckForKeyboardToggle
 LoseLifeFromParticleLoop:
  LDMFD   R13!, {R10, R12}
 LoseLife:
@@ -2756,6 +2759,9 @@ ResetMousePosition:
  LDR     R1, mouseParametersAddr
  MOV     R0, #21
  SWI     OS_Word
+ MOV     R0, #0
+ STR     R0, polarAngle
+ STR     R0, polarDistance
  MOV     PC, R14
 AbortWithMemoryError:
  STRB    R1, [R0]
@@ -2968,6 +2974,75 @@ PrintHexDigit:
  ADDLO   R0, R0, #0x30
  SWI     OS_WriteC
  MOV     PC, R14
+CheckForKeyboardToggle:
+ MOV     R0, #129
+ MOV     R1, #0x3A
+ MOV     R2, #0xFF
+ SWI     OS_Byte
+ TEQ     R1, #70
+ MOVEQ   R0, #0xFF
+ STREQ   R0, keyboardStatus
+ TEQ     R1, #69
+ MOVEQ   R0, #0
+ STREQ   R0, keyboardStatus
+ LDR     R1, [R11, #yPlayer]
+ MOV     PC, R14
+keyboardStatus:
+.long 0
+ReadKeyboardMouseButtons:
+ LDR     R7, keyboardStatus
+ TEQ     R7, #0xFF
+ BEQ     rkey1
+ SWI     OS_Mouse
+ MOV     PC, R14
+rkey1:
+ MOV     R3, #0
+ MOV     R0, #121
+ MOV     R1, #0xE2
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ORREQ   R3, R3, #0x4
+ MOV     R1, #0xE8
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ORREQ   R3, R3, #0x2
+ MOV     R1, #0xC1
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ORREQ   R3, R3, #0x1
+ MOV     R2, R3
+ MOV     PC, R14
+GetPolarAnglesFromKeyboard:
+ LDR     R3, polarAngle
+ MOV     R0, #121
+ MOV     R1, #0xE6
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ SUBEQ   R3, R3, #64 << 22
+ MOV     R1, #0xE7
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ADDEQ   R3, R3, #64 << 22
+ STR     R3, polarAngle
+ LDR     R4, polarDistance
+ MOV     R1, #0xC2
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ SUBEQ   R4, R4, #8 << 22
+ MOV     R1, #0xD1
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ADDEQ   R4, R4, #8 << 22
+ CMP     R4, #0
+ MOVLT   R4, #0
+ STR     R4, polarDistance
+ MOV     R1, R3
+ MOV     R0, R4
+ B       move1
+polarAngle:
+.long 0
+polarDistance:
+.long 0
 objectRock:
 .long    6
 .long    8

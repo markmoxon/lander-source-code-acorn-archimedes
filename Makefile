@@ -104,7 +104,7 @@ else
 	mkdir 5-compiled-game-discs/adfs/RISC_OS/!BigLander
 endif
 
-	$(VASM) -a2 -m2 -quiet -Fbin -DTILES_X=${x} -DTILES_Z=${z} -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
+	$(VASM) -a2 -m2 -opt-adr -quiet -Fbin -DTILES_X=${x} -DTILES_Z=${z} -L 3-assembled-output/compile.txt -o 3-assembled-output/GameCode.bin 3-assembled-output/Lander.arm
 
 ifeq ($(OS), Windows_NT)
 	copy "1-source-files\other-sources\arthur\BigLander,ffb" "5-compiled-game-discs\adfs\Arthur\Game\BigLander,ffb"
@@ -142,7 +142,7 @@ else
 	echo "subtract 1 from the number of tile corners." >> 3-assembled-output/!Help,fff
 endif
 
-	$(VASM) -a2 -m2 -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
+	$(VASM) -a2 -m2 -opt-adr -quiet -Fbin -L 3-assembled-output/compile-RunImage.txt -o 3-assembled-output/!RunImage.bin 3-assembled-output/RunImage.arm
 
 ifeq ($(OS), Windows_NT)
 	copy "3-assembled-output\!Run,feb" "5-compiled-game-discs\adfs\RISC_OS\!BigLander\!Run,feb"

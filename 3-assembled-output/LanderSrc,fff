@@ -1759,13 +1759,22 @@ REM ****************************************************************************
                                     \ the player's ship, based on its new
                                     \ orientation
 
- SWI     OS_Mouse                   \ Read the mouse coordinates, returning;
-                                    \
-                                    \   R0 = x-coordinate
-                                    \
-                                    \   R1 = y-coordinate
-                                    \
-                                    \   R2 = mouse buttons [%lmr]
+                                    \ --- Mod; Code removed for keyboard ------>
+
+\SWI     OS_Mouse                   \ Read the mouse coordinates, returning;
+\                                   \
+\                                   \   R0 = x-coordinate
+\                                   \
+\                                   \   R1 = y-coordinate
+\                                   \
+\                                   \   R2 = mouse buttons [%lmr]
+
+                                    \ --- And replaced by; -------------------->
+
+ BL      ReadKeyboardMouseButtons   \ Read either the mouse buttons or keyboard
+                                    \ equivalents
+
+                                    \ --- End of replacement ------------------>
 
  STRB    R2, [R11, #fuelBurnRate]   \ Set the fuel burn rate to the mouse button
                                     \ result, so it's set to;
@@ -1791,6 +1800,16 @@ REM ****************************************************************************
  CMP     R14, #0                    \ fuel burn rate, as we can't burn fuel that
  STREQB  R14, [R11, #fuelBurnRate]  \ we don't have
 
+                                    \ --- Mod; Code added for keyboard--------->
+
+ TEQ     R7, #&FF                   \ If keyboard is enabled then the call to
+ BEQ     GetPolarAnglesFromKeyboard \ ReadKeyboardMouseButtons will have set R7
+                                    \ to &FF, so skip the following and jump to
+                                    \ GetPolarAnglesFromKeyboard instead,
+                                    \ returning to move1 below
+
+                                    \ --- End of added code ------------------->
+
                                     \ At the start of each new life, the mouse
                                     \ is initialised to coordinates [511, 511]
 
@@ -1814,6 +1833,12 @@ REM ****************************************************************************
  BL      GetMouseInPolarCoordinates \ Convert the mouse coordinates into polar
                                     \ coordinates, returning the polar angle in
                                     \ R1 and the polar distance in R0
+
+                                    \ --- Mod; Code added for keyboard--------->
+
+.move1
+
+                                    \ --- End of added code ------------------->
 
  CMP     R0, #&40000000             \ Cap the polar distance in R0 so it's in
  MOVHS   R0, #&40000000             \ the range 0 to &3FFFFFFF
@@ -2577,7 +2602,18 @@ REM ****************************************************************************
                                     \ player's ship is resting correctly on the
                                     \ pad
 
- MOV     PC, R14                    \ Return from the subroutine
+                                    \ --- Mod; Code removed for keyboard ------>
+
+\MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- And replaced by; -------------------->
+
+ B       CheckForKeyboardToggle     \ Jump to CheckForKeyboardToggle to check
+                                    \ for the keyboard toggle keys 'K' and 'J',
+                                    \ returning from the subroutine using a tail
+                                    \ call
+
+                                    \ --- End of replacement ------------------>
 
 \ ******************************************************************************
 \
@@ -12172,6 +12208,14 @@ REM ****************************************************************************
  MOV     R0, #21                    \ position to [511, 511]
  SWI     OS_Word
 
+                                    \ --- Mod; Code added for keyboard--------->
+
+ MOV     R0, #0                     \ Reset the ship's orientation
+ STR     R0, polarAngle
+ STR     R0, polarDistance
+
+                                    \ --- End of added code ------------------->
+
  MOV     PC, R14                    \ Return from the subroutine
 
 \ ******************************************************************************
@@ -12836,6 +12880,236 @@ REM ****************************************************************************
  SWI     OS_WriteC                  \ Print the character in R0
 
  MOV     PC, R14                    \ Return from the subroutine
+
+\ ******************************************************************************
+\
+\       Name; CheckForKeyboardToggle
+\       Type; Subroutine
+\   Category; Keyboard
+\    Summary; Check whether 'K' or 'J' is being pressed and set the flag in
+\             keyboardStatus accordingle
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns;
+\
+\   R1                              The y-coordinate of the player's ship
+\
+\ ******************************************************************************
+
+                                    \ --- Mod; Code added for keyboard -------->
+
+.CheckForKeyboardToggle
+
+ MOV     R0, #129                   \ Call OS_Byte 129 to read the keyboard for
+ MOV     R1, #&3A                   \ 'J' [so R1 = 69 EOR &7F] and up, returning
+ MOV     R2, #&FF                   \ the result in R1
+ SWI     OS_Byte
+
+ TEQ     R1, #70                    \ If R1 = 70 then 'K' was pressed, so set
+ MOVEQ   R0, #&FF                   \ keyboardStatus to &FF to record that we
+ STREQ   R0, keyboardStatus         \ should be reading the keyboard instead of
+                                    \ of the mouse
+
+ TEQ     R1, #69                    \ If R1 = 69 then 'J' was pressed, so set
+ MOVEQ   R0, #0                     \ keyboardStatus to 0 to record that we
+ STREQ   R0, keyboardStatus         \ should be reading the mouse
+
+ LDR     R1, [R11, #yPlayer]        \ Set R1 to the y-coordinate of the player,
+                                    \ which we need to return from the routine
+                                    \ that jumped here [LandOnLaunchpad]
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name; keyboardStatus
+\       Type; Variable
+\   Category; Keyboard
+\    Summary; A flag to record whether we are using the keyboard or mouse
+\
+\ ******************************************************************************
+
+                                    \ --- Mod; Code added for keyboard -------->
+
+.keyboardStatus
+
+ EQUD 0                             \ 0 = mouse, &FF = keyboard
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name; ReadKeyboardMouseButtons
+\       Type; Subroutine
+\   Category; Keyboard
+\    Summary; Convert key presses into mouse button presses
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns;
+\
+\   R0                              The mouse x-coordinate, if mouse is enabled
+\
+\   R1                              The mouse y-coordinate, if mouse is enabled
+\
+\   R2                              The state of the mouse buttons or keyboard
+\                                   equivalents
+\
+\   R7                              The value of keyboardStatus
+\
+\ ******************************************************************************
+
+                                    \ --- Mod; Code added for AES ------------->
+
+.ReadKeyboardMouseButtons
+
+ LDR     R7, keyboardStatus         \ If keyboardStatus = &FF then we are using
+ TEQ     R7, #&FF                   \ the keyboard to fly the ship, so jump to
+ BEQ     rkey1                      \ rkey1 to read the keys
+
+                                    \ If we get here then we are using the
+                                    \ mouse
+
+ SWI     OS_Mouse                   \ Read the mouse coordinates, returning;
+                                    \
+                                    \   R0 = x-coordinate
+                                    \
+                                    \   R1 = y-coordinate
+                                    \
+                                    \   R2 = mouse buttons [%lmr]
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+.rkey1
+                                    \ If we get here then we are using the
+                                    \ keyboard
+
+ MOV     R3, #0                     \ Set R3 to 0 to record the key presses
+
+ MOV     R0, #121                   \ Call OS_Byte 121 to read the keyboard for
+ MOV     R1, #&E2                   \ Space [so R1 = 98 EOR &80], returning
+ SWI     OS_Byte                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If Space was pressed then set the bit for
+ ORREQ   R3, R3, #%100              \ thrust
+
+ MOV     R1, #&E8                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ '?' [so R1 = 104 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If '?' was pressed then set the bit for
+ ORREQ   R3, R3, #%010              \ hover
+
+ MOV     R1, #&C1                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ 'A' [so R1 = 98 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If 'A' was pressed then set the bit for
+ ORREQ   R3, R3, #%001              \ fire
+
+ MOV     R2, R3                     \ Set R2 to the result to return
+
+ MOV     PC, R14                    \ Return from the subroutine
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name; GetPolarAnglesFromKeyboard
+\       Type; Subroutine
+\   Category; Keyboard
+\    Summary; Convert key pressses into polar coordinates
+\
+\ ******************************************************************************
+
+                                    \ --- Mod; Code added for AES ------------->
+
+.GetPolarAnglesFromKeyboard
+
+ LDR     R3, polarAngle             \ Set R3 to the current polar angle
+
+ MOV     R0, #121                   \ Call OS_Byte 121 to read the keyboard for
+ MOV     R1, #&E6                   \ '<' [so R1 = 102 EOR &80], returning
+ SWI     OS_Byte                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If yaw left '<' was pressed then decrease
+ SUBEQ   R3, R3, #64 << 22          \ the angle
+
+ MOV     R1, #&E7                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ '>' [so R1 = 103 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If yaw right '>' was pressed then increase
+ ADDEQ   R3, R3, #64 << 22          \ the angle
+
+ STR     R3, polarAngle             \ Store the new polar angle
+
+ LDR     R4, polarDistance          \ Set R4 to the current polar angle
+
+ MOV     R1, #&C2                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ 'X' [so R1 = 66 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If pull up 'X' was pressed then decrease
+ SUBEQ   R4, R4, #8 << 22           \ the distance
+
+ MOV     R1, #&D1                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ 'S' [so R1 = 81 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If pitch down 'S' was pressed then
+ ADDEQ   R4, R4, #8 << 22           \ increase the distance
+
+ CMP     R4, #0                     \ Ensure R4 remains positive
+ MOVLT   R4, #0
+
+ STR     R4, polarDistance          \ Store the new polar distance
+
+ MOV     R1, R3                     \ Return the polar angle in R1 and the polar
+ MOV     R0, R4                     \ distance in R0, to be used by the rest of
+                                    \ the code in part 1 of MoveAndDrawPlayer
+
+ B       move1                      \ Return from the subroutine by jumping to
+                                    \ move1, after the mouse calculations
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name; polarAngle
+\       Type; Variable
+\   Category; Keyboard
+\    Summary; The current polar angle of the mouse
+\
+\ ******************************************************************************
+
+                                    \ --- Mod; Code added for AES ------------->
+
+.polarAngle
+
+ EQUD 0
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name; polarDistance
+\       Type; Variable
+\   Category; Keyboard
+\    Summary; The current polar distance of the mouse
+\
+\ ******************************************************************************
+
+                                    \ --- Mod; Code added for AES ------------->
+
+.polarDistance
+
+ EQUD 0
+
+                                    \ --- End of added code ------------------->
 
 \ ******************************************************************************
 \
