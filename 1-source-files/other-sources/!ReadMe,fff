@@ -1,6 +1,6 @@
 This disc contains BigLander, an extended version
-of Lander that has a larger landscape and
-keyboard support.
+of Lander that has a larger landscape and keyboard
+support.
 
 The Arthur directory contains BigLander for
 Arthur.
@@ -24,9 +24,9 @@ subtract 1 from the number of tile corners, so
 the first option contains 12x10 tiles, just like
 the original Lander.
 
-Choose the relevant folder for your system. You
-can run all versions on all systems, but large
-landscapes will run more slowly.
+Note that you can run all the landscape sizes on
+all systems, but larger landscapes will run quite
+slowly on slower CPUs.
 
 More information can be found by clicking Menu on
 !BigLander and choosing Help.
