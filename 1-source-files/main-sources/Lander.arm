@@ -12912,36 +12912,101 @@
  MOV     R3, #0                     \ Zero R3 so we can record whether an option
                                     \ key has been pressed
 
- TEQ     R1, #70                    \ If R1 = 70 then "K" was pressed, so set
- MOVEQ   R0, #1                     \ keyboardStatus to 1 to record that we
- STREQ   R0, keyboardStatus         \ should be reading the keyboard instead of
- MOVEQ   R3, #1                     \ of the mouse, using an Elite-like key
+ LDR     R4, keyboardStatus         \ Set R4 to the current keyboard status
+
+ TEQ     R1, #70                    \ If R1 = 70 then "K" was pressed, so jump
+ BNE     togg1                      \ to togg1 to skip the following if it
+                                    \ wasn't
+
+                                    \ If we get here then "K" was pressed
+
+ MOV     R0, #1                     \ Set keyboardStatus to 1 to record that we
+ STR     R0, keyboardStatus         \ should be reading the keyboard instead of
+                                    \ of the mouse, using an Elite-like key
                                     \ layout
 
- TEQ     R1, #86                    \ If R1 = 86 then "L" was pressed, so set
- MOVEQ   R0, #2                     \ keyboardStatus to 2 to record that we
- STREQ   R0, keyboardStatus         \ should be reading the keyboard instead of
- MOVEQ   R3, #1                     \ of the mouse, using a typical RISC OS key
+ TEQ     R0, R4                     \ If the new setting is different to the old
+ MOVNE   R3, #1                     \ setting, set R3 to 1 so we make a beep in
+                                    \ togg5
+
+ B       togg5                      \ Jump to togg5 to stop checking for option
+                                    \ keys and return from the subroutine
+
+.togg1
+
+ TEQ     R1, #86                    \ If R1 = 86 then "L" was pressed, so jump
+ BNE     togg2                      \ to togg2 to skip the following if it
+                                    \ wasn't
+
+                                    \ If we get here then "L" was pressed
+
+ MOV     R0, #2                     \ Set keyboardStatus to 2 to record that we
+ STR     R0, keyboardStatus         \ should be reading the keyboard instead of
+                                    \ of the mouse, using a typical RISC OS key
                                     \ layout
 
- TEQ     R1, #69                    \ If R1 = 69 then "J" was pressed, so set
- MOVEQ   R0, #0                     \ keyboardStatus to 0 to record that we
- STREQ   R0, keyboardStatus         \ should be reading the mouse
- MOVEQ   R3, #1
+ TEQ     R0, R4                     \ If the new setting is different to the old
+ MOVNE   R3, #1                     \ setting, set R3 to 1 so we make a beep in
+                                    \ togg5
 
- TEQ     R1, #68                    \ If R1 = 68 then "Y" was pressed, so set
- MOVEQ   R0, #1                     \ yAxisInvert to 1 to invert the y-axis
- STREQ   R0, yAxisInvert
- MOVEQ   R3, #1
+ B       togg5                      \ Jump to togg5 to stop checking for option
+                                    \ keys and return from the subroutine
 
- TEQ     R1, #53                    \ If R1 = 53 then "U" was pressed, so set
- MOVEQ   R0, #0                     \ yAxisInvert to 0 to stop inverting the
- STREQ   R0, yAxisInvert            \ y-axis
- MOVEQ   R3, #1
+.togg2
 
- TEQ     R3, #1                     \ If R3 = 1 then an option key was pressed,
- MOVEQ   R0, #7                     \ so make a confirmation beep
- SWIEQ   OS_WriteC
+ TEQ     R1, #69                    \ If R1 = 69 then "J" was pressed, so jump
+ BNE     togg3                      \ to togg3 to skip the following if it
+                                    \ wasn't
+
+                                    \ If we get here then "J" was pressed
+
+ MOV     R0, #0                     \ Set keyboardStatus to 0 to record that we
+ STR     R0, keyboardStatus         \ should be reading the mouse
+
+ TEQ     R0, R4                     \ If the new setting is different to the old
+ MOVNE   R3, #1                     \ setting, set R3 to 1 so we make a beep in
+                                    \ togg5
+
+ B       togg5                      \ Jump to togg5 to stop checking for option
+                                    \ keys and return from the subroutine
+
+.togg3
+
+ LDR     R4, yAxisInvert            \ Set R4 to the current y-axis setting
+
+ TEQ     R1, #68                    \ If R1 = 68 then "Y" was pressed, so jump
+ BNE     togg4                      \ to togg4 to skip the following if it
+                                    \ wasn't
+
+ MOV     R0, #1                     \ Set yAxisInvert to 1 to invert the y-axis
+ STR     R0, yAxisInvert
+
+ TEQ     R0, R4                     \ If the new setting is different to the old
+ MOVNE   R3, #1                     \ setting, set R3 to 1 so we make a beep in
+                                    \ togg5
+
+ B       togg5                      \ Jump to togg5 to stop checking for option
+                                    \ keys and return from the subroutine
+.togg4
+
+ TEQ     R1, #53                    \ If R1 = 53 then "U" was pressed, so jump
+ BNE     togg6                      \ to togg6 to skip the following if it
+                                    \ wasn't
+
+ MOV     R0, #0                     \ yAxisInvert to 0 to stop inverting the
+ STR     R0, yAxisInvert            \ y-axis
+
+ TEQ     R0, R4                     \ If the new setting is different to the old
+ MOVNE   R3, #1                     \ setting, set R3 to 1 so we make a beep in
+                                    \ togg5
+
+.togg5
+
+ TEQ     R3, #1                     \ If R3 = 1 then we just changed the value
+ MOVEQ   R0, #7                     \ of one of the options, so make a
+ SWIEQ   OS_WriteC                  \ confirmation beep
+
+.togg6
 
  LDR     R1, [R11, #yPlayer]        \ Set R1 to the y-coordinate of the player,
                                     \ which we need to return from the routine
@@ -13125,13 +13190,6 @@
 
  TEQ     R1, #&FF                   \ If left Shift was pressed then set the bit
  ORREQ   R3, R3, #%010              \ for hover
-
- MOV     R1, #&86                   \ Call OS_Byte 121 to read the keyboard for
- SWI     OS_Byte                    \ right Shift (so R1 = 6 EOR &80), returning
-                                    \ the result in R1
-
- TEQ     R1, #&FF                   \ If right Shift was pressed then set the
- ORREQ   R3, R3, #%010              \ bit for hover
 
  MOV     R1, #&C9                   \ Call OS_Byte 121 to read the keyboard for
  SWI     OS_Byte                    \ Return (so R1 = 73 EOR &80), returning

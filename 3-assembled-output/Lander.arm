@@ -2979,29 +2979,51 @@ CheckForKeyboardToggle:
  MOV     R2, #0xFF
  SWI     OS_Byte
  MOV     R3, #0
+ LDR     R4, keyboardStatus
  TEQ     R1, #70
- MOVEQ   R0, #1
- STREQ   R0, keyboardStatus
- MOVEQ   R3, #1
+ BNE     togg1
+ MOV     R0, #1
+ STR     R0, keyboardStatus
+ TEQ     R0, R4
+ MOVNE   R3, #1
+ B       togg5
+togg1:
  TEQ     R1, #86
- MOVEQ   R0, #2
- STREQ   R0, keyboardStatus
- MOVEQ   R3, #1
+ BNE     togg2
+ MOV     R0, #2
+ STR     R0, keyboardStatus
+ TEQ     R0, R4
+ MOVNE   R3, #1
+ B       togg5
+togg2:
  TEQ     R1, #69
- MOVEQ   R0, #0
- STREQ   R0, keyboardStatus
- MOVEQ   R3, #1
+ BNE     togg3
+ MOV     R0, #0
+ STR     R0, keyboardStatus
+ TEQ     R0, R4
+ MOVNE   R3, #1
+ B       togg5
+togg3:
+ LDR     R4, yAxisInvert
  TEQ     R1, #68
- MOVEQ   R0, #1
- STREQ   R0, yAxisInvert
- MOVEQ   R3, #1
+ BNE     togg4
+ MOV     R0, #1
+ STR     R0, yAxisInvert
+ TEQ     R0, R4
+ MOVNE   R3, #1
+ B       togg5
+togg4:
  TEQ     R1, #53
- MOVEQ   R0, #0
- STREQ   R0, yAxisInvert
- MOVEQ   R3, #1
+ BNE     togg6
+ MOV     R0, #0
+ STR     R0, yAxisInvert
+ TEQ     R0, R4
+ MOVNE   R3, #1
+togg5:
  TEQ     R3, #1
  MOVEQ   R0, #7
  SWIEQ   OS_WriteC
+togg6:
  LDR     R1, [R11, #yPlayer]
  MOV     PC, R14
 keyboardStatus:
@@ -3041,10 +3063,6 @@ rkey2:
  TEQ     R1, #0xFF
  ORREQ   R3, R3, #0x4
  MOV     R1, #0x83
- SWI     OS_Byte
- TEQ     R1, #0xFF
- ORREQ   R3, R3, #0x2
- MOV     R1, #0x86
  SWI     OS_Byte
  TEQ     R1, #0xFF
  ORREQ   R3, R3, #0x2
