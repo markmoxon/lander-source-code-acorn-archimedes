@@ -19,8 +19,8 @@ Space   Thrust
 Or press "L" while on the launchpad and use the
 following keys:
 
-?       Pitch down
-"       Pull up
+"       Pitch down
+?       Pull up
 Z       Rotate anti-clockwise
 X       Rotate clockwise
 Return  Fire
@@ -29,7 +29,18 @@ Shift   Hover
 
 You can use either Shift key to hover.
 
+Press "Y" while on the launchpad to invert the
+y-axis for keyboard controls, which will swap the
+keys for pitching down and pulling up.
+
+Press "U" while on the launchpad to set the
+y-axis controls back to normal.
+
 Press "J" while on the launchpad to switch back
 to the mouse.
+
+Pressing an option key while on the launchpad
+will produce a beep, so you know the change has
+been registered.
 
 See lander.bbcelite.com for details.

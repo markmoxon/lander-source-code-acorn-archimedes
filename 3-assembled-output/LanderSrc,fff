@@ -12885,8 +12885,8 @@ REM ****************************************************************************
 \       Name; CheckForKeyboardToggle
 \       Type; Subroutine
 \   Category; Keyboard
-\    Summary; Check whether 'K', 'J' or 'L' is being pressed and set the flag in
-\             keyboardStatus accordingly
+\    Summary; Check whether any option keys are being pressed and set the flags
+\             in keyboardStatus and yAxisInvert accordingly
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12901,25 +12901,43 @@ REM ****************************************************************************
 .CheckForKeyboardToggle
 
  MOV     R0, #129                   \ Call OS_Byte 129 to read the keyboard for
- MOV     R1, #&3A                   \ 'J' [so R1 = 69 EOR &7F] and up, returning
+ MOV     R1, #&4A                   \ 'U' and up [so R1 = 53 EOR &7F], returning
  MOV     R2, #&FF                   \ the result in R1
  SWI     OS_Byte
+
+ MOV     R3, #0                     \ Zero R3 so we can record whether an option
+                                    \ key has been pressed
 
  TEQ     R1, #70                    \ If R1 = 70 then 'K' was pressed, so set
  MOVEQ   R0, #1                     \ keyboardStatus to 1 to record that we
  STREQ   R0, keyboardStatus         \ should be reading the keyboard instead of
-                                    \ of the mouse, using an Elite-like key
+ MOVEQ   R3, #1                     \ of the mouse, using an Elite-like key
                                     \ layout
 
  TEQ     R1, #86                    \ If R1 = 86 then 'L' was pressed, so set
  MOVEQ   R0, #2                     \ keyboardStatus to 2 to record that we
  STREQ   R0, keyboardStatus         \ should be reading the keyboard instead of
-                                    \ of the mouse, using a typical RISC OS key
+ MOVEQ   R3, #1                     \ of the mouse, using a typical RISC OS key
                                     \ layout
 
  TEQ     R1, #69                    \ If R1 = 69 then 'J' was pressed, so set
  MOVEQ   R0, #0                     \ keyboardStatus to 0 to record that we
  STREQ   R0, keyboardStatus         \ should be reading the mouse
+ MOVEQ   R3, #1
+
+ TEQ     R1, #68                    \ If R1 = 68 then 'Y' was pressed, so set
+ MOVEQ   R0, #1                     \ yAxisInvert to 1 to invert the y-axis
+ STREQ   R0, yAxisInvert
+ MOVEQ   R3, #1
+
+ TEQ     R1, #53                    \ If R1 = 53 then 'U' was pressed, so set
+ MOVEQ   R0, #0                     \ yAxisInvert to 0 to stop inverting the
+ STREQ   R0, yAxisInvert            \ y-axis
+ MOVEQ   R3, #1
+
+ TEQ     R3, #1                     \ If R3 = 1 then an option key was pressed,
+ MOVEQ   R0, #7                     \ so make a confirmation beep
+ SWIEQ   OS_WriteC
 
  LDR     R1, [R11, #yPlayer]        \ Set R1 to the y-coordinate of the player,
                                     \ which we need to return from the routine
@@ -12965,6 +12983,28 @@ REM ****************************************************************************
                                     \     * Space = Thrust
                                     \     * Shift [either one] = Hover
                                     \     * Return = Fire
+
+                                    \ --- End of added code ------------------->
+
+\ ******************************************************************************
+\
+\       Name; yAxisInvert
+\       Type; Variable
+\   Category; Keyboard
+\    Summary; A flag to record whether we invert the y-axis with keyboard
+\             control
+\
+\ ******************************************************************************
+
+                                    \ --- Mod; Code added for keyboard -------->
+
+.yAxisInvert
+
+ EQUD 0                             \ The configuration of the y-axis invert
+                                    \
+                                    \   * 0 = Do not invert y-axis
+                                    \
+                                    \   * 1 = Invert y-axis
 
                                     \ --- End of added code ------------------->
 
@@ -13120,7 +13160,7 @@ REM ****************************************************************************
  MOVEQ   PC, R14                    \ the subroutine to skip reading the keys
 
  TEQ     R3, #2                     \ If keyboardStatus = 2 then we are using
- BEQ     pkey1                      \ the keyboard to fly the ship and the more
+ BEQ     pkey2                      \ the keyboard to fly the ship and the more
                                     \ typical RISC OS key layout is configured,
                                     \ so jump to rkey2 to read the correct keys
 
@@ -13154,6 +13194,10 @@ REM ****************************************************************************
 
  STR     R3, polarAngle             \ Store the new polar angle
 
+ LDR     R1, yAxisInvert            \ If yAxisInvert = 1 then the y-axis is
+ TEQ     R1, #1                     \ inverted, so jump to pkey1 to swap the
+ BEQ     pkey1                      \ pull up and pitch down keys
+
  LDR     R4, polarDistance          \ Set R4 to the current polar angle
 
  MOV     R1, #&C2                   \ Call OS_Byte 121 to read the keyboard for
@@ -13183,6 +13227,39 @@ REM ****************************************************************************
                                     \ move1, after the mouse calculations
 
 .pkey1
+
+                                    \ If we get here then the y-axis is inverted
+                                    \ so we swap the pull up and pitch down keys
+
+ LDR     R4, polarDistance          \ Set R4 to the current polar angle
+
+ MOV     R1, #&C2                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ 'X' [so R1 = 66 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If pull up 'X' was pressed then increase
+ ADDEQ   R4, R4, #8 << 22           \ the distance
+
+ MOV     R1, #&D1                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ 'S' [so R1 = 81 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If pitch down 'S' was pressed then
+ SUBEQ   R4, R4, #8 << 22           \ decrease the distance
+
+ CMP     R4, #0                     \ Ensure R4 remains positive
+ MOVLT   R4, #0
+
+ STR     R4, polarDistance          \ Store the new polar distance
+
+ MOV     R1, R3                     \ Return the polar angle in R1 and the polar
+ MOV     R0, R4                     \ distance in R0, to be used by the rest of
+                                    \ the code in part 1 of MoveAndDrawPlayer
+
+ B       move1                      \ Return from the subroutine by jumping to
+                                    \ move1, after the mouse calculations
+
+.pkey2
 
                                     \ If we get here then keyboardStatus = 2 and
                                     \ we are using the keyboard in a standard
@@ -13214,6 +13291,10 @@ REM ****************************************************************************
 
  STR     R3, polarAngle             \ Store the new polar angle
 
+ LDR     R1, yAxisInvert            \ If yAxisInvert = 1 then the y-axis is
+ TEQ     R1, #1                     \ inverted, so jump to pkey3 to swap the
+ BEQ     pkey3                      \ pull up and pitch down keys
+
  LDR     R4, polarDistance          \ Set R4 to the current polar angle
 
  MOV     R1, #&E8                   \ Call OS_Byte 121 to read the keyboard for
@@ -13229,6 +13310,39 @@ REM ****************************************************************************
 
  TEQ     R1, #&FF                   \ If pitch down ''' was pressed then
  ADDEQ   R4, R4, #8 << 22           \ increase the distance
+
+ CMP     R4, #0                     \ Ensure R4 remains positive
+ MOVLT   R4, #0
+
+ STR     R4, polarDistance          \ Store the new polar distance
+
+ MOV     R1, R3                     \ Return the polar angle in R1 and the polar
+ MOV     R0, R4                     \ distance in R0, to be used by the rest of
+                                    \ the code in part 1 of MoveAndDrawPlayer
+
+ B       move1                      \ Return from the subroutine by jumping to
+                                    \ move1, after the mouse calculations
+
+.pkey3
+
+                                    \ If we get here then the y-axis is inverted
+                                    \ so we swap the pull up and pitch down keys
+
+ LDR     R4, polarDistance          \ Set R4 to the current polar angle
+
+ MOV     R1, #&E8                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ '?' [so R1 = 104 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If pull up '?' was pressed then increase
+ ADDEQ   R4, R4, #8 << 22           \ the distance
+
+ MOV     R1, #&CF                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ ''' [so R1 = 81 EOR &80], returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If pitch down ''' was pressed then
+ SUBEQ   R4, R4, #8 << 22           \ decrease the distance
 
  CMP     R4, #0                     \ Ensure R4 remains positive
  MOVLT   R4, #0

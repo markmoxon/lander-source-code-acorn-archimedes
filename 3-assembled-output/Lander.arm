@@ -2975,21 +2975,38 @@ PrintHexDigit:
  MOV     PC, R14
 CheckForKeyboardToggle:
  MOV     R0, #129
- MOV     R1, #0x3A
+ MOV     R1, #0x4A
  MOV     R2, #0xFF
  SWI     OS_Byte
+ MOV     R3, #0
  TEQ     R1, #70
  MOVEQ   R0, #1
  STREQ   R0, keyboardStatus
+ MOVEQ   R3, #1
  TEQ     R1, #86
  MOVEQ   R0, #2
  STREQ   R0, keyboardStatus
+ MOVEQ   R3, #1
  TEQ     R1, #69
  MOVEQ   R0, #0
  STREQ   R0, keyboardStatus
+ MOVEQ   R3, #1
+ TEQ     R1, #68
+ MOVEQ   R0, #1
+ STREQ   R0, yAxisInvert
+ MOVEQ   R3, #1
+ TEQ     R1, #53
+ MOVEQ   R0, #0
+ STREQ   R0, yAxisInvert
+ MOVEQ   R3, #1
+ TEQ     R3, #1
+ MOVEQ   R0, #7
+ SWIEQ   OS_WriteC
  LDR     R1, [R11, #yPlayer]
  MOV     PC, R14
 keyboardStatus:
+.long 0
+yAxisInvert:
 .long 0
 ReadKeyboardMouseButtons:
  LDR     R3, keyboardStatus
@@ -3042,7 +3059,7 @@ GetPolarAnglesFromKeyboard:
  TEQ     R3, #0
  MOVEQ   PC, R14
  TEQ     R3, #2
- BEQ     pkey1
+ BEQ     pkey2
  LDR     R3, polarAngle
  MOV     R0, #121
  MOV     R1, #0xE6
@@ -3054,6 +3071,9 @@ GetPolarAnglesFromKeyboard:
  TEQ     R1, #0xFF
  ADDEQ   R3, R3, #64 << 22
  STR     R3, polarAngle
+ LDR     R1, yAxisInvert
+ TEQ     R1, #1
+ BEQ     pkey1
  LDR     R4, polarDistance
  MOV     R1, #0xC2
  SWI     OS_Byte
@@ -3070,6 +3090,22 @@ GetPolarAnglesFromKeyboard:
  MOV     R0, R4
  B       move1
 pkey1:
+ LDR     R4, polarDistance
+ MOV     R1, #0xC2
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ADDEQ   R4, R4, #8 << 22
+ MOV     R1, #0xD1
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ SUBEQ   R4, R4, #8 << 22
+ CMP     R4, #0
+ MOVLT   R4, #0
+ STR     R4, polarDistance
+ MOV     R1, R3
+ MOV     R0, R4
+ B       move1
+pkey2:
  LDR     R3, polarAngle
  MOV     R0, #121
  MOV     R1, #0xE1
@@ -3081,6 +3117,9 @@ pkey1:
  TEQ     R1, #0xFF
  ADDEQ   R3, R3, #64 << 22
  STR     R3, polarAngle
+ LDR     R1, yAxisInvert
+ TEQ     R1, #1
+ BEQ     pkey3
  LDR     R4, polarDistance
  MOV     R1, #0xE8
  SWI     OS_Byte
@@ -3090,6 +3129,22 @@ pkey1:
  SWI     OS_Byte
  TEQ     R1, #0xFF
  ADDEQ   R4, R4, #8 << 22
+ CMP     R4, #0
+ MOVLT   R4, #0
+ STR     R4, polarDistance
+ MOV     R1, R3
+ MOV     R0, R4
+ B       move1
+pkey3:
+ LDR     R4, polarDistance
+ MOV     R1, #0xE8
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ADDEQ   R4, R4, #8 << 22
+ MOV     R1, #0xCF
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ SUBEQ   R4, R4, #8 << 22
  CMP     R4, #0
  MOVLT   R4, #0
  STR     R4, polarDistance
