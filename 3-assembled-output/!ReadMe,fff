@@ -1,0 +1,36 @@
+This disc contains BigLander, an extended version
+of Lander that has a larger landscape and
+keyboard support.
+
+The Arthur directory contains BigLander for
+Arthur.
+
+The RISC_OS directory contains BigLander for all
+versions of RISC OS.
+
+BigLander comes in four landscape sizes, each of
+which is in a folder giving the landscape size:
+
+* 13x11 tile corners (suitable for ARM2)
+
+* 20x20 tile corners (suitable for ARM3)
+
+* 65x65 tile corners (suitable for StrongARM)
+
+* 122x122 tile corners (suitable for Raspberry Pi)
+
+To get the number of tiles in each direction,
+subtract 1 from the number of tile corners, so
+the first option contains 12x10 tiles, just like
+the original Lander.
+
+Choose the relevant folder for your system. You
+can run all versions on all systems, but large
+landscapes will run more slowly.
+
+More information can be found by clicking Menu on
+!BigLander and choosing Help.
+
+See lander.bbcelite.com/hacks for details.
+
+Build: 2026-11-20 15-53-48

@@ -70,6 +70,18 @@ all:
 	$(DISC) cp --recursive 5-compiled-game-discs/big-lander-13-11.adf:$$.Arthur.Library 5-compiled-game-discs/big-lander.adf:$$.Arthur.Library
 
   ifeq ($(OS), Windows_NT)
+	copy /y "1-source-files\other-sources\!ReadMe,fff" "3-assembled-output\!ReadMe,fff"
+	echo:>> "3-assembled-output\!ReadMe,fff"
+	echo:>> "3-assembled-output\!ReadMe,fff"
+	echo Build: %DATE% %TIME%>> "3-assembled-output\!ReadMe,fff"
+  else
+	cp 1-source-files/other-sources/!ReadMe,fff 3-assembled-output/!ReadMe,fff
+	echo "\n\nBuild: $$(date +%Y-%m-%d\ %H-%M-%S)" >> 3-assembled-output/!ReadMe,fff
+  endif
+
+	$(DISC) put 5-compiled-game-discs/big-lander.adf:$$.!ReadMe 3-assembled-output/!ReadMe,fff
+
+  ifeq ($(OS), Windows_NT)
 	del /q /f  5-compiled-game-discs\big-lander-13-11.adf
 	del /q /f  5-compiled-game-discs\big-lander-20-20.adf
 	del /q /f  5-compiled-game-discs\big-lander-65-65.adf
