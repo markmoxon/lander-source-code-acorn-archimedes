@@ -1806,11 +1806,10 @@
 
                                     \ --- Mod: Code added for keyboard--------->
 
- TEQ     R7, #&FF                   \ If keyboard is enabled then the call to
- BEQ     GetPolarAnglesFromKeyboard \ ReadKeyboardMouseButtons will have set R7
-                                    \ to &FF, so skip the following and jump to
-                                    \ GetPolarAnglesFromKeyboard instead,
-                                    \ returning to move1 below
+ BL      GetPolarAnglesFromKeyboard \ Call GetPolarAnglesFromKeyboard with the
+                                    \ keyboard status in R7 to process the keys
+                                    \ if keyboards are configured, returning to
+                                    \ move1 below
 
                                     \ --- End of added code ------------------->
 
@@ -12890,8 +12889,8 @@
 \       Name: CheckForKeyboardToggle
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Check whether "K" or "J" is being pressed and set the flag in
-\             keyboardStatus accordingle
+\    Summary: Check whether "K", "J" or "L" is being pressed and set the flag in
+\             keyboardStatus accordingly
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12911,9 +12910,16 @@
  SWI     OS_Byte
 
  TEQ     R1, #70                    \ If R1 = 70 then "K" was pressed, so set
- MOVEQ   R0, #&FF                   \ keyboardStatus to &FF to record that we
+ MOVEQ   R0, #1                     \ keyboardStatus to 1 to record that we
  STREQ   R0, keyboardStatus         \ should be reading the keyboard instead of
-                                    \ of the mouse
+                                    \ of the mouse, using an Elite-like key
+                                    \ layout
+
+ TEQ     R1, #86                    \ If R1 = 86 then "L" was pressed, so set
+ MOVEQ   R0, #2                     \ keyboardStatus to 2 to record that we
+ STREQ   R0, keyboardStatus         \ should be reading the keyboard instead of
+                                    \ of the mouse, using a typical RISC OS key
+                                    \ layout
 
  TEQ     R1, #69                    \ If R1 = 69 then "J" was pressed, so set
  MOVEQ   R0, #0                     \ keyboardStatus to 0 to record that we
@@ -12940,7 +12946,29 @@
 
 .keyboardStatus
 
- EQUD 0                             \ 0 = mouse, &FF = keyboard
+ EQUD 0                             \ The configuration of the game controls
+                                    \
+                                    \   * 0 = Mouse
+                                    \
+                                    \   * 1 = Keyboard, Elite-style
+                                    \
+                                    \     * S = Pitch down
+                                    \     * X = Pull up
+                                    \     * <, = Rotate anti-clockwise
+                                    \     * >. = Rotate clockwise
+                                    \     * Space = Thrust
+                                    \     * ?/ = Hover
+                                    \     * A = Fire
+                                    \
+                                    \   * 2 = Keyboard, RISC OS-style
+                                    \
+                                    \     * ?/ = Pitch down
+                                    \     * '" = Pull up
+                                    \     * Z = Rotate anti-clockwise
+                                    \     * X = Rotate clockwise
+                                    \     * Space = Thrust
+                                    \     * Shift (either one) = Hover
+                                    \     * Return = Fire
 
                                     \ --- End of added code ------------------->
 
@@ -12970,9 +12998,15 @@
 
 .ReadKeyboardMouseButtons
 
- LDR     R7, keyboardStatus         \ If keyboardStatus = &FF then we are using
- TEQ     R7, #&FF                   \ the keyboard to fly the ship, so jump to
- BEQ     rkey1                      \ rkey1 to read the keys
+ LDR     R3, keyboardStatus         \ If keyboardStatus = 1 then we are using
+ TEQ     R3, #1                     \ the keyboard to fly the ship and the
+ BEQ     rkey1                      \ Elite-like key layout is configured, so
+                                    \ jump to rkey1 to read the correct keys
+
+ TEQ     R3, #2                     \ If keyboardStatus = 2 then we are using
+ BEQ     rkey2                      \ the keyboard to fly the ship and the more
+                                    \ typical RISC OS key layout is configured,
+                                    \ so jump to rkey2 to read the correct keys
 
                                     \ If we get here then we are using the
                                     \ mouse
@@ -12988,8 +13022,15 @@
  MOV     PC, R14                    \ Return from the subroutine
 
 .rkey1
+
                                     \ If we get here then we are using the
-                                    \ keyboard
+                                    \ keyboard in an Elite-like layout:
+                                    \
+                                    \   * Space = Thrust
+                                    \
+                                    \   * ?/ = Hover
+                                    \
+                                    \   * A = Fire
 
  MOV     R3, #0                     \ Set R3 to 0 to record the key presses
 
@@ -13018,6 +13059,51 @@
 
  MOV     PC, R14                    \ Return from the subroutine
 
+.rkey2
+
+                                    \ If we get here then we are using the
+                                    \ keyboard in a typical RISC OS layout:
+                                    \
+                                    \   * Space = Thrust
+                                    \
+                                    \   * Shift (either one) = Hover
+                                    \
+                                    \   * Return = Fire
+
+ MOV     R3, #0                     \ Set R3 to 0 to record the key presses
+
+ MOV     R0, #121                   \ Call OS_Byte 121 to read the keyboard for
+ MOV     R1, #&E2                   \ Space (so R1 = 98 EOR &80), returning
+ SWI     OS_Byte                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If Space was pressed then set the bit for
+ ORREQ   R3, R3, #%100              \ thrust
+
+ MOV     R1, #&83                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ left Shift (so R1 = 3 EOR &80), returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If left Shift was pressed then set the bit
+ ORREQ   R3, R3, #%010              \ for hover
+
+ MOV     R1, #&86                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ right Shift (so R1 = 6 EOR &80), returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If right Shift was pressed then set the
+ ORREQ   R3, R3, #%010              \ bit for hover
+
+ MOV     R1, #&C9                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ Return (so R1 = 73 EOR &80), returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If "A" was pressed then set the bit for
+ ORREQ   R3, R3, #%001              \ fire
+
+ MOV     R2, R3                     \ Set R2 to the result to return
+
+ MOV     PC, R14                    \ Return from the subroutine
+
                                     \ --- End of added code ------------------->
 
 \ ******************************************************************************
@@ -13033,20 +13119,41 @@
 
 .GetPolarAnglesFromKeyboard
 
+ LDR     R3, keyboardStatus         \ If keyboardStatus = 0 then we are using
+ TEQ     R3, #0                     \ the mouse to fly the ship, so return from
+ MOVEQ   PC, R14                    \ the subroutine to skip reading the keys
+
+ TEQ     R3, #2                     \ If keyboardStatus = 2 then we are using
+ BEQ     pkey1                      \ the keyboard to fly the ship and the more
+                                    \ typical RISC OS key layout is configured,
+                                    \ so jump to rkey2 to read the correct keys
+
+                                    \ If we get here then keyboardStatus = 1 and
+                                    \ we are using the keyboard in an Elite-like
+                                    \ layout:
+                                    \
+                                    \   * S = Pitch down
+                                    \
+                                    \   * X = Pull up
+                                    \
+                                    \   * ,< = Rotate anti-clockwise
+                                    \
+                                    \   * .>  = Rotate clockwise
+
  LDR     R3, polarAngle             \ Set R3 to the current polar angle
 
  MOV     R0, #121                   \ Call OS_Byte 121 to read the keyboard for
- MOV     R1, #&E6                   \ "<" (so R1 = 102 EOR &80), returning
+ MOV     R1, #&E6                   \ "," (so R1 = 102 EOR &80), returning
  SWI     OS_Byte                    \ the result in R1
 
- TEQ     R1, #&FF                   \ If yaw left "<" was pressed then decrease
+ TEQ     R1, #&FF                   \ If yaw left "," was pressed then decrease
  SUBEQ   R3, R3, #64 << 22          \ the angle
 
  MOV     R1, #&E7                   \ Call OS_Byte 121 to read the keyboard for
- SWI     OS_Byte                    \ ">" (so R1 = 103 EOR &80), returning
+ SWI     OS_Byte                    \ "." (so R1 = 103 EOR &80), returning
                                     \ the result in R1
 
- TEQ     R1, #&FF                   \ If yaw right ">" was pressed then increase
+ TEQ     R1, #&FF                   \ If yaw right "." was pressed then increase
  ADDEQ   R3, R3, #64 << 22          \ the angle
 
  STR     R3, polarAngle             \ Store the new polar angle
@@ -13065,6 +13172,66 @@
                                     \ the result in R1
 
  TEQ     R1, #&FF                   \ If pitch down "S" was pressed then
+ ADDEQ   R4, R4, #8 << 22           \ increase the distance
+
+ CMP     R4, #0                     \ Ensure R4 remains positive
+ MOVLT   R4, #0
+
+ STR     R4, polarDistance          \ Store the new polar distance
+
+ MOV     R1, R3                     \ Return the polar angle in R1 and the polar
+ MOV     R0, R4                     \ distance in R0, to be used by the rest of
+                                    \ the code in part 1 of MoveAndDrawPlayer
+
+ B       move1                      \ Return from the subroutine by jumping to
+                                    \ move1, after the mouse calculations
+
+.pkey1
+
+                                    \ If we get here then keyboardStatus = 2 and
+                                    \ we are using the keyboard in a standard
+                                    \ RISC OS layout:
+                                    \
+                                    \   * ?/ = Pitch down
+                                    \
+                                    \   * '" = Pull up
+                                    \
+                                    \   * Z = Rotate anti-clockwise
+                                    \
+                                    \   * X = Rotate clockwise
+
+ LDR     R3, polarAngle             \ Set R3 to the current polar angle
+
+ MOV     R0, #121                   \ Call OS_Byte 121 to read the keyboard for
+ MOV     R1, #&E1                   \ "Z" (so R1 = 97 EOR &80), returning
+ SWI     OS_Byte                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If yaw left "Z" was pressed then decrease
+ SUBEQ   R3, R3, #64 << 22          \ the angle
+
+ MOV     R1, #&C2                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ "X" (so R1 = 66 EOR &80), returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If yaw right "X" was pressed then increase
+ ADDEQ   R3, R3, #64 << 22          \ the angle
+
+ STR     R3, polarAngle             \ Store the new polar angle
+
+ LDR     R4, polarDistance          \ Set R4 to the current polar angle
+
+ MOV     R1, #&E8                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ "?" (so R1 = 104 EOR &80), returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If pull up "?" was pressed then decrease
+ SUBEQ   R4, R4, #8 << 22           \ the distance
+
+ MOV     R1, #&CF                   \ Call OS_Byte 121 to read the keyboard for
+ SWI     OS_Byte                    \ "'" (so R1 = 81 EOR &80), returning
+                                    \ the result in R1
+
+ TEQ     R1, #&FF                   \ If pitch down "'" was pressed then
  ADDEQ   R4, R4, #8 << 22           \ increase the distance
 
  CMP     R4, #0                     \ Ensure R4 remains positive

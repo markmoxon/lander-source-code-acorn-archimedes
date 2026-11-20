@@ -5,8 +5,8 @@ It should work on all versions of RISC OS.
 
 To fly using the mouse, just play as normal.
 
-To fly using the keyboard, press "K" while on the
-launchpad and use the following keys:
+To fly using the keyboard, either press "K" while
+on the launchpad and use the following keys:
 
 S       Pitch down
 X       Pull up
@@ -15,6 +15,19 @@ X       Pull up
 A       Fire
 Space   Thrust
 ?       Hover
+
+Or press "L" while on the launchpad and use the
+following keys:
+
+?       Pitch down
+"       Pull up
+Z       Rotate anti-clockwise
+X       Rotate clockwise
+Return  Fire
+Space   Thrust
+Shift   Hover
+
+You can use either Shift key to hover.
 
 Press "J" while on the launchpad to switch back
 to the mouse.

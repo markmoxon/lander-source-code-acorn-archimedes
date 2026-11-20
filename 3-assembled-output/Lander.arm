@@ -358,8 +358,7 @@ MoveAndDrawPlayer:
  LDR     R14, [R11, #fuelLevel]
  CMP     R14, #0
  STREQB  R14, [R11, #fuelBurnRate]
- TEQ     R7, #0xFF
- BEQ     GetPolarAnglesFromKeyboard
+ BL      GetPolarAnglesFromKeyboard
  CMP     R0, #1024
  MOVHS   R0, #1024
  SUBHS   R0, R0, #1
@@ -2980,7 +2979,10 @@ CheckForKeyboardToggle:
  MOV     R2, #0xFF
  SWI     OS_Byte
  TEQ     R1, #70
- MOVEQ   R0, #0xFF
+ MOVEQ   R0, #1
+ STREQ   R0, keyboardStatus
+ TEQ     R1, #86
+ MOVEQ   R0, #2
  STREQ   R0, keyboardStatus
  TEQ     R1, #69
  MOVEQ   R0, #0
@@ -2990,9 +2992,11 @@ CheckForKeyboardToggle:
 keyboardStatus:
 .long 0
 ReadKeyboardMouseButtons:
- LDR     R7, keyboardStatus
- TEQ     R7, #0xFF
+ LDR     R3, keyboardStatus
+ TEQ     R3, #1
  BEQ     rkey1
+ TEQ     R3, #2
+ BEQ     rkey2
  SWI     OS_Mouse
  MOV     PC, R14
 rkey1:
@@ -3012,7 +3016,33 @@ rkey1:
  ORREQ   R3, R3, #0x1
  MOV     R2, R3
  MOV     PC, R14
+rkey2:
+ MOV     R3, #0
+ MOV     R0, #121
+ MOV     R1, #0xE2
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ORREQ   R3, R3, #0x4
+ MOV     R1, #0x83
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ORREQ   R3, R3, #0x2
+ MOV     R1, #0x86
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ORREQ   R3, R3, #0x2
+ MOV     R1, #0xC9
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ORREQ   R3, R3, #0x1
+ MOV     R2, R3
+ MOV     PC, R14
 GetPolarAnglesFromKeyboard:
+ LDR     R3, keyboardStatus
+ TEQ     R3, #0
+ MOVEQ   PC, R14
+ TEQ     R3, #2
+ BEQ     pkey1
  LDR     R3, polarAngle
  MOV     R0, #121
  MOV     R1, #0xE6
@@ -3030,6 +3060,33 @@ GetPolarAnglesFromKeyboard:
  TEQ     R1, #0xFF
  SUBEQ   R4, R4, #8 << 22
  MOV     R1, #0xD1
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ADDEQ   R4, R4, #8 << 22
+ CMP     R4, #0
+ MOVLT   R4, #0
+ STR     R4, polarDistance
+ MOV     R1, R3
+ MOV     R0, R4
+ B       move1
+pkey1:
+ LDR     R3, polarAngle
+ MOV     R0, #121
+ MOV     R1, #0xE1
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ SUBEQ   R3, R3, #64 << 22
+ MOV     R1, #0xC2
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ ADDEQ   R3, R3, #64 << 22
+ STR     R3, polarAngle
+ LDR     R4, polarDistance
+ MOV     R1, #0xE8
+ SWI     OS_Byte
+ TEQ     R1, #0xFF
+ SUBEQ   R4, R4, #8 << 22
+ MOV     R1, #0xCF
  SWI     OS_Byte
  TEQ     R1, #0xFF
  ADDEQ   R4, R4, #8 << 22
